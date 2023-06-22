@@ -1,0 +1,4 @@
+FROM rust:1.67
+WORKDIR /usr/src/thorn
+COPY ../thorn /usr/src 
+RUN make world

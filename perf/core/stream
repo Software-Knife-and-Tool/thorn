@@ -1,0 +1,7 @@
+#
+# core stream tests
+#
+perf '(mu:write 1000 () (mu:open :string :output \"\"))'
+perf '(mu:write (mu:fx-mul 100 200) () (mu:open :string :output \"\"))'
+perf '(mu:write (core:string= \"\" \"\") () (mu:open :string :output \"\"))'
+perf '(mu:write (core:string= \"ci\" \"\") () (mu:open :string :output \"\"))'

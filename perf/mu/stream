@@ -1,0 +1,3 @@
+perf "(mu:eof mu:std-in)"
+perf '(mu:close mu:err-out)'
+perf '(mu:get-str (mu:open :string :output "abcdef"))'

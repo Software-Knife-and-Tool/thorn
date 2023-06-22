@@ -1,0 +1,8 @@
+#
+# core closure tests
+#
+perf '(core:compile (:quote (lambda ())))'
+perf '(core:compile (:quote (lambda (a) a)))'
+perf '(core:compile (:quote (lambda (&rest c))))'
+perf '(core:compile (:quote ((lambda (a b) (mu:fx-add a b)) 1 2)))'
+perf '(core:compile (:quote ((lambda (a b &rest c) (mu:fx-add a b) c) 1 2)))'

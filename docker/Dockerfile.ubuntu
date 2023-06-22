@@ -1,0 +1,4 @@
+FROM ubuntu:jammy AS env
+COPY thorn/dist/thorn-0.0.1.tgz /tmp
+RUN (cd /opt ; tar xvfz /tmp/thorn-0.0.1.tgz)
+SHELL ["/bin/bash", "--login", "-c"]

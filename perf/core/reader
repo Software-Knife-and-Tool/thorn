@@ -1,0 +1,31 @@
+#
+# core reader tests
+#
+perf "(mu:type-of core:in-namespace)"
+perf "(mu:type-of core:read)"
+# symbols
+perf '(mu:sy-name (core:read (core:make-string-stream :input "a") () ()))'
+perf '(mu:sy-name (core:read (core:make-string-stream :input "core:a") () ()))'
+perf '(core:read (core:make-string-stream :input "abcdefgh") () ())'
+perf '(core:read (core:make-string-stream :input "core:abcdefgh") () ())'
+# quoted forms
+perf '(core:read (core:make-string-stream :input "(:quote abcdefgh)") () ())'
+perf '(core:read (core:make-string-stream :input "(:quote core:abcdefgh)") () ())'
+# chars
+perf '(core:read (core:make-string-stream :input "#\\a") () ())'
+# numbers
+perf '(core:read (core:make-string-stream :input "1024") () ())'
+perf '(core:read (core:make-string-stream :input "-1024") () ())'
+perf '(core:read (core:make-string-stream :input "1.024") () ())'
+perf '(core:read (core:make-string-stream :input "#b10101100") () ())'
+perf '(core:read (core:make-string-stream :input "#d1024") () ())'
+perf '(core:read (core:make-string-stream :input "#xabcdef") () ())'
+# lists
+perf '(core:read (core:make-string-stream :input "(())") () ())'
+perf '(core:read (core:make-string-stream :input "(a b)") () ())'
+perf '(core:read (core:make-string-stream :input "(:a :b)") () ())'
+perf '(core:read (core:make-string-stream :input "(:abc ())") () ())'
+perf '(core:read (core:make-string-stream :input "(1 . 2)") () ())'
+perf '(core:read (core:make-string-stream :input "(1 2 . 3)") () ())'
+perf '(core:read (core:make-string-stream :input "((1 2) . 3)") () ())'
+perf '(core:read (core:make-string-stream :input "((1 2) . (3 4))") () ())'

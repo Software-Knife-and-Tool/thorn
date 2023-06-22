@@ -1,0 +1,6 @@
+#
+# general core tests
+#
+perf "(core:1+ 1)"
+perf "(core:fixnump 5)"
+perf "(core:mod 1 5)"

@@ -1,0 +1,9 @@
+perf "(mu:type-of core:svref)"
+perf "(mu:type-of core:vector-type)"
+perf '(core:svref \"abcde\" 2)'
+perf '(core:svref #(:byte 1 2 3) 1)'
+perf '(core:svref #(:char #\1 #\2 #\3) 1)'
+perf '(core:svref #(:fixnum 1 2 -3) 1)'
+perf '(core:svref #(:float 1.0 2.0 -3.0) 1)'
+perf '(core:svref #(:t 1 a -3) 1)'
+perf '(core:vector-type \"abcde\")'

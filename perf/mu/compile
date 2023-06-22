@@ -1,0 +1,5 @@
+perf "((:lambda (fn) (mu:apply (:lambda (fn) (mu:eq :func (mu:type-of fn))) (mu:cons fn ()))) mu:eq)"
+perf "(mu:apply (mu:compile '(:lambda (a) ((:lambda (a) (mu:fx-add a a)) (mu:fx-add a 2)))) '(1))"
+perf "(mu:apply (mu:compile '(:lambda (a) (mu:fx-add a a))) '(1))"
+# perf '(mu:compile "compile")'
+perf "(mu:compile '(:lambda ()))"

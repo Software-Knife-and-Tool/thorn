@@ -1,0 +1,11 @@
+#
+# general core compiler tests
+#
+# special forms if, defconst
+perf "(core:compile '(defconst foo ()))"
+perf "(core:compile '(if :t :t :t))"
+perf "(core:compile '(if :t :t))"
+perf "(core:compile '(if :t (mu:fx-add 0 1) (mu:fx-add 0 0)))"
+perf "(core:compile '(if (core:null ()) (mu:fx-add 0 1) (mu:fx-add 0 0)))"
+perf "(core:compile '(if (core:not (core:null :t)) (mu:fx-add 0 1) (mu:fx-add 0 0)))"
+perf "(core:compile '((lambda (fn) (core:apply (lambda (fn) (mu:eq :func (mu:type-of fn))) (core::list fn))) mu:eq))"

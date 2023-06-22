@@ -1,0 +1,8 @@
+#
+# core format tests
+#
+perf '(core:stringp (core:format () \"core:format\" ()))'
+perf '(core:format () \"core:format unqualified ~A symbol arg\" (:quote (f-symbol)))'
+perf '(core:format () \"core:format qualified ~A symbol arg\" (:quote (mu:fx-add)))'
+perf '(core:format () \"core:format ~A string arg\" (:quote (\"f-string\")))'
+perf '(core:format () \"core:format ~X fixnum arg\" (:quote (#xabcddcba)))'

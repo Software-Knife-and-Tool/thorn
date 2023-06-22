@@ -1,0 +1,7 @@
+#
+# core exception tests
+#
+perf '(core:structp (core:make-exception () :error (:quote test) \"exception test\" ()))'
+perf '(core:exceptionp (core:make-exception () :error (:quote test) \"exception test\" ()))'
+perf '(core:with-exception (:lambda (ex) :t) (:lambda () (core:raise () (:quote test) \"\")))'
+perf '(core:with-exception (:lambda (exception) ()) (:lambda () :t))'
