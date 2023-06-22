@@ -1,0 +1,14 @@
+#
+# core exception tests
+#
+assert_eq "(mu:type-of core:print-exception)" ":func"
+assert_eq "(mu:type-of core:make-exception)" ":func"
+assert_eq "(mu:type-of core:raise)" ":func"
+assert_eq "(mu:type-of core:raise-if)" ":func"
+assert_eq "(mu:type-of core:raise-unless)" ":func"
+assert_eq "(mu:type-of core:raise-when)" ":func"
+assert_eq "(mu:type-of core:warn)" ":func"
+assert_eq "(core:structp (core:make-exception () :error 'test \"exception test\" ()))" ":t"
+assert_eq "(core:exceptionp (core:make-exception () :error 'test \"exception test\" ()))" ":t"
+assert_eq "(core:with-exception (:lambda (ex) :t) (:lambda () (core:raise () 'test \"\")))" ":t"
+assert_eq "(core:with-exception (:lambda (exception) ()) (:lambda () :t))" ":t"

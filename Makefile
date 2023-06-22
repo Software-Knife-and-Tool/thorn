@@ -1,0 +1,85 @@
+#
+# thorn makefile
+#
+.PHONY: world run clean doc dist format tests runtime release
+RUNTIME=target/debug/runtime
+
+help:
+	@echo "thorn top-level makefile -----------------"
+	@echo
+	@echo "--- build options"
+	@echo "    world - build release and package dist"
+	@echo "    debug - build runtime for debug"
+	@echo "    release - build runtime for release"
+	@echo "--- distribution options"
+	@echo "    doc - generate documentation"
+	@echo "    dist - build distribution image"
+	@echo "    install - install distribution (needs sudo)"
+	@echo "    uninstall - uninstall distribution (needs sudo)"
+	@echo "--- development options"
+	@echo "    clean - remove build artifacts"
+	@echo "    commit - run clippy, rustfmt, make test and perf reports"
+	@echo "    report - view test and perf reports"
+	@echo "    tags - make etags"
+	@echo "--- test options"
+	@echo "    tests/rust - rust tests"
+	@echo "    tests/summary - test summary"
+	@echo "    tests/report - full test report"
+	@echo "--- perf options"
+	@echo "    perf/summary - performance summary"
+	@echo "    perf/commit - condensed report"
+
+world: release dist
+
+tags:
+	@etags `find src/mu -name '*.rs' -print`
+
+release:
+	@cargo build --release
+	@cp target/release/runtime dist
+
+debug:
+	@cargo build
+	@cp target/debug/runtime dist
+
+dist:
+	@make -C ./dist --no-print-directory
+
+doc:
+	@cargo doc
+	@mkdir -p ./doc/rustdoc
+	@cp -r ./target/doc/* ./doc/rustdoc
+	@make -C ./doc --no-print-directory
+
+install:
+	@make -C ./dist -f install.mk install
+
+tests/commit:
+	@make -C tests commit --no-print-directory
+
+tests/summary:
+	@make -C tests summary --no-print-directory
+
+perf/base:
+	@make -C perf base --no-print-directory
+
+perf/commit:
+	@make -C perf commit --no-print-directory
+
+perf/summary:
+	@make -C perf summary --no-print-directory
+
+commit:
+	@cargo fmt
+	@echo ";;; rust tests"
+	@cargo -q test | sed -e '/^$$/d'
+	@echo ";;; clippy tests"
+	@cargo clippy
+	@make -C tests commit --no-print-directory
+	@make -C perf commit --no-print-directory
+
+clean:
+	@rm -f TAGS
+	@make -C docker clean --no-print-directory
+	@make -C dist clean --no-print-directory
+	@make -C tests clean --no-print-directory

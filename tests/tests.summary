@@ -1,0 +1,34 @@
+Test Summary:
+-----------------------
+mu:        backquote      total: 6        failed: 0        aborted: 0       
+mu:        compile        total: 8        failed: 0        aborted: 0       
+mu:        core           total: 36       failed: 0        aborted: 0       
+mu:        exception      total: 4        failed: 0        aborted: 0       
+mu:        list           total: 26       failed: 0        aborted: 0       
+mu:        namespace      total: 16       failed: 0        aborted: 0       
+mu:        number         total: 34       failed: 0        aborted: 0       
+mu:        reader         total: 43       failed: 0        aborted: 0       
+mu:        special-form   total: 11       failed: 0        aborted: 0       
+mu:        stream         total: 11       failed: 0        aborted: 0       
+mu:        struct         total: 7        failed: 0        aborted: 0       
+mu:        symbol         total: 10       failed: 0        aborted: 0       
+mu:        vector         total: 23       failed: 0        aborted: 0       
+-----------------------
+mu:        passed: 235    total: 235      failed: 0        aborted: 0         
+
+core:      closure        total: 8        failed: 7        aborted: 0       
+core:      compile        total: 24       failed: 0        aborted: 0       
+core:      core           total: 24       failed: 0        aborted: 0       
+core:      exception      total: 11       failed: 0        aborted: 0       
+core:      format         total: 15       failed: 0        aborted: 0       
+core:      lambda         total: 28       failed: 0        aborted: 0       
+core:      list           total: 78       failed: 0        aborted: 0       
+core:      macro          total: 9        failed: 0        aborted: 0       
+core:      reader         total: 56       failed: 0        aborted: 0       
+core:      sequence       total: 3        failed: 0        aborted: 0       
+core:      stream         total: 22       failed: 0        aborted: 0       
+core:      string         total: 20       failed: 0        aborted: 0       
+core:      vector         total: 13       failed: 0        aborted: 0       
+-----------------------
+core:      passed: 304    total: 311      failed: 7        aborted: 0         
+

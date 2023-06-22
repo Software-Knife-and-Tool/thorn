@@ -1,0 +1,64 @@
+#
+# core reader tests
+#
+assert_eq "(mu:type-of core:in-namespace)" ":func"
+assert_eq "(mu:type-of core:read)" ":func"
+# symbols
+assert_eq '(mu:sy-name (core:read (core:make-string-stream :input "a") () ()))' '"a"'
+assert_eq '(mu:sy-name (core:read (core:make-string-stream :input "core::a") () ()))' '"a"'
+assert_eq '(mu:sy-name (core:read (core:make-string-stream :input "core:a") () ()))' '"a"'
+assert_eq '(mu:sy-ns (core:read (core:make-string-stream :input "a") () ()))' ':nil'
+assert_eq '(mu:sy-ns (core:read (core:make-string-stream :input "core::a") () ()))' '#<namespace: "core">'
+assert_eq '(mu:sy-ns (core:read (core:make-string-stream :input "core:a") () ()))' '#<namespace: "core">'
+assert_eq '(core:read (core:make-string-stream :input "a") () ())' "a"
+assert_eq '(core:read (core:make-string-stream :input "core:a") () ())' "core:a"
+assert_eq '(core:read (core:make-string-stream :input "abcdefgh") () ())' "abcdefgh"
+assert_eq '(core:read (core:make-string-stream :input "core:abcdefgh") () ())' "core:abcdefgh"
+# numbers
+assert_eq '(core:read (core:make-string-stream :input "0") () ())' "0"
+assert_eq '(core:read (core:make-string-stream :input "+0") () ())' "0"
+assert_eq '(core:read (core:make-string-stream :input "-0") () ())' "0"
+assert_eq '(core:read (core:make-string-stream :input "1024") () ())' "1024"
+assert_eq '(core:read (core:make-string-stream :input "-1024") () ())' "-1024"
+assert_eq '(core:read (core:make-string-stream :input "+1024") () ())' "1024"
+assert_eq '(core:read (core:make-string-stream :input "1.024") () ())' "1.0240"
+assert_eq '(core:read (core:make-string-stream :input "#b10101100") () ())' "172"
+assert_eq '(core:read (core:make-string-stream :input "#d1024") () ())' "1024"
+assert_eq '(core:read (core:make-string-stream :input "#xabc") () ())' "2748"
+assert_eq '(core:read (core:make-string-stream :input "#xabcdef") () ())' "11259375"
+# lists
+assert_eq '(core:read (core:make-string-stream :input "()") () ())' ":nil"
+assert_eq '(core:read (core:make-string-stream :input "(())") () ())' '(:nil)'
+assert_eq '(core:read (core:make-string-stream :input "(() ())") () ())' '(:nil :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(123 ())") () ())' '(123 :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(() 123)") () ())' '(:nil 123)'
+assert_eq '(core:read (core:make-string-stream :input "(a ())") () ())' '(a :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(a () )") () ())' '(a :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(a())") () ())' '(a :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(a() )") () ())' '(a :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(()a)") () ())' '(:nil a)'
+assert_eq '(core:read (core:make-string-stream :input "(()a )") () ())' '(:nil a)'
+assert_eq '(core:read (core:make-string-stream :input "(a b )") () ())' '(a b)'
+assert_eq '(core:read (core:make-string-stream :input "(a b)") () ())' '(a b)'
+assert_eq '(core:read (core:make-string-stream :input "(abc ())") () ())' '(abc :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(() abc )") () ())' '(:nil abc)'
+assert_eq '(core:read (core:make-string-stream :input "(:a :b )") () ())' '(:a :b)'
+assert_eq '(core:read (core:make-string-stream :input "(:a :b)") () ())' '(:a :b)'
+assert_eq '(core:read (core:make-string-stream :input "(:abc ())") () ())' '(:abc :nil)'
+assert_eq '(core:read (core:make-string-stream :input "(() :abc )") () ())' '(:nil :abc)'
+assert_eq '(core:read (core:make-string-stream :input "(1 2)") () ())' '(1 2)'
+assert_eq '(core:read (core:make-string-stream :input "(1 . 2)") () ())' '(1 . 2)'
+assert_eq '(core:read (core:make-string-stream :input "(1 2 . 3)") () ())' '(1 2 . 3)'
+assert_eq '(core:read (core:make-string-stream :input "((1 2) . 3)") () ())' '((1 2) . 3)'
+assert_eq '(core:read (core:make-string-stream :input "((1 2) . (3 4))") () ())' '((1 2) 3 4)'
+# chars
+assert_eq '(core:read (core:make-string-stream :input "#\\a") () ())' "#\\a"
+assert_eq '(core:read (core:make-string-stream :input "#\\ ") () ())' "#\\space"
+assert_eq '(core:read (core:make-string-stream :input "#\\)") () ())' "#\\)"
+# quoted forms
+assert_eq "(core:read (core:make-string-stream :input \"'a\") () ())" "(:quote a)"
+assert_eq "(core:read (core:make-string-stream :input \"'core:a\") () ())" "(:quote core:a)"
+assert_eq "(core:read (core:make-string-stream :input \"'abc\") () ())" "(:quote abc)"
+assert_eq "(core:read (core:make-string-stream :input \"'core:abc\") () ())" "(:quote core:abc)"
+assert_eq "(core:read (core:make-string-stream :input \"'abcdefgh\") () ())" "(:quote abcdefgh)"
+assert_eq "(core:read (core:make-string-stream :input \"'core:abcdefgh\") () ())" "(:quote core:abcdefgh)"

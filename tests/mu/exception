@@ -1,0 +1,7 @@
+#
+# exceptions
+#
+assert_eq "(mu:with-ex (:lambda (obj cond) (mu:write cond () mu:std-out)) (:lambda () (mu:raise () :except)))" ":except:except"
+assert_eq "(mu:with-ex (:lambda (obj cond) (mu:write obj () mu:std-out)) (:lambda () (mu:raise 1 :except)))" "11"
+assert_eq "(mu:with-ex (:lambda (obj cond) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 0)))" ":div0:div0"
+assert_eq "(mu:with-ex (:lambda (obj cond) (mu:write obj () mu:std-out)) (:lambda () 1))" "1"

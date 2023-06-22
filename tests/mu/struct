@@ -1,0 +1,7 @@
+assert_eq "(mu:type-of mu:make-st)" ":func"
+assert_eq "(mu:type-of mu:st-type)" ":func"
+assert_eq "(mu:type-of mu:st-vec)" ":func"
+assert_eq "(mu:type-of (mu:make-st :foo ()))" ":struct"
+assert_eq "(mu:st-type (mu:make-st :foo ()))" ":foo"
+assert_eq "(mu:st-vec (mu:make-st :foo ()))" "#(:t)"
+assert_eq "(mu:st-vec (mu:make-st :foo '(1 2 3 4)))" "#(:t 1 2 3 4)"
