@@ -1,3 +1,6 @@
+
+![alt text](https://github.com/Software-Knife-and-Tool/thorn/blob/main/.github/thorn-eth.png?raw=true)
+
 # *thorn* - a system programming environment
 
 
