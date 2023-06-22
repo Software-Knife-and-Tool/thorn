@@ -1,0 +1,156 @@
+;;;  SPDX-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-License-Identifier: MIT
+
+;;;
+;;; core lambda form
+;;;
+;;; [*core lambda form*]
+;;; (lambda ([symbol ...] [&rest rest-symbol]) . body)
+;;;
+
+;;;
+;;; [*lambda descriptor*] #s(:lambda lambda-syms req-syms rest-sym env closure)
+;;;
+;;; syms:    list of symbols, suitable for :lambda
+;;; reqs:    list of required symbols
+;;; rest:    rest symbol or nil
+;;; env:     list of lambda descriptors
+;;; closed:  list of closed symbol bindings
+;;;
+(mu:intern core::ns :intern "lambda-property"
+  (:lambda (key desc)
+    (mu:sv-ref
+     (mu:st-vec desc)
+     (mu:cdr
+      (core:assoc
+       key
+       '((:syms   . 0)
+         (:reqs   . 1)
+         (:rest   . 2)
+         (:env    . 3)
+         (:closed . 4)))))))
+
+(mu:intern core::ns :intern "make-lambda"
+   (:lambda (lambda req-syms rest-sym env closed)
+     (mu:make-st :lambda
+       (core::append
+        (core::list-3 lambda req-syms rest-sym)
+        (core::list-2 env closed)))))
+
+;;;
+;;; parse core lambda list
+;;;
+;;; compile a core lambda form to a lambda descriptor
+;;;
+(mu:intern core::ns :intern "core-lambda"
+   (:lambda (lambda env)
+      (:if (core:findl (:lambda (el) (core:null (core:symbolp el))) lambda)
+         (core:raise lambda 'core::core-lambda "list syntax")
+         ((:lambda (desc)
+            (:if (core:fixnump desc)
+                 (core::make-lambda lambda lambda () env ())
+                 desc))
+          (core:foldl
+            (:lambda (el acc)
+               (:if (core:structp acc)
+                  acc
+                  (:if (mu:eq '&rest el)
+                     (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
+                          (core::make-lambda
+                           (core::append (core:dropr lambda 2) (core:dropl lambda (core:1- (mu:length lambda))))
+                           (core:dropr lambda 2)
+                           (mu:nth (core:1- (mu:length lambda)) lambda)
+                           env
+                           ())
+                          (core:raise lambda 'core::core-lambda "rest botch"))
+                     (core:1+ acc))))
+            0
+            lambda)))))
+
+;;;
+;;; `core::compile-lambda-body` resolves body symbols with `core::compile-symbol`,
+;;; uses the core compiler for everything else, and returns a compiled body.
+;;;
+;;; if a body returns a function, a closure body is generated.
+;;;
+;;; `lambda-desc:` lambda descriptor
+;;; `body:` list of body forms
+;;; `env:` runtime lexical env
+;;;
+;;; `returns:` compiled body
+;;;
+(mu:intern core::ns :intern "compile-lambda-body"
+  (:lambda (lambda-desc body env)
+    (:if body
+         ((:lambda (env)
+              (core::compile-closure lambda-desc body env))
+            (core::compile-add-env lambda-desc env))
+           ())))
+
+(mu:intern core::ns :intern "compile-closure"
+  (:lambda (lambda-desc body env)
+    (core:maplist
+     (:lambda (body)
+       ((:lambda (compiled-form)
+          (:if (mu:cdr body)
+               compiled-form
+               (:if (core:functionp compiled-form)
+                    (core:compile (mu:cons 'core::closure (core::list compiled-form)))
+                    compiled-form)))
+        (core::compile (mu:car body) env)))
+     body)))
+
+;;;
+;;; Compiling symbols
+;;;
+;;; `core::compile-symbol` looks up unqualified symbols in the current lexical environment. If found,
+;;; it compiles a *frame-reference* from the *lexical-descriptor* returned by `core::symbol-frame`.
+;;;
+;;; [*lexical-descriptor*] `(lex-ref frame-id offset)`
+;;;
+;;; We have two sources of lexical bindings: from the *core* lambda being compiled and the
+;;; current lexical environment.
+;;;
+;;; `symbol:` symbol to be compiled
+;;;
+;;; `env:` compiled environment
+;;;
+;;; `returns:` qualified symbol or *frame-ref*
+;;;
+;;; need to differentiate between uninterned symbols and closed symbols
+;;;
+(mu:intern core::ns :intern "compile-symbol"
+  (:lambda (symbol env)
+    (:if (core:uninternedp symbol)
+         symbol
+         symbol)))
+
+;;;
+;;; resolving body symbols
+;;;
+;;; *symbol-frame-ref* looks up *symbol* in a compiled environment.
+;;;
+;;; if found return a compiled frame reference, otherwise *nil*.
+;;;
+;;; `symbol:` symbol to be compiled
+;;;
+;;; `env:` lexical compiled environment
+;;;
+;;; `returns:` *frame-ref* or *nil*
+;;;
+;;; used only for closed symbols
+;;;
+(mu:intern core::ns :intern "symbol-frame-ref"
+  (:lambda (symbol env)
+    (core:foldl
+     (:lambda (frame acc)
+       (:if acc
+            acc
+            ((:lambda (offset)
+               (:if offset
+                    ((:lambda ()
+                       (mu:compile (core::list-3 'mu::fr-ref (core::lambda-property :func frame) offset))))
+                    ()))
+             (core:positionl (:lambda (el) (mu:eq el symbol)) (core::lambda-property :syms frame)))))
+     ()
+     env)))
