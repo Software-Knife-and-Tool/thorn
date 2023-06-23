@@ -24,12 +24,22 @@ use crate::{
 };
 
 pub trait Reader {
+    fn bq_append(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn bq_read(_: &Mu, _: Tag, _: bool) -> exception::Result<Tag>;
     fn bq_comma(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn bq_cons(_: &Mu, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Reader for Mu {
+    // backquote append:
+    //
+    //      return Ok(tag) for successful expansion
+    //      return Err exception for stream I/O error or unexpected eof
+    //
+    fn bq_append(_mu: &Mu, _list: Tag) -> exception::Result<Tag> {
+        Ok(Tag::nil())
+    }
+
     // backquote comma:
     //
     //      return Ok(tag) for successful expansion

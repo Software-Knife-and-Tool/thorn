@@ -275,7 +275,6 @@ impl Core for Cons {
 
 /// mu functions
 pub trait MuFunction {
-    fn mu_append(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_car(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_cdr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_cons(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -285,12 +284,6 @@ pub trait MuFunction {
 }
 
 impl MuFunction for Cons {
-    fn mu_append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Self::append(mu, fp.argv[0], fp.argv[1]);
-
-        Ok(())
-    }
-
     fn mu_car(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
