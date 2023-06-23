@@ -104,9 +104,7 @@ fn usage() {
     std::process::exit(0);
 }
 
-fn repl(system: &System, config: &str) {
-    println!("runtime: v{} config [{}]", Mu::VERSION, config);
-
+fn repl(system: &System, _config: &str) {
     let mu = system.mu();
 
     let eval_string = system
@@ -116,13 +114,9 @@ fn repl(system: &System, config: &str) {
     let eof_value = system.eval(&"(mu:make-sy \"eof\")".to_string()).unwrap();
 
     loop {
-        print!("mu> ");
-        std::io::stdout().flush().unwrap();
-
         match mu.read(mu.std_in(), true, eof_value) {
             Ok(expr) => {
                 if mu.eq(expr, eof_value) {
-                    println!("sic transit gloria mundi");
                     break;
                 }
 
