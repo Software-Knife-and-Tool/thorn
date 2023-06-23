@@ -176,7 +176,7 @@ pub fn main() {
         None => std::process::exit(0),
     }
 
-    let mu = System::new();
+    let mu = System::new(String::new());
 
     match options(std::env::args().collect()) {
         Some(opts) => {

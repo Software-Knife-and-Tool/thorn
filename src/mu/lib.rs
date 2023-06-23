@@ -183,8 +183,8 @@ pub struct System {
 
 impl System {
     #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        let mu = Mu::new(String::new());
+    pub fn new(config: String) -> Self {
+        let mu = Mu::new(config);
         let sys_stream = mu
             .eval(
                 mu.compile(

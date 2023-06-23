@@ -1,14 +1,15 @@
 
-![alt text](https://github.com/Software-Knife-and-Tool/thorn/blob/main/.github/thorn-eth.png?raw=true)
 
-# *thorn* - a system programming environment
+<img src="https://github.com/Software-Knife-and-Tool/thorn/blob/main/.github/thorn-eth.png?raw=true" width="20%" height="%20">
+
+# *thorn-eth* - a system programming environment
 
 
 ### Under heavy development
 
-*thorn* is a LISP-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
+*thorn-eth* is a LISP-idiomatic functionally-oriented interactive environment for system programming in the Rust ecosystem. It is targeted to low-resource persistent POSIX environments.
 
-*thorn* is a LISP-1 namespaced programming environment with Common Lisp idioms and macro system.
+*thorn* is a LISP-1 namespaced programming language with Common Lisp idioms and macro system.
 
 While *thorn* has much in common with Scheme, it is meant to be familiar to traditional LISP programmers.
 
@@ -19,8 +20,8 @@ While *thorn* has much in common with Scheme, it is meant to be familiar to trad
 #### Project Goals
 ------
 
-- functional forward system language
-- minimal POSIX runtime suitable for containers
+- *thorn*, a functional forward system language
+- *thorn-mu*, minimal POSIX runtime suitable for containers
 - small and simple installation, no external dependencies
 - add interactivity and extensibility to application implementations
 - Rust FFI system
@@ -34,9 +35,9 @@ While *thorn* has much in common with Scheme, it is meant to be familiar to trad
 
 ------
 
-*thorn* is a work in progress.
+*thorn-eth* is a work in progress.
 
-*thorn* should build with rust 1.68 or better. *thorn* builds are targeted to:
+*thorn-mu* should build with rust 1.68 or better. *thorn-mu* builds are targeted to:
 
 - x86-64 and AArch-64 Linux distributions
 - x86-64 and M1 MacOs X
@@ -55,15 +56,15 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 *thorn* leans heavily on functional programming principles.
 
-The *thorn* runtime kernel is written in mostly-safe `rust` (the system image heap facility *mmaps* a file, which is an inherently unsafe operation.)
+The *thorn-mu* runtime kernel is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file, which is an inherently unsafe operation.)
 
-The *mu* runtime implements 64 bit tagged pointers. The *mu* runtime is available as a crate, extends a Rust API for embedded applications, and is an evaluator for the *mu* kernel language. *mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
+The runtime implements 64 bit tagged pointers, is available as a crate, extends a Rust API for embedded applications, and is an evaluator for the *mu* kernel language. *mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
-The *thorn* 2-LISP system is organized as a stack of compilers. 
+The *thorn* 2-LISP system is organized as a stack of compilers, culminating in the *thorn-eth* native code compiler/system builder.
 
 The *core* library provides *rest* lambdas, closures, extended exceptions, *defun/defconst/defmacro* and a compiler for those forms.
 
-*preface* extends *core* with various lexical binding forms, *cond/and/or/progn*, and a library loading facility.
+The *preface* library extends *core* with various lexical binding forms, *cond/and/or/progn*, and a library loading facility.
 
 Optional libraries provide a variety of enhancements and services, including Common LISP macros and binding special forms.
 
@@ -168,7 +169,7 @@ The `base` target produces a performance run and establishes a base line. The `s
 
 The `perf` makefile has additional facilities for development, including reporting on individual tests. The`help` target will list them. 
 
-In specific, a summary of significant performance changes (differences in measured resource consumption and/or a large (%25) difference in average test time between the current summary and the repo summary.)
+In specific, a summary of significant performance changes (differences in measured resource consumption and/or a large difference in average test time between the current summary and the repo summary.)
 
 ```
 % make -C perf commit
@@ -190,13 +191,13 @@ For convenience, the *thorn* Makefile provides:
 
 ------
 
-The *thorn* binaries, libraries, and source files are installed in `/opt/thorn` . The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `core` and `preface` library sources.
+The *thorn* binaries, libraries, and source files are installed in `/opt/thorn`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `core` and `preface` library sources.
 
 
 
 ```
-runtime      runtime binary, minimal repl
-thorn         shell script for running the extended repl
+runtime			runtime binary, minimal repl
+thorn			shell script for running the extended repl
 ```
 
 
@@ -206,15 +207,16 @@ USAGE: runtime [options] [file...]
 
 runtime: 0.0.x: [-h?psvcelq] [file...]
 OPTIONS:
-  -h                   print this message
-  -?                   print this message
-  -v                   print version string and exit
-  -p                   pipe mode, no welcome message or repl
-  -l SRCFILE           load SRCFILE in sequence
-  -e SEXPR             evaluate SEXPR and print result
-  -q SEXPR             evaluate SEXPR quietly
-  -c name:value[,...]  environment configuration  	   
-  file ...             load source file(s)
+  -h					print this message
+  -?					print this message
+  -v					print version string and exit
+  -e					enable debugging
+  -p					pipe mode, repl
+  -l SRCFILE			load SRCFILE in sequence
+  -e SEXPR				evaluate SEXPR and print result
+  -q SEXPR				evaluate SEXPR quietly
+  -c name:value[,...]	environment configuration  	   
+  [file ...]			load source file(s)
   
 ```
 
@@ -222,7 +224,7 @@ An interactive session for the extended *thorn* system is invoked by the`thorn` 
 
 ```
 % /opt/thorn/bin/thorn
-;;; Thorn LISP version 0.0.x (preface:repl) :h for help
+;;; Thorn version 0.0.x (preface:repl) :h for help
 user>
 ```
 
@@ -242,9 +244,13 @@ set enable-bracketed-paste off
 
 to your `~/.inputrc` may help.
 
+
+
+#### Rationale
+
 ------
 
-Functional languages bring us closer to a time where we can automatically prove our programs are correct. 
+Functional languages bring us closer to a time where we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that the various components that make them up  are reliable. Modern programming concepts to much to underpin reliability.
 
 *thorn* attempts to couch modern programming concepts with a familiar syntax.
 
