@@ -4,7 +4,7 @@ mu:        backquote      total: 6        failed: 0        aborted: 0
 mu:        compile        total: 8        failed: 0        aborted: 0       
 mu:        core           total: 36       failed: 0        aborted: 0       
 mu:        exception      total: 4        failed: 0        aborted: 0       
-mu:        list           total: 26       failed: 0        aborted: 0       
+mu:        list           total: 22       failed: 0        aborted: 0       
 mu:        namespace      total: 16       failed: 0        aborted: 0       
 mu:        number         total: 34       failed: 0        aborted: 0       
 mu:        reader         total: 43       failed: 0        aborted: 0       
@@ -14,7 +14,7 @@ mu:        struct         total: 7        failed: 0        aborted: 0
 mu:        symbol         total: 10       failed: 0        aborted: 0       
 mu:        vector         total: 23       failed: 0        aborted: 0       
 -----------------------
-mu:        passed: 235    total: 235      failed: 0        aborted: 0         
+mu:        passed: 231    total: 231      failed: 0        aborted: 0         
 
 core:      closure        total: 8        failed: 7        aborted: 0       
 core:      compile        total: 24       failed: 0        aborted: 0       

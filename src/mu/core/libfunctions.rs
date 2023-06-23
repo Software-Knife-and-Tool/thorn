@@ -39,7 +39,6 @@ lazy_static! {
         ("eq", Scope::Extern, 2, Tag::mu_eq),
         ("type-of", Scope::Extern, 1, Tag::mu_typeof),
         // conses and lists
-        ("append", Scope::Extern, 2, Cons::mu_append),
         ("car", Scope::Extern, 1, Cons::mu_car),
         ("cdr", Scope::Extern, 1, Cons::mu_cdr),
         ("cons", Scope::Extern, 2, Cons::mu_cons),
