@@ -145,7 +145,7 @@ impl MuFunction for Exception {
                     Ok(v) => v,
                     Err(e) => {
                         let args = vec![e.object, Self::map_condkey(e.condition).unwrap()];
-                        match mu.apply(handler, Cons::list(mu, &args)) {
+                        match mu.apply(handler, Cons::vlist(mu, &args)) {
                             Ok(v) => v,
                             Err(e) => return Err(e),
                         }

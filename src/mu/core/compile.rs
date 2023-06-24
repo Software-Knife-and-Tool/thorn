@@ -60,7 +60,7 @@ impl Compiler for Mu {
                 Some(t) => t,
                 None => panic!(),
             },
-            Cons::list(
+            Cons::vlist(
                 mu,
                 &[
                     lambda,
@@ -71,7 +71,7 @@ impl Compiler for Mu {
                     },
                 ],
             ),
-            Cons::list(
+            Cons::vlist(
                 mu,
                 &[
                     lambda,
@@ -84,7 +84,7 @@ impl Compiler for Mu {
             ),
         ];
 
-        Self::compile(mu, Cons::list(mu, &if_vec))
+        Self::compile(mu, Cons::vlist(mu, &if_vec))
     }
 
     fn compile_quote(mu: &Mu, args: Tag) -> exception::Result<Tag> {
@@ -121,7 +121,7 @@ impl Compiler for Mu {
             }
         }
 
-        Ok(Cons::list(mu, &body_vec))
+        Ok(Cons::vlist(mu, &body_vec))
     }
 
     // lexical symbols
@@ -172,7 +172,7 @@ impl Compiler for Mu {
                     Fixnum::as_tag(nth as i64),
                 ];
 
-                match Self::compile(mu, Cons::list(mu, &lex_ref)) {
+                match Self::compile(mu, Cons::vlist(mu, &lex_ref)) {
                     Ok(lexref) => return Ok(lexref),
                     Err(e) => return Err(e),
                 }
