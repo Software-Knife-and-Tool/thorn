@@ -104,8 +104,7 @@ impl Cons {
 // core operations
 pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
-    fn append(_: &Mu, _: Tag, _: Tag) -> Tag;
-    fn list(_: &Mu, _: &[Tag]) -> Tag;
+    fn vlist(_: &Mu, _: &[Tag]) -> Tag;
     fn nth(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn read(_: &Mu, _: Tag) -> exception::Result<Tag>;
@@ -201,23 +200,12 @@ impl Core for Cons {
         mu.write_string(")".to_string(), stream)
     }
 
-    fn append(mu: &Mu, cons0: Tag, cons1: Tag) -> Tag {
-        match Tag::type_of(mu, cons0) {
-            Type::Null => cons1,
-            Type::Cons => Self::new(
-                Self::car(mu, cons0),
-                Self::append(mu, Cons::cdr(mu, cons0), cons1),
-            )
-            .evict(mu),
-            _ => panic!(),
-        }
-    }
-
-    fn list(mu: &Mu, vec: &[Tag]) -> Tag {
+    fn vlist(mu: &Mu, vec: &[Tag]) -> Tag {
         let mut list = Tag::nil();
 
         vec.iter()
-            .for_each(|tag| list = Self::append(mu, list, Self::new(*tag, Tag::nil()).evict(mu)));
+            .rev()
+            .for_each(|tag| list = Self::new(*tag, list).evict(mu));
 
         list
     }

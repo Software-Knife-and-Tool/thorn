@@ -237,7 +237,7 @@ impl MuFunction for Frame {
             frames.push(Cons::new(Tag::from_u64(*func), values).evict(mu))
         }
 
-        fp.value = Cons::list(mu, &frames);
+        fp.value = Cons::vlist(mu, &frames);
         Ok(())
     }
 
