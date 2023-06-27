@@ -128,7 +128,7 @@ impl Core for Function {
                     Type::Fixnum => {
                         let name = Function::id(mu, func);
                         (
-                            format!("mu:{}", Vector::as_string(mu, Symbol::name_of(mu, name))),
+                            format!("mu:{}", Vector::as_string(mu, Symbol::name(mu, name))),
                             form.as_u64().to_string(),
                         )
                     }

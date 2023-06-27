@@ -145,7 +145,7 @@ impl Core for Cons {
                     Ok(Tag::nil())
                 } else {
                     match Tag::type_of(mu, car) {
-                        Type::Symbol if dot.eq_(Symbol::name_of(mu, car)) => {
+                        Type::Symbol if dot.eq_(Symbol::name(mu, car)) => {
                             match <Mu as Reader>::read(mu, stream, false, Tag::nil(), true) {
                                 Ok(cdr) if EOL.eq_(cdr) => Ok(Tag::nil()),
                                 Ok(cdr) => {

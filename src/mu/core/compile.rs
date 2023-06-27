@@ -55,7 +55,10 @@ impl Compiler for Mu {
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
-            Namespace::intern(mu, mu.mu_ns, Scope::Intern, "if".to_string(), Tag::nil()),
+            Symbol::value(
+                mu,
+                Namespace::intern(mu, mu.mu_ns, Scope::Intern, "if".to_string(), Tag::nil()),
+            ),
             match Cons::nth(mu, 0, args) {
                 Some(t) => t,
                 None => panic!(),

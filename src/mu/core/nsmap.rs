@@ -58,7 +58,7 @@ impl NSMaps for Mu {
 
         for (_, ns_cache) in ns_ref.iter() {
             let (ns, _) = ns_cache;
-            let map_name = Vector::as_string(mu, Namespace::name_of(mu, *ns));
+            let map_name = Vector::as_string(mu, Namespace::name(mu, *ns));
 
             if name == map_name {
                 return Some(*ns);
@@ -86,7 +86,7 @@ impl NSMaps for Mu {
     fn intern(mu: &Mu, ns: Tag, scope: Scope, symbol: Tag) {
         let ns_ref = mu.ns_map.read().unwrap();
         let (_, (externs, interns)) = &ns_ref[&ns.as_u64()];
-        let name = Vector::as_string(mu, Symbol::name_of(mu, symbol));
+        let name = Vector::as_string(mu, Symbol::name(mu, symbol));
 
         let mut hash = match scope {
             Scope::Intern => externs.write().unwrap(),
