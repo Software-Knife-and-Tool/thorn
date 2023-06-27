@@ -9,7 +9,7 @@ use {
             async_, exception,
             exception::{Condition, Exception},
             frame::Frame,
-            libfunctions::Core as _,
+            functions::{Core as _, LibFunction},
             nsmap::NSMaps,
             types::{Tag, Type},
         },
@@ -45,6 +45,9 @@ pub struct Mu {
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
     pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
+
+    // functions
+    pub functions: Vec<LibFunction>,
 
     // namespaces
     pub mu_ns: Tag,
@@ -89,6 +92,9 @@ impl Core for Mu {
             compile: RwLock::new(Vec::new()),
             dynamic: RwLock::new(Vec::new()),
             lexical: RwLock::new(HashMap::new()),
+
+            // functions
+            functions: Vec::new(),
 
             // namespaces
             mu_ns: Tag::nil(),
@@ -139,7 +145,7 @@ impl Core for Mu {
             Err(_) => panic!(),
         };
 
-        Self::install_mu_symbols(&mu);
+        mu.functions = Self::install_mu_symbols(&mu);
 
         mu
     }
