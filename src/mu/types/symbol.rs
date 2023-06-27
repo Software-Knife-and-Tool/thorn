@@ -98,7 +98,7 @@ impl Symbol {
         }
     }
 
-    pub fn namespace_of(mu: &Mu, symbol: Tag) -> Tag {
+    pub fn namespace(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Keyword => Tag::nil(),
             Type::Symbol => match symbol {
@@ -109,7 +109,7 @@ impl Symbol {
         }
     }
 
-    pub fn scope_of(mu: &Mu, symbol: Tag) -> Tag {
+    pub fn scope(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Keyword => match symbol {
                 Tag::Direct(_) => Symbol::keyword("extern"),
@@ -123,7 +123,7 @@ impl Symbol {
         }
     }
 
-    pub fn name_of(mu: &Mu, symbol: Tag) -> Tag {
+    pub fn name(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Keyword => match symbol {
                 Tag::Direct(dir) => Tag::to_direct(dir.data(), dir.length(), DirectType::Byte),
@@ -137,7 +137,7 @@ impl Symbol {
         }
     }
 
-    pub fn value_of(mu: &Mu, symbol: Tag) -> Tag {
+    pub fn value(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Keyword => symbol,
             Type::Symbol => match symbol {
@@ -161,13 +161,13 @@ pub trait Core {
 impl Core for Symbol {
     fn view(mu: &Mu, symbol: Tag) -> Tag {
         let vec = vec![
-            Self::namespace_of(mu, symbol),
-            Self::scope_of(mu, symbol),
-            Self::name_of(mu, symbol),
+            Self::namespace(mu, symbol),
+            Self::scope(mu, symbol),
+            Self::name(mu, symbol),
             if Self::is_unbound(mu, symbol) {
                 Symbol::keyword("UNBOUND")
             } else {
-                Self::value_of(mu, symbol)
+                Self::value(mu, symbol)
             },
         ];
 
@@ -305,18 +305,18 @@ impl Core for Symbol {
                 Err(_) => panic!(),
             },
             Type::Symbol => {
-                let name = Self::name_of(mu, symbol);
+                let name = Self::name(mu, symbol);
 
                 if escape {
-                    let ns = Self::namespace_of(mu, symbol);
+                    let ns = Self::namespace(mu, symbol);
 
                     if !ns.null_() {
-                        match mu.write(Namespace::name_of(mu, ns), false, stream) {
+                        match mu.write(Namespace::name(mu, ns), false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
 
-                        let scope = Symbol::scope_of(mu, symbol);
+                        let scope = Symbol::scope(mu, symbol);
                         if scope.eq_(Symbol::keyword("extern")) {
                             match mu.write_string(":".to_string(), stream) {
                                 Ok(_) => (),
@@ -339,7 +339,7 @@ impl Core for Symbol {
     }
 
     fn is_unbound(mu: &Mu, symbol: Tag) -> bool {
-        Self::value_of(mu, symbol).eq_(*UNBOUND)
+        Self::value(mu, symbol).eq_(*UNBOUND)
     }
 }
 
@@ -358,7 +358,7 @@ impl MuFunction for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match Tag::type_of(mu, symbol) {
-            Type::Keyword | Type::Symbol => Symbol::name_of(mu, symbol),
+            Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "mu:sy-name", symbol)),
         };
 
@@ -369,7 +369,7 @@ impl MuFunction for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match Tag::type_of(mu, symbol) {
-            Type::Symbol => Symbol::namespace_of(mu, symbol),
+            Type::Symbol => Symbol::namespace(mu, symbol),
             Type::Keyword => Self::keyword("keyword"),
             _ => return Err(Exception::new(Condition::Type, "mu:sy-ns", symbol)),
         };
@@ -385,7 +385,7 @@ impl MuFunction for Symbol {
                 if Symbol::is_unbound(mu, symbol) {
                     return Err(Exception::new(Condition::Type, "mu:sy-value", symbol));
                 } else {
-                    Symbol::value_of(mu, symbol)
+                    Symbol::value(mu, symbol)
                 }
             }
             Type::Keyword => symbol,

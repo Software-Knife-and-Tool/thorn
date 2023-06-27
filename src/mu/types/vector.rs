@@ -89,7 +89,7 @@ impl Vector {
         }
     }
 
-    pub fn length_of(mu: &Mu, vector: Tag) -> usize {
+    pub fn length(mu: &Mu, vector: Tag) -> usize {
         match vector {
             Tag::Direct(direct) => direct.length() as usize,
             Tag::Indirect(_) => {
@@ -118,7 +118,7 @@ pub trait Core<'a> {
 impl<'a> Core<'a> for Vector {
     fn view(mu: &Mu, vector: Tag) -> Tag {
         let vec = vec![
-            Fixnum::as_tag(Self::length_of(mu, vector) as i64),
+            Fixnum::as_tag(Self::length(mu, vector) as i64),
             match Tag::type_key(Self::type_of(mu, vector)) {
                 Some(key) => key,
                 None => panic!(),
@@ -558,7 +558,7 @@ impl MuFunction for Vector {
             Type::Fixnum => {
                 let nth = Fixnum::as_i64(mu, index);
 
-                if nth < 0 || nth as usize >= Self::length_of(mu, vector) {
+                if nth < 0 || nth as usize >= Self::length(mu, vector) {
                     return Err(Exception::new(Condition::Range, "mu:sv-ref", index));
                 }
 
@@ -598,7 +598,7 @@ impl MuFunction for Vector {
 
         match Tag::type_of(mu, vector) {
             Type::Vector => {
-                fp.value = Fixnum::as_tag(Self::length_of(mu, vector) as i64);
+                fp.value = Fixnum::as_tag(Self::length(mu, vector) as i64);
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "mu:sv-len", vector)),

@@ -43,13 +43,13 @@ pub enum IndirectVector<'a> {
 
 pub trait IVector {
     const IMAGE_NBYTES: usize = 2 * 8; // bytes in image
-    fn image_of(_: &VectorImage) -> Vec<[u8; 8]>;
+    fn image(_: &VectorImage) -> Vec<[u8; 8]>;
     fn evict(&self, _: &Mu) -> Tag;
     fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
 }
 
 impl<'a> IVector for IndirectVector<'a> {
-    fn image_of(image: &VectorImage) -> Vec<[u8; 8]> {
+    fn image(image: &VectorImage) -> Vec<[u8; 8]> {
         let slices = vec![image.vtype.as_slice(), image.length.as_slice()];
 
         slices
@@ -58,7 +58,7 @@ impl<'a> IVector for IndirectVector<'a> {
     fn evict(&self, mu: &Mu) -> Tag {
         match self {
             IndirectVector::Byte((image, ivec)) => {
-                let slices = Self::image_of(image);
+                let slices = Self::image(image);
 
                 let data = match ivec {
                     IVec::Byte(vec_u8) => &vec_u8[..],
@@ -74,7 +74,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 )
             }
             IndirectVector::Char((image, ivec)) => {
-                let slices = Self::image_of(image);
+                let slices = Self::image(image);
 
                 let data = match ivec {
                     IVec::Char(string) => string.as_bytes(),
@@ -90,7 +90,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 )
             }
             IndirectVector::T((image, vec)) => {
-                let mut slices = Self::image_of(image);
+                let mut slices = Self::image(image);
 
                 match vec {
                     IVec::T(vec) => {
@@ -110,7 +110,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 )
             }
             IndirectVector::Fixnum((image, vec)) => {
-                let mut slices = Self::image_of(image);
+                let mut slices = Self::image(image);
 
                 match vec {
                     IVec::Fixnum(vec) => {
@@ -148,11 +148,9 @@ impl<'a> IVector for IndirectVector<'a> {
                 let mut heap_ref = mu.heap.write().unwrap();
                 Tag::Indirect(
                     IndirectTag::new()
-                        .with_offset(heap_ref.valloc(
-                            &Self::image_of(image),
-                            &data,
-                            Type::Vector as u8,
-                        ) as u64)
+                        .with_offset(
+                            heap_ref.valloc(&Self::image(image), &data, Type::Vector as u8) as u64,
+                        )
                         .with_heap_id(1)
                         .with_tag(TagType::Indirect),
                 )
@@ -339,7 +337,7 @@ impl<'a> Iterator for VectorIter<'a> {
     type Item = Tag;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index >= Vector::length_of(self.mu, self.vec) {
+        if self.index >= Vector::length(self.mu, self.vec) {
             None
         } else {
             let el = Vector::ref_(self.mu, self.vec, self.index);

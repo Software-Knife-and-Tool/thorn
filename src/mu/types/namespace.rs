@@ -91,7 +91,7 @@ impl Namespace {
         }
     }
 
-    pub fn name_of(mu: &Mu, ns: Tag) -> Tag {
+    pub fn name(mu: &Mu, ns: Tag) -> Tag {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
                 Tag::Indirect(_) => Self::to_image(mu, ns).name,
@@ -101,7 +101,7 @@ impl Namespace {
         }
     }
 
-    pub fn externs_of(mu: &Mu, ns: Tag) -> Tag {
+    pub fn externs(mu: &Mu, ns: Tag) -> Tag {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
                 Tag::Indirect(_) => Self::to_image(mu, ns).externs,
@@ -111,7 +111,7 @@ impl Namespace {
         }
     }
 
-    pub fn interns_of(mu: &Mu, ns: Tag) -> Tag {
+    pub fn interns(mu: &Mu, ns: Tag) -> Tag {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
                 Tag::Indirect(_) => Self::to_image(mu, ns).interns,
@@ -121,7 +121,7 @@ impl Namespace {
         }
     }
 
-    pub fn import_of(mu: &Mu, ns: Tag) -> Tag {
+    pub fn import(mu: &Mu, ns: Tag) -> Tag {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
                 Tag::Indirect(_) => Self::to_image(mu, ns).import,
@@ -140,7 +140,7 @@ pub trait Core {
 
 impl Core for Namespace {
     fn view(mu: &Mu, ns: Tag) -> Tag {
-        let vec = vec![Self::name_of(mu, ns), Self::import_of(mu, ns)];
+        let vec = vec![Self::name(mu, ns), Self::import(mu, ns)];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
@@ -148,7 +148,7 @@ impl Core for Namespace {
     fn write(mu: &Mu, ns: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                let name = Self::name_of(mu, ns);
+                let name = Self::name(mu, ns);
                 match mu.write_string("#<namespace: ".to_string(), stream) {
                     Ok(_) => (),
                     Err(e) => return Err(e),
@@ -389,7 +389,7 @@ impl MuFunction for Namespace {
         match Tag::type_of(mu, name) {
             Type::Vector => match Tag::type_of(mu, ns) {
                 Type::Namespace => {
-                    let ns_name = Vector::as_string(mu, Namespace::name_of(mu, ns));
+                    let ns_name = Vector::as_string(mu, Namespace::name(mu, ns));
                     let sy_name = Vector::as_string(mu, name);
 
                     fp.value = match <Mu as NSMaps>::map_ns(mu, &ns_name) {
@@ -413,7 +413,7 @@ impl MuFunction for Namespace {
 
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                fp.value = Self::import_of(mu, ns);
+                fp.value = Self::import(mu, ns);
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "mu:ns-ump", ns)),
@@ -425,7 +425,7 @@ impl MuFunction for Namespace {
 
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                fp.value = Self::name_of(mu, ns);
+                fp.value = Self::name(mu, ns);
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "mu:ns-name", ns)),
@@ -437,7 +437,7 @@ impl MuFunction for Namespace {
 
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                fp.value = Self::externs_of(mu, ns);
+                fp.value = Self::externs(mu, ns);
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "mu:ns-ext", ns)),
@@ -449,7 +449,7 @@ impl MuFunction for Namespace {
 
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                fp.value = Self::interns_of(mu, ns);
+                fp.value = Self::interns(mu, ns);
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "mu:ns-int", ns)),

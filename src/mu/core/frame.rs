@@ -154,7 +154,7 @@ impl Frame {
                 if Symbol::is_unbound(mu, func) {
                     Err(Exception::new(Condition::Unbound, "frame::apply", func))
                 } else {
-                    self.apply(mu, Symbol::value_of(mu, func))
+                    self.apply(mu, Symbol::value(mu, func))
                 }
             }
             Type::Function => match Tag::type_of(mu, Function::form(mu, func)) {
