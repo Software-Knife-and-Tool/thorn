@@ -30,11 +30,12 @@ use crate::{
 };
 
 // native functions
-type MuFunctionType = fn(&Mu, &mut Frame) -> exception::Result<()>;
+pub type LibFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
+pub type LibFunctionDesc = (&'static str, Scope, u16, LibFunction);
 
 // mu function dispatch table
 lazy_static! {
-    static ref FUNCTIONMAP: Vec<<Mu as Core>::FunctionDesc> = vec![
+    static ref SYMBOLMAP: Vec<LibFunctionDesc> = vec![
         // types
         ("eq", Scope::Extern, 2, Tag::mu_eq),
         ("type-of", Scope::Extern, 1, Tag::mu_typeof),
@@ -130,20 +131,11 @@ lazy_static! {
 }
 
 pub trait Core {
-    type FunctionDesc;
-
-    fn install_mu_symbols(_: &Mu);
-    fn map_function(_: usize) -> <Mu as Core>::FunctionDesc;
+    fn install_mu_symbols(_: &Mu) -> Vec<LibFunction>;
 }
 
 impl Core for Mu {
-    type FunctionDesc = (&'static str, Scope, u16, MuFunctionType);
-
-    fn map_function(index: usize) -> <Mu as Core>::FunctionDesc {
-        FUNCTIONMAP[index]
-    }
-
-    fn install_mu_symbols(mu: &Mu) {
+    fn install_mu_symbols<'a>(mu: &Mu) -> Vec<LibFunction> {
         Namespace::intern(
             mu,
             mu.mu_ns,
@@ -167,8 +159,10 @@ impl Core for Mu {
             mu.errout,
         );
 
-        for (id, fnmap) in FUNCTIONMAP.iter().enumerate() {
-            let (name, scope, nreqs, _) = fnmap;
+        let mut funcv = Vec::new();
+
+        for (id, fnmap) in SYMBOLMAP.iter().enumerate() {
+            let (name, scope, nreqs, fn_) = fnmap;
 
             let func = Function::new(
                 Fixnum::as_tag(*nreqs as i64),
@@ -180,8 +174,12 @@ impl Core for Mu {
             )
             .evict(mu);
 
+            funcv.push(*fn_);
+
             Namespace::intern(mu, mu.mu_ns, *scope, name.to_string(), func);
         }
+
+        funcv
     }
 }
 

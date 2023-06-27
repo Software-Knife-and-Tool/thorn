@@ -11,7 +11,6 @@ use {
     crate::{
         core::{
             exception::{self, Condition, Exception},
-            libfunctions::Core as _,
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },
@@ -168,7 +167,7 @@ impl Frame {
                     }
 
                     let fn_off = Fixnum::as_i64(mu, Function::form(mu, func)) as usize;
-                    let (_, _, _, fnc) = Mu::map_function(fn_off);
+                    let fnc = mu.functions[fn_off];
 
                     match fnc(mu, &mut self) {
                         Ok(_) => Ok(self.value),
