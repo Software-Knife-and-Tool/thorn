@@ -9,6 +9,8 @@ NAMESPACES=\
 	mu	\
 	core
 
+VALGRIND='((:lambda (g) (mu:apply g (mu:cons g (mu:cons 101010101 (mu:cons 11011 ()))))) (:lambda (g a b) (:if (mu:eq 0 b) a (mu:apply g (mu:cons g (mu:cons b (mu:cons (mu:fx-sub a (mu:fx-mul b (mu:fx-div a b))) ()))))))) '
+
 help:
 	@echo "thorn perf makefile -----------------"
 	@echo
@@ -74,19 +76,19 @@ memcheck:
 	@valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=10 \
 		--leak-resolution=med --show-leak-kinds=definite \
 		../dist/runtime -p      \
-		    -q "(mu:eval ()) " > memcheck.report 2>&1 || true
+		    -q $(VALGRIND) > memcheck.report 2>&1 || true
 
 callgrind:
 	@valgrind --tool=callgrind     	\
 		../dist/runtime -p      \
-		    -q "(mu:eval ()) " > callgrind.report 2>&1 || true
+		    -q $(VALGRIND) > callgrind.report 2>&1 || true
 
 	@callgrind_annotate --auto=yes callgrind.out.* >> callgrind.report
 
 cachegrind:
 	@valgrind --tool=cachegrind	\
 		../dist/runtime -p      \
-		    -q "(mu:eval ()) " > cachegrind.report 2>&1 || true
+		    -q $(VALGRIND) > cachegrind.report 2>&1 || true
 
 clean:
 	@rm -rf *.diff *.out *.out.* ../dist/runtime.dSYM
