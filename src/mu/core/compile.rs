@@ -7,6 +7,7 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception, Result},
+        functions::Core as _,
         mu::Mu,
         types::{Tag, Type},
     },
@@ -52,13 +53,15 @@ impl Compiler for Mu {
             ));
         }
 
+        let if_fn = match Mu::map_internal(mu, "if".to_string()) {
+            Some(fn_) => fn_,
+            None => panic!(),
+        };
+
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
-            Symbol::value(
-                mu,
-                Namespace::intern(mu, mu.mu_ns, Scope::Intern, "if".to_string(), Tag::nil()),
-            ),
+            if_fn,
             match Cons::nth(mu, 0, args) {
                 Some(t) => t,
                 None => panic!(),

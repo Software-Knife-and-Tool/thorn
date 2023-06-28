@@ -9,7 +9,7 @@ use {
             async_, exception,
             exception::{Condition, Exception},
             frame::Frame,
-            functions::{Core as _, LibFunction},
+            functions::{Core as _, InternalFunction, LibFunction},
             nsmap::NSMaps,
             types::{Tag, Type},
         },
@@ -48,6 +48,7 @@ pub struct Mu {
 
     // functions
     pub functions: Vec<LibFunction>,
+    pub internals: Vec<InternalFunction>,
 
     // namespaces
     pub mu_ns: Tag,
@@ -70,7 +71,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.1";
+    const VERSION: &'static str = "0.0.3";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -95,6 +96,7 @@ impl Core for Mu {
 
             // functions
             functions: Vec::new(),
+            internals: Vec::new(),
 
             // namespaces
             mu_ns: Tag::nil(),
@@ -145,7 +147,9 @@ impl Core for Mu {
             Err(_) => panic!(),
         };
 
-        mu.functions = Self::install_mu_symbols(&mu);
+        let (functions, internals) = Self::install_lib_functions(&mu);
+        mu.functions = functions;
+        mu.internals = internals;
 
         mu
     }
@@ -203,6 +207,7 @@ impl Core for Mu {
         if Tag::type_of(self, stream) != Type::Stream {
             panic!("{:?}", Tag::type_of(self, stream))
         }
+
         match Tag::type_of(self, tag) {
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),

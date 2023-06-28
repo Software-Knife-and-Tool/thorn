@@ -31,111 +31,119 @@ use crate::{
 
 // native functions
 pub type LibFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
-pub type LibFunctionDesc = (&'static str, Scope, u16, LibFunction);
+pub type InternalFunction = (String, Tag);
 
 // mu function dispatch table
 lazy_static! {
-    static ref SYMBOLMAP: Vec<LibFunctionDesc> = vec![
+    static ref SYMBOLMAP: Vec<(&'static str, Option<Scope>, u16, LibFunction)> = vec![
         // types
-        ("eq", Scope::Extern, 2, Tag::mu_eq),
-        ("type-of", Scope::Extern, 1, Tag::mu_typeof),
+        ("eq", Some(Scope::Extern), 2, Tag::mu_eq),
+        ("type-of", Some(Scope::Extern), 1, Tag::mu_typeof),
         // conses and lists
-        ("car", Scope::Extern, 1, Cons::mu_car),
-        ("cdr", Scope::Extern, 1, Cons::mu_cdr),
-        ("cons", Scope::Extern, 2, Cons::mu_cons),
-        ("length", Scope::Extern, 1, Cons::mu_length),
-        ("nth", Scope::Extern, 2, Cons::mu_nth),
-        ("nthcdr", Scope::Extern, 2, Cons::mu_nthcdr),
+        ("car", Some(Scope::Extern), 1, Cons::mu_car),
+        ("cdr", Some(Scope::Extern), 1, Cons::mu_cdr),
+        ("cons", Some(Scope::Extern), 2, Cons::mu_cons),
+        ("length", Some(Scope::Extern), 1, Cons::mu_length),
+        ("nth", Some(Scope::Extern), 2, Cons::mu_nth),
+        ("nthcdr", Some(Scope::Extern), 2, Cons::mu_nthcdr),
         // async
-        ("async", Scope::Extern, 2, Async::mu_async),
-        ("await", Scope::Extern, 2, Async::mu_await),
+        ("async", Some(Scope::Extern), 2, Async::mu_async),
+        ("await", Some(Scope::Extern), 2, Async::mu_await),
         // mu
-        ("apply", Scope::Extern, 2, Mu::mu_apply),
-        ("compile", Scope::Extern, 1, Mu::mu_compile),
-        ("eval", Scope::Extern, 1, Mu::mu_eval),
-        ("exit", Scope::Intern, 1, Mu::mu_exit),
-        ("fix", Scope::Extern, 2, Mu::mu_fix),
-        ("hp-info", Scope::Extern, 0, Mu::mu_hp_info),
-        ("view", Scope::Extern, 1, Mu::mu_view),
+        ("apply", Some(Scope::Extern), 2, Mu::mu_apply),
+        ("compile", Some(Scope::Extern), 1, Mu::mu_compile),
+        ("eval", Some(Scope::Extern), 1, Mu::mu_eval),
+        ("exit", Some(Scope::Intern), 1, Mu::mu_exit),
+        ("fix", Some(Scope::Extern), 2, Mu::mu_fix),
+        ("hp-info", Some(Scope::Extern), 0, Mu::mu_hp_info),
+        ("view", Some(Scope::Extern), 1, Mu::mu_view),
         // time
-        ("real-tm", Scope::Extern, 0, Mu::mu_real_time),
-        ("run-us", Scope::Extern, 0, Mu::mu_run_time),
+        ("real-tm", Some(Scope::Extern), 0, Mu::mu_real_time),
+        ("run-us", Some(Scope::Extern), 0, Mu::mu_run_time),
         // exceptions
-        ("with-ex", Scope::Extern, 2, Exception::mu_with_ex),
-        ("raise", Scope::Extern, 2, Exception::mu_raise),
+        ("with-ex", Some(Scope::Extern), 2, Exception::mu_with_ex),
+        ("raise", Some(Scope::Extern), 2, Exception::mu_raise),
         // frames
-        ("frames", Scope::Intern, 0, Frame::mu_frames),
-        ("fr-get", Scope::Extern, 1, Frame::mu_fr_get),
-        ("fr-pop", Scope::Extern, 1, Frame::mu_fr_pop),
-        ("fr-push", Scope::Extern, 1, Frame::mu_fr_push),
+        ("frames", Some(Scope::Intern), 0, Frame::mu_frames),
+        ("fr-get", Some(Scope::Extern), 1, Frame::mu_fr_get),
+        ("fr-pop", Some(Scope::Extern), 1, Frame::mu_fr_pop),
+        ("fr-push", Some(Scope::Extern), 1, Frame::mu_fr_push),
+        ("fr-ref", Some(Scope::Intern), 2, Frame::mu_fr_ref),
         // fixnums
-        ("fx-add", Scope::Extern, 2, Fixnum::mu_fxadd),
-        ("fx-sub", Scope::Extern, 2, Fixnum::mu_fxsub),
-        ("fx-lt", Scope::Extern, 2, Fixnum::mu_fxlt),
-        ("fx-mul", Scope::Extern, 2, Fixnum::mu_fxmul),
-        ("fx-div", Scope::Extern, 2, Fixnum::mu_fxdiv),
-        ("logand", Scope::Extern, 2, Fixnum::mu_fxand),
-        ("logor", Scope::Extern, 2, Fixnum::mu_fxor),
+        ("fx-add", Some(Scope::Extern), 2, Fixnum::mu_fxadd),
+        ("fx-sub", Some(Scope::Extern), 2, Fixnum::mu_fxsub),
+        ("fx-lt", Some(Scope::Extern), 2, Fixnum::mu_fxlt),
+        ("fx-mul", Some(Scope::Extern), 2, Fixnum::mu_fxmul),
+        ("fx-div", Some(Scope::Extern), 2, Fixnum::mu_fxdiv),
+        ("logand", Some(Scope::Extern), 2, Fixnum::mu_fxand),
+        ("logor", Some(Scope::Extern), 2, Fixnum::mu_fxor),
         // floats
-        ("fl-add", Scope::Extern, 2, Float::mu_fladd),
-        ("fl-sub", Scope::Extern, 2, Float::mu_flsub),
-        ("fl-lt", Scope::Extern, 2, Float::mu_fllt),
-        ("fl-mul", Scope::Extern, 2, Float::mu_flmul),
-        ("fl-div", Scope::Extern, 2, Float::mu_fldiv),
+        ("fl-add", Some(Scope::Extern), 2, Float::mu_fladd),
+        ("fl-sub", Some(Scope::Extern), 2, Float::mu_flsub),
+        ("fl-lt", Some(Scope::Extern), 2, Float::mu_fllt),
+        ("fl-mul", Some(Scope::Extern), 2, Float::mu_flmul),
+        ("fl-div", Some(Scope::Extern), 2, Float::mu_fldiv),
         // namespaces
-        ("untern", Scope::Extern, 3, Namespace::mu_untern),
-        ("intern", Scope::Extern, 4, Namespace::mu_intern),
-        ("make-ns", Scope::Extern, 2, Namespace::mu_make_ns),
-        ("map-ns", Scope::Extern, 1, Namespace::mu_map_ns),
-        ("ns-ext", Scope::Extern, 1, Namespace::mu_ns_externs),
-        ("ns-imp", Scope::Extern, 1, Namespace::mu_ns_import),
-        ("ns-int", Scope::Extern, 1, Namespace::mu_ns_interns),
-        ("ns-find", Scope::Extern, 3, Namespace::mu_ns_find),
-        ("ns-name", Scope::Extern, 1, Namespace::mu_ns_name),
+        ("untern", Some(Scope::Extern), 3, Namespace::mu_untern),
+        ("intern", Some(Scope::Extern), 4, Namespace::mu_intern),
+        ("make-ns", Some(Scope::Extern), 2, Namespace::mu_make_ns),
+        ("map-ns", Some(Scope::Extern), 1, Namespace::mu_map_ns),
+        ("ns-ext", Some(Scope::Extern), 1, Namespace::mu_ns_externs),
+        ("ns-imp", Some(Scope::Extern), 1, Namespace::mu_ns_import),
+        ("ns-int", Some(Scope::Extern), 1, Namespace::mu_ns_interns),
+        ("ns-find", Some(Scope::Extern), 3, Namespace::mu_ns_find),
+        ("ns-name", Some(Scope::Extern), 1, Namespace::mu_ns_name),
         // read/write
-        ("read", Scope::Extern, 3, Stream::mu_read),
-        ("write", Scope::Extern, 3, Stream::mu_write),
+        ("read", Some(Scope::Extern), 3, Stream::mu_read),
+        ("write", Some(Scope::Extern), 3, Stream::mu_write),
         // symbols
-        ("boundp", Scope::Extern, 1, Symbol::mu_boundp),
-        ("keyp", Scope::Extern, 1, Symbol::mu_keywordp),
-        ("keyword", Scope::Extern, 1, Symbol::mu_keyword),
-        ("make-sy", Scope::Extern, 1, Symbol::mu_symbol),
-        ("sy-name", Scope::Extern, 1, Symbol::mu_name),
-        ("sy-ns", Scope::Extern, 1, Symbol::mu_ns),
-        ("sy-val", Scope::Extern, 1, Symbol::mu_value),
+        ("boundp", Some(Scope::Extern), 1, Symbol::mu_boundp),
+        ("keyp", Some(Scope::Extern), 1, Symbol::mu_keywordp),
+        ("keyword", Some(Scope::Extern), 1, Symbol::mu_keyword),
+        ("make-sy", Some(Scope::Extern), 1, Symbol::mu_symbol),
+        ("sy-name", Some(Scope::Extern), 1, Symbol::mu_name),
+        ("sy-ns", Some(Scope::Extern), 1, Symbol::mu_ns),
+        ("sy-val", Some(Scope::Extern), 1, Symbol::mu_value),
         // simple vectors
-        ("make-sv", Scope::Extern, 2, Vector::mu_make_vector),
-        ("sv-len", Scope::Extern, 1, Vector::mu_length),
-        ("sv-ref", Scope::Extern, 2, Vector::mu_svref),
-        ("sv-type", Scope::Extern, 1, Vector::mu_type),
+        ("make-sv", Some(Scope::Extern), 2, Vector::mu_make_vector),
+        ("sv-len", Some(Scope::Extern), 1, Vector::mu_length),
+        ("sv-ref", Some(Scope::Extern), 2, Vector::mu_svref),
+        ("sv-type", Some(Scope::Extern), 1, Vector::mu_type),
         // structs
-        ("make-st", Scope::Extern, 2, Struct::mu_make_struct),
-        ("st-type", Scope::Extern, 1, Struct::mu_struct_type),
-        ("st-vec", Scope::Extern, 1, Struct::mu_struct_vector),
+        ("make-st", Some(Scope::Extern), 2, Struct::mu_make_struct),
+        ("st-type", Some(Scope::Extern), 1, Struct::mu_struct_type),
+        ("st-vec", Some(Scope::Extern), 1, Struct::mu_struct_vector),
         // streams
-        ("close", Scope::Extern, 1, Stream::mu_close),
-        ("eof", Scope::Extern, 1, Stream::mu_eof),
-        ("flush", Scope::Extern, 1, Stream::mu_flush),
-        ("get-str", Scope::Extern, 1, Stream::mu_get_string),
-        ("open", Scope::Extern, 3, Stream::mu_open),
-        ("openp", Scope::Extern, 1, Stream::mu_openp),
-        ("rd-byte", Scope::Extern, 3, Stream::mu_read_byte),
-        ("rd-char", Scope::Extern, 3, Stream::mu_read_char),
-        ("un-char", Scope::Extern, 2, Stream::mu_unread_char),
-        ("wr-byte", Scope::Extern, 2, Stream::mu_write_byte),
-        ("wr-char", Scope::Extern, 2, Stream::mu_write_char),
+        ("close", Some(Scope::Extern), 1, Stream::mu_close),
+        ("eof", Some(Scope::Extern), 1, Stream::mu_eof),
+        ("flush", Some(Scope::Extern), 1, Stream::mu_flush),
+        ("get-str", Some(Scope::Extern), 1, Stream::mu_get_string),
+        ("open", Some(Scope::Extern), 3, Stream::mu_open),
+        ("openp", Some(Scope::Extern), 1, Stream::mu_openp),
+        ("rd-byte", Some(Scope::Extern), 3, Stream::mu_read_byte),
+        ("rd-char", Some(Scope::Extern), 3, Stream::mu_read_char),
+        ("un-char", Some(Scope::Extern), 2, Stream::mu_unread_char),
+        ("wr-byte", Some(Scope::Extern), 2, Stream::mu_write_byte),
+        ("wr-char", Some(Scope::Extern), 2, Stream::mu_write_char),
         // interns
-        ("if", Scope::Intern, 3, Mu::mu_if),
-        ("fr-ref", Scope::Intern, 2, Frame::mu_fr_ref),
+        ("if", None, 3, Mu::mu_if),
     ];
 }
 
 pub trait Core {
-    fn install_mu_symbols(_: &Mu) -> Vec<LibFunction>;
+    fn map_internal(_: &Mu, name: String) -> Option<Tag>;
+    fn install_lib_functions(_: &Mu) -> (Vec<LibFunction>, Vec<InternalFunction>);
 }
 
 impl Core for Mu {
-    fn install_mu_symbols<'a>(mu: &Mu) -> Vec<LibFunction> {
+    fn map_internal(mu: &Mu, name: String) -> Option<Tag> {
+        mu.internals
+            .iter()
+            .find(|(libname, _)| *libname == name)
+            .map(|(_, libfn)| *libfn)
+    }
+
+    fn install_lib_functions<'a>(mu: &Mu) -> (Vec<LibFunction>, Vec<InternalFunction>) {
         Namespace::intern(
             mu,
             mu.mu_ns,
@@ -160,9 +168,10 @@ impl Core for Mu {
         );
 
         let mut funcv = Vec::new();
+        let mut internals = Vec::new();
 
         for (id, fnmap) in SYMBOLMAP.iter().enumerate() {
-            let (name, scope, nreqs, fn_) = fnmap;
+            let (name, scope, nreqs, libfn) = fnmap;
 
             let func = Function::new(
                 Fixnum::as_tag(*nreqs as i64),
@@ -174,12 +183,19 @@ impl Core for Mu {
             )
             .evict(mu);
 
-            funcv.push(*fn_);
+            funcv.push(*libfn);
 
-            Namespace::intern(mu, mu.mu_ns, *scope, name.to_string(), func);
+            match scope {
+                Some(scope) => {
+                    Namespace::intern(mu, mu.mu_ns, *scope, name.to_string(), func);
+                }
+                None => {
+                    internals.push((name.to_string(), func));
+                }
+            };
         }
 
-        funcv
+        (funcv, internals)
     }
 }
 

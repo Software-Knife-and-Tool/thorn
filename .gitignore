@@ -5,3 +5,6 @@ target
 doc/rustdoc
 base.report
 perf.report
+cachegrind.report
+callgrind.report
+memcheck.report
