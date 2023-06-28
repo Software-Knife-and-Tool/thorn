@@ -1,5 +1,6 @@
 compile
 core
+gcd
 list
 namespace
 number
