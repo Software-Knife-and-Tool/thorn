@@ -7,6 +7,7 @@
 use crate::{
     core::{
         async_::{Async, MuFunction as _},
+        backquote::MuFunction as _,
         compile::Compiler,
         exception::{self, Condition, Exception, MuFunction as _},
         frame::{Frame, MuFunction as _},
@@ -126,6 +127,7 @@ lazy_static! {
         ("wr-byte", Some(Scope::Extern), 2, Stream::mu_write_byte),
         ("wr-char", Some(Scope::Extern), 2, Stream::mu_write_char),
         // interns
+        ("bq-append", None, 2, Mu::mu_bq_append),
         ("if", None, 3, Mu::mu_if),
     ];
 }

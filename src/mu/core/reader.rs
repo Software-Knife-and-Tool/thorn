@@ -405,7 +405,7 @@ impl Reader for Mu {
                         )),
                     },
                     SyntaxType::Tmacro => match ch {
-                        '`' => Self::bq_read(mu, stream, false),
+                        '`' => Self::bq_read(mu, false, stream, false),
                         '\'' => match Self::read(mu, stream, false, Tag::nil(), recursivep) {
                             Ok(tag) => Ok(Cons::new(
                                 Symbol::keyword("quote"),
@@ -435,7 +435,7 @@ impl Reader for Mu {
                         },
                         ',' => Err(Exception::new(
                             Condition::Range,
-                            "read::comma_invalid",
+                            "reader::comma_invalid",
                             Char::as_tag(ch),
                         )),
                         _ => Err(Exception::new(
