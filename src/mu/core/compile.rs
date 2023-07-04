@@ -6,7 +6,7 @@
 //!     special forms
 use crate::{
     core::{
-        exception::{self, Condition, Exception, Result},
+        exception::{self, Condition, Exception},
         functions::Core as _,
         mu::Mu,
         types::{Tag, Type},
@@ -37,7 +37,7 @@ pub trait Compiler {
     fn compile_frame_symbols(_: &Mu, _: Tag) -> exception::Result<Vec<Tag>>;
     fn compile_if(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lambda(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_lexical(_: &Mu, _: Tag) -> Result<Tag>;
+    fn compile_lexical(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_quote(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_special_form(_: &Mu, _: Tag, args: Tag) -> exception::Result<Tag>;
@@ -159,7 +159,7 @@ impl Compiler for Mu {
         Ok(symv)
     }
 
-    fn compile_lexical(mu: &Mu, symbol: Tag) -> Result<Tag> {
+    fn compile_lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
         let lexenv_ref = mu.compile.read().unwrap();
 
         for frame in lexenv_ref.iter().rev() {

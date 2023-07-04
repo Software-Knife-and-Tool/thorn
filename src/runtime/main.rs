@@ -124,7 +124,7 @@ fn repl(system: &System, _config: &str) {
                 match mu.compile(expr) {
                     Ok(form) => match mu.eval(form) {
                         Ok(eval) => {
-                            mu.write(eval, false, eval_string).unwrap();
+                            mu.write(eval, true, eval_string).unwrap();
                             println!("{}", mu.get_string(eval_string).unwrap());
                         }
                         Err(e) => {
