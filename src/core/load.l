@@ -10,7 +10,7 @@
     ((:lambda (ifs)
        (core:raise-unless core:streamp ifs 'core:load "cannot open input file")
        (:if verbose
-            (core:format :t ";;; loading ~A~%" (core::list source))
+            (core:format :t ";;; loading ~A~%" `(,source))
             ())
        (mu:fix
         (:lambda (loop)
@@ -24,7 +24,7 @@
                       (:if (core:eof ifs)
                            loop
                            (:if verbose
-                                (core:format :t "~A~%" (core::list form))
+                                (core:format :t "~A~%" `(,form))
                                 ()))
                       (core:null loop))
                     (mu:eval (core:compile (core:read ifs :t ()))))))))

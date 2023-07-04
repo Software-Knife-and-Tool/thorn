@@ -58,7 +58,7 @@
                       (:if (mu:fx-lt (core:1- len) loop)
                            ()
                            (:if (core:apply fn (core::list (mu:sv-ref str loop)))
-                                (core::list loop)
+                                `(,loop)
                                 (core:1+ loop)))))
                0)))
            (core:length str)))))
@@ -118,7 +118,7 @@
          (:if (core:symbolp designator)
               (mu:sy-name designator)
               (:if (core:charp designator)
-                   (mu:make-sv :char (core::list designator))
+                   (mu:make-sv :char `(,designator))
                    (core:raise designator 'core::string "not a char"))))))
 
 (mu:intern core::ns :extern "string-append"

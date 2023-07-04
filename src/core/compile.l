@@ -99,7 +99,7 @@
          ((:lambda (macro-fn)
             ((:lambda (symbol)
                (core::core-macro-env symbol macro-fn)
-               (mu:compile (core::list-2 :quote symbol)))
+               (mu:compile `(:quote ,symbol)))
              (core::intern symbol macro-fn env)))
             (core::compile-macro (core::list-2 (mu:car lambda) (mu:cdr lambda)) env)))
        (mu:nth 1 form)
@@ -165,7 +165,7 @@
                        (core::compile-application fn args env)
                        ((:lambda (specf)
                           (:if specf
-                               (mu:apply (mu:sy-val specf) (core::list-2 form env))
+                               (mu:apply (mu:sy-val specf) `(,form ,env))
                                (core::compile-application fn args env)))
                         (core::special-table fn)))))
            (mu:car form)

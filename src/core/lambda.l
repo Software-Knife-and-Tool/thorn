@@ -33,9 +33,7 @@
 (mu:intern core::ns :intern "make-lambda"
    (:lambda (lambda req-syms rest-sym env closed)
      (mu:make-st :lambda
-       (core::append
-        (core::list-3 lambda req-syms rest-sym)
-        (core::list-2 env closed)))))
+       `(,lambda ,req-syms ,rest-sym ,env ,closed))))
 
 ;;;
 ;;; parse core lambda list
@@ -95,7 +93,7 @@
           (:if (mu:cdr body)
                compiled-form
                (:if (core:functionp compiled-form)
-                    (core:compile (mu:cons 'core::closure (core::list compiled-form)))
+                    (core:compile (mu:cons 'core::closure `(,compiled-form)))
                     compiled-form)))
         (core::compile (mu:car body) env)))
      body)))

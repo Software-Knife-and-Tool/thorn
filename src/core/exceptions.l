@@ -17,9 +17,7 @@
 (mu:intern core::ns :extern "make-exception"
   (:lambda (cond object source reason env)
     (mu:make-st :except
-      (core::append
-       (core::list-3 cond object source)
-       (core::list-2 reason env)))))
+      `(,cond ,object ,source ,reason ,env))))
 
 (mu:intern core::ns :intern "exception-property"
   (:lambda (key exception)
@@ -39,7 +37,7 @@
     ((:lambda (cond object source reason env)
        (core:format stream
                     "core exception: (~A) ~A by ~A~%"
-                    (core::list-3 reason object source)))
+                    `(,reason ,object ,source)))
      (core::exception-property :cond except)
      (core::exception-property :object except)
      (core::exception-property :source except)
@@ -61,7 +59,7 @@
     ((:lambda (cond object source reason env)
       (core:format stream fmt
          (core::list (core:format () "~A ~A in ~A~%"
-                                  (core::list-3 object reason source)))))
+                                  `(,object ,reason ,source)))))
      (core::exception-property :cond except)
      (core::exception-property :object except)
      (core::exception-property :source except)
@@ -71,7 +69,7 @@
 (mu:intern core::ns :extern "raise"
   (:lambda (object source reason)
     (mu:raise
-     (core::list :quote (core::append (core::list-3 object source reason) (core::list (core:dropl (mu::frames) 2))))
+     (core::list :quote (core::append `(,object ,source ,reason) (core::list (core:dropl (mu::frames) 2))))
      :except)))
 
 (mu:intern core::ns :extern "with-exception"
@@ -103,13 +101,13 @@
 
 (mu:intern core::ns :extern "raise-when"
   (:lambda (fn obj source reason)
-    (:if (mu:apply fn (core::list obj))
+    (:if (mu:apply fn `(,obj))
          (core:raise obj source reason)
          obj)))
 
 (mu:intern core::ns :extern "raise-unless"
   (:lambda (fn obj source reason)
-    (:if (mu:apply fn (core::list obj))
+    (:if (mu:apply fn `(,obj))
          obj
          (core:raise obj source reason))))
 
@@ -126,7 +124,7 @@
 
 (mu:intern core::ns :extern "warn"
   (:lambda (obj msg)
-     (core:format mu:err-out "warning: ~A ~S~%" (core::list-2 obj msg))
+     (core:format mu:err-out "warning: ~A ~S~%" `(,obj ,msg))
     obj))
 
 (mu:intern core::ns :intern "repl"

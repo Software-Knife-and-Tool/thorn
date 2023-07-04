@@ -77,7 +77,7 @@
     ((:lambda (ch sharp-table)
        (mu:apply
         (mu:sy-val (mu:cdr (core:assoc ch sharp-table)))
-        (core::list-2 ch stream)))
+        `(,ch ,stream)))
      (core:read-char stream () ())
      '((#\| . core::read-sharp-comment)
        (#\\ . core::read-sharp-char)
@@ -112,8 +112,8 @@
                                                 dotted)
                                             (core:raise () 'core::read-list "malformed dotted list")))
                                      (core::append loop (core::read stream)))
-                                    (core::append loop (core::list el)))
-                               (core::append loop (core::list el)))))
+                                    (core::append loop `(,el)))
+                               (core::append loop `(,el)))))
                    (core::read stream))))
           ()))))
 
@@ -166,7 +166,7 @@
     ((:lambda (macro-table)
        (mu:apply
             (mu:sy-val (mu:cdr (core:assoc ch macro-table)))
-            (core::list-2 ch stream)))
+            `(,ch ,stream)))
        '((#\" . core::read-string)
          (#\# . core::read-sharp)
          (#\' . core::read-quote)
@@ -187,11 +187,11 @@
         (:if macro-symbol
             (core:symbol-value macro-symbol)
             ()))
-      (mu:ns-find core::core-char-macro-ns :extern (mu:make-sv :char (core::list char))))))
+      (mu:ns-find core::core-char-macro-ns :extern (mu:make-sv :char `(,char))))))
 
 (mu:intern core::ns :extern "set-macro-character"
    (:lambda (char fn non-terminating)
      (core:raise-unless core:charp char 'core:set-macro-character "not a character")
      (core:raise-unless core:functionp fn 'core:set-macro-character "not a function")
-     (mu:intern core::core-char-macro-ns :extern (mu:make-sv :char (core::list char)) (mu:cons fn non-terminating))
+     (mu:intern core::core-char-macro-ns :extern (mu:make-sv :char `(,char)) (mu:cons fn non-terminating))
      :t))

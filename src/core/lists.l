@@ -12,7 +12,7 @@
         list-1)))
 
 (mu:intern core::ns :intern "list"
-   (:lambda (form)
+  (:lambda (form)
      (mu:cons form ())))
 
 (mu:intern core::ns :intern "list-2"
@@ -21,7 +21,7 @@
 
 (mu:intern core::ns :intern "list-3"
    (:lambda (f1 f2 f3)
-     (mu:cons f1 (core::list-2 f2 f3))))
+      (mu:cons f1 (core::list-2 f2 f3))))
 
 (mu:intern core::ns :intern "list-3*"
    (:lambda (f1 f2 f3)
@@ -87,7 +87,7 @@
      (core:raise-unless core:listp list 'core:mapcar "not a list")
      (core:foldl
       (:lambda (elt acc)
-        (core::append acc (core::list (core:apply fn (core::list elt)))))
+        (core::append acc (core::list (core:apply fn `(,elt)))))
       ()
       list)))
 
@@ -99,7 +99,7 @@
        (:lambda (list)
          (:if list
               (core::prog2
-                  (core:apply fn (core::list list))
+                  (core:apply fn `(,list))
                   (mu:cdr list))
               ()))
        list)
@@ -131,7 +131,7 @@
      (core:raise-unless core:listp list 'core:findl "not a list")
      (core:foldr
       (:lambda (el acc)
-        (:if (core:apply fn (core::list el))
+        (:if (core:apply fn `(,el))
              el
              acc))
       ()
@@ -143,7 +143,7 @@
      (core:raise-unless core:sequencep list 'core:findr "not a list")
      (core:foldl
       (:lambda (el acc)
-        (:if (core:apply fn (core::list el))
+        (:if (core:apply fn `(,el))
              el
              acc))
       ()
@@ -167,7 +167,7 @@
                       (:if (mu:fx-lt len loop)
                            ()
                            (:if (core:apply fn (core::list (mu:nth loop list)))
-                                (core::list loop)
+                                `(,loop)
                                 (core:1+ loop)))))
                0)))
            (mu:length list)))))
@@ -186,7 +186,7 @@
                    (:if (mu:fx-lt loop 0)
                         ()
                         (:if (core:apply fn (core::list (mu:nth loop list)))
-                             (core::list loop)
+                             `(,loop)
                              (core:1- loop)))))
             (core:1- (mu:length list)))))))
 
