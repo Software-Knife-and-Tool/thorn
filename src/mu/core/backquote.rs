@@ -16,7 +16,7 @@ use crate::{
         char::Char,
         cons::{Cons, ConsIter, Core as _},
         fixnum::Fixnum,
-        namespace::{Core as _, Namespace, Scope},
+        namespace::{Core as _, Namespace},
         stream::{Core as _, Stream},
         streambuilder::StreamBuilder,
         symbol::{Core as _, Symbol},
@@ -36,7 +36,7 @@ trait Backquote {
 }
 
 impl Backquote for Mu {
-    // backquote atom parser:
+    // backquote read from string:
     //
     //      return Ok(tag) for successful expansion
     //      return Err exception for stream I/O error or unexpected eof
@@ -74,13 +74,7 @@ impl Backquote for Mu {
                             Ok(Cons::vlist(
                                 mu,
                                 &[
-                                    Namespace::intern(
-                                        mu,
-                                        mu.mu_ns,
-                                        Scope::Extern,
-                                        "cons".to_string(),
-                                        Tag::nil(),
-                                    ),
+                                    Namespace::mu_ext_symbol(mu, "cons".to_string()),
                                     Self::bq_read_string(mu, form).unwrap(),
                                     Tag::nil(),
                                 ],
@@ -120,13 +114,7 @@ impl Backquote for Mu {
                                 Ok(expr) => Ok(Cons::vlist(
                                     mu,
                                     &[
-                                        Namespace::intern(
-                                            mu,
-                                            mu.mu_ns,
-                                            Scope::Extern,
-                                            "cons".to_string(),
-                                            Tag::nil(),
-                                        ),
+                                        Namespace::mu_ext_symbol(mu, "cons".to_string()),
                                         expr,
                                         Tag::nil(),
                                     ],

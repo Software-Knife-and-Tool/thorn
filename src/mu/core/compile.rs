@@ -167,13 +167,7 @@ impl Compiler for Mu {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(*lex)) {
                 let lex_ref = vec![
-                    Namespace::intern(
-                        mu,
-                        mu.mu_ns,
-                        Scope::Intern,
-                        "fr-ref".to_string(),
-                        Tag::nil(),
-                    ),
+                    Namespace::mu_int_symbol(mu, "fr-ref".to_string()),
                     Fixnum::as_tag(tag.as_u64() as i64),
                     Fixnum::as_tag(nth as i64),
                 ];
