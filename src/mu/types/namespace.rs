@@ -133,12 +133,22 @@ impl Namespace {
 }
 
 pub trait Core {
-    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn intern(_: &Mu, _: Tag, _: Scope, _: String, _: Tag) -> Tag;
+    fn mu_ext_symbol(_: &Mu, _: String) -> Tag;
+    fn mu_int_symbol(_: &Mu, _: String) -> Tag;
     fn view(_: &Mu, _: Tag) -> Tag;
+    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Namespace {
+    fn mu_ext_symbol(mu: &Mu, name: String) -> Tag {
+        Namespace::intern(mu, mu.mu_ns, Scope::Extern, name, Tag::nil())
+    }
+
+    fn mu_int_symbol(mu: &Mu, name: String) -> Tag {
+        Namespace::intern(mu, mu.mu_ns, Scope::Intern, name, Tag::nil())
+    }
+
     fn view(mu: &Mu, ns: Tag) -> Tag {
         let vec = vec![Self::name(mu, ns), Self::import(mu, ns)];
 
