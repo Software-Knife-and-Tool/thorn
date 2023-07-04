@@ -68,7 +68,7 @@
   (:lambda (dir dest args)
     ((:lambda (fn)
        (:if fn
-            (core:apply (mu:sy-val fn) (core::list-2 dest args))
+            (core:apply (mu:sy-val fn) `(,dest ,args))
             (core:raise dir 'core:format "unrecognized format directive")))
      (mu:cdr
       (core:assoc

@@ -31,10 +31,7 @@
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
                                 (mu:cons (core::append list type-stats) (core:1+ n)))
-                              (mu:cons type
-                                (mu:cons total
-                                  (mu:cons alloc
-                                    (core::list in-use))))))
+                              `(,type ,total ,alloc ,in-use)))
                            (mu:sv-ref start-vec (mu:fx-add offset 0))
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 1)) (mu:sv-ref start-vec (mu:fx-add offset 1)))
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 2)) (mu:sv-ref start-vec (mu:fx-add offset 2)))

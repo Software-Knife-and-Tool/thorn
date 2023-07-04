@@ -87,11 +87,11 @@
          args
          (:if (core::closure-property :rest fn)
               (:if (core::and (core:closure-property :rest fn) (core:zerop (core::closure-property :arity fn)))
-                   (core::list args)
+                   `(,args)
                    ((:lambda (reqs rest)
                       (core::append
                        reqs
-                       (core::list rest)))
+                       `(,rest)))
                     (core:dropr args (mu:fx-sub (mu:length args) (core::closure-property :arity fn)))
                     (core:dropl args (core::closure-property :arity fn))))
               args))))
@@ -104,7 +104,7 @@
     ; (core:warn args "compile-flat-arg-list")
     (core:foldr
      (:lambda (elt acc)
-       (mu:cons 'mu:cons (mu:cons (core::compile elt env) (core::list acc))))
+       (mu:cons 'mu:cons (mu:cons (core::compile elt env) `(,acc))))
      ()
      args)))
 
