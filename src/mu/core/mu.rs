@@ -123,9 +123,8 @@ impl Core for Mu {
             async_map: RwLock::new(HashMap::new()),
         };
 
+        // a lot of this is order dependent
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
-
-        mu.reader = mu.reader.build(&mu);
 
         mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
             Ok(stdin) => stdin.evict(&mu),
@@ -159,6 +158,8 @@ impl Core for Mu {
         let (functions, internals) = Self::install_lib_functions(&mu);
         mu.functions = functions;
         mu.internals = internals;
+
+        mu.reader = mu.reader.build(&mu);
 
         mu
     }

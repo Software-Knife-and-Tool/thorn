@@ -4,9 +4,9 @@
 //! mu reader
 use crate::{
     core::{
+        compile::Compiler,
         exception::{self, Condition, Exception},
         frame::Frame,
-        functions::Core as _,
         mu::{Core, Mu},
         reader::{Core as _, Reader},
         readtable::{map_char_syntax, SyntaxType},
@@ -16,72 +16,54 @@ use crate::{
         char::Char,
         cons::{Cons, ConsIter, Core as _},
         fixnum::Fixnum,
-        namespace::{Core as _, Namespace},
         stream::{Core as _, Stream},
         streambuilder::StreamBuilder,
-        symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
     },
 };
 
 pub trait Backquote {
     fn bq_read(_: &Mu, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
-    fn bq_read_string(_: &Mu, _: String) -> exception::Result<Tag>;
     fn bq_comma(_: &Mu, _: bool, _: Tag) -> exception::Result<Tag>;
     fn bq_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn bq_list_elt(_: &Mu, _: Tag) -> exception::Result<Tag>;
+    fn bq_list_element(_: &Mu, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Backquote for Mu {
-    // backquote read from string:
-    //
-    //      return Ok(tag) for successful expansion
-    //      return Err exception for stream I/O error or unexpected eof
-    //
-    fn bq_read_string(mu: &Mu, string: String) -> exception::Result<Tag> {
-        match StreamBuilder::new().string(string).input().build(mu) {
-            Ok(stream) => Reader::read(mu, stream.evict(mu), true, Tag::nil(), false),
-            Err(e) => Err(e),
-        }
-    }
-
     // backquote comma:
     //
     //      return Ok(tag) for successful expansion
     //      return Err exception for stream I/O error or unexpected eof
     //
     fn bq_comma(mu: &Mu, in_list: bool, stream: Tag) -> exception::Result<Tag> {
-        match Reader::read_token(mu, stream) {
-            Ok(token) => match token {
-                Some(mut form) => match form.chars().next().unwrap() {
-                    '@' => {
-                        form.remove(0);
-                        if in_list {
-                            Self::bq_read_string(mu, form)
-                        } else {
-                            Err(Exception::new(
-                                Condition::Range,
-                                "mu:bq_comma",
-                                Vector::from_string(&form).evict(mu),
-                            ))
-                        }
+        match Stream::read_char(mu, stream) {
+            Ok(None) => Err(Exception::new(Condition::Eof, "mu:bq_comma", stream)),
+            Ok(Some(ch)) => match ch {
+                '@' => {
+                    if in_list {
+                        Reader::read(mu, stream, false, Tag::nil(), false)
+                    } else {
+                        Err(Exception::new(Condition::Range, "mu:bq_comma", stream))
                     }
-                    _ => {
-                        if in_list {
-                            Ok(Cons::vlist(
-                                mu,
-                                &[
-                                    Namespace::mu_ext_symbol(mu, "cons".to_string()),
-                                    Self::bq_read_string(mu, form).unwrap(),
-                                    Tag::nil(),
-                                ],
-                            ))
-                        } else {
-                            Ok(Self::bq_read_string(mu, form).unwrap())
-                        }
+                }
+                _ => {
+                    Stream::unread_char(mu, stream, ch).unwrap();
+                    if in_list {
+                        Ok(Cons::vlist(
+                            mu,
+                            &[
+                                mu.reader.cons,
+                                match Reader::read(mu, stream, false, Tag::nil(), false) {
+                                    Ok(expr) => expr,
+                                    Err(e) => return Err(e),
+                                },
+                                Tag::nil(),
+                            ],
+                        ))
+                    } else {
+                        Reader::read(mu, stream, false, Tag::nil(), false)
                     }
-                },
-                None => Err(Exception::new(Condition::Range, "mu:bq_comma", stream)),
+                }
             },
             Err(e) => Err(e),
         }
@@ -94,25 +76,15 @@ impl Backquote for Mu {
     //      return Ok(tag) for successful expansion
     //      return Err exception for stream I/O error or unexpected eof
     //
-    fn bq_list_elt(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
+    fn bq_list_element(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
         Mu::write(mu, expr, true, mu.reader.bq_str).unwrap();
 
         match Stream::get_string(mu, mu.reader.bq_str) {
             Ok(string) => match StreamBuilder::new().string(string).input().build(mu) {
-                Ok(stream) => {
-                    let istream = stream.evict(mu);
-                    match Self::bq_read(mu, false, istream, false) {
-                        Ok(expr) => Ok(Cons::vlist(
-                            mu,
-                            &[
-                                Namespace::mu_ext_symbol(mu, "cons".to_string()),
-                                expr,
-                                Tag::nil(),
-                            ],
-                        )),
-                        Err(e) => Err(e),
-                    }
-                }
+                Ok(stream) => match Self::bq_read(mu, false, stream.evict(mu), false) {
+                    Ok(expr) => Ok(Cons::vlist(mu, &[mu.reader.cons, expr, Tag::nil()])),
+                    Err(e) => Err(e),
+                },
                 Err(e) => Err(e),
             },
             Err(e) => Err(e),
@@ -127,17 +99,12 @@ impl Backquote for Mu {
     //      return Err exception for stream I/O error or unexpected eof
     //
     fn bq_list(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
-        let bq_fn = match Mu::map_internal(mu, "bq-append".to_string()) {
-            Some(fn_) => fn_,
-            None => panic!(),
-        };
-
         match Self::bq_read(mu, true, stream, true) {
             Ok(expr) if mu.reader.eol.eq_(expr) => Ok(Tag::nil()),
             Ok(expr) => Ok(Cons::vlist(
                 mu,
                 &[
-                    bq_fn,
+                    mu.reader.bq_append,
                     expr,
                     match Self::bq_list(mu, stream) {
                         Ok(expr) => expr,
@@ -169,14 +136,14 @@ impl Backquote for Mu {
                     SyntaxType::Constituent => match Reader::read_atom(mu, ch, stream) {
                         Ok(expr) => {
                             if in_list {
-                                Self::bq_list_elt(mu, expr)
+                                Self::bq_list_element(mu, expr)
                             } else {
                                 match Tag::type_of(mu, expr) {
-                                    Type::Symbol => Ok(Cons::new(
-                                        Symbol::keyword("quote"),
+                                    Type::Symbol => Ok(<Mu as Compiler>::compile_quote(
+                                        mu,
                                         Cons::new(expr, Tag::nil()).evict(mu),
                                     )
-                                    .evict(mu)),
+                                    .unwrap()),
                                     _ => Ok(expr),
                                 }
                             }
@@ -199,21 +166,33 @@ impl Backquote for Mu {
                         '`' => Self::bq_read(mu, in_list, stream, true),
                         ',' => Self::bq_comma(mu, in_list, stream),
                         '\'' => match Reader::read(mu, stream, false, Tag::nil(), recursivep) {
-                            Ok(tag) => Ok(Cons::new(
-                                Symbol::keyword("quote"),
+                            Ok(tag) => Ok(<Mu as Compiler>::compile_quote(
+                                mu,
                                 Cons::new(tag, Tag::nil()).evict(mu),
                             )
-                            .evict(mu)),
+                            .unwrap()),
                             Err(e) => Err(e),
                         },
                         '"' => match Vector::read(mu, '"', stream) {
                             Ok(tag) => Ok(tag),
                             Err(e) => Err(e),
                         },
-                        '(' => match Self::bq_list(mu, stream) {
-                            Ok(cons) => Ok(cons),
-                            Err(e) => Err(e),
-                        },
+                        '(' => {
+                            if in_list {
+                                match Cons::read(mu, stream) {
+                                    Ok(cons) => match Self::bq_list_element(mu, cons) {
+                                        Ok(list) => Ok(list),
+                                        Err(e) => Err(e),
+                                    },
+                                    Err(e) => Err(e),
+                                }
+                            } else {
+                                match Self::bq_list(mu, stream) {
+                                    Ok(cons) => Ok(cons),
+                                    Err(e) => Err(e),
+                                }
+                            }
+                        }
                         ')' => {
                             if recursivep {
                                 Ok(mu.reader.eol)
