@@ -4,7 +4,7 @@
 //! mu reader
 use crate::{
     core::{
-        backquote::Reader as _,
+        backquote::Backquote,
         direct::DirectType,
         exception::{self, Condition, Exception},
         mu::Mu,
@@ -17,14 +17,16 @@ use crate::{
         fixnum::Fixnum,
         float::Float,
         stream::{Core as _, Stream},
+        streambuilder::StreamBuilder,
         struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
     },
 };
 
-lazy_static! {
-    pub static ref EOL: Tag = Tag::to_direct(0, 0, DirectType::Keyword);
+pub struct Reader {
+    pub eol: Tag,
+    pub bq_str: Tag,
 }
 
 //
@@ -35,7 +37,9 @@ lazy_static! {
 //     Err if stream or syntax error
 //     errors propagate out of read()
 //
-pub trait Reader {
+pub trait Core {
+    fn new() -> Self;
+    fn build(&self, _: &Mu) -> Self;
     fn read_atom(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
     fn read(_: &Mu, _: Tag, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
     fn read_block_comment(_: &Mu, _: Tag) -> exception::Result<Option<()>>;
@@ -46,7 +50,29 @@ pub trait Reader {
     fn read_token(_: &Mu, _: Tag) -> exception::Result<Option<String>>;
 }
 
-impl Reader for Mu {
+impl Core for Reader {
+    //
+    // reader creation:
+    //
+    fn new() -> Self {
+        Reader {
+            eol: Tag::to_direct(0, 0, DirectType::Keyword),
+            bq_str: Tag::nil(),
+        }
+    }
+
+    fn build(&self, mu: &Mu) -> Self {
+        Reader {
+            eol: self.eol,
+            bq_str: StreamBuilder::new()
+                .string("".to_string())
+                .output()
+                .build(mu)
+                .unwrap()
+                .evict(mu),
+        }
+    }
+
     //
     // read whitespace:
     //
@@ -405,7 +431,7 @@ impl Reader for Mu {
                         )),
                     },
                     SyntaxType::Tmacro => match ch {
-                        '`' => Self::bq_read(mu, false, stream, false),
+                        '`' => <Mu as Backquote>::bq_read(mu, false, stream, false),
                         '\'' => match Self::read(mu, stream, false, Tag::nil(), recursivep) {
                             Ok(tag) => Ok(Cons::new(
                                 Symbol::keyword("quote"),
@@ -424,7 +450,7 @@ impl Reader for Mu {
                         },
                         ')' => {
                             if recursivep {
-                                Ok(*EOL)
+                                Ok(mu.reader.eol)
                             } else {
                                 Err(Exception::new(Condition::Syntax, "read:read", stream))
                             }

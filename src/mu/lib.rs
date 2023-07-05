@@ -56,7 +56,12 @@ mod system;
 mod types;
 
 use {
-    crate::core::{compile::Compiler, exception, mu::Core, reader::Reader},
+    crate::core::{
+        compile::Compiler,
+        exception,
+        mu::{self, Core},
+        reader::{Core as _, Reader},
+    },
     std::fs,
     types::{
         stream::{Core as _, Stream},
@@ -112,24 +117,18 @@ impl Mu {
 
     /// compile a tagged s-expression
     pub fn compile(&self, expr: Tag) -> exception::Result<Tag> {
-        <core::mu::Mu as Compiler>::compile(&self.0, expr)
+        <mu::Mu as Compiler>::compile(&self.0, expr)
     }
 
     /// read a tagged s-expression from a mu stream
     pub fn read(&self, stream: Tag, eofp: bool, eof_value: Tag) -> exception::Result<Tag> {
-        <core::mu::Mu as Reader>::read(&self.0, stream, eofp, eof_value, false)
+        Reader::read(&self.0, stream, eofp, eof_value, false)
     }
 
     /// convert a rust String to a tagged s-expression
     pub fn read_string(&self, string: String) -> exception::Result<Tag> {
         match StreamBuilder::new().string(string).input().build(&self.0) {
-            Ok(stream) => <core::mu::Mu as Reader>::read(
-                &self.0,
-                stream.evict(&self.0),
-                true,
-                Tag::nil(),
-                false,
-            ),
+            Ok(stream) => Reader::read(&self.0, stream.evict(&self.0), true, Tag::nil(), false),
             Err(e) => Err(e),
         }
     }
@@ -231,7 +230,7 @@ impl System {
             .input()
             .build(&self.mu.0)
         {
-            Ok(stream) => <core::mu::Mu as Reader>::read(
+            Ok(stream) => Reader::read(
                 &self.mu.0,
                 stream.evict(&self.mu.0),
                 true,

@@ -11,6 +11,7 @@ use {
             frame::Frame,
             functions::{Core as _, InternalFunction, LibFunction},
             nsmap::NSMaps,
+            reader::{Core as _, Reader},
             types::{Tag, Type},
         },
         image::heap::Heap,
@@ -53,6 +54,9 @@ pub struct Mu {
     // namespaces
     pub mu_ns: Tag,
     pub unintern_ns: Tag,
+
+    // reader
+    pub reader: Reader,
 
     // standard streams
     pub stdin: Tag,
@@ -108,6 +112,9 @@ impl Core for Mu {
             stdout: Tag::nil(),
             errout: Tag::nil(),
 
+            // reader
+            reader: Reader::new(),
+
             // system
             start_time: ProcessTime::now(),
             system: system::System::new(),
@@ -117,6 +124,8 @@ impl Core for Mu {
         };
 
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
+
+        mu.reader = mu.reader.build(&mu);
 
         mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
             Ok(stdin) => stdin.evict(&mu),
