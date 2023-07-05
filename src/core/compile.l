@@ -82,11 +82,11 @@
         (core:raise-unless core:symbolp symbol 'defconst "not a symbol")
         (core:raise-when core:keywordp symbol 'defconst "not a symbol")
         (mu:compile
-         (core::list-2 :quote
-                      (core::intern
-                       symbol
-                       (mu:eval (core::compile value env))
-                       env))))
+         `(:quote
+           ,(core::intern
+            symbol
+            (mu:eval (core::compile value env))
+            env))))
       (mu:nth 1 form)
       (mu:nth 2 form))))
 
@@ -101,7 +101,7 @@
                (core::core-macro-env symbol macro-fn)
                (mu:compile `(:quote ,symbol)))
              (core::intern symbol macro-fn env)))
-            (core::compile-macro (core::list-2 (mu:car lambda) (mu:cdr lambda)) env)))
+            (core::compile-macro `(,(mu:car lambda) ,(mu:cdr lambda)) env)))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
@@ -111,7 +111,7 @@
          (core:raise-unless core:symbolp symbol 'defun "not a symbol")
          (core:raise-when core:keywordp symbol 'defun "not a symbol")
          (core:raise-unless core:listp lambda 'defun "not a lambda list")
-         (mu:compile (core::list-2 :quote (core::intern symbol (core::lambda (mu:cons :lambda lambda) env) env))))
+         (mu:compile `(:quote ,(core::intern symbol (core::lambda (mu:cons :lambda lambda) env) env))))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
@@ -121,7 +121,7 @@
 (mu:intern core::ns :intern "thunk"
   (:lambda (form env)
     (core::compile
-     (core::list-3 :lambda () form)
+     `(:lambda () ,form)
      env)))
 
 (mu:intern core::ns :intern "if-body"
@@ -136,10 +136,9 @@
       (core:raise-unless (:lambda (form) (mu:fx-lt 2 (mu:length form))) form 'if "takes two or three arguments")
       (core:raise-unless (:lambda (form) (mu:fx-lt (mu:length form) 5)) form 'if "takes two or three arguments")
       (mu:cons 'core::if-body
-        (core::list-3
-         (core::list (core::thunk (mu:nth 1 form) env))
-         (core::thunk (mu:nth 2 form) env)
-         (core::thunk (mu:nth 3 form) env)))))
+        `(,(core::list (core::thunk (mu:nth 1 form) env))
+          ,(core::thunk (mu:nth 2 form) env)
+          ,(core::thunk (mu:nth 3 form) env)))))
 
 (mu:intern core::ns :intern "special-table"
    (:lambda (symbol)

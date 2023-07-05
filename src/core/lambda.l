@@ -147,7 +147,7 @@
             ((:lambda (offset)
                (:if offset
                     ((:lambda ()
-                       (mu:compile (core::list-3 'mu::fr-ref (core::lambda-property :func frame) offset))))
+                       (mu:compile `(mu::fr-ref ,(core::lambda-property :func frame) ,offset))))
                     ()))
              (core:positionl (:lambda (el) (mu:eq el symbol)) (core::lambda-property :syms frame)))))
      ()

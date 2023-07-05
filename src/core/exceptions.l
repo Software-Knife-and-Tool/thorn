@@ -58,8 +58,8 @@
   (:lambda (stream fmt except)
     ((:lambda (cond object source reason env)
       (core:format stream fmt
-         (core::list (core:format () "~A ~A in ~A~%"
-                                  `(,object ,reason ,source)))))
+         `(,(core:format () "~A ~A in ~A~%"
+                         `(,object ,reason ,source)))))
      (core::exception-property :cond except)
      (core::exception-property :object except)
      (core::exception-property :source except)
@@ -69,7 +69,7 @@
 (mu:intern core::ns :extern "raise"
   (:lambda (object source reason)
     (mu:raise
-     (core::list :quote (core::append `(,object ,source ,reason) (core::list (core:dropl (mu::frames) 2))))
+     (core::list :quote (core::append `(,object ,source ,reason) `(,(core:dropl (mu::frames) 2))))
      :except)))
 
 (mu:intern core::ns :extern "with-exception"
@@ -79,16 +79,13 @@
         (:if (mu:eq condition :except)
              (core:apply
               handler
-              (core::list
-               (core:apply
-                core:make-exception
-                (core::list-2 (core::list :error) source))))
+              `(,(core:apply
+                  core:make-exception
+                  `((:error) ,source))))
              (core:apply
               handler
-              (core::list
-               (core:make-exception condition source 'mu "from mu" (core:dropl (mu::frames) 4))))))
-     (:lambda ()
-        (core:apply thunk ())))))
+              `(,(core:make-exception condition source 'mu "from mu" (core:dropl (mu::frames) 4))))))
+     (:lambda () (core:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
@@ -144,7 +141,7 @@
                     (:if (core:eof :t)
                          ()
                          ((:lambda (form)
-                            (core:format :t "[~A] ~S~%" (core::list-2 (mu:type-of form) form))
+                            (core:format :t "[~A] ~S~%" `(,(mu:type-of form) ,form))
                             (core:null loop))
                           (mu:eval (core:compile form)))))
                   (core:read :t () ()))))))
