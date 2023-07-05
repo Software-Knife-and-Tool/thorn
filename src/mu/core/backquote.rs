@@ -152,7 +152,13 @@ impl Backquote for Mu {
                     },
                     SyntaxType::Macro => match ch {
                         '#' => match Reader::sharp_macro(mu, stream) {
-                            Ok(Some(tag)) => Ok(tag),
+                            Ok(Some(expr)) => {
+                                if in_list {
+                                    Self::bq_list_element(mu, expr)
+                                } else {
+                                    Ok(expr)
+                                }
+                            }
                             Ok(None) => Reader::read(mu, stream, false, Tag::nil(), recursivep),
                             Err(e) => Err(e),
                         },
@@ -174,7 +180,13 @@ impl Backquote for Mu {
                             Err(e) => Err(e),
                         },
                         '"' => match Vector::read(mu, '"', stream) {
-                            Ok(tag) => Ok(tag),
+                            Ok(expr) => {
+                                if in_list {
+                                    Self::bq_list_element(mu, expr)
+                                } else {
+                                    Ok(expr)
+                                }
+                            }
                             Err(e) => Err(e),
                         },
                         '(' => {
@@ -233,25 +245,29 @@ pub trait MuFunction {
 
 impl MuFunction for Mu {
     fn mu_bq_append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let list = fp.argv[0];
-        let cdr = fp.argv[1];
+        let list1 = fp.argv[0];
+        let list2 = fp.argv[1];
 
-        fp.value = match Tag::type_of(mu, list) {
-            Type::Null => cdr,
-            Type::Cons => {
+        fp.value = match Tag::type_of(mu, list1) {
+            Type::Null | Type::Cons => {
                 let mut append = Vec::new();
 
-                for elt in ConsIter::new(mu, list) {
+                for elt in ConsIter::new(mu, list1) {
                     append.push(Cons::car(mu, elt))
                 }
 
-                for elt in ConsIter::new(mu, cdr) {
-                    append.push(Cons::car(mu, elt))
-                }
+                match Tag::type_of(mu, list2) {
+                    Type::Null | Type::Cons => {
+                        for elt in ConsIter::new(mu, list2) {
+                            append.push(Cons::car(mu, elt))
+                        }
 
-                Cons::vlist(mu, &append)
+                        Cons::vlist(mu, &append)
+                    }
+                    _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
+                }
             }
-            _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list)),
+            _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list1)),
         };
 
         Ok(())
