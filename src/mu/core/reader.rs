@@ -7,6 +7,7 @@ use crate::{
         backquote::Backquote,
         direct::DirectType,
         exception::{self, Condition, Exception},
+        functions::Core as _,
         mu::Mu,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
@@ -16,6 +17,7 @@ use crate::{
         cons::{Cons, Core as _},
         fixnum::Fixnum,
         float::Float,
+        namespace::{Core as _, Namespace},
         stream::{Core as _, Stream},
         streambuilder::StreamBuilder,
         struct_::{Core as _, Struct},
@@ -27,6 +29,8 @@ use crate::{
 pub struct Reader {
     pub eol: Tag,
     pub bq_str: Tag,
+    pub cons: Tag,
+    pub bq_append: Tag,
 }
 
 //
@@ -56,20 +60,24 @@ impl Core for Reader {
     //
     fn new() -> Self {
         Reader {
+            cons: Tag::nil(),
             eol: Tag::to_direct(0, 0, DirectType::Keyword),
             bq_str: Tag::nil(),
+            bq_append: Tag::nil(),
         }
     }
 
     fn build(&self, mu: &Mu) -> Self {
         Reader {
             eol: self.eol,
+            cons: Namespace::mu_ext_symbol(mu, "cons".to_string()),
             bq_str: StreamBuilder::new()
                 .string("".to_string())
                 .output()
                 .build(mu)
                 .unwrap()
                 .evict(mu),
+            bq_append: Mu::map_internal(mu, "bq-append".to_string()).unwrap(),
         }
     }
 

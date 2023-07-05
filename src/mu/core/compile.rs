@@ -38,8 +38,8 @@ pub trait Compiler {
     fn compile_if(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lambda(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lexical(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_quote(_: &Mu, _: Tag) -> exception::Result<Tag>;
+    fn compile_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_special_form(_: &Mu, _: Tag, args: Tag) -> exception::Result<Tag>;
 }
 
@@ -93,16 +93,16 @@ impl Compiler for Mu {
         Self::compile(mu, Cons::vlist(mu, &if_vec))
     }
 
-    fn compile_quote(mu: &Mu, args: Tag) -> exception::Result<Tag> {
-        if Cons::length(mu, args) != Some(1) {
+    fn compile_quote(mu: &Mu, list: Tag) -> exception::Result<Tag> {
+        if Cons::length(mu, list) != Some(1) {
             return Err(Exception::new(
                 Condition::Syntax,
                 "compile::compile_quote",
-                args,
+                list,
             ));
         }
 
-        Ok(Cons::new(Symbol::keyword("quote"), args).evict(mu))
+        Ok(Cons::new(Symbol::keyword("quote"), list).evict(mu))
     }
 
     fn compile_special_form(mu: &Mu, name: Tag, args: Tag) -> exception::Result<Tag> {
