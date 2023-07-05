@@ -140,7 +140,7 @@
 ;;;
 (mu:intern core::ns :intern "read-quote"
   (:lambda (ch stream)
-     (core::list-2 :quote (core::read stream))))
+     `(:quote ,(core::read stream))))
 
 ;;;
 ;;; line comment

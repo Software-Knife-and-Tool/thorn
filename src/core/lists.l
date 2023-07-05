@@ -17,11 +17,11 @@
 
 (mu:intern core::ns :intern "list-2"
    (:lambda (f1 f2)
-     (mu:cons f1 (core::list f2))))
+     `(,f1 ,f2)))
 
 (mu:intern core::ns :intern "list-3"
    (:lambda (f1 f2 f3)
-      (mu:cons f1 (core::list-2 f2 f3))))
+      `(,f1 ,f2 ,f3)))
 
 (mu:intern core::ns :intern "list-3*"
    (:lambda (f1 f2 f3)
@@ -35,7 +35,7 @@
      (core:raise-unless core:functionp fn 'core:fix "not a function")
      (core:raise-unless core:listp list 'core:fix "not a list")
      (:if (core::fn-applyp fn)
-          (mu:fix (:lambda (arg) (core:apply fn (core::list arg))) list)
+          (mu:fix (:lambda (arg) (core:apply fn `(,arg))) list)
           (mu:fix fn list))))
 
 ;;;
@@ -52,7 +52,7 @@
              (:if list
                   (mu:cons
                    (mu:cdr list)
-                   (core:apply fn (core::list-2 (mu:car list) acc)))
+                   (core:apply fn `(,(mu:car list) ,acc)))
                   arg))
            (mu:car arg)
            (mu:cdr arg)))
@@ -75,7 +75,7 @@
       (:lambda (lst)
         (:if lst
              (core::prog2
-                 (core:apply fn (core::list (mu:car lst)))
+                 (core:apply fn `(,(mu:car lst)))
                  (mu:cdr lst))
              ()))
       list)
@@ -87,7 +87,7 @@
      (core:raise-unless core:listp list 'core:mapcar "not a list")
      (core:foldl
       (:lambda (elt acc)
-        (core::append acc (core::list (core:apply fn `(,elt)))))
+        (core::append acc `(,(core:apply fn `(,elt)))))
       ()
       list)))
 
@@ -115,7 +115,7 @@
          ((:lambda (acc list)
             (:if list
                  (mu:cons
-                  (core::append acc (core::list (core:apply fn (core::list list))))
+                  (core::append acc `(,(core:apply fn `(,list))))
                   (mu:cdr list))
                  loop))
           (mu:car loop)
@@ -166,7 +166,7 @@
                       loop
                       (:if (mu:fx-lt len loop)
                            ()
-                           (:if (core:apply fn (core::list (mu:nth loop list)))
+                           (:if (core:apply fn `(,(mu:nth loop list)))
                                 `(,loop)
                                 (core:1+ loop)))))
                0)))
@@ -185,7 +185,7 @@
                    loop
                    (:if (mu:fx-lt loop 0)
                         ()
-                        (:if (core:apply fn (core::list (mu:nth loop list)))
+                        (:if (core:apply fn `(,(mu:nth loop list)))
                              `(,loop)
                              (core:1- loop)))))
             (core:1- (mu:length list)))))))

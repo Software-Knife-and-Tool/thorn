@@ -57,7 +57,7 @@
                       loop
                       (:if (mu:fx-lt (core:1- len) loop)
                            ()
-                           (:if (core:apply fn (core::list (mu:sv-ref str loop)))
+                           (:if (core:apply fn `(,(mu:sv-ref str loop)))
                                 `(,loop)
                                 (core:1+ loop)))))
                0)))

@@ -68,7 +68,7 @@
                        (core::prog2
                           (mu:fr-setv (core::fn-frame-id self) 1 (core:1- count))
                           (mu:fr-setv (core::fn-frame-id self) 2 (mu:fx-divXS fix 2)))))
-                 (core::list-2 (mu:fx-mul -1 count) fix))
+                 `(,(mu:fx-mul -1 count) fix))
                 (mu:fix
                  (:lambda (self count fix)
                    (:if (core:zerop count)
