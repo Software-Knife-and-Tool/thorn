@@ -10,7 +10,7 @@ use crate::{
         frame::Frame,
         indirect::IndirectTag,
         mu::{Core as _, Mu},
-        reader::{Reader, EOL},
+        reader::{Core as _, Reader},
         types::{Tag, TagType, Type},
     },
     types::{
@@ -139,19 +139,18 @@ impl Core for Cons {
     fn read(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
         let dot = Tag::to_direct('.' as u64, 1, DirectType::Byte);
 
-        match <Mu as Reader>::read(mu, stream, false, Tag::nil(), true) {
+        match Reader::read(mu, stream, false, Tag::nil(), true) {
             Ok(car) => {
-                if EOL.eq_(car) {
+                if mu.reader.eol.eq_(car) {
                     Ok(Tag::nil())
                 } else {
                     match Tag::type_of(mu, car) {
                         Type::Symbol if dot.eq_(Symbol::name(mu, car)) => {
-                            match <Mu as Reader>::read(mu, stream, false, Tag::nil(), true) {
-                                Ok(cdr) if EOL.eq_(cdr) => Ok(Tag::nil()),
+                            match Reader::read(mu, stream, false, Tag::nil(), true) {
+                                Ok(cdr) if mu.reader.eol.eq_(cdr) => Ok(Tag::nil()),
                                 Ok(cdr) => {
-                                    match <Mu as Reader>::read(mu, stream, false, Tag::nil(), true)
-                                    {
-                                        Ok(eol) if EOL.eq_(eol) => Ok(cdr),
+                                    match Reader::read(mu, stream, false, Tag::nil(), true) {
+                                        Ok(eol) if mu.reader.eol.eq_(eol) => Ok(cdr),
                                         Ok(_) => {
                                             Err(Exception::new(Condition::Eof, "mu:car", stream))
                                         }

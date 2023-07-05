@@ -13,7 +13,7 @@ use crate::{
         frame::Frame,
         indirect::IndirectTag,
         mu::{Core as _, Mu},
-        reader::Reader,
+        reader::{Core as _, Reader},
         types::{Tag, TagType, Type},
     },
     system::{stream::Core as _, sys::System},
@@ -509,8 +509,7 @@ impl MuFunction for Stream {
         let eof_value = fp.argv[2];
 
         match Tag::type_of(mu, stream) {
-            Type::Stream => match <Mu as Reader>::read(mu, stream, !eofp.null_(), eof_value, false)
-            {
+            Type::Stream => match Reader::read(mu, stream, !eofp.null_(), eof_value, false) {
                 Ok(tag) => {
                     fp.value = tag;
                     Ok(())
