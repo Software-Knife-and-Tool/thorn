@@ -15,18 +15,6 @@
   (:lambda (form)
      (mu:cons form ())))
 
-(mu:intern core::ns :intern "list-2"
-   (:lambda (f1 f2)
-     `(,f1 ,f2)))
-
-(mu:intern core::ns :intern "list-3"
-   (:lambda (f1 f2 f3)
-      `(,f1 ,f2 ,f3)))
-
-(mu:intern core::ns :intern "list-3*"
-   (:lambda (f1 f2 f3)
-     (mu:cons f1 (mu:cons f2 f3))))
-
 ;;;
 ;;; fixpoint loop
 ;;;
@@ -87,7 +75,7 @@
      (core:raise-unless core:listp list 'core:mapcar "not a list")
      (core:foldl
       (:lambda (elt acc)
-        (core::append acc `(,(core:apply fn `(,elt)))))
+        `(,@acc ,(core:apply fn `(,elt))))
       ()
       list)))
 
@@ -115,12 +103,12 @@
          ((:lambda (acc list)
             (:if list
                  (mu:cons
-                  (core::append acc `(,(core:apply fn `(,list))))
+                  `(,@acc ,(core:apply fn `(,list)))
                   (mu:cdr list))
                  loop))
           (mu:car loop)
           (mu:cdr loop)))
-       (mu:cons () list)))))
+       `(() ,@list)))))
 
 ;;;
 ;;; finds

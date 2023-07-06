@@ -55,7 +55,7 @@
                   (:if (mu:eq '&rest el)
                      (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
                           (core::make-lambda
-                           (core::append (core:dropr lambda 2) (core:dropl lambda (core:1- (mu:length lambda))))
+                           `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
                            (core:dropr lambda 2)
                            (mu:nth (core:1- (mu:length lambda)) lambda)
                            env
