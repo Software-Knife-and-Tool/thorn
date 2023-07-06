@@ -13,7 +13,7 @@
 
 While *thorn* has much in common with Scheme, it is meant to be familiar to traditional LISP programmers.
 
-*thorn* is a 2-Lisp, which gives it considerable flexibility in implementation and subsequent customization. A small, native code runtime kernel supports system classes, function application, heap/system image management, and the FFI framework.
+*thorn* is a 2-Lisp, which gives it flexibility in implementation and subsequent customization. A small, native code runtime kernel supports system classes, function application, heap/system image management, and the FFI framework.
 
 
 
@@ -58,11 +58,11 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 The *thorn/mu* runtime kernel is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file, which is an inherently unsafe operation.)
 
-The runtime implements 64 bit tagged pointers, is available as a crate, extends a Rust API for embedded applications, and is an evaluator for the *mu* kernel language. *mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
+The runtime implements 64 bit tagged pointers, is available as a crate, extends a Rust API for embedded applications, and is an evaluator for the *thorn/mu* kernel language. *thorn/mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
 The *thorn* 2-LISP system is organized as a stack of compilers, culminating in the *thorn-eth* native code compiler/system builder.
 
-The *core* library provides *rest* lambdas, closures, extended exceptions, *defun/defconst/defmacro* and a compiler for those forms.
+The *core* library provides *rest* lambdas, closures, a type system, *defun/defconst/defmacro* and a reader/compiler for those forms.
 
 The *preface* library extends *core* with various lexical binding forms, *cond/and/or/progn*, and a library loading facility.
 
@@ -205,7 +205,7 @@ thorn			shell script for running the extended repl
 OVERVIEW: runtime - posix platform mu interface
 USAGE: runtime [options] [file...]
 
-runtime: 0.0.x: [-h?psvcelq] [file...]
+runtime: x.y.z: [-h?psvcelq] [file...]
 OPTIONS:
   -h					print this message
   -?					print this message
