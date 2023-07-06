@@ -18,7 +18,7 @@
    (:lambda (n m)
      (core:raise-unless core:fixnump n 'core:truncate "not a fixnum")
      (core:raise-unless core:fixnump m 'core:truncate "not a fixnum")
-     (mu:cons (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
+     `(,(mu:fx-div n m) ,(mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
 
 ;;; round to negative infinity
 (mu:intern core::ns :extern "floor"
