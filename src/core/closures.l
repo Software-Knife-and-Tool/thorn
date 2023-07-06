@@ -25,8 +25,7 @@
 (mu:intern core::ns :intern "make-closure"
   (:lambda (env nreqs rest func)
     (mu:make-st :closure
-      (core::append
-       (core::list-3 env nreqs rest) (core::list func)))))
+      `(,env ,nreqs ,rest ,func))))
 
 ;;;
 ;;; create a closure
@@ -58,7 +57,7 @@
     (:lambda (args)
       (core:foldr
        (:lambda (elt acc)
-         (mu:cons 'mu:cons (mu:cons elt (core::list acc))))
+         `(mu:cons ,elt ,acc))
        ()
        args)))
 
@@ -66,7 +65,7 @@
   (:lambda (fn args)
     (:if (core:closurep fn)
          (:if (core::and (core::closure-property :rest fn) (core:zerop (core::closure-property :nreqs fn)))
-              (core::list-3 'mu:cons (core::flat-arg-list args) ())
+              `(mu:cons ,(core::flat-arg-list args) ())
               ((:lambda (reqs rest)
                  (mu:cons 'core::append
                           (mu:cons (core::flat-arg-list reqs)
@@ -74,7 +73,7 @@
                                     (mu:cons 'mu:cons
                                              (mu:cons
                                               (core::flat-arg-list rest)
-                                              (core::list ())))
+                                              '(())))
                                     ()))))
                (core:dropr args (mu:fx-sub (mu:length args) (core::closure-property :nreqs fn)))
                (core:dropl args (core::closure-property :nreqs fn))))
@@ -88,12 +87,8 @@
          (:if (core::closure-property :rest fn)
               (:if (core::and (core:closure-property :rest fn) (core:zerop (core::closure-property :arity fn)))
                    `(,args)
-                   ((:lambda (reqs rest)
-                      (core::append
-                       reqs
-                       `(,rest)))
-                    (core:dropr args (mu:fx-sub (mu:length args) (core::closure-property :arity fn)))
-                    (core:dropl args (core::closure-property :arity fn))))
+                   `(,@(core:dropr args (mu:fx-sub (mu:length args) (core::closure-property :arity fn)))
+                     ,@(core:dropl args (core::closure-property :arity fn))))
               args))))
 
 ;;;
@@ -139,7 +134,7 @@
     ; (core:warn form "compile-lambda-call")
     ((:lambda (fn)
        (:if (core:closurep fn)
-            (core::list-3 core::closure-apply fn (core::compile-flat-arg-list args env))
+            `(core::closure-apply ,fn ,(core::compile-flat-arg-list args env))
             (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env))))
      (core::compile form env))))
 
@@ -147,7 +142,7 @@
   (:lambda (fn args env)
     ; (core:warn fn "compile-fn-call")
     (:if (core::closurep fn)
-         (core::list-3 core:apply fn (core::compile-flat-arg-list args env))
+         `(core:apply ,fn ,(core::compile-flat-arg-list args env))
          (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env)))))
 
 (mu:intern core::ns :intern "compile-macro-call"
@@ -164,11 +159,11 @@
          ((:lambda (fn)
             (:if (core:closurep fn)
                  (:if (core::lambda-property :desc fn)
-                      (core::list-3 core:apply fn (core::compile-flat-arg-list args env))
+                      `(core:apply ,fn ,(core::compile-flat-arg-list args env))
                       (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env)))
-                 (core::list-3 mu:apply fn (core::compile-flat-arg-list args env))))
+                 `(mu:apply ,fn ,(core::compile-flat-arg-list args env))))
           (core:symbol-value (core::compile symbol env)))
-         (core::list-3 core:apply (core::compile symbol env) (core::compile-flat-arg-list args env)))))
+         `(core:apply ,(core::compile symbol env) ,(core::compile-flat-arg-list args env)))))
 
 ;;;
 ;;; compile function application

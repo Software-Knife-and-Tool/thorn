@@ -30,7 +30,7 @@
                      (:if (mu:fx-lt offset (mu:sv-len start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
-                                (mu:cons (core::append list type-stats) (core:1+ n)))
+                                (mu:cons `(,@list ,@type-stats) (core:1+ n)))
                               `(,type ,total ,alloc ,in-use)))
                            (mu:sv-ref start-vec (mu:fx-add offset 0))
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 1)) (mu:sv-ref start-vec (mu:fx-add offset 1)))

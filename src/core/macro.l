@@ -35,7 +35,7 @@
         (mu:ns-find (mu:sy-ns symbol) :intern macro-ns-name)
         (mu:sy-ns symbol)
         (mu:sy-name symbol)))
-     (core:string-append (core::list-2 (mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))))
+     (core:string-append `(,(mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))))
 
 (mu:intern core::ns :intern "core-find-macro"
    (:lambda (symbol env)
@@ -44,7 +44,7 @@
         (:if macro-ns
              (mu:ns-find (mu:sy-val macro-ns) :intern symbol-name)
              ()))
-     (mu:ns-find (mu:sy-ns symbol) :intern (core:string-append (core::list-2 (mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))
+     (mu:ns-find (mu:sy-ns symbol) :intern (core:string-append `(,(mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))
      (mu:sy-ns symbol)
      (mu:sy-name symbol))))
 
@@ -114,7 +114,7 @@
                   (:if (mu:eq '&rest el)
                      (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
                           (core::make-lambda
-                           (core::append (core:dropr lambda 2) (core:dropl lambda (core:1- (mu:length lambda))))
+                           `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
                            (core:dropr lambda 2)
                            (mu:nth (core:1- (mu:length lambda)) lambda)
                            env

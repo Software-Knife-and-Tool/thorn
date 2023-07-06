@@ -55,18 +55,11 @@
     ((:lambda (lambda body)
        ((:lambda (lambda-desc)
            ((:lambda (symbols reqsyms restsym lambda-env closed)
-             (:if (core::or lambda-env restsym)
-                  (core::make-closure
-                   lambda-env
-                   (mu:length reqsyms)
-                   restsym
-                   (mu:compile
-                     (core::list-3*
-                     :lambda
-                     symbols
-                     (core::compile-lambda-body lambda-desc body env))))
-                  (mu:compile
-                    (core::list-3* :lambda symbols (core::compile-lambda-body lambda-desc body env)))))
+             ((:lambda (form)                
+                 (:if (core::or lambda-env restsym)           
+                      (core::make-closure lambda-env (mu:length reqsyms) restsym form)
+                      form))
+              (mu:compile `(:lambda ,symbols ,@(core::compile-lambda-body lambda-desc body env)))))
            (core::lambda-property :syms lambda-desc)
            (core::lambda-property :reqs lambda-desc)
            (core::lambda-property :rest lambda-desc)

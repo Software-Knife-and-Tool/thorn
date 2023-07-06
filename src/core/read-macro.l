@@ -112,8 +112,8 @@
                                                 dotted)
                                             (core:raise () 'core::read-list "malformed dotted list")))
                                      (core::append loop (core::read stream)))
-                                    (core::append loop `(,el)))
-                               (core::append loop `(,el)))))
+                                    `(,@loop ,el))
+                               `(,@loop ,el))))
                    (core::read stream))))
           ()))))
 
