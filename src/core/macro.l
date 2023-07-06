@@ -128,8 +128,7 @@
   (:lambda (form env)
     ((:lambda (lambda-desc body)
        (mu:compile
-        (mu:cons :lambda
-                 (mu:cons (core::lambda-property :syms lambda-desc)
-                          (core::compile-lambda-body lambda-desc body env)))))
+        `(:lambda ,(core::lambda-property :syms lambda-desc)
+                  ,@(core::compile-lambda-body lambda-desc body env))))
      (core::core-macro (mu:car form) env)
      (mu:nth 1 form))))

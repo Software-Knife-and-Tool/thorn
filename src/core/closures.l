@@ -35,18 +35,16 @@
     ((:lambda (lambda-desc)
        (core:raise-when core:null lambda-desc 'core::closure "closing bare function")
        ((:lambda (desc body)
-          (mu:compile
-           (mu:cons :lambda
-                    (mu:cons
-                     (core::lambda-property :syms desc)
-                     (mu:cons desc (mu:cdr (core::fn-form fn)))))))
+          (mu:compile `(:lambda ,(core::lambda-property :syms desc) ,desc ,@(mu:cdr (core::fn-form fn)))))
         (core::make-lambda
          (core::lambda-property :syms lambda-desc)
          (core::lambda-property :reqs lambda-desc)
          (core::lambda-property :rest lambda-desc)
          (core::lambda-property :env lambda-desc)
-         (core:mapcar (:lambda (desc) (mu:fr-get (core::lambda-property :frame desc)))
-                      (core::lambda-property :env lambda-desc)))
+         (core:mapcar
+          (:lambda (desc)
+             (mu:fr-get (core::lambda-property :frame desc)))
+          (core::lambda-property :env lambda-desc)))
         (mu:cdr (core::fn-form fn))))
      (core::fn-lambda-desc fn))))
 
@@ -96,7 +94,6 @@
 ;;;
 (mu:intern core::ns :intern "compile-flat-arg-list"
   (:lambda (args env)
-    ; (core:warn args "compile-flat-arg-list")
     (core:foldr
      (:lambda (elt acc)
        (mu:cons 'mu:cons (mu:cons (core::compile elt env) `(,acc))))
@@ -105,7 +102,6 @@
 
 (mu:intern core::ns :intern "compile-quoted-lambda-arg-list"
    (:lambda (fn args env)
-     ; (core:warn args "compile-quoted-lambda-arg-list")
      (core::quoted-lambda-arg-list
       fn
       (core:mapcar (:lambda (elt) (core::compile elt env)) args))))
@@ -131,7 +127,6 @@
 ;;;
 (mu:intern core::ns :intern "compile-lambda-call"
   (:lambda (form args env)
-    ; (core:warn form "compile-lambda-call")
     ((:lambda (fn)
        (:if (core:closurep fn)
             `(core::closure-apply ,fn ,(core::compile-flat-arg-list args env))
@@ -140,27 +135,24 @@
 
 (mu:intern core::ns :intern "compile-fn-call"
   (:lambda (fn args env)
-    ; (core:warn fn "compile-fn-call")
     (:if (core::closurep fn)
          `(core:apply ,fn ,(core::compile-flat-arg-list args env))
          (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env)))))
 
 (mu:intern core::ns :intern "compile-macro-call"
   (:lambda (macro-symbol args env)
-    ; (core:warn macro-symbol "compile-macro-call")
     (core::compile
-     (core:macroexpand (mu:cons macro-symbol args) env)
+     (core:macroexpand `(macro-symbol ,@args) env)
      env)))
 
 (mu:intern core::ns :intern "compile-symbol-call"
   (:lambda (symbol args env)
-    ; (core:warn symbol "compile-symbol-call")
     (:if (core:boundp symbol)
          ((:lambda (fn)
             (:if (core:closurep fn)
                  (:if (core::lambda-property :desc fn)
                       `(core:apply ,fn ,(core::compile-flat-arg-list args env))
-                      (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env)))
+                      `(,fn ,@(core::compile-quoted-lambda-arg-list fn args env)))
                  `(mu:apply ,fn ,(core::compile-flat-arg-list args env))))
           (core:symbol-value (core::compile symbol env)))
          `(core:apply ,(core::compile symbol env) ,(core::compile-flat-arg-list args env)))))

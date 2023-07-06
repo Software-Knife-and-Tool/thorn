@@ -104,7 +104,7 @@
          (core:raise-unless core:symbolp symbol 'defun "not a symbol")
          (core:raise-when core:keywordp symbol 'defun "not a symbol")
          (core:raise-unless core:listp lambda 'defun "not a lambda list")
-         (mu:compile `(:quote ,(core::intern symbol (core::lambda (mu:cons :lambda lambda) env) env))))
+         (mu:compile `(:quote ,(core::intern symbol (core::lambda `(:lambda ,lambda) env) env))))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 

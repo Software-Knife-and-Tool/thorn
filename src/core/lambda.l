@@ -93,7 +93,7 @@
           (:if (mu:cdr body)
                compiled-form
                (:if (core:functionp compiled-form)
-                    (core:compile (mu:cons 'core::closure `(,compiled-form)))
+                    (core:compile `(core::closure ,@compiled-form))
                     compiled-form)))
         (core::compile (mu:car body) env)))
      body)))
