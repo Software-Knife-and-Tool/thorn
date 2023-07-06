@@ -1,6 +1,6 @@
 Test Summary:
 -----------------------
-mu:        backquote      total: 15       failed: 0        aborted: 0       
+mu:        backquote      total: 12       failed: 0        aborted: 0       
 mu:        compile        total: 8        failed: 0        aborted: 0       
 mu:        core           total: 36       failed: 0        aborted: 0       
 mu:        exception      total: 4        failed: 0        aborted: 0       
@@ -14,7 +14,7 @@ mu:        struct         total: 7        failed: 0        aborted: 0
 mu:        symbol         total: 10       failed: 0        aborted: 0       
 mu:        vector         total: 23       failed: 0        aborted: 0       
 -----------------------
-mu:        passed: 240    total: 240      failed: 0        aborted: 0         
+mu:        passed: 237    total: 237      failed: 0        aborted: 0         
 
 core:      closure        total: 8        failed: 7        aborted: 0       
 core:      compile        total: 24       failed: 0        aborted: 0       
