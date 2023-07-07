@@ -173,7 +173,10 @@ pub fn main() {
                 }
             }
         }
-        None => std::process::exit(-1),
+        None => {
+            eprintln!("option: error");
+            std::process::exit(-1)
+        }
     }
 
     let mu = System::new(String::new());

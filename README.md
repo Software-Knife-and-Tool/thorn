@@ -128,9 +128,9 @@ and then install.
 
 #### Testing
 
-<hr>
+------
 
-The distribution includes a test suite, which should be run after every interesting change. The test suite consists of a several hundred individual tests separated into multiple sections, roughly separated by namespace.
+The distribution includes a test suite, which should be run after every interesting change. The test suite consists of a several hundred individual tests separated into multiple sections, roughly separated by namespace. You will need some version of python 3 to run the tests.
 
 Failures in the *mu* tests are almost guaranteed to cause complete failure of subsequent tests.
 
@@ -153,8 +153,11 @@ The `tests` makefile has additional facilities for development, including report
 
 #### Performance metrics
 
-<hr>
+------
+
 Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination.
+
+You will need some version of python3 to run the performance suite.
 
 The NTESTS environment variable (defaults to 20) controls how many passes are included in a single test run.
 

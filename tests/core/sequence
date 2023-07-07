@@ -1,6 +1,2 @@
-#
-# core sequence tests
-#
-assert_eq "(mu:type-of core:length)" ":func"
-assert_eq "(mu:type-of core:elt)" ":func"
-
+(mu:type-of core:length)	:func
+(mu:type-of core:elt)	:func

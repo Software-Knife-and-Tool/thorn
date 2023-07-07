@@ -1,14 +1,9 @@
-#
-# core macro tests"
-#
-assert_eq "(mu:type-of core::macroexpand-1)" ":func"
-assert_eq "(mu:type-of core:macroexpand)" ":func"
-assert_eq "(mu:type-of core:macro-function)" ":func"
-assert_eq "(mu:type-of core::core-macro)" ":func"
-assert_eq "(mu:type-of core::compile-macro)" ":func"
-assert_eq "(core:compile '(defmacro a-macro ()))" "(:quote core:a-macro)"
-assert_eq "(mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'a-macro) (core:macroexpand '(core:a-macro) ())))))" "a-macro"
-assert_eq "(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function core:a-macro ()))))))" ":null"
-assert_eq "(core:macro-function core:macro-function ())" ":nil"
-# failures
-# assert_eq "(mu:type-of (mu:with-ex (:lambda (ex) ex) (:lambda () (core:compile '(defmacro)))))" "core exception: core::defmacro: not a symbol, condition :error on :nil"
+(mu:type-of core::macroexpand-1)	:func
+(mu:type-of core:macroexpand)	:func
+(mu:type-of core:macro-function)	:func
+(mu:type-of core::core-macro)	:func
+(mu:type-of core::compile-macro)	:func
+(core:compile '(defmacro a-macro ()))	(:quote core:a-macro)
+(mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'a-macro) (core:macroexpand '(core:a-macro) ())))))	a-macro
+(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function core:a-macro ()))))))	:null
+(core:macro-function core:macro-function ())	:nil
