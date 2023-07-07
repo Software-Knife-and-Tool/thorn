@@ -16,7 +16,7 @@ mu:        vector         total: 23       failed: 0        aborted: 0
 -----------------------
 mu:        passed: 237    total: 237      failed: 0        aborted: 0         
 
-core:      closure        total: 8        failed: 7        aborted: 0       
+core:      closure        total: 8        failed: 0        aborted: 7       
 core:      compile        total: 24       failed: 0        aborted: 0       
 core:      core           total: 24       failed: 0        aborted: 0       
 core:      exception      total: 11       failed: 0        aborted: 0       
@@ -30,5 +30,5 @@ core:      stream         total: 22       failed: 0        aborted: 0
 core:      string         total: 20       failed: 0        aborted: 0       
 core:      vector         total: 13       failed: 0        aborted: 0       
 -----------------------
-core:      passed: 304    total: 311      failed: 7        aborted: 0         
+core:      passed: 304    total: 311      failed: 0        aborted: 7         
 
