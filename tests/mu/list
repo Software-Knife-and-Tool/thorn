@@ -1,22 +1,22 @@
-assert_eq "(mu:car '(1))" "1"
-assert_eq "(mu:car ())" ":nil"
-assert_eq "(mu:cdr '(1 2))" "(2)"
-assert_eq "(mu:cdr ())" ":nil"
-assert_eq "(mu:cons 1 ())" "(1)"
-assert_eq "(mu:cons 1 2)" "(1 . 2)"
-assert_eq "(mu:length '(1))" "1"
-assert_eq "(mu:length ())" "0"
-assert_eq "(mu:nth 0 '(1 . 2))" "1"
-assert_eq "(mu:nth 0 '(1 2))" "1"
-assert_eq "(mu:nth 0 ())" ":nil"
-assert_eq "(mu:nth 1 '(1 . 2))" "2"
-assert_eq "(mu:nth 1 '(1 2))" "2"
-assert_eq "(mu:nth 1 ())" ":nil"
-assert_eq "(mu:nth 3 '(1 2))" ":nil"
-assert_eq "(mu:nthcdr 0 '(1 . 2))" "(1 . 2)"
-assert_eq "(mu:nthcdr 0 '(1 2))" "(1 2)"
-assert_eq "(mu:nthcdr 0 ())" ":nil"
-assert_eq "(mu:nthcdr 1 '(1 . 2))" "2"
-assert_eq "(mu:nthcdr 1 '(1 2))" "(2)"
-assert_eq "(mu:nthcdr 1 ())" ":nil"
-assert_eq "(mu:nthcdr 3 '(1 2))" ":nil"
+(mu:car '(1))	1
+(mu:car ())	:nil
+(mu:cdr '(1 2))	(2)
+(mu:cdr ())	:nil
+(mu:cons 1 ())	(1)
+(mu:cons 1 2)	(1 . 2)
+(mu:length '(1))	1
+(mu:length ())	0
+(mu:nth 0 '(1 . 2))	1
+(mu:nth 0 '(1 2))	1
+(mu:nth 0 ())	:nil
+(mu:nth 1 '(1 . 2))	2
+(mu:nth 1 '(1 2))	2
+(mu:nth 1 ())	:nil
+(mu:nth 3 '(1 2))	:nil
+(mu:nthcdr 0 '(1 . 2))	(1 . 2)
+(mu:nthcdr 0 '(1 2))	(1 2)
+(mu:nthcdr 0 ())	:nil
+(mu:nthcdr 1 '(1 . 2))	2
+(mu:nthcdr 1 '(1 2))	(2)
+(mu:nthcdr 1 ())	:nil
+(mu:nthcdr 3 '(1 2))	:nil

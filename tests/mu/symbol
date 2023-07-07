@@ -1,10 +1,10 @@
-assert_eq "(mu:boundp 'mu:foo)" ":nil"
-assert_eq "(mu:boundp 'mu:foo)" ":nil"
-assert_eq "(mu:boundp 'mu:std-in)" "mu:std-in"
-assert_eq "(mu:keyp 'abcd)" ":nil"
-assert_eq "(mu:keyp :abcd)" ":abcd"
-assert_eq "(mu:sy-name 'mu:std-in)" '"std-in"'
-assert_eq "(mu:sy-ns 'mu:std-in)" '#<namespace: "mu">'
-assert_eq "(mu:sy-val 'mu:std-in)" "#<stream: id: 2147483648>"
-assert_eq '(mu:keyword "abcde")' ":abcde"
-assert_eq '(mu:make-sy "abcde")' "abcde"
+(mu:boundp 'mu:foo)	:nil
+(mu:boundp 'mu:foo)	:nil
+(mu:boundp 'mu:std-in)	mu:std-in
+(mu:keyp 'abcd)	:nil
+(mu:keyp :abcd)	:abcd
+(mu:sy-name 'mu:std-in)	"std-in"
+(mu:sy-ns 'mu:std-in)	#<namespace: "mu">
+(mu:sy-val 'mu:std-in)	#<stream: id: 2147483648>
+(mu:keyword "abcde")	:abcde
+(mu:make-sy "abcde")	abcde

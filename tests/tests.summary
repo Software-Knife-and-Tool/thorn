@@ -1,34 +1,36 @@
 Test Summary:
 -----------------------
-mu:        backquote      total: 12       failed: 0        aborted: 0       
-mu:        compile        total: 8        failed: 0        aborted: 0       
-mu:        core           total: 36       failed: 0        aborted: 0       
-mu:        exception      total: 4        failed: 0        aborted: 0       
-mu:        list           total: 22       failed: 0        aborted: 0       
-mu:        namespace      total: 16       failed: 0        aborted: 0       
-mu:        number         total: 34       failed: 0        aborted: 0       
-mu:        reader         total: 43       failed: 0        aborted: 0       
-mu:        special-form   total: 11       failed: 0        aborted: 0       
-mu:        stream         total: 11       failed: 0        aborted: 0       
-mu:        struct         total: 7        failed: 0        aborted: 0       
-mu:        symbol         total: 10       failed: 0        aborted: 0       
-mu:        vector         total: 23       failed: 0        aborted: 0       
+mu         backquote      total: 16       passed: 16       failed: 0        aborted: 0       
+mu         compile        total: 8        passed: 8        failed: 0        aborted: 0       
+mu         core           total: 36       passed: 36       failed: 0        aborted: 0       
+mu         exception      total: 4        passed: 4        failed: 0        aborted: 0       
+mu         list           total: 22       passed: 22       failed: 0        aborted: 0       
+mu         namespace      total: 16       passed: 16       failed: 0        aborted: 0       
+mu         number         total: 34       passed: 34       failed: 0        aborted: 0       
+mu         reader         total: 42       passed: 42       failed: 0        aborted: 0       
+mu         special-form   total: 11       passed: 11       failed: 0        aborted: 0       
+mu         stream         total: 10       passed: 10       failed: 0        aborted: 0       
+mu         struct         total: 7        passed: 7        failed: 0        aborted: 0       
+mu         symbol         total: 10       passed: 10       failed: 0        aborted: 0       
+mu         vector         total: 23       passed: 23       failed: 0        aborted: 0       
 -----------------------
-mu:        passed: 237    total: 237      failed: 0        aborted: 0         
+mu         passed: 239    total: 239      failed: 0        aborted: 0         
 
-core:      closure        total: 8        failed: 0        aborted: 7       
-core:      compile        total: 24       failed: 0        aborted: 0       
-core:      core           total: 24       failed: 0        aborted: 0       
-core:      exception      total: 11       failed: 0        aborted: 0       
-core:      format         total: 15       failed: 0        aborted: 0       
-core:      lambda         total: 28       failed: 0        aborted: 0       
-core:      list           total: 78       failed: 0        aborted: 0       
-core:      macro          total: 9        failed: 0        aborted: 0       
-core:      reader         total: 56       failed: 0        aborted: 0       
-core:      sequence       total: 3        failed: 0        aborted: 0       
-core:      stream         total: 22       failed: 0        aborted: 0       
-core:      string         total: 20       failed: 0        aborted: 0       
-core:      vector         total: 13       failed: 0        aborted: 0       
+Test Summary:
 -----------------------
-core:      passed: 304    total: 311      failed: 0        aborted: 7         
+core       closure        total: 8        passed: 1        failed: 0        aborted: 7       
+core       compile        total: 24       passed: 24       failed: 0        aborted: 0       
+core       core           total: 24       passed: 24       failed: 0        aborted: 0       
+core       exception      total: 11       passed: 11       failed: 0        aborted: 0       
+core       format         total: 15       passed: 15       failed: 0        aborted: 0       
+core       lambda         total: 28       passed: 28       failed: 0        aborted: 0       
+core       list           total: 78       passed: 78       failed: 0        aborted: 0       
+core       macro          total: 9        passed: 9        failed: 0        aborted: 0       
+core       reader         total: 56       passed: 56       failed: 0        aborted: 0       
+core       sequence       total: 2        passed: 2        failed: 0        aborted: 0       
+core       stream         total: 22       passed: 22       failed: 0        aborted: 0       
+core       string         total: 20       passed: 20       failed: 0        aborted: 0       
+core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
+-----------------------
+core       passed: 303    total: 310      failed: 0        aborted: 7         
 
