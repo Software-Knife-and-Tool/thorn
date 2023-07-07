@@ -43,7 +43,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
                     eprintln!("runtime: option {error:?}")
                 };
                 usage();
-                std::process::exit(0);
+                std::process::exit(-1);
             }
             Ok(None) => {
                 break;
@@ -173,7 +173,7 @@ pub fn main() {
                 }
             }
         }
-        None => std::process::exit(0),
+        None => std::process::exit(-1),
     }
 
     let mu = System::new(String::new());
@@ -186,7 +186,7 @@ pub fn main() {
                         Ok(eval) => println!("{}", mu.write(eval, true)),
                         Err(e) => {
                             eprintln!("runtime: error {}, {}", opt.1, mu.error(e));
-                            std::process::exit(0);
+                            std::process::exit(-1);
                         }
                     },
                     OptType::Debug => {
@@ -199,14 +199,14 @@ pub fn main() {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!("runtime: failed to load {}, {}", &opt.1, mu.error(e));
-                            std::process::exit(0);
+                            std::process::exit(-1);
                         }
                     },
                     OptType::Quiet => match mu.eval(&opt.1) {
                         Ok(_) => (),
                         Err(e) => {
                             eprintln!("runtime: error {}, {}", opt.1, mu.error(e));
-                            std::process::exit(0);
+                            std::process::exit(-1);
                         }
                     },
                     OptType::Config => (),
