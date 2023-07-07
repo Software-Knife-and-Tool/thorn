@@ -1,42 +1,40 @@
 import sys
 from datetime import datetime
 
-labels = [
-    'mu:',
-    'core:',
-    'preface:',
-]
+namespace=sys.argv[1]
+test_name=sys.argv[2]
 
-with open(sys.argv[1]) as f: test_results = f.readlines()
+with open(sys.argv[3]) as f: test_results = f.readlines()
 date = datetime.now().strftime('%m/%d/%Y %H:%M:%S')
 
-print(f'Test Report: {date:<10}')
+print(f'Test Report: {namespace}/{test_name} {date:<10}')
 print('----------------------')
 
 line_no = 0
+totals = [0, 0, 0, 0]
 for test in test_results:
-    global totals
+    line_no += 1
 
-    fields=test[:-1].split(",")
+    fields = test[:-1].split("\t")
+    test, expected, obtained, status = fields
 
-    if fields[0] in labels:
-        totals = fields
+    totals[0] += 1
+
+    if status == "passed":
+        totals[1] += 1
+    elif status == "failed":
+        totals[2] += 1
+    elif status == "aborted":
+        totals[3] += 1
     else:
-        form = (fields[0][:27] + '...') if len(fields[0]) > 30 else fields[0]
-        if len(fields) != 4:
-            if len(fields) == 1:
-                pass
-            else:
-                if len(fields) == 2:
-                    if fields[0].find('panicked') != -1:
-                        pass
-                    elif fields[0].find('exception') != -1:
-                        pass
-                    else:
-                        line_no += 1
-                        print(f'{line_no:>3} {form:<30} aborted')
-        else:
-            line_no += 1
-            print(f'{line_no:>3} {form:<30} {fields[1]:<15} {fields[2]:<15} {fields[3]:<15}')
+        print("status: " + status)
+        exit(1)
+
+    if status == "aborted" or status == "failed":
+        ftest = (test[:27] + '...') if len(test) > 30 else test
+        ferr = (obtained[:27] + '...') if len(obtained) > 30 else obtained
+        fexpect = (expected[:12] + '...') if len(expected) > 15 else expected
+        print(f'{line_no:>3} {ftest:<30} {fexpect:<15} {ferr:<30} {status:<15}')
+
 print('----------------------')
-print(f'{totals[0]} {totals[1]:<26} total: {totals[2]:<8} failed: {totals[3]:<8} aborted: {totals[4]:<8}')    
+print(f'total tests: {totals[0]:<5} passed: {totals[1]:<5} failed: {totals[2]:<5} aborted: {totals[3]:<5}')    
