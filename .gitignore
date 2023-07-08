@@ -1,6 +1,7 @@
 Cargo.lock
 thorn*.tgz
 dist/runtime
+dist/core.l
 target
 doc/rustdoc
 base.report

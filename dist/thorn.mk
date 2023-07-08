@@ -1,29 +1,32 @@
 #
 # thorn makefile
 #
-.PHONY: thorn
+.PHONY: thorn core
 SRC = ../src
 
+# order dependent
 CORE = \
-	core.l	     	\
-        compile.l    	\
-        exceptions.l 	\
-	fixnums.l  	\
-	closures.l  	\
-        format.l     	\
-        lambda.l     	\
-        lists.l      	\
-        load.l       	\
-        macro.l      	\
-	read.l       	\
-	symbol-macro.l	\
+	core.l		\
+	closures.l	\
+	fixnums.l	\
 	read-macro.l	\
-        quasiquote.l 	\
-	sequences.l  	\
-        streams.l    	\
-        strings.l	\
+	read.l		\
+	sequences.l	\
+	symbol-macro.l	\
 	symbols.l	\
-	vectors.l
+	vectors.l	\
+        compile.l	\
+        exceptions.l	\
+        format.l	\
+        lambda.l	\
+        lists.l		\
+        load.l		\
+        macro.l		\
+        parse.l		\
+        perf.l		\
+        quasiquote.l	\
+        streams.l	\
+        strings.l
 
 PREFACE = \
 	preface.l   	\
@@ -43,3 +46,9 @@ thorn:
 	@cp -r $(SRC)/core thorn/thorn
 	@cp -r $(SRC)/preface thorn/thorn
 	@cp -r $(SRC)/mu thorn/thorn
+
+core:
+	@rm -f core.l
+	@for core in $(CORE); do		\
+	    cat $(SRC)/core/$$core >> core.l;	\
+	done
