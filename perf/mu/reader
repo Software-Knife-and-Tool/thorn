@@ -1,28 +1,23 @@
-perf "#(:t 1 2 3)"
-perf "#(:byte 1 2 3)"
-perf "#(:char #\1 #\2 #\3)"
-perf "#(:fixnum 1 2 -3)"
-perf "#(:float 1.0 2.0 -3.0)"
-perf "#s(:foo 1 2 3)"
-perf "'(1 2 3)"
-perf "'()"
-perf "#\ "
-perf "#\a"
-perf '#| hello |# 1234'
-# perf "1234 ; hello"
-perf "'a-long-symbol"
-perf "'a-symbol"
-perf "'symbol"
-perf "'mu:eq"
-perf "'mu::eq"
-perf "'s"
-perf "(mu:type-of '#:abc)"
-perf ":a"
-perf ":abcdefg"
-perf "1.024e23"
-perf "1234"
-perf "#xabc"
-# perf '""'
-# perf '"a long string"'
-# perf '"a"'# perf '"abcd"'
-# perf '"abcdefg"'
+#(:t 1 2 3)
+#(:byte 1 2 3)
+#(:char #\1 #\2 #\3)
+#(:fixnum 1 2 -3)
+#(:float 1.0 2.0 -3.0)
+#s(:foo 1 2 3)
+'(1 2 3)
+'()
+#\ 
+#\a
+#| hello |# 1234
+'a-long-symbol
+'a-symbol
+'symbol
+'mu:eq
+'mu::eq
+'s
+(mu:type-of '#:abc)
+:a
+:abcdefg
+1.024e23
+1234
+#xabc

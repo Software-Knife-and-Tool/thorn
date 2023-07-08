@@ -1,2 +1,2 @@
-perf "(mu:st-type (mu:make-st :foo ()))"
-perf "(mu:st-vec (mu:make-st :foo '(1 2 3 4)))"
+(mu:st-type (mu:make-st :foo ()))
+(mu:st-vec (mu:make-st :foo '(1 2 3 4)))

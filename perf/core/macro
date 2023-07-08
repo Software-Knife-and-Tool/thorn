@@ -1,7 +1,4 @@
-#
-# core macro tests
-#
-perf "(core:compile '(defmacro a-macro ()))"
-perf "(mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'a-macro) (core:macroexpand '(core:a-macro) ())))))"
-perf "(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function core:a-macro ()))))))"
-perf "(core:macro-function core:macro-function ())"
+(core:compile '(defmacro a-macro ()))
+(mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'a-macro) (core:macroexpand '(core:a-macro) ())))))
+(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function core:a-macro ()))))))
+(core:macro-function core:macro-function ())

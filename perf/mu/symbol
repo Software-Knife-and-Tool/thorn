@@ -1,7 +1,5 @@
-perf "(mu:boundp 'mu:foo)"
-perf "(mu:boundp 'mu:std-in)"
-perf "(mu:keyp 'abcd)"
-perf "(mu:keyp :abcd)"
-perf "(mu:sy-val 'mu:std-in)"
-# perf '(mu:keyword "abcde")'
-# perf '(mu:make-sy "abcde")'
+(mu:boundp 'mu:foo)
+(mu:boundp 'mu:std-in)
+(mu:keyp 'abcd)
+(mu:keyp :abcd)
+(mu:sy-val 'mu:std-in)

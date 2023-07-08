@@ -1,12 +1,12 @@
-perf "(mu:fl-add 1.12 2.0)"
-perf "(mu:fl-div 5.0 2.0)"
-perf "(mu:fl-lt 5.0 2.0)"
-perf "(mu:fl-mul 1.0 2.0)"
-perf "(mu:fl-sub 2.0 1.0)"
-perf "(mu:fx-add -1 2)"
-perf "(mu:fx-div -5 2)"
-perf "(mu:fx-lt -1 2)"
-perf "(mu:fx-mul -5 2)"
-perf "(mu:fx-sub 2 -1)"
-perf "(mu:logand 1 2)"
-perf "(mu:logor 1 2)"
+(mu:fl-add 1.12 2.0)
+(mu:fl-div 5.0 2.0)
+(mu:fl-lt 5.0 2.0)
+(mu:fl-mul 1.0 2.0)
+(mu:fl-sub 2.0 1.0)
+(mu:fx-add -1 2)
+(mu:fx-div -5 2)
+(mu:fx-lt -1 2)
+(mu:fx-mul -5 2)
+(mu:fx-sub 2 -1)
+(mu:logand 1 2)
+(mu:logor 1 2)
