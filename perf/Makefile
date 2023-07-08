@@ -1,7 +1,7 @@
 #
 # perf makefile
 #
-.PHONY: help clean commit report run summary mu core
+.PHONY: help clean commit report run summary mu core format
 
 NTESTS ?= 20
 TMPF:=$(shell mktemp)
@@ -17,6 +17,7 @@ help:
 	@echo "--- perf options"
 	@echo "    namespaces - list namespaces"
 	@echo "    list - tests in \$$NAMESPACE"
+	@echo "    format - print test totals"
 	@echo "    \$$NAMESPACE - run all tests in namespace, unformatted output"
 	@echo "    base - run all tests in all namespaces, establish baseline"
 	@echo "    summary - "
@@ -64,6 +65,12 @@ base:
 	done
 	@python3 report.py $(TMPF) > base.report
 
+format:
+	@echo ------ base.report -----
+	@python3 format.py base.report
+	@echo -e \\n------ perf.report -----
+	@python3 format.py perf.report
+
 summary:
 	@rm -f $(TMPF)
 	@for namespace in $(NAMESPACES); do	\
@@ -90,4 +97,3 @@ cachegrind:
 		    -q $(VALGRIND) > cachegrind.report 2>&1 || true
 
 clean:
-	@rm -rf *.diff *.out *.out.* ../dist/runtime.dSYM
