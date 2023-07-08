@@ -1,5 +1,2 @@
-#
-# core sequence tests
-#
-perf "(mu:type-of core:length)"
-perf "(mu:type-of core:elt)"
+(mu:type-of core:length)
+(mu:type-of core:elt)

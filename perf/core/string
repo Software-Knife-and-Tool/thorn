@@ -1,12 +1,9 @@
-#
-# core string tests
-#
-perf '(core:string-append (:quote (\"abc\" \"123\")))'
-perf '(core:string= \"abc\" \"abc\")'
-perf '(core:string= \"abd\" \"abc\")'
-perf '(core:stringp \"abc\")'
-perf '(core:string-find #\a \"abc\")'
-perf '(core:string-find #\d \"abc\")'
-perf '(core:string-position #\a \"abc\")'
-perf '(core:string-position #\d \"abc\")'
-perf '(core:substr \"abc\" 1 3)'
+(core:string-append (:quote ("abc" "123")))
+(core:string= "abc" "abc")
+(core:string= "abd" "abc")
+(core:stringp "abc")
+(core:string-find #\a "abc")
+(core:string-find #\d "abc")
+(core:string-position #\a "abc")
+(core:string-position #\d "abc")
+(core:substr "abc" 1 3)

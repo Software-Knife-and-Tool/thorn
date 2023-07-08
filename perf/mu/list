@@ -1,22 +1,22 @@
-perf "(mu:car '(1))"
-perf "(mu:car ())"
-perf "(mu:cdr '(1 2))"
-perf "(mu:cdr ())"
-perf "(mu:cons 1 ())"
-perf "(mu:cons 1 2)"
-perf "(mu:length '(1))"
-perf "(mu:length ())"
-perf "(mu:nth 0 '(1 . 2))"
-perf "(mu:nth 0 '(1 2))"
-perf "(mu:nth 0 ())"
-perf "(mu:nth 1 '(1 . 2))"
-perf "(mu:nth 1 '(1 2))"
-perf "(mu:nth 1 ())"
-perf "(mu:nth 3 '(1 2))"
-perf "(mu:nthcdr 0 '(1 . 2))"
-perf "(mu:nthcdr 0 '(1 2))"
-perf "(mu:nthcdr 0 ())"
-perf "(mu:nthcdr 1 '(1 . 2))"
-perf "(mu:nthcdr 1 '(1 2))"
-perf "(mu:nthcdr 1 ())"
-perf "(mu:nthcdr 3 '(1 2))"
+(mu:car '(1))
+(mu:car ())
+(mu:cdr '(1 2))
+(mu:cdr ())
+(mu:cons 1 ())
+(mu:cons 1 2)
+(mu:length '(1))
+(mu:length ())
+(mu:nth 0 '(1 . 2))
+(mu:nth 0 '(1 2))
+(mu:nth 0 ())
+(mu:nth 1 '(1 . 2))
+(mu:nth 1 '(1 2))
+(mu:nth 1 ())
+(mu:nth 3 '(1 2))
+(mu:nthcdr 0 '(1 . 2))
+(mu:nthcdr 0 '(1 2))
+(mu:nthcdr 0 ())
+(mu:nthcdr 1 '(1 . 2))
+(mu:nthcdr 1 '(1 2))
+(mu:nthcdr 1 ())
+(mu:nthcdr 3 '(1 2))

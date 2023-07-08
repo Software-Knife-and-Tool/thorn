@@ -34,12 +34,12 @@ commit:
 
 mu:
 	@for test in `cat mu/tests`; do 	\
-	    bash mu/run-perf mu/$$test $(NTESTS);	\
+	    python3 mu/runner.py $(NTESTS) mu/$$test;	\
 	done
 
 core:
 	@for test in `cat core/tests`; do 	\
-	    bash core/run-perf core/$$test $(NTESTS);	\
+	    python3 core/runner.py $(NTESTS) core/$$test;	\
 	done
 
 namespaces:
@@ -59,7 +59,6 @@ report:
 	@rm -f $(TMPF)
 
 base:
-	@rm -f $(TMPF)
 	@for namespace in $(NAMESPACES); do	\
 	    make $$namespace >> $(TMPF);	\
 	done

@@ -1,28 +1,24 @@
-perf "(mu:eq 1 1)"
-perf "(mu:eval 'mu:std-in)"
-perf "(mu:eval ())"
-perf "(mu:fix (:lambda (l) (:if l ((:lambda () (mu:cdr l))) ())) '(1 2 3 4))"
-# perf "(mu:fix (:lambda (l) (:if l ((:lambda () (mu:car l))) ())) '(1 2 3 4))"
-# perf "(mu:fix (:lambda (l) (:if l ((:lambda () (mu:length l))) ())) '(1 2 3 4))"
-perf "(mu:apply mu:eq '(1 2))"
-perf "(mu:apply mu:fx-add '(1 2))"
-perf "(mu:type-of (mu:real-tm))"
-perf "(mu:type-of #\a)"
-perf "(mu:type-of '(1 2 3))"
-perf "(mu:type-of 'mu:apply)"
-perf "(mu:type-of ())"
-perf "(mu:type-of 1)"
-perf "(mu:type-of :typeof)"
-perf "(mu:type-of mu:std-in)"
-# perf '(mu:type-of "type-of")'
-perf '(mu:view #\a)'
-perf "(mu:view '(1 2))"
-perf '(mu:view 1234)'
-perf '(mu:view 1.0)'
-perf "(mu:view #(:t 1 2))"
-perf "(mu:view #s(:foo 1 2))"
-perf "(mu:view 'a)"
-perf "(mu:view 'mu:eq)"
-# perf '(mu:view (mu:map-ns "mu"))'
-perf "(mu:view mu:std-in)"
-perf "(mu:with-ex (:lambda (cond obj) cond) (:lambda () (mu:fx-div 1 1)))"
+(mu:eq 1 1)
+(mu:eval 'mu:std-in)
+(mu:eval ())
+(mu:fix (:lambda (l) (:if l ((:lambda () (mu:cdr l))) ())) '(1 2 3 4))
+(mu:apply mu:eq '(1 2))
+(mu:apply mu:fx-add '(1 2))
+(mu:type-of (mu:real-tm))
+(mu:type-of #\a)
+(mu:type-of '(1 2 3))
+(mu:type-of 'mu:apply)
+(mu:type-of ())
+(mu:type-of 1)
+(mu:type-of :typeof)
+(mu:type-of mu:std-in)
+(mu:view #\a)
+(mu:view '(1 2))
+(mu:view 1234)
+(mu:view 1.0)
+(mu:view #(:t 1 2))
+(mu:view #s(:foo 1 2))
+(mu:view 'a)
+(mu:view 'mu:eq)
+(mu:view mu:std-in)
+(mu:with-ex (:lambda (cond obj) cond) (:lambda () (mu:fx-div 1 1)))
