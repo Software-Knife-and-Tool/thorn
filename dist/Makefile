@@ -16,7 +16,7 @@ dist:
 	@install -d $(BASE)/thorn/preface
 	@install -d $(BASE)/thorn/mu
 
-	@make -f thorn.mk
+	@make -f thorn.mk thorn core
 
 	@install -d $(BASE)/bin
 	@install -d $(BASE)/$(BASE)
