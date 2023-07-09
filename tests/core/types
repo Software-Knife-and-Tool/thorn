@@ -1,0 +1,5 @@
+(mu:type-of core::ctypes)	:ns
+(mu:type-of core:ctypep)	:func
+(mu:type-of core:type-of)	:func
+(mu:type-of core::ctype-slot)	:func
+(mu:type-of (core:compile '(defctype test (name . type))))	:symbol

@@ -19,6 +19,7 @@
 (mu:type-of core:round)	:func
 (mu:type-of core:streamp)	:func
 (mu:type-of core:stringp)	:func
+(mu:type-of core:structp)	:func
 (mu:type-of core:symbolp)	:func
 (mu:type-of core:truncate)	:func
 (mu:type-of core:vectorp)	:func

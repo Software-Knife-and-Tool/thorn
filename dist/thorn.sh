@@ -42,7 +42,8 @@ CORE=(\
         quasiquote.l 	\
         streams.l    	\
         strings.l    	\
-        )
+        types.l         \
+    )
 
 for src in ${CORE[@]}; do
     CORE_FILES+=" -l $BASE_CORE/$src"

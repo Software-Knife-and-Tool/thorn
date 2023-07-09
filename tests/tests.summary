@@ -20,7 +20,7 @@ Test Summary:
 -----------------------
 core       closure        total: 8        passed: 1        failed: 0        aborted: 7       
 core       compile        total: 24       passed: 24       failed: 0        aborted: 0       
-core       core           total: 24       passed: 24       failed: 0        aborted: 0       
+core       core           total: 25       passed: 25       failed: 0        aborted: 0       
 core       exception      total: 11       passed: 11       failed: 0        aborted: 0       
 core       format         total: 15       passed: 15       failed: 0        aborted: 0       
 core       lambda         total: 28       passed: 28       failed: 0        aborted: 0       
@@ -30,7 +30,8 @@ core       reader         total: 56       passed: 56       failed: 0        abor
 core       sequence       total: 2        passed: 2        failed: 0        aborted: 0       
 core       stream         total: 22       passed: 22       failed: 0        aborted: 0       
 core       string         total: 20       passed: 20       failed: 0        aborted: 0       
+core       types          total: 5        passed: 5        failed: 0        aborted: 0       
 core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
 -----------------------
-core       passed: 303    total: 310      failed: 0        aborted: 7         
+core       passed: 309    total: 316      failed: 0        aborted: 7         
 
