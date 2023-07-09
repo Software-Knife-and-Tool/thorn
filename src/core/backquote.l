@@ -6,6 +6,7 @@
 ;;;
 (mu:intern core::ns :intern "read-backquote"
    (:lambda (stream ch)
-      (mu:un-char #\` stream)))
+      (mu:un-char #\` stream)
+      (mu:read stream () ())))
 
 (core:set-macro-character #\` core::read-backquote :t)
