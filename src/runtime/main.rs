@@ -129,20 +129,20 @@ fn repl(system: &System, _config: &str) {
                         }
                         Err(e) => {
                             eprint!(
-                                "(eval) exception: raised by {}, {:?} condition on ",
+                                "eval exception raised by {}, {:?} condition on ",
                                 e.source, e.condition
                             );
                             mu.write(e.object, true, mu.err_out()).unwrap();
-                            println!()
+                            eprintln!()
                         }
                     },
                     Err(e) => {
                         eprint!(
-                            "(compile) exception: raised by {}, {:?} condition on ",
+                            "compile exception raised by {}, {:?} condition on ",
                             e.source, e.condition
                         );
                         mu.write(e.object, true, mu.err_out()).unwrap();
-                        println!()
+                        eprintln!()
                     }
                 }
             }
@@ -151,9 +151,11 @@ fn repl(system: &System, _config: &str) {
                     std::process::exit(0);
                 } else {
                     eprint!(
-                        "(read) exception raised by {}, {:?} condition on ",
+                        "reader exception raised by {}, {:?} condition on ",
                         e.source, e.condition
-                    )
+                    );
+                    mu.write(e.object, true, mu.err_out()).unwrap();
+                    eprintln!()
                 }
             }
         }
