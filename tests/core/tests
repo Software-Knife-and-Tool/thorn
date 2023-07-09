@@ -10,4 +10,5 @@ reader
 sequence
 stream
 string
+types
 vector

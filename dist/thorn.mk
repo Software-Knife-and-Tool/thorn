@@ -26,7 +26,8 @@ CORE = \
         perf.l		\
         quasiquote.l	\
         streams.l	\
-        strings.l
+        strings.l	\
+	types.l
 
 PREFACE = \
 	preface.l   	\

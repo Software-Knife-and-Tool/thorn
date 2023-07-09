@@ -28,7 +28,7 @@ def runtest(test, expected):
 line_no = 0
 for test in test_source:
     line_no += 1
-    fields=test[:-1].split('\t')
+    fields = test[:-1].split('\t')
     if len(fields) != 2:
         print(line_no, end=" !malformed test source: ")
         print(test, end="")

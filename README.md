@@ -52,7 +52,7 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 ------
 
-*thorn* is an immutable, namespaced *LISP-1* that borrows heavily from *Scheme*, but is stylistically more closely related to the Common LISP family of languages. *thorn* syntax and constructs will be familiar to the traditional LISP programmer. 
+*thorn* is an immutable, namespaced LISP-1 that borrows heavily from *Scheme*, but is more closely related to the Common LISP family of languages. *thorn* syntax and constructs will be familiar to the traditional LISP programmer. 
 
 *thorn* leans heavily on functional programming principles.
 
@@ -62,7 +62,7 @@ The runtime implements 64 bit tagged pointers, is available as a crate, extends 
 
 The *thorn* 2-LISP system is organized as a stack of compilers, culminating in the *thorn-eth* native code compiler/system builder.
 
-The *core* library provides *rest* lambdas, closures, a type system, *defun/defconst/defmacro* and a reader/compiler for those forms.
+The *core* library provides *rest* lambdas, closures, a type system, *defun/defconst/defmacro/defctype* and a reader/compiler for those forms.
 
 The *preface* library extends *core* with various lexical binding forms, *cond/and/or/progn*, and a library loading facility.
 
@@ -130,7 +130,7 @@ and then install.
 
 ------
 
-The distribution includes a test suite, which should be run after every interesting change. The test suite consists of a several hundred individual tests separated into multiple sections, roughly separated by namespace. You will need some version of python 3 to run the tests.
+The distribution includes a test suite, which should be run after every interesting change. The test suite consists of a several hundred individual tests roughly separated by namespace.
 
 Failures in the *mu* tests are almost guaranteed to cause complete failure of subsequent tests.
 
@@ -157,8 +157,6 @@ The `tests` makefile has additional facilities for development, including report
 
 Metrics include the average amount of time (in microsconds) taken for an individual test and the number of objects allocated by that test. Differences between runs in the same installation can be in the 10% range. Any changes in storage consumption or a large (10% or greater) increase in test timing warrant examination.
 
-You will need some version of python3 to run the performance suite.
-
 The NTESTS environment variable (defaults to 20) controls how many passes are included in a single test run.
 
 On a Core I7 CPU at 3+ GHz, the default perf tests take approximately three minutes of elapsed time for the *mu* namespace.
@@ -183,9 +181,9 @@ produces a report of the differences between the current summary and the establi
 For convenience, the *thorn* Makefile provides:
 
 ```
-% make perf/base	  # establish a baseline summary
-% make perf/summary   # produce a secondary summary
-% make perf/commit    # produce a condensed report
+% make perf/base		# establish a baseline summary
+% make perf/summary		# produce a secondary summary
+% make perf/commit		# produce a condensed report
 ```
 
 
@@ -205,7 +203,7 @@ thorn			shell script for running the extended repl
 
 
 ```
-OVERVIEW: runtime - posix platform mu interface
+OVERVIEW: runtime - posix platform thorn/mu
 USAGE: runtime [options] [file...]
 
 runtime: x.y.z: [-h?psvcelq] [file...]
@@ -253,14 +251,14 @@ to your `~/.inputrc` may help.
 
 ------
 
-Functional languages bring us closer to a time where we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that the various components that make them up  are reliable. Modern programming concepts do much to underpin reliability.
+Functional languages bring us closer to a time where we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that their various components are reliable. Modern programming concepts do much to underpin reliability and transparency.
 
-*thorn* attempts to couch modern programming concepts with a familiar syntax.
+*thorn* attempts to express modern programming concepts with a simple, familiar syntax. The venerable Common Lisp macro system helps the system designer create domain specific languages.
 
 *LISPs* are intentionally dynamic which has selected against them for use in production environments, yet statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few of the dynamic languages in use today have adequate meta programming facilities. We need systems that can we reason about and can supplement themselves.
 
-Such systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands.
+Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. An evolving system can have a runtime measured in months or years.
 
 Evolutionary response to change is the only defense a system has against obsolescence.
 
-Most, if not all, of our core computational frameworks are built on static systems and are fragile with respect to change. Such systems tend to be disposable. Dynamic systems designed for persistence and change are the next step.
+Most of our core computational frameworks are built on static systems and are fragile with respect to change. Such systems tend to be disposable. Dynamic systems designed for persistence are the next step.

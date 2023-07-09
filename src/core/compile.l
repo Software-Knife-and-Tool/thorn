@@ -98,6 +98,17 @@
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
+(mu:intern core::ns :intern "defctype"
+   (:lambda (form env)
+      ((:lambda (symbol slots)
+          (core:raise-unless core:symbolp symbol 'defctype "not a symbol")
+          ((:lambda (struct)
+              (mu:intern core::ctypes :extern (mu:sy-name symbol) struct)
+              symbol)
+           (mu:make-st :ctype `(,symbol ,slots))))
+       (mu:nth 1 form)
+       (mu:nthcdr 2 form))))
+
 (mu:intern core::ns :intern "defun"
    (:lambda (form env)
       ((:lambda (symbol lambda)
@@ -140,6 +151,7 @@
         '((defconst . core::defconst)
           (defun    . core::defun)
           (defmacro . core::defmacro)
+          (defctype . core::defctype)
           (if       . core::if)
           (lambda   . core::lambda)
           (quote    . core::quote))))))
