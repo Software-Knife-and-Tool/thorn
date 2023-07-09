@@ -23,6 +23,11 @@
                type))
        (mu:type-of object))))
 
+;;;
+;;; ctype struct: :ctyle #(:t name slot-alist)
+;;;
+;;; where the slot-alist is (:name . :type)
+;;;
 (mu:intern core::ns :intern "ctype-slot"
    (:lambda (struct name)
       (core:raise-unless core:ctypep struct 'core:ctype-slot "not a ctype")

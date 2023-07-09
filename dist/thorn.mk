@@ -24,7 +24,7 @@ CORE = \
         macro.l		\
         parse.l		\
         perf.l		\
-        quasiquote.l	\
+        backquote.l	\
         streams.l	\
         strings.l	\
 	types.l
