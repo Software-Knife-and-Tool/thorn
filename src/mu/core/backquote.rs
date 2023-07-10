@@ -82,7 +82,15 @@ impl Backquote for Mu {
         match Stream::get_string(mu, mu.reader.bq_str) {
             Ok(string) => match StreamBuilder::new().string(string).input().build(mu) {
                 Ok(stream) => match Self::bq_read(mu, false, stream.evict(mu), false) {
-                    Ok(expr) => Ok(Cons::vlist(mu, &[mu.reader.cons, expr, Tag::nil()])),
+                    Ok(expr) => match Tag::type_of(mu, expr) {
+                        Type::Cons | Type::Symbol => {
+                            Ok(Cons::vlist(mu, &[mu.reader.cons, expr, Tag::nil()]))
+                        }
+                        _ => Mu::compile_quoted_list(
+                            mu,
+                            Cons::vlist(mu, &[Cons::vlist(mu, &[expr])]),
+                        ),
+                    },
                     Err(e) => Err(e),
                 },
                 Err(e) => Err(e),
@@ -139,11 +147,10 @@ impl Backquote for Mu {
                                 Self::bq_list_element(mu, expr)
                             } else {
                                 match Tag::type_of(mu, expr) {
-                                    Type::Symbol => Ok(<Mu as Compiler>::compile_quote(
+                                    Type::Symbol => Mu::compile_quoted_list(
                                         mu,
                                         Cons::new(expr, Tag::nil()).evict(mu),
-                                    )
-                                    .unwrap()),
+                                    ),
                                     _ => Ok(expr),
                                 }
                             }
@@ -172,7 +179,7 @@ impl Backquote for Mu {
                         '`' => Self::bq_read(mu, in_list, stream, true),
                         ',' => Self::bq_comma(mu, in_list, stream),
                         '\'' => match Reader::read(mu, stream, false, Tag::nil(), recursivep) {
-                            Ok(tag) => Ok(<Mu as Compiler>::compile_quote(
+                            Ok(tag) => Ok(Mu::compile_quoted_list(
                                 mu,
                                 Cons::new(tag, Tag::nil()).evict(mu),
                             )

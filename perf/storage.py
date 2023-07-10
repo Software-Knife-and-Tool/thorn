@@ -35,7 +35,7 @@ def storage(test_name, hp_info):
                 
 for namespace in namespaces:
     for test in test_results:
-        fields=test[:-1].split(',')
+        fields = test[:-1].split(',')
         if fields[0] == namespace:
             if len(fields) > 2:
                 storage(fields[1], fields[2])
