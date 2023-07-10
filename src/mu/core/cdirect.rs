@@ -13,21 +13,21 @@ use {
 };
 
 #[derive(Copy, Clone)]
-pub struct CDirect {
+pub struct ConsDirect {
     data: u64,
 }
 
 #[derive(Copy, Clone)]
 #[bitfield]
 #[repr(u64)]
-pub struct CDirectTag {
+pub struct ConsDirectTag {
     #[bits = 3]
     pub tag: TagType,
     pub data: B60,
     msb: B1, // always 0
 }
 
-impl CDirect {
+impl ConsDirect {
     // can tag be sign extended from 30 bits?
     pub fn u32_from_tag(tag: Tag) -> Option<u32> {
         let u64_ = tag.as_u64();
@@ -55,12 +55,12 @@ impl CDirect {
                         return None;
                     }
 
-                    let cons = CDirectTag::new()
+                    let cons = ConsDirectTag::new()
                         .with_data(data)
-                        .with_tag(TagType::CDirect)
+                        .with_tag(TagType::ConsDirect)
                         .with_msb(0);
 
-                    Some(Tag::CDirect(cons))
+                    Some(Tag::ConsDirect(cons))
                 }
                 None => None,
             },
