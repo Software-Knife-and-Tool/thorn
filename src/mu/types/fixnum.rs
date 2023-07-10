@@ -10,6 +10,7 @@ use crate::{
         types::{Tag, TagType, Type},
     },
     types::{
+        symbol::{Core as _, Symbol},
         vecimage::{TypedVec, VecType},
         vector::Core as _,
     },
@@ -120,7 +121,7 @@ impl MuFunction for Fixnum {
             Type::Fixnum => match Tag::type_of(mu, fx1) {
                 Type::Fixnum => {
                     fp.value = if Fixnum::as_i64(mu, fx0) < Fixnum::as_i64(mu, fx1) {
-                        Tag::t()
+                        Symbol::keyword("t")
                     } else {
                         Tag::nil()
                     };

@@ -140,7 +140,7 @@ impl Core for Stream {
     fn is_open(mu: &Mu, stream: Tag) -> bool {
         let image = Self::to_image(mu, stream);
 
-        !image.stream_id.eq_(Tag::t())
+        !image.stream_id.eq_(Symbol::keyword("t"))
     }
 
     fn close(mu: &Mu, stream: Tag) {
@@ -148,7 +148,7 @@ impl Core for Stream {
 
         System::close(&mu.system, Fixnum::as_i64(mu, image.stream_id) as usize).unwrap();
 
-        image.stream_id = Tag::t();
+        image.stream_id = Symbol::keyword("t");
         Self::update(mu, &image, stream);
     }
 
@@ -218,7 +218,7 @@ impl Core for Stream {
                         Ok(opt) => match opt {
                             Some(byte) => Ok(Some(byte as char)),
                             None => {
-                                image.eof = Tag::t();
+                                image.eof = Symbol::keyword("t");
                                 Self::update(mu, &image, stream);
                                 Ok(None)
                             }
@@ -265,7 +265,7 @@ impl Core for Stream {
                         Ok(opt) => match opt {
                             Some(byte) => Ok(Some(byte)),
                             None => {
-                                image.eof = Tag::t();
+                                image.eof = Symbol::keyword("t");
                                 Self::update(mu, &image, stream);
                                 Ok(None)
                             }
@@ -400,7 +400,7 @@ impl MuFunction for Stream {
             Type::Stream => {
                 if Self::is_open(mu, stream) {
                     Self::close(mu, stream);
-                    Tag::t()
+                    Symbol::keyword("t")
                 } else {
                     Tag::nil()
                 }
@@ -543,7 +543,7 @@ impl MuFunction for Stream {
         match Tag::type_of(mu, stream) {
             Type::Stream => {
                 fp.value = if Self::is_eof(mu, stream) {
-                    Tag::t()
+                    Symbol::keyword("t")
                 } else {
                     Tag::nil()
                 };
