@@ -7,7 +7,7 @@
 use {
     crate::{
         core::{
-            cdirect::CDirectTag,
+            cdirect::ConsDirectTag,
             direct::{DirectTag, DirectType},
             exception,
             frame::Frame,
@@ -24,7 +24,7 @@ use {
 #[derive(Copy, Clone)]
 pub enum Tag {
     Fixnum(i64),
-    CDirect(CDirectTag),
+    ConsDirect(ConsDirectTag),
     Direct(DirectTag),
     Indirect(IndirectTag),
 }
@@ -51,14 +51,14 @@ pub enum Type {
 
 #[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TagType {
-    Fixnum = 0,   // 61 bit signed integer
-    CDirect = 1,  // cons direct
-    Direct = 2,   // chars, short strings, keywords
-    Indirect = 3, // heap tags
-    Cons = 4,     // cons heap tag
-    Function = 5, // function heap tag
-    Symbol = 6,   // symbol heap tag
-    Vector = 7,   // vector heap tag
+    Fixnum = 0,     // 61 bit signed integer
+    ConsDirect = 1, // cons direct
+    Direct = 2,     // chars, short strings, keywords
+    Indirect = 3,   // heap tags
+    Cons = 4,       // cons heap tag
+    Function = 5,   // function heap tag
+    Symbol = 6,     // symbol heap tag
+    Vector = 7,     // vector heap tag
 }
 
 lazy_static! {
@@ -92,7 +92,7 @@ impl fmt::Display for Tag {
             Tag::Fixnum(_i64) => write!(f, "fixnum: {}", _i64 >> 3),
             Tag::Direct(direct) => write!(f, "direct: type {:?}", direct.dtype() as u8),
             Tag::Indirect(indirect) => write!(f, "indirect: type {:?}", indirect.tag()),
-            Tag::CDirect(_) => write!(f, "cdrcode:"),
+            Tag::ConsDirect(_) => write!(f, "cdrcode:"),
         }
     }
 }
@@ -110,13 +110,13 @@ impl Tag {
                 },
                 None => panic!(),
             },
-            Tag::CDirect(tag) => tag.data(),
+            Tag::ConsDirect(tag) => tag.data(),
         }
     }
 
     pub fn as_slice(&self) -> [u8; 8] {
         match self {
-            Tag::CDirect(tag) => tag.into_bytes(),
+            Tag::ConsDirect(tag) => tag.into_bytes(),
             Tag::Direct(tag) => tag.into_bytes(),
             Tag::Fixnum(tag) => tag.to_le_bytes(),
             Tag::Indirect(tag) => tag.into_bytes(),
@@ -154,7 +154,7 @@ impl Tag {
 
         match tag {
             tag if tag == TagType::Fixnum as u8 => Tag::Fixnum(_u64 as i64),
-            tag if tag == TagType::CDirect as u8 => Tag::CDirect(CDirectTag::from(_u64)),
+            tag if tag == TagType::ConsDirect as u8 => Tag::ConsDirect(ConsDirectTag::from(_u64)),
             tag if tag == TagType::Direct as u8 => Tag::Direct(DirectTag::from(_u64)),
             _ => Tag::Indirect(IndirectTag::from(_u64)),
         }
@@ -168,7 +168,7 @@ impl Tag {
         } else {
             match tag {
                 Tag::Fixnum(_) => Type::Fixnum,
-                Tag::CDirect(_) => Type::Cons,
+                Tag::ConsDirect(_) => Type::Cons,
                 Tag::Direct(direct) => match direct.dtype() {
                     DirectType::Char => Type::Char,
                     DirectType::Byte => Type::Vector,

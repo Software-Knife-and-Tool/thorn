@@ -4,7 +4,7 @@
 //! mu cons class
 use crate::{
     core::{
-        cdirect::CDirect,
+        cdirect::ConsDirect,
         direct::DirectType,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -56,7 +56,7 @@ impl Cons {
         match Tag::type_of(mu, cons) {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::CDirect(_) => CDirect::car(mu, cons),
+                Tag::ConsDirect(_) => ConsDirect::car(mu, cons),
                 Tag::Indirect(_) => Self::to_image(mu, cons).car,
                 _ => panic!(),
             },
@@ -69,7 +69,7 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(mu, cons).cdr,
-                Tag::CDirect(_) => CDirect::cdr(mu, cons),
+                Tag::ConsDirect(_) => ConsDirect::cdr(mu, cons),
                 _ => panic!(),
             },
             _ => panic!(),
@@ -120,7 +120,7 @@ impl Core for Cons {
     }
 
     fn evict(&self, mu: &Mu) -> Tag {
-        match CDirect::cons(self.car, self.cdr) {
+        match ConsDirect::cons(self.car, self.cdr) {
             Some(tag) => tag,
             None => {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
