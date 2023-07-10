@@ -28,7 +28,7 @@ lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
         (Symbol::keyword("if"), Mu::compile_if),
         (Symbol::keyword("lambda"), Mu::compile_lambda),
-        (Symbol::keyword("quote"), Mu::compile_quote),
+        (Symbol::keyword("quote"), Mu::compile_quoted_list),
     ];
 }
 
@@ -38,7 +38,7 @@ pub trait Compiler {
     fn compile_if(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lambda(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lexical(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_quote(_: &Mu, _: Tag) -> exception::Result<Tag>;
+    fn compile_quoted_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_special_form(_: &Mu, _: Tag, args: Tag) -> exception::Result<Tag>;
 }
@@ -48,7 +48,7 @@ impl Compiler for Mu {
         if Cons::length(mu, args) != Some(3) {
             return Err(Exception::new(
                 Condition::Syntax,
-                "compile::compile_quote",
+                "compile::compile_quoted_list",
                 args,
             ));
         }
@@ -93,11 +93,11 @@ impl Compiler for Mu {
         Self::compile(mu, Cons::vlist(mu, &if_vec))
     }
 
-    fn compile_quote(mu: &Mu, list: Tag) -> exception::Result<Tag> {
+    fn compile_quoted_list(mu: &Mu, list: Tag) -> exception::Result<Tag> {
         if Cons::length(mu, list) != Some(1) {
             return Err(Exception::new(
                 Condition::Syntax,
-                "compile::compile_quote",
+                "compile::compile_quoted_list",
                 list,
             ));
         }

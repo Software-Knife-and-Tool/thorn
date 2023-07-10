@@ -44,7 +44,7 @@ def report(info_list):
             test_in = test_name
 
         if b == '*' or t == '*':
-            print(f'[{b:<1}{t:<1}] {nth_test:>2} {test_name:<16} bytes: ({then_bytes}/{bytes},{bytes_ratio:.2f})  times: ({then_time:.2f}/{time:.2f},{time_ratio:.2f})')
+            print(f'[{b:<1}{t:<1}] {nth_test:>2} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes-then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time-then_time:.2f}, {time_ratio:.2f})')
 
 print(f'Perf Report {date:<10}')
 print('-------------------------')
