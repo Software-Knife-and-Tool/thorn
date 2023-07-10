@@ -94,7 +94,7 @@ impl MuFunction for Mu {
         let (pagesz, npages) = Self::hp_info(mu);
 
         let mut vec = vec![
-            Tag::t(),
+            Symbol::keyword("t"),
             Fixnum::as_tag((pagesz * npages) as i64),
             Fixnum::as_tag(npages as i64),
             Fixnum::as_tag(npages as i64),

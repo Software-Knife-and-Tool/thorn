@@ -11,6 +11,7 @@ use crate::{
         types::{Tag, Type},
     },
     types::{
+        symbol::{Core as _, Symbol},
         vecimage::{TypedVec, VecType},
         vector::Core as _,
     },
@@ -126,7 +127,7 @@ impl MuFunction for Float {
             Type::Float => match Tag::type_of(mu, fl1) {
                 Type::Float => {
                     fp.value = if Self::as_f32(mu, fl0) < Self::as_f32(mu, fl1) {
-                        Tag::t()
+                        Symbol::keyword("t")
                     } else {
                         Tag::nil()
                     };

@@ -62,7 +62,6 @@ pub enum TagType {
 }
 
 lazy_static! {
-    static ref T: Tag = Tag::to_direct('t' as u64, 1, DirectType::Keyword);
     static ref NIL: Tag = Tag::to_direct(
         (('l' as u64) << 16) | (('i' as u64) << 8) | ('n' as u64),
         3,
@@ -130,10 +129,6 @@ impl Tag {
 
     pub fn null_(&self) -> bool {
         self.eq_(Self::nil())
-    }
-
-    pub fn t() -> Tag {
-        *T
     }
 
     pub fn nil() -> Tag {
@@ -223,7 +218,7 @@ pub trait MuFunction {
 impl MuFunction for Tag {
     fn mu_eq(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = if fp.argv[0].eq_(fp.argv[1]) {
-            Tag::t()
+            Symbol::keyword("t")
         } else {
             Tag::nil()
         };
