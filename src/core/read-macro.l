@@ -111,7 +111,7 @@
                                                 (mu:un-char #\) stream)
                                                 dotted)
                                             (core:raise () 'core::read-list "malformed dotted list")))
-                                     (core::append loop (core::read stream)))
+                                     (core:foldr mu:cons (core::read stream) loop))
                                     `(,@loop ,el))
                                `(,@loop ,el))))
                    (core::read stream))))
