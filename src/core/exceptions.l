@@ -67,10 +67,11 @@
      (core::exception-property :env except))))
 
 (mu:intern core::ns :extern "raise"
-  (:lambda (object source reason)
-    (mu:raise
-     (core::list :quote (core::append `(,object ,source ,reason) `(,(core:dropl (mu::frames) 2))))
-     :except)))
+   (:lambda (object source reason)
+      ((:lambda (desc)
+          (mu:raise (mu:cons :quote (mu:cons desc ()))))
+       `(,object ,source ,reason ,(core:dropl (mu::frames) 2)))
+     :except))
 
 (mu:intern core::ns :extern "with-exception"
   (:lambda (handler thunk)

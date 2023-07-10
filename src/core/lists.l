@@ -11,10 +11,6 @@
         list-2
         list-1)))
 
-(mu:intern core::ns :intern "list"
-  (:lambda (form)
-     (mu:cons form ())))
-
 ;;;
 ;;; fixpoint loop
 ;;;

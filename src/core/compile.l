@@ -140,7 +140,7 @@
       (core:raise-unless (:lambda (form) (mu:fx-lt 2 (mu:length form))) form 'if "takes two or three arguments")
       (core:raise-unless (:lambda (form) (mu:fx-lt (mu:length form) 5)) form 'if "takes two or three arguments")
       (mu:cons 'core::if-body
-        `(,(core::list (core::thunk (mu:nth 1 form) env))
+        `(,(mu:cons (core::thunk (mu:nth 1 form) env) ())
           ,(core::thunk (mu:nth 2 form) env)
           ,(core::thunk (mu:nth 3 form) env)))))
 
