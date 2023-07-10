@@ -69,7 +69,7 @@
 (mu:intern core::ns :extern "raise"
    (:lambda (object source reason)
       ((:lambda (desc)
-          (mu:raise (mu:cons :quote (mu:cons desc ()))))
+          (mu:raise `(:quote ,desc)))
        `(,object ,source ,reason ,(core:dropl (mu::frames) 2)))
      :except))
 
@@ -122,7 +122,7 @@
 
 (mu:intern core::ns :extern "warn"
   (:lambda (obj msg)
-     (core:format mu:err-out "warning: ~A ~S~%" `(,obj ,msg))
+     (core:format mu:err-out "warning: ~S ~A~%" `(,obj ,msg))
     obj))
 
 (mu:intern core::ns :intern "repl"

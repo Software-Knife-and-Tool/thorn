@@ -60,22 +60,17 @@
        args)))
 
 (mu:intern core::ns :intern "lambda-arg-list"
-  (:lambda (fn args)
-    (:if (core:closurep fn)
-         (:if (core::and (core::closure-property :rest fn) (core:zerop (core::closure-property :nreqs fn)))
-              `(mu:cons ,(core::flat-arg-list args) ())
-              ((:lambda (reqs rest)
-                 (mu:cons 'core::append
-                          (mu:cons (core::flat-arg-list reqs)
-                                   (mu:cons
-                                    (mu:cons 'mu:cons
-                                             (mu:cons
-                                              (core::flat-arg-list rest)
-                                              '(())))
-                                    ()))))
-               (core:dropr args (mu:fx-sub (mu:length args) (core::closure-property :nreqs fn)))
-               (core:dropl args (core::closure-property :nreqs fn))))
-         (core::flat-arg-list args))))
+   (:lambda (fn args)
+      (:if (core:closurep fn)
+           ((:lambda (nreqs)
+               (:if (core::and (core::closure-property :rest fn) (core:zerop nreqs))
+                    `(mu:cons ,(core::flat-arg-list args) ())
+                    ((:lambda (reqs rest)
+                              (core::flat-arg-list `(,@reqs ,(core::flat-arg-list rest))))
+                     (core:dropr args (mu:fx-sub (mu:length args) nreqs))
+                     (core:dropl args nreqs))))
+            (core::closure-property :nreqs fn))
+           (core::flat-arg-list args))))
 
 (mu:intern core::ns :intern "quoted-lambda-arg-list"
   (:lambda (fn args)

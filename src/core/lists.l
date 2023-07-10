@@ -2,16 +2,6 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; internal utilities
-;;;
-(mu:intern core::ns :intern "append"
-   (:lambda (list-1 list-2)
-      (core:foldr
-        mu:cons
-        list-2
-        list-1)))
-
-;;;
 ;;; fixpoint loop
 ;;;
 (mu:intern core::ns :extern "fix"
