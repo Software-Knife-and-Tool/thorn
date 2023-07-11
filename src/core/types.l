@@ -24,10 +24,19 @@
        (mu:type-of object))))
 
 ;;;
-;;; ctype struct: :ctyle #(:t name slot-alist)
+;;; ctype struct: #s(:ctype #(:t name slot-alist))
 ;;;
 ;;; where the slot-alist is (:name . :type)
 ;;;
+(mu:intern core::ns :extern "make-ctype"
+   (:lambda (name slots)
+      (core:raise-unless core:stringp name 'core:make-ctype "not a string")
+      (core:raise-unless core:listp slots 'core:make-ctype "not a slot list")
+      ((:lambda (symbol)
+          (core:raise-unless core:null symbol 'core:make-ctype "symbol already bound")
+          (mu:intern core::ctypes :extern name (mu:make-st :ctype `(,name ,slots))))
+       (mu:ns-find core::ctypes :extern name))))
+
 (mu:intern core::ns :intern "ctype-slot"
    (:lambda (struct name)
       (core:raise-unless core:ctypep struct 'core:ctype-slot "not a ctype")
