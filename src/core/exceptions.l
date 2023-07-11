@@ -66,31 +66,30 @@
      (core::exception-property :reason except)
      (core::exception-property :env except))))
 
-(mu:intern core::ns :extern "raise"
-   (:lambda (object source reason)
-      ((:lambda (desc)
-          (mu:raise `(:quote ,desc)))
-       `(,object ,source ,reason ,(core:dropl (mu::frames) 2)))
-     :except))
-
 (mu:intern core::ns :extern "with-exception"
   (:lambda (handler thunk)
     (mu:with-ex
-      (:lambda (source condition)
-        (:if (mu:eq condition :except)
-             (core:apply
-              handler
-              `(,(core:apply
-                  core:make-exception
-                  `((:error) ,source))))
-             (core:apply
-              handler
-              `(,(core:make-exception condition source 'mu "from mu" (core:dropl (mu::frames) 4))))))
-     (:lambda () (core:apply thunk ())))))
+       (:lambda (source condition)
+         (:if (mu:eq condition :except)
+              (core:apply
+               handler
+               `(,(core:apply
+                   core:make-exception
+                   `((:error) ,source))))
+              (core:apply
+               handler
+               `(,(core:make-exception condition source 'mu "from mu" (core:dropl (mu::frames) 4))))))
+       (:lambda () (core:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
 ;;;
+(mu:intern core::ns :extern "raise"
+   (:lambda (object source reason)
+      (mu:raise
+       `(:quote ,object ,source ,reason ,(core:dropl (mu::frames) 2))
+       :except)))
+
 (mu:intern core::ns :extern "raise-if"
   (:lambda (test obj source reason)
     (:if test
