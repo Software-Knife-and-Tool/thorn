@@ -100,7 +100,7 @@
 ;;;
 (mu:intern core::ns :extern "apply"
   (:lambda (fn args)
-    (core:raise-unless
+     (core:raise-unless
       (:lambda (fn) (core::or (core:functionp fn) (core:closurep fn)))
       fn
       'core:apply "not a function or closure")

@@ -14,6 +14,10 @@
     (core:terpri dest)
     args))
 
+(mu:intern core::ns :intern "fmt-bang"
+  (:lambda (dest args)
+    (mu:cdr args)))
+
 (mu:intern core::ns :intern "fmt-decimal"
   (:lambda (dest args)
     (core:raise-unless core:fixnump (mu:car args) 'core:format "argument to ~D not a fixnum")
@@ -78,7 +82,8 @@
          (#\X . core::fmt-hex)
          (#\D . core::fmt-decimal)
          (#\~ . core::fmt-tilde)
-         (#\% . core::fmt-percent)))))))
+         (#\% . core::fmt-percent)
+         (#\! . core::fmt-bang)))))))
 
 (mu:intern core::ns :intern "fmt-loop"
   (:lambda (stream dest fmt args)
@@ -107,7 +112,6 @@
    (:lambda (stream fmt args)
      (core:raise-unless core:stringp fmt 'core:format "not a string")
      (core:raise-unless core:listp args 'core:format "not a list")
-
      (:if (core:zerop (core:length fmt))
           (:if stream
                ""

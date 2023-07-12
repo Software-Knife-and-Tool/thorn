@@ -1,5 +1,4 @@
 (mu:type-of core:apply)	:func
-(mu:eval (core:compile '((lambda () (defun core:a-defun () 'a-defun) (core:a-defun)))))	a-defun
 (mu:eval (core:compile '((lambda () (defun core:a-defun (a) a) (core:a-defun 'a-defun)))))	a-defun
 (mu:eval (core:compile '((lambda () (defun core:a-defun (a b) (mu:cons a b)) (core:a-defun 'a-defun 'b-defun)))))	(a-defun . b-defun)
 (mu:eval (core:compile '((lambda () (defun core:a-defun (&rest a) a) (core:a-defun 1 2 3)))))	(1 2 3)

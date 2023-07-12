@@ -74,7 +74,6 @@
 
 (mu:intern core::ns :intern "quoted-lambda-arg-list"
   (:lambda (fn args)
-    ; (core:warn lambda-desc "quoted-lambda-arg-list")
     (:if (core:functionp fn)
          args
          (:if (core::closure-property :rest fn)
@@ -157,7 +156,6 @@
 ;;;
 (mu:intern core::ns :intern "compile-application"
   (:lambda (fn args env)
-    ; (core:warn fn "compile-application")
     (:if (core:functionp fn)
          (core::compile-fn-call fn args env)
          (:if (core:consp fn)

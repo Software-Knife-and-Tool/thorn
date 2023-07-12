@@ -8,7 +8,6 @@ with open(sys.argv[3]) as f: test_results = f.readlines()
 totals = [0, 0, 0, 0]
 for test in test_results:
     fields = test[:-1].split("\t")
-
     test, expected, obtained, status = fields
 
     totals[0] += 1

@@ -100,12 +100,11 @@
 
 (mu:intern core::ns :intern "defctype"
    (:lambda (form env)
-      ((:lambda (symbol slots)
-          (core:raise-unless core:symbolp symbol 'defctype "not a symbol")
-          ((:lambda (struct)
-              (mu:intern core::ctypes :extern (mu:sy-name symbol) struct)
-              symbol)
-           (mu:make-st :ctype `(,symbol ,slots))))
+      ((:lambda (symbol slot-defs)
+         (core:raise-unless core:symbolp symbol 'defctype "not a symbol")
+         (core:raise-unless core:listp slot-defs 'defctype "not a slot-defs list")
+         (core::def-ctype (mu:sy-name symbol) slot-defs)
+         symbol)
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
@@ -164,12 +163,12 @@
       (:if (core:consp form)
           ((:lambda (fn args)
              (:if (mu:keyp fn)
-                  (mu:compile form)     ;;; libmu special form (:key ...)
+                  (mu:compile form)     ;;; mu special form (:key ...)
                   (:if (core:consp fn)  ;;; application ((...) ...), native or core
                        (core::compile-application fn args env)
-                       ((:lambda (specf)
-                          (:if specf
-                               (mu:apply (mu:sy-val specf) `(,form ,env))
+                       ((:lambda (special)
+                          (:if special
+                               (mu:apply (mu:sy-val special) `(,form ,env))
                                (core::compile-application fn args env)))
                         (core::special-table fn)))))
            (mu:car form)
