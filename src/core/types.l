@@ -28,20 +28,35 @@
 ;;;
 ;;; where the slot-alist is (:name . :type)
 ;;;
-(mu:intern core::ns :extern "make-ctype"
+(mu:intern core::ns :intern "def-ctype"
    (:lambda (name slots)
-      (core:raise-unless core:stringp name 'core:make-ctype "not a string")
-      (core:raise-unless core:listp slots 'core:make-ctype "not a slot list")
+      ; (core:warn `(,name ,slots) "enter: def-ctype")
+      (core:raise-unless core:stringp name 'core:def-ctype "not a string")
+      (core:raise-unless core:listp slots 'core:def-ctype "not a slot list")
       ((:lambda (symbol)
-          (core:raise-unless core:null symbol 'core:make-ctype "symbol already bound")
+          (core:raise-unless core:null symbol 'core:def-ctype "type symbol bound")
           (mu:intern core::ctypes :extern name (mu:make-st :ctype `(,name ,slots))))
        (mu:ns-find core::ctypes :extern name))))
 
-(mu:intern core::ns :intern "ctype-slot"
-   (:lambda (struct name)
-      (core:raise-unless core:ctypep struct 'core:ctype-slot "not a ctype")
-      (core:raise-unless core:keywordp name 'core:ctype-slot "not a slot name")
+(mu:intern core::ns :intern "make-ctype"
+   (:lambda (name slot-defs)
+      (core:raise-unless core:stringp name 'core:make-ctype "not a type name")
+      (core:raise-unless core:listp slot-defs 'core:make-ctype "not a slot list")
+      ((:lambda (symbol)
+          (core:raise-when core:null symbol 'core:make-ctype "type unbound")
+          (mu:make-st :ctype `(,name ,slot-defs)))
+       (mu:ns-find core::ctypes :extern name))))
+
+(mu:intern core::ns :intern "slot-value"
+   (:lambda (slot-name struct)
+      (core:raise-unless core:ctypep struct 'core::slot-value "not a ctype")
+      (core:raise-unless core:keywordp slot-name 'core:slot-value "not a slot name")
       ((:lambda (slot)
-          (core:raise-if core:null slot 'core:ctype-slot "slot name not bound")
+          (core:raise-if core:null slot 'core::slot-value "slot not bound")
           (mu:car slot))
-       (core::assoc slot-name (mu:sv-ref (mu:st-vec struct) 1)))))
+       (core:assoc slot-name (mu:sv-ref (mu:st-vec struct) 1)))))
+
+;;;
+;;; core synthetic types
+;;;
+(core::def-ctype "string" '((:text . :vector)))

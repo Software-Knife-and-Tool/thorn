@@ -1,4 +1,4 @@
-(mu:type-of core:print-exception)	:func
+(mu:type-of core:exceptionf)	:func
 (mu:type-of core:make-exception)	:func
 (mu:type-of core:raise)	:func
 (mu:type-of core:raise-if)	:func

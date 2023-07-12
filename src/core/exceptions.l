@@ -32,53 +32,33 @@
           (:reason  . 3)
           (:env     . 4)))))))
 
-(mu:intern core::ns :extern "print-exception"
-  (:lambda (except stream)
-    ((:lambda (cond object source reason env)
-       (core:format stream
-                    "core exception: (~A) ~A by ~A~%"
-                    `(,reason ,object ,source)))
-     (core::exception-property :cond except)
-     (core::exception-property :object except)
-     (core::exception-property :source except)
-     (core::exception-property :reason except)
-     (core::exception-property :env except))))
-
-(mu:intern core::ns :extern "print-exception-env"
-  (:lambda (except stream)
-    ((:lambda (env)
-       (core:format stream "env:~%")
-       (core:mapc
-        (:lambda (frame)
-          (core:format :t "(~A ~A)~%" frame))
-        env)))
-    (core::exception-property :env except)))
-
 (mu:intern core::ns :extern "exceptionf"
-  (:lambda (stream fmt except)
-    ((:lambda (cond object source reason env)
-      (core:format stream fmt
-         `(,(core:format () "~A ~A in ~A~%"
-                         `(,object ,reason ,source)))))
+  (:lambda (stream fmt envp except)
+     ((:lambda (cond object source reason env)
+         (:if (core:null fmt)                
+              (core:format stream "exception ~A: ~A ~A by ~A~%" `(,cond ,object ,reason ,source))
+              (core:format stream fmt `(,cond ,object ,reason ,source)))
+         (:if envp
+              (core:format stream "environment:~%")
+              (core:mapc
+               (:lambda (frame)
+                  (core:format :t "(~A)~%" frame))
+               env)))
      (core::exception-property :cond except)
      (core::exception-property :object except)
      (core::exception-property :source except)
      (core::exception-property :reason except)
-     (core::exception-property :env except))))
+     (core::exception-property :reason except))))
 
 (mu:intern core::ns :extern "with-exception"
   (:lambda (handler thunk)
     (mu:with-ex
        (:lambda (source condition)
-         (:if (mu:eq condition :except)
-              (core:apply
-               handler
-               `(,(core:apply
-                   core:make-exception
-                   `((:error) ,source))))
-              (core:apply
-               handler
-               `(,(core:make-exception condition source 'mu "from mu" (core:dropl (mu::frames) 4))))))
+          (:if (mu:eq condition :except)
+               (core:apply handler (mu:cons source ()))
+               (core:apply
+                handler
+                `(,(core:make-exception condition source 'mu "from mu" (core:dropl (mu::frames) 4))))))
        (:lambda () (core:apply thunk ())))))
 
 ;;;
@@ -87,7 +67,7 @@
 (mu:intern core::ns :extern "raise"
    (:lambda (object source reason)
       (mu:raise
-       `(:quote ,object ,source ,reason ,(core:dropl (mu::frames) 2))
+       (core:make-exception :error object source reason (core:dropl (mu::frames) 2))
        :except)))
 
 (mu:intern core::ns :extern "raise-if"
@@ -131,9 +111,9 @@
         (:if (core:eof :t)
              loop
              (core:with-exception
-                 (:lambda (exception)
-                   (core:exceptionf mu:err-out "error: ~A~%" exception)
-                   (core:null loop))
+              (:lambda (exception)
+                 (core:exceptionf mu:err-out () () source)
+                 (core:null loop))
                (:lambda ()
                  (core:format :t "core> " ())
                  (mu:flush mu:std-out)
