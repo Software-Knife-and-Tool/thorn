@@ -160,7 +160,7 @@
          (core::compile-fn-call fn args env)
          (:if (core:consp fn)
               (core::compile-lambda-call fn args env)
-              (:if (core:symbolp fn)
+              (:if (mu:eq :symbol (mu:type-of fn))
                    (:if (core:boundp fn)
                         ((:lambda (macro-fn)
                            (:if macro-fn

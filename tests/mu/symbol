@@ -1,8 +1,6 @@
 (mu:boundp 'mu:foo)	:nil
 (mu:boundp 'mu:foo)	:nil
 (mu:boundp 'mu:std-in)	mu:std-in
-(mu:keyp 'abcd)	:nil
-(mu:keyp :abcd)	:abcd
 (mu:sy-name 'mu:std-in)	"std-in"
 (mu:sy-ns 'mu:std-in)	#<namespace: "mu">
 (mu:sy-val 'mu:std-in)	#<stream: id: 2147483648>

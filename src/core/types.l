@@ -4,9 +4,6 @@
 ;;;
 ;;; type system
 ;;;
-(mu:intern core::ns :intern "ctypes"
-   (mu:make-ns "ctypes" core::ns))
-
 (mu:intern core::ns :extern "ctypep"
    (:lambda (object)
       (:if (core:structp object)
@@ -30,7 +27,6 @@
 ;;;
 (mu:intern core::ns :intern "def-ctype"
    (:lambda (name slots)
-      ; (core:warn `(,name ,slots) "enter: def-ctype")
       (core:raise-unless core:stringp name 'core:def-ctype "not a string")
       (core:raise-unless core:listp slots 'core:def-ctype "not a slot list")
       ((:lambda (symbol)
@@ -57,6 +53,32 @@
        (core:assoc slot-name (mu:sv-ref (mu:st-vec struct) 1)))))
 
 ;;;
-;;; core synthetic types
+;;; core ctypes
 ;;;
-(core::def-ctype "string" '((:text . :vector)))
+
+;;; exception
+(core::def-ctype "core:ex"
+  '((:cond . :symbol)
+    (:object  . :t)
+    (:source  . :symbol)
+    (:reason  . :vector)
+    (:env     . :cons)))
+
+;;; string
+(core::def-ctype "core:st"
+  '((:text . :vector)))
+
+;;; closure
+(core::def-ctype "core:cl"
+  '((:env   . :cons)
+    (:nreqs . :fixnum)
+    (:rest  . :symbol)
+    (:func  . :func)
+    (:apply . :func)))
+
+;;; sequence
+(core::def-ctype "core:sq"
+  '((:type   . :symbol)
+    (:vector . :vector)
+    (:cons   . :cons)
+    (:elt    . :func)))

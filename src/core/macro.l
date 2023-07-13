@@ -39,14 +39,18 @@
 
 (mu:intern core::ns :intern "core-find-macro"
    (:lambda (symbol env)
-     (core:raise-unless core:symbolp symbol 'core-find-macro "is not a symbol")
-     ((:lambda (macro-ns symbol-ns symbol-name)
-        (:if macro-ns
-             (mu:ns-find (mu:sy-val macro-ns) :intern symbol-name)
-             ()))
-     (mu:ns-find (mu:sy-ns symbol) :intern (core:string-append `(,(mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))
-     (mu:sy-ns symbol)
-     (mu:sy-name symbol))))
+      (:if (mu:eq :symbol (mu:type-of symbol))
+           ((:lambda (macro-ns symbol-ns symbol-name)
+                     (:if macro-ns
+                          (mu:ns-find (mu:sy-val macro-ns) :intern symbol-name)
+                          ()))
+            (mu:ns-find
+             (mu:sy-ns symbol)
+             :intern
+             (core:string-append `(,(mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))
+            (mu:sy-ns symbol)
+            (mu:sy-name symbol))
+           (core:raise symbol 'core-find-macro "is not a symbol"))))
 
 ;;;
 ;;; core:macroexpand-1 expands a macro call once.
@@ -55,7 +59,7 @@
    (:lambda (form env)
      (:if (core:consp form)
           ((:lambda (fn-symbol args)
-             (:if (core:symbolp fn-symbol)
+             (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
                      (:if macro-fn
                           (core:apply macro-fn args)
@@ -84,7 +88,7 @@
 ;;;
 (mu:intern core::ns :extern "macro-function"
   (:lambda (symbol env)
-     (:if (core:symbolp symbol)
+     (:if (mu:eq :symbol (mu:type-of symbol))
           (:if (core:keywordp symbol)
                ()
                ((:lambda (macro)
@@ -101,7 +105,7 @@
 ;;;
 (mu:intern core::ns :intern "core-macro"
    (:lambda (lambda env)
-     (:if (core:findl (:lambda (el) (core:null (core:symbolp el))) lambda)
+     (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
          (core:raise-if lambda 'core::core-macro "lambda syntax")
          ((:lambda (desc)
              (:if (core:fixnump desc)

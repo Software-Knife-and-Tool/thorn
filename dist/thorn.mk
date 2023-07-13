@@ -26,7 +26,7 @@ CORE = \
         perf.l		\
         backquote.l	\
         streams.l	\
-        strings.l	\
+	strings.l	\
 	types.l
 
 PREFACE = \
