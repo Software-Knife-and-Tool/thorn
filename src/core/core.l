@@ -6,6 +6,9 @@
 ;;;
 (mu:make-ns "core" (mu:map-ns "mu"))
 (mu:intern (mu:map-ns "core") :intern "ns" (mu:map-ns "core"))
+(mu:intern core::ns :intern "ctypes" (mu:make-ns "ctypes" core::ns))
+(mu:intern core::ns :intern "core-char-macro-ns" (mu:make-ns "core:char-macro-ns" ()))
+(mu:intern core::ns :intern "core-symbol-macro-ns" (mu:make-ns "core:symbol-macro-ns" ()))
 
 ;;;
 ;;; predicates
@@ -25,10 +28,9 @@
 (mu:intern core::ns :extern "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
 (mu:intern core::ns :extern "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
 (mu:intern core::ns :extern "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
-(mu:intern core::ns :extern "symbolp" (:lambda (t) (mu:eq :symbol (mu:type-of t))))
+
 (mu:intern core::ns :extern "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))
 (mu:intern core::ns :extern "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
-(mu:intern core::ns :extern "keywordp" (:lambda (t) (:if (mu:keyp t) :t (core:null t))))
 (mu:intern core::ns :extern "sequencep" (:lambda (t) (:if (core:listp t) :t (core:vectorp t))))
 
 (mu:intern core::ns :extern "atom"

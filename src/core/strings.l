@@ -1,9 +1,11 @@
+
 ;;;  SPDX-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
 ;;; strings
 ;;;
+;;; (core::def-ctype "core:st" '((:text . :vector)))
 (mu:intern core::ns :extern "stringp"
    (:lambda (v)
       (:if (core:vectorp v)
@@ -111,6 +113,12 @@
 ;;;
 ;;; string construction
 ;;;
+(mu:intern core::ns :extern "string-coerce"
+   (:lambda (object)
+      (:if (core:symbolp object)
+           (mu:sy-name object)
+           (core:format () "~A" `(,object)))))
+
 (mu:intern core::ns :extern "string"
    (:lambda (designator)
       (:if (core:stringp designator)

@@ -71,50 +71,52 @@
 
 (mu:intern core::ns :intern "defconst"
    (:lambda (form env)
-     ((:lambda (symbol value)
-        (core:raise-unless core:symbolp symbol 'defconst "not a symbol")
-        (core:raise-when core:keywordp symbol 'defconst "not a symbol")
-        (mu:compile
-         `(:quote
-           ,(core::intern
-            symbol
-            (mu:eval (core::compile value env))
-            env))))
-      (mu:nth 1 form)
-      (mu:nth 2 form))))
+      ((:lambda (symbol value)
+          (:if (mu:eq :symbol (mu:type-of symbol))
+               (mu:compile
+                `(:quote
+                  ,(core::intern
+                    symbol
+                    (mu:eval (core::compile value env))
+                    env)))
+               (core:raise symbol 'defconst "not a symbol")))
+          (mu:nth 1 form)
+          (mu:nth 2 form))))
 
 (mu:intern core::ns :intern "defmacro"
-    (:lambda (form env)
+   (:lambda (form env)
       ((:lambda (symbol lambda)
-         (core:raise-unless core:symbolp symbol 'defmacro "not a symbol")
-         (core:raise-when core:keywordp symbol 'defmacro "not a symbol")
-         (core:raise-unless core:listp lambda 'defmacro "not a lambda list")
-         ((:lambda (macro-fn)
-            ((:lambda (symbol)
-               (core::core-macro-env symbol macro-fn)
-               (mu:compile `(:quote ,symbol)))
-             (core::intern symbol macro-fn env)))
-            (core::compile-macro `(,(mu:car lambda) ,(mu:cdr lambda)) env)))
+          (core:raise-unless core:listp lambda 'defmacro "not a lambda list")
+          (:if (mu:eq :symbol (mu:type-of symbol))
+               ((:lambda (macro-fn)
+                   ((:lambda (symbol)
+                       (core::core-macro-env symbol macro-fn)
+                       (mu:compile `(:quote ,symbol)))
+                    (core::intern symbol macro-fn env)))
+                (core::compile-macro `(,(mu:car lambda) ,(mu:cdr lambda)) env))
+               (core:raise symbol 'defmacro "not a symbol")))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
 (mu:intern core::ns :intern "defctype"
    (:lambda (form env)
       ((:lambda (symbol slot-defs)
-         (core:raise-unless core:symbolp symbol 'defctype "not a symbol")
          (core:raise-unless core:listp slot-defs 'defctype "not a slot-defs list")
-         (core::def-ctype (mu:sy-name symbol) slot-defs)
-         symbol)
+         (:if (mu:eq :symbol (mu:type-of symbol))
+              ((:lambda ()
+                (core::def-ctype (mu:sy-name symbol) slot-defs)
+                (mu:compile `(:quote ,symbol))))
+              (core:raise symbol 'defctype "not a symbol")))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
 (mu:intern core::ns :intern "defun"
    (:lambda (form env)
       ((:lambda (symbol lambda)
-         (core:raise-unless core:symbolp symbol 'defun "not a symbol")
-         (core:raise-when core:keywordp symbol 'defun "not a symbol")
-         (core:raise-unless core:listp lambda 'defun "not a lambda list")
-         (mu:compile `(:quote ,(core::intern symbol (core::lambda `(:lambda ,lambda) env) env))))
+          (core:raise-unless core:listp lambda 'defun "not a lambda list")
+          (:if (mu:eq :symbol (mu:type-of symbol))
+               (mu:compile `(:quote ,(core::intern symbol (core::lambda `(:lambda ,lambda) env) env)))
+               (core:raise symbol 'defun "not a symbol")))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
@@ -162,7 +164,7 @@
     (:lambda (form env)
       (:if (core:consp form)
           ((:lambda (fn args)
-             (:if (mu:keyp fn)
+             (:if (core:keywordp fn)
                   (mu:compile form)     ;;; mu special form (:key ...)
                   (:if (core:consp fn)  ;;; application ((...) ...), native or core
                        (core::compile-application fn args env)
@@ -173,7 +175,7 @@
                         (core::special-table fn)))))
            (mu:car form)
            (mu:cdr form))
-          (:if (core:symbolp form)
+          (:if (mu:eq :symbol (mu:type-of form))
                (core::compile-symbol form env)
                (mu:compile form)))))
 

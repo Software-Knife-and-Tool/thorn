@@ -125,7 +125,7 @@ impl Symbol {
 
     pub fn name(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
-            Type::Keyword => match symbol {
+            Type::Null | Type::Keyword => match symbol {
                 Tag::Direct(dir) => Tag::to_direct(dir.data(), dir.length(), DirectType::Byte),
                 _ => panic!(),
             },
@@ -350,7 +350,6 @@ pub trait MuFunction {
     fn mu_boundp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_symbol(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_keyword(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_keywordp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Symbol {
@@ -358,7 +357,7 @@ impl MuFunction for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match Tag::type_of(mu, symbol) {
-            Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
+            Type::Null | Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "mu:sy-name", symbol)),
         };
 
@@ -383,7 +382,7 @@ impl MuFunction for Symbol {
         fp.value = match Tag::type_of(mu, symbol) {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, symbol) {
-                    return Err(Exception::new(Condition::Type, "mu:sy-value", symbol));
+                    return Err(Exception::new(Condition::Type, "mu:sy-val", symbol));
                 } else {
                     Symbol::value(mu, symbol)
                 }
@@ -408,17 +407,6 @@ impl MuFunction for Symbol {
                 }
             }
             _ => return Err(Exception::new(Condition::Type, "mu:unboundp", symbol)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_keywordp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let symbol = fp.argv[0];
-
-        fp.value = match Tag::type_of(mu, symbol) {
-            Type::Keyword => symbol,
-            _ => Tag::nil(),
         };
 
         Ok(())

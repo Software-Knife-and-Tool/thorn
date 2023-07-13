@@ -36,15 +36,16 @@
 (mu:intern core::ns :intern "read-sharp-vector"
     (:lambda (ch stream)
       ((:lambda (type)
-          (core:raise-unless mu:keyp type 'core:read-sharp-vector "not a type keyword")
+          (core:raise-unless core:keywordp type 'core:read-sharp-vector "not a type keyword")
           (mu:make-sv type (core::read-list #\( stream)))
        (core::read-atom ch stream))))
 
 (mu:intern core::ns :intern "read-sharp-symbol"
    (:lambda (ch stream)
      ((:lambda (symbol)
-          (core:raise-unless core:symbolp symbol 'core::read-sharp-symbol "not a symbol")
-          (mu:make0-sy (mu:sy-name symbol)))
+          (:if (mu:eq :symbol (mu:type-of symbol))
+               (mu:make-sy (mu:sy-name symbol))
+               (core:raise symbol 'core::read-sharp-symbol "not a symbol")))
        (core::read-atom ch stream))))
 
 (mu:intern core::ns :intern "read-sharp-number"
@@ -102,7 +103,7 @@
                   ((:lambda (el)
                      (:if (core::or (core:eof stream) (mu:eq el core::read-list-eol))
                           loop
-                          (:if (core:symbolp el)
+                          (:if (mu:eq :symbol (mu:type-of el))
                                (:if (mu:eq (mu:sy-name el) ".")
                                     ((:lambda (dotted)
                                        (core:raise-if (core:null dotted) () 'core::read-list "early eof in dotted list")
@@ -179,7 +180,6 @@
 ;;;
 ;;; get/set-macro-character
 ;;;
-(mu:intern core::ns :intern "core-char-macro-ns" (mu:make-ns "core:char-macro-ns" ()))
 (mu:intern core::ns :extern "get-macro-character"
    (:lambda (char)
      (core:raise-unless core:charp char 'core:get-macro-character "not a character")

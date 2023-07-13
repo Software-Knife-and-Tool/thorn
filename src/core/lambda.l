@@ -42,7 +42,7 @@
 ;;;
 (mu:intern core::ns :intern "core-lambda"
    (:lambda (lambda env)
-      (:if (core:findl (:lambda (el) (core:null (core:symbolp el))) lambda)
+      (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
          (core:raise lambda 'core::core-lambda "list syntax")
          ((:lambda (desc)
             (:if (core:fixnump desc)

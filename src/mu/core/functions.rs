@@ -99,7 +99,6 @@ lazy_static! {
         ("write", Some(Scope::Extern), 3, Stream::mu_write),
         // symbols
         ("boundp", Some(Scope::Extern), 1, Symbol::mu_boundp),
-        ("keyp", Some(Scope::Extern), 1, Symbol::mu_keywordp),
         ("keyword", Some(Scope::Extern), 1, Symbol::mu_keyword),
         ("make-sy", Some(Scope::Extern), 1, Symbol::mu_symbol),
         ("sy-name", Some(Scope::Extern), 1, Symbol::mu_name),

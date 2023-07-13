@@ -77,7 +77,6 @@
 ;;;
 ;;; symbol macros
 ;;;
-(mu:intern core::ns :intern "core-symbol-macro-ns" (mu:make-ns "core:symbol-macro-ns" ()))
 (mu:intern core::ns :intern "symbol-macro-expand"
    (:lambda (symbol)
      (:if (core:uninternedp symbol)
@@ -90,18 +89,15 @@
 
 (mu:intern core::ns :intern "get-symbol-macro"
    (:lambda (symbol)
-     (core:raise-unless core:symbolp symbol 'get-symbol-macro-form "not a symbol")
-     ((:lambda (macro-symbol)
-        (:if macro-symbol
-            macro-symbol
-            ()))
-      (mu:ns-find core::core-symbol-macro-ns :extern (core:symbol-name symbol)))))
+      (:if (mu:eq :symbol (mu:type-of symbol))
+           (mu:ns-find core::core-symbol-macro-ns :extern (core:symbol-name symbol))
+           (core:raise symbol 'get-symbol-macro-form "not a symbol"))))
 
 (mu:intern core::ns :extern "define-symbol-macro"
    (:lambda (symbol form)
-     (core:raise-unless core:symbolp symbol 'define-symbol-macro "not a symbol")
-     (mu:intern core::core-symbol-macro-ns :extern (mu:sy-name symbol) form)
-     symbol))
+      (:if (mu:eq :symbol (mu:type-of symbol))
+           (mu:intern core::core-symbol-macro-ns :extern (mu:sy-name symbol) form)
+           (core:raise symbol 'define-symbol-macro "not a symbol"))))
 
 ;;; (core:define-symbol-macro 't :t)
 ;;; (core:define-symbol-macro 'nil :nil)

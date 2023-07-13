@@ -8,23 +8,37 @@
 (mu:intern core::ns :extern "symbol-ns" mu:sy-ns)
 (mu:intern core::ns :extern "symbol-value" mu:sy-val)
 
+(mu:intern core::ns :extern "keywordp"
+   (:lambda (t)
+      (mu:eq :keyword (mu:type-of t))))
+
+(mu:intern core::ns :extern "symbolp"
+   (:lambda (t)
+      ((:lambda (type)
+          (:if (mu:eq :null type)
+               :t
+               (:if (mu:eq :keyword type)
+                    :t
+                    (mu:eq :symbol type))))
+       (mu:type-of t))))
+
 (mu:intern core::ns :intern "intern"
-  (:lambda (symbol value env)
-    (:if (core:uninternedp symbol)
-         ((:lambda (sym)
-            (:if sym
-                 (:if (core:boundp sym)
-                      (core:raise sym 'core::intern "symbol already bound")
-                      (mu:intern (core::read-get-ns) :extern (mu:sy-name symbol) value))
-                 (mu:intern (core::read-get-ns) :extern (mu:sy-name symbol) value)))
-          (mu:ns-find (core::read-get-ns) :extern (mu:sy-name symbol)))
-         ((:lambda (ns name)
-             (mu:intern
-              (core::read-get-ns)
-              (:if (mu:ns-find ns :extern name)
-                   :extern
-                   :intern)
-              name
-              value))
-           (mu:sy-ns symbol)
-          (mu:sy-name symbol)))))
+   (:lambda (symbol value env)
+      (:if (core:uninternedp symbol)
+           ((:lambda (sym)
+               (:if sym
+                    (:if (core:boundp sym)
+                         (core:raise sym 'core::intern "symbol already bound")
+                         (mu:intern (core::read-get-ns) :extern (mu:sy-name symbol) value))
+                    (mu:intern (core::read-get-ns) :extern (mu:sy-name symbol) value)))
+            (mu:ns-find (core::read-get-ns) :extern (mu:sy-name symbol)))
+           ((:lambda (ns name)
+               (mu:intern
+                (core::read-get-ns)
+                (:if (mu:ns-find ns :extern name)
+                     :extern
+                     :intern)
+                name
+                value))
+            (mu:sy-ns symbol)
+            (mu:sy-name symbol)))))
