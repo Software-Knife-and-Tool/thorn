@@ -48,8 +48,8 @@
       (core:raise-unless core:ctypep struct 'core::slot-value "not a ctype")
       (core:raise-unless core:keywordp slot-name 'core:slot-value "not a slot name")
       ((:lambda (slot)
-          (core:raise-if core:null slot 'core::slot-value "slot not bound")
-          (mu:car slot))
+          (core:raise-when core:null slot 'core::slot-value "slot not bound")
+          (mu:cdr slot))
        (core:assoc slot-name (mu:sv-ref (mu:st-vec struct) 1)))))
 
 ;;;
@@ -64,21 +64,15 @@
     (:reason  . :vector)
     (:env     . :cons)))
 
-;;; string
-(core::def-ctype "core:st"
-  '((:text . :vector)))
-
 ;;; closure
 (core::def-ctype "core:cl"
   '((:env   . :cons)
     (:nreqs . :fixnum)
     (:rest  . :symbol)
-    (:func  . :func)
-    (:apply . :func)))
+    (:func  . :func)))
 
 ;;; sequence
 (core::def-ctype "core:sq"
   '((:type   . :symbol)
     (:vector . :vector)
-    (:cons   . :cons)
-    (:elt    . :func)))
+    (:cons   . :cons)))

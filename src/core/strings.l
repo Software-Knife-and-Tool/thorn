@@ -5,7 +5,6 @@
 ;;;
 ;;; strings
 ;;;
-;;; (core::def-ctype "core:st" '((:text . :vector)))
 (mu:intern core::ns :extern "stringp"
    (:lambda (v)
       (:if (core:vectorp v)

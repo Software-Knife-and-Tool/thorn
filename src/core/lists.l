@@ -2,6 +2,34 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
+;;; utilities
+;;;
+(mu:intern core::ns :intern "pair-list"
+   (:lambda (pairs)
+      ((:lambda (len)
+          (:if (core:zerop len)
+               ()
+               (:if (core:zerop (mu:logand len 1))
+                    (mu:cdr
+                     (mu:fix
+                      (:lambda (pair-state)
+                         ((:lambda (nth alist)
+                             (:if (core:zerop nth)
+                                  pair-state
+                                  ((:lambda (offset)
+                                      (mu:cons offset
+                                         (mu:cons
+                                          (mu:cons (mu:nth offset pairs)
+                                             (mu:nth (core:1+ offset) pairs))
+                                          alist)))
+                                   (mu:fx-sub nth 2))))
+                          (mu:car pair-state)
+                          (mu:cdr pair-state)))
+                      (mu:cons len ())))
+                    (core:raise pairs 'core::pair-list "malformed pair list"))))
+       (mu:length pairs))))
+
+;;;
 ;;; fixpoint loop
 ;;;
 (mu:intern core::ns :extern "fix"

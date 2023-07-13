@@ -8,6 +8,7 @@ SRC = ../src
 CORE = \
 	core.l		\
 	closures.l	\
+        compile.l	\
 	fixnums.l	\
 	read-macro.l	\
 	read.l		\
@@ -15,9 +16,8 @@ CORE = \
 	symbol-macro.l	\
 	symbols.l	\
 	vectors.l	\
-        compile.l	\
         exceptions.l	\
-        format.l	\
+	format.l	\
         lambda.l	\
         lists.l		\
         load.l		\
