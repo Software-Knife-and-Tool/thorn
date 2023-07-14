@@ -111,8 +111,8 @@
         (:if (core:eof :t)
              loop
              (core:with-exception
-              (:lambda (exception)
-                 (core:exceptionf mu:err-out () () source)
+              (:lambda (ex)
+                 (core:exceptionf mu:err-out () () (core::exception-property :source ex))
                  (core:null loop))
                (:lambda ()
                  (core:format :t "core> " ())
