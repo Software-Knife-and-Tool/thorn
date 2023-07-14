@@ -2,5 +2,5 @@
 (mu:type-of core:type-of)	:func
 (mu:eval (core:compile '(defctype test :v :t)))	test
 (mu:type-of (mu:eval (core:compile '((:lambda () (core::def-ctype "test" '((:v . :t))) (core::make-ctype "test" '((:v . 2))))))))	:struct
-(core:type-of (mu:eval (core:compile '((:lambda () (core::def-ctype "test" '((:v . :t))) (core::make-ctype "test" '((:v . 2))))))))	"test"
+(core:type-of (mu:eval (core:compile '((:lambda () (core::def-ctype "test" '((:v . :t))) (core::make-ctype "test" '((:v . 2))))))))	test
 (mu:eval (core:compile '((:lambda () (core::def-ctype "test" '((:v . :t))) (core::slot-value :v (core::make-ctype "test" '((:v . 2))))))))	2

@@ -10,5 +10,6 @@ reader
 sequence
 stream
 string
+symbol
 types
 vector

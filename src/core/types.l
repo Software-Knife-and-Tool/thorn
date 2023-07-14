@@ -15,7 +15,7 @@
       ((:lambda (type)
           (:if (mu:eq type :struct)
                (:if (mu:eq :ctype (mu:st-type object))
-                    (mu:sv-ref (mu:st-vec object) 0)
+                    (mu:untern () :extern (mu:sv-ref (mu:st-vec object) 0))
                     type)
                type))
        (mu:type-of object))))
@@ -72,13 +72,9 @@
 ;;; core ctypes
 ;;;
 
-;;; exception
-(core::def-ctype "core:ex"
-  '((:cond . :symbol)
-    (:object  . :t)
-    (:source  . :symbol)
-    (:reason  . :vector)
-    (:env     . :cons)))
+;;; long keyword
+(core::def-ctype "keyword"
+  '((:name . :vector)))
 
 ;;; closure
 (core::def-ctype "core:cl"
