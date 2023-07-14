@@ -1,0 +1,4 @@
+(mu:type-of (core:keyword "abcdefghi"))	:struct
+(mu:type-of (core:keyword "abcd"))	:keyword
+(core:type-of (core:keyword "abcdefghi"))	keyword
+(core:type-of (core:keyword "abcd"))	:keyword

@@ -9,8 +9,8 @@
 (mu:intern core::ns :extern "symbol-value" mu:sy-val)
 
 (mu:intern core::ns :extern "keywordp"
-   (:lambda (t)
-      (mu:eq :keyword (mu:type-of t))))
+   (:lambda (t)                 
+      (mu:eq (core:type-of t) :keyword)))
 
 (mu:intern core::ns :extern "symbolp"
    (:lambda (t)
@@ -20,7 +20,14 @@
                (:if (mu:eq :keyword type)
                     :t
                     (mu:eq :symbol type))))
-       (mu:type-of t))))
+       (core:type-of t))))
+
+(mu:intern core::ns :extern "keyword"
+   (:lambda (name)
+      (core:raise-unless core:stringp name 'core:keyword "not a keyword name")
+      (:if (mu:fx-lt (mu:sv-len name) 8)
+           (mu:keyword name)
+           (core::make-ctype "keyword" `(,(mu:cons :name name))))))
 
 (mu:intern core::ns :intern "intern"
    (:lambda (symbol value env)
