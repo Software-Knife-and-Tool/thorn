@@ -16,8 +16,8 @@
           (:if (mu:eq type :struct)
                (:if (mu:eq :ctype (mu:st-type object))
                     (mu:untern () :extern (mu:sv-ref (mu:st-vec object) 0))
-                    type)
-               type))
+                    (mu:untern () :extern (mu:st-type object)))
+               (mu:untern () :extern (mu:sy-name type))))
        (mu:type-of object))))
 
 ;;;

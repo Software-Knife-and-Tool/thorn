@@ -65,10 +65,10 @@
 (mu:intern core::ns :intern "read-symbol"
    (:lambda (symbol)
      (:if (core::read-keywordp symbol)
-          (mu:keyword (core::read-symbol-name symbol))
+          (core:keyword (core::read-symbol-name symbol))
           ((:lambda (ns scope name)
              (:if (core:null ns)
-                  (mu:untern (mu:map-ns "") :extern name)
+                  (mu:untern () :extern name)
                   (mu:untern ns scope name)))
            (core::read-symbol-ns symbol)
            (core::read-symbol-scope symbol)

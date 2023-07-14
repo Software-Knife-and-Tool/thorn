@@ -9,18 +9,13 @@
 (mu:intern core::ns :extern "symbol-value" mu:sy-val)
 
 (mu:intern core::ns :extern "keywordp"
-   (:lambda (t)                 
-      (mu:eq (core:type-of t) :keyword)))
+   (:lambda (t)
+      (mu:eq (core:type-of t) 'keyword)))
 
 (mu:intern core::ns :extern "symbolp"
    (:lambda (t)
-      ((:lambda (type)
-          (:if (mu:eq :null type)
-               :t
-               (:if (mu:eq :keyword type)
-                    :t
-                    (mu:eq :symbol type))))
-       (core:type-of t))))
+      (core::or (core::or (core:keywordp t) (mu:eq () t))
+                (mu:eq 'symbol (core:type-of t)))))
 
 (mu:intern core::ns :extern "keyword"
    (:lambda (name)
