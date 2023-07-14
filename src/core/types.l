@@ -35,13 +35,29 @@
        (mu:ns-find core::ctypes :extern name))))
 
 (mu:intern core::ns :intern "make-ctype"
-   (:lambda (name slot-defs)
+   (:lambda (name slot-values)
       (core:raise-unless core:stringp name 'core:make-ctype "not a type name")
-      (core:raise-unless core:listp slot-defs 'core:make-ctype "not a slot list")
-      ((:lambda (symbol)
-          (core:raise-when core:null symbol 'core:make-ctype "type unbound")
-          (mu:make-st :ctype `(,name ,slot-defs)))
-       (mu:ns-find core::ctypes :extern name))))
+      (core:raise-unless core:listp slot-values 'core:make-ctype "not a slot list")
+      ((:lambda (type-symbol)
+          (core:raise-when core:null type-symbol 'core:make-ctype "type unbound")
+          (core:mapc
+           (:lambda (slot-value)
+              ((:lambda (slot-def)
+                  (core:raise-when core:null slot-def 'core:make-ctype "undefined slot"))
+               (core:findl
+                (:lambda (slot-def)
+                   (:if (mu:eq (mu:car slot-value) (mu:car slot-def))
+                        ((:lambda (name type)      
+                            (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of (mu:cdr slot-value)) type))
+                                 slot-def
+                                 (core:raise slot-value 'core:make-ctype "slot type mismatch")))
+                         (mu:car slot-def)
+                         (mu:cdr slot-def))
+                        ()))
+                (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1))))           
+           slot-values))
+       (mu:ns-find core::ctypes :extern name))
+      (mu:make-st :ctype `(,name ,slot-values))))
 
 (mu:intern core::ns :intern "slot-value"
    (:lambda (slot-name struct)
