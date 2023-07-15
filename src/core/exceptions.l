@@ -4,6 +4,11 @@
 ;;;
 ;;; exceptions
 ;;;
+(mu:intern core::ns :extern "exceptionp"
+           (:lambda (t)
+             (:if (core:structp t)
+                  (mu:eq :except (mu:st-type t))
+                  ())))
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond obj source reason env)

@@ -2,6 +2,19 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
+;;; lists
+;;;
+(mu:intern core::ns :extern "consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
+(mu:intern core::ns :extern "null" (:lambda (t) (mu:eq () t)))
+(mu:intern core::ns :extern "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
+
+(mu:intern core::ns :extern "dottedp"
+  (:lambda (obj)
+    (:if (core:consp obj)
+         (core:atom (mu:cdr obj))
+         ())))
+
+;;;
 ;;; utilities
 ;;;
 (mu:intern core::ns :intern "pair-list"
