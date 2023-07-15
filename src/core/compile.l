@@ -77,8 +77,7 @@
                 `(:quote
                   ,(core::intern
                     symbol
-                    (mu:eval (core::compile value env))
-                    env)))
+                    (mu:eval (core::compile value env)))))
                (core:raise symbol 'defconst "not a symbol")))
           (mu:nth 1 form)
           (mu:nth 2 form))))
@@ -92,7 +91,7 @@
                    ((:lambda (symbol)
                        (core::core-macro-env symbol macro-fn)
                        (mu:compile `(:quote ,symbol)))
-                    (core::intern symbol macro-fn env)))
+                    (core::intern symbol macro-fn)))
                 (core::compile-macro `(,(mu:car lambda) ,(mu:cdr lambda)) env))
                (core:raise symbol 'defmacro "not a symbol")))
        (mu:nth 1 form)
@@ -113,13 +112,20 @@
 
 (mu:intern core::ns :intern "defun"
    (:lambda (form env)
-      ((:lambda (symbol lambda)
+      ((:lambda (symbol lambda body)
+          (core:raise-unless core:symbolp symbol 'defun "not a symbol")
           (core:raise-unless core:listp lambda 'defun "not a lambda list")
-          (:if (mu:eq :symbol (mu:type-of symbol))
-               (mu:compile `(:quote ,(core::intern symbol (core::lambda `(:lambda ,lambda) env) env)))
-               (core:raise symbol 'defun "not a symbol")))
+          ((:lambda (lambda-desc)
+              ((:lambda (compiled-lambda compiled-body)               
+                  (mu:cons :quote
+                     (mu:cons (core::intern symbol (mu:compile `(:lambda ,compiled-lambda ,@compiled-body)))
+                        ())))
+               (core::lambda-property :syms lambda-desc)
+               (core::compile-lambda-body lambda-desc body env)))
+           (core::core-lambda lambda env)))
        (mu:nth 1 form)
-       (mu:nthcdr 2 form))))
+       (mu:nth 2 form)
+       (mu:nthcdr 3 form))))
 
 ;;;
 ;;; this if form can take two or three arguments

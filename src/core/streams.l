@@ -4,6 +4,15 @@
 ;;;
 ;;; core streams
 ;;;
+(mu:intern core::ns :extern "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
+
+(mu:intern core::ns :extern "eof"
+  (:lambda (designator)
+    (mu:eof (core::read-stream-designator designator))))
+
+;;;
+;;; utilities
+;;;
 (mu:intern core::ns :intern "write-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
@@ -22,6 +31,9 @@
                    designator
                    (core:raise-unless core:streamp designator 'core::read-stream-designator "not a stream"))))))
 
+;;;
+;;; constructors
+;;;
 (mu:intern core::ns :extern "make-string-stream"
   (:lambda (dir init)
     (core:raise-unless core:keywordp dir 'core:make-string-stream "not a direction keyword")
@@ -31,10 +43,6 @@
          (:if (mu:eq dir :output)
               (mu:open :string :output init)
               (core:raise dir 'core:make-string-stream "not a direction keyword")))))
-
-(mu:intern core::ns :extern "eof"
-  (:lambda (designator)
-    (mu:eof (core::read-stream-designator designator))))
 
 (mu:intern core::ns :extern "open"
   (:lambda (dir path)
