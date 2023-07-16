@@ -9,6 +9,7 @@
 ;;; rest:  rest symbol or nil
 ;;; func:  function, mu applyable
 ;;;
+;;; closure
 (mu:intern core::ns :intern "closure-property"
   (:lambda (key closure)
     (core:raise-unless core:closurep closure 'core::closure-property "is not a closure")
