@@ -67,7 +67,7 @@
                (:if (core::and (core::closure-property :rest fn) (core:zerop nreqs))
                     `(mu:cons ,(core::flat-arg-list args) ())
                     ((:lambda (reqs rest)
-                              (core::flat-arg-list `(,@reqs ,(core::flat-arg-list rest))))
+                        (core::flat-arg-list `(,@reqs ,(core::flat-arg-list rest))))
                      (core:dropr args (mu:fx-sub (mu:length args) nreqs))
                      (core:dropl args nreqs))))
             (core::closure-property :nreqs fn))
@@ -123,13 +123,13 @@
 (mu:intern core::ns :intern "compile-lambda-call"
   (:lambda (form args env)
     ((:lambda (fn)
-       (:if (core:closurep fn)
+        (:if (core:closurep fn)
             `(core::closure-apply ,fn ,(core::compile-flat-arg-list args env))
             (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env))))
      (core::compile form env))))
 
 (mu:intern core::ns :intern "compile-fn-call"
-  (:lambda (fn args env)
+   (:lambda (fn args env)
     (:if (core:closurep fn)
          `(core:apply ,fn ,(core::compile-flat-arg-list args env))
          (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env)))))
