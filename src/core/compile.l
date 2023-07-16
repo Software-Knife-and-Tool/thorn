@@ -55,17 +55,17 @@
     ((:lambda (lambda body)
        ((:lambda (lambda-desc)
            ((:lambda (symbols reqsyms restsym lambda-env closed)
-             ((:lambda (form)                
+               ((:lambda (fn)                
                  (:if (core::or lambda-env restsym)           
-                      (core::make-closure lambda-env (mu:length reqsyms) restsym form)
-                      form))
-              (mu:compile `(:lambda ,symbols ,@(core::compile-lambda-body lambda-desc body env)))))
-           (core::lambda-property :syms lambda-desc)
-           (core::lambda-property :reqs lambda-desc)
-           (core::lambda-property :rest lambda-desc)
-           (core::lambda-property :env lambda-desc)
-           (core::lambda-property :closed lambda-desc)))
-       (core::core-lambda lambda env)))
+                      (core::make-closure lambda-env (mu:length reqsyms) restsym fn)
+                      fn))
+                (mu:compile `(:lambda ,symbols ,@(core::compile-lambda-body lambda-desc body env)))))
+            (core::lambda-property :syms lambda-desc)
+            (core::lambda-property :reqs lambda-desc)
+            (core::lambda-property :rest lambda-desc)
+            (core::lambda-property :env lambda-desc)
+            (core::lambda-property :closed lambda-desc)))
+        (core::core-lambda lambda env)))
      (mu:nth 1 form)
      (mu:nthcdr 2 form))))
 
@@ -110,22 +110,18 @@
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
+;;; (mu:compile (core::list-2 :quote (core::intern symbol (core::lambda (mu:cons :lambda lambda) env) env)))
+
 (mu:intern core::ns :intern "defun"
    (:lambda (form env)
-      ((:lambda (symbol lambda body)
+      ((:lambda (symbol lambda-form)
           (core:raise-unless core:symbolp symbol 'defun "not a symbol")
-          (core:raise-unless core:listp lambda 'defun "not a lambda list")
-          ((:lambda (lambda-desc)
-              ((:lambda (compiled-lambda compiled-body)               
-                  (mu:cons :quote
-                     (mu:cons (core::intern symbol (mu:compile `(:lambda ,compiled-lambda ,@compiled-body)))
-                        ())))
-               (core::lambda-property :syms lambda-desc)
-               (core::compile-lambda-body lambda-desc body env)))
-           (core::core-lambda lambda env)))
+          (core:raise-when core:keywordp symbol 'defun "not a symbol")
+          (core:raise-unless core:listp lambda-form 'defun "not a lambda list")
+          ;;; we get away with this only because core:lambda ignores the initial symbol
+          `(:quote ,(core::intern symbol (core::lambda lambda-form env))))
        (mu:nth 1 form)
-       (mu:nth 2 form)
-       (mu:nthcdr 3 form))))
+       (mu:nthcdr 1 form))))
 
 ;;;
 ;;; this if form can take two or three arguments
