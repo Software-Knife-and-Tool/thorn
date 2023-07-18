@@ -25,7 +25,7 @@ core       exception      total: 11       passed: 11       failed: 0        abor
 core       format         total: 15       passed: 15       failed: 0        aborted: 0       
 core       lambda         total: 28       passed: 17       failed: 0        aborted: 11      
 core       list           total: 78       passed: 78       failed: 0        aborted: 0       
-core       macro          total: 9        passed: 6        failed: 1        aborted: 2       
+core       macro          total: 9        passed: 7        failed: 0        aborted: 2       
 core       reader         total: 56       passed: 56       failed: 0        aborted: 0       
 core       sequence       total: 2        passed: 2        failed: 0        aborted: 0       
 core       stream         total: 22       passed: 22       failed: 0        aborted: 0       
@@ -34,5 +34,5 @@ core       symbol         total: 4        passed: 4        failed: 0        abor
 core       types          total: 6        passed: 6        failed: 0        aborted: 0       
 core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
 -----------------------
-core       passed: 300    total: 320      failed: 1        aborted: 19        
+core       passed: 301    total: 320      failed: 0        aborted: 19        
 
