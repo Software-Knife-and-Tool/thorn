@@ -73,26 +73,20 @@
    (:lambda (form env)
       ((:lambda (symbol value)
           (:if (mu:eq :symbol (mu:type-of symbol))
-               (mu:compile
-                `(:quote
-                  ,(core::intern
-                    symbol
-                    (mu:eval (core::compile value env)))))
+               `(:quote
+                 ,(core::intern
+                   symbol
+                   (mu:eval value)))
                (core:raise symbol 'defconst "not a symbol")))
           (mu:nth 1 form)
           (mu:nth 2 form))))
 
 (mu:intern core::ns :intern "defmacro"
    (:lambda (form env)
-      ((:lambda (symbol lambda)
-          (core:raise-unless core:listp lambda 'defmacro "not a lambda list")
-          (:if (mu:eq :symbol (mu:type-of symbol))
-               ((:lambda (macro-fn)
-                   ((:lambda (symbol)
-                       (core::core-macro-env symbol macro-fn)
-                       (mu:compile `(:quote ,symbol)))
-                    (core::intern symbol macro-fn)))
-                (core::compile-macro `(,(mu:car lambda) ,(mu:cdr lambda)) env))
+      ((:lambda (symbol lambda-form)
+          (:if (core:symbolp symbol)
+               ;; `(:quote (core::intern ,symbol (core::core-macro-env ,symbol (core::compile-macro ,lambda-form) ,env)))
+               `(:quote ,symbol)
                (core:raise symbol 'defmacro "not a symbol")))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
@@ -164,23 +158,33 @@
 ;;; compile
 ;;;
 (mu:intern core::ns :intern "compile"
-    (:lambda (form env)
+   (:lambda (form env)
       (:if (core:consp form)
-          ((:lambda (fn args)
-             (:if (core:keywordp fn)
-                  (mu:compile form)     ;;; mu special form (:key ...)
-                  (:if (core:consp fn)  ;;; application ((...) ...), native or core
-                       (core::compile-application fn args env)
-                       ((:lambda (special)
-                          (:if special
-                               (mu:apply (mu:sy-val special) `(,form ,env))
-                               (core::compile-application fn args env)))
-                        (core::special-table fn)))))
-           (mu:car form)
-           (mu:cdr form))
-          (:if (mu:eq :symbol (mu:type-of form))
-               (core::compile-symbol form env)
-               (mu:compile form)))))
+           ((:lambda (fn args)
+               (:if (core::or (core:closurep fn) (core:functionp fn))
+                    (core::compile-fn-call fn args env)
+                    (:if (core:keywordp fn)
+                         (mu:compile form)     ; mu special form (:key ...)
+                         (:if (core:consp fn)  ; application ((...) ...), native or core
+                              (core::compile-lambda-call fn args env)
+                              (:if (core:symbolp fn) ; symbol, function symbol or special form
+                                   ((:lambda (special)
+                                       (:if special
+                                            (core::compile (mu:apply (mu:sy-val special) `(,form ,env)) env)
+                                            (:if (core:fboundp fn)
+                                                 ((:lambda (macro-fn)
+                                                     (:if macro-fn
+                                                          (core::compile-macro-call fn args env)
+                                                          (core::compile-symbol-call fn args env)))
+                                                  (core:macro-function fn env))
+                                                 (core::compile-symbol-call fn args env))))
+                                    (core::special-table fn))
+                                   (core:raise form 'core::compile "not a function designator"))))))
+            (mu:car form)
+            (mu:cdr form))
+           (:if (core:symbolp form)
+                (core::compile-symbol form env)
+                form))))
 
 (mu:intern core::ns :extern "compile"
    (:lambda (form)

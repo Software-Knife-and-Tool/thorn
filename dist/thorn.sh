@@ -23,6 +23,7 @@ SOURCES=""
 CORE=(\
 	core.l	     	\
 	closures.l      \
+	funcall.l       \
 	fixnums.l       \
 	read-macro.l    \
 	read.l       	\
