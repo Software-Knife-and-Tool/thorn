@@ -8,7 +8,8 @@ SRC = ../src
 CORE = \
 	core.l		\
 	closures.l	\
-        compile.l	\
+	funcall.l	\
+	compile.l	\
 	fixnums.l	\
 	read-macro.l	\
 	read.l		\

@@ -135,4 +135,4 @@
         `(:lambda ,(core::lambda-property :syms lambda-desc)
                   ,@(core::compile-lambda-body lambda-desc body env))))
      (core::core-macro (mu:car form) env)
-     (mu:nth 1 form))))
+     (mu:nthcdr 1 form))))
