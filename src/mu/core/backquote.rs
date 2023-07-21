@@ -127,7 +127,7 @@ impl Backquote for Mu {
     // bq_read returns:
     //
     //     Err raise exception if I/O problem, syntax error, or end of file
-    //     Ok(tag) if the read succeeded,
+    //     Ok(tag) if the read succeeded
     //
     #[allow(clippy::only_used_in_recursion)]
     fn bq_read(mu: &Mu, in_list: bool, stream: Tag, recursivep: bool) -> exception::Result<Tag> {
@@ -247,18 +247,18 @@ impl Backquote for Mu {
 }
 
 pub trait MuFunction {
-    fn mu_bq_append(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
+    fn _append(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
-    fn mu_bq_append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn _append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list1 = fp.argv[0];
         let list2 = fp.argv[1];
 
+        let mut append = Vec::new();
+
         fp.value = match Tag::type_of(mu, list1) {
             Type::Null | Type::Cons => {
-                let mut append = Vec::new();
-
                 for elt in ConsIter::new(mu, list1) {
                     append.push(Cons::car(mu, elt))
                 }
@@ -274,7 +274,20 @@ impl MuFunction for Mu {
                     _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list1)),
+            _ => {
+                append.push(Cons::car(mu, list1));
+
+                match Tag::type_of(mu, list2) {
+                    Type::Null | Type::Cons => {
+                        for elt in ConsIter::new(mu, list2) {
+                            append.push(Cons::car(mu, elt))
+                        }
+
+                        Cons::vlist(mu, &append)
+                    }
+                    _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
+                }
+            }
         };
 
         Ok(())
