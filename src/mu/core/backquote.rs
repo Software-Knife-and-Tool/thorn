@@ -257,37 +257,27 @@ impl MuFunction for Mu {
 
         let mut append = Vec::new();
 
-        fp.value = match Tag::type_of(mu, list1) {
+        match Tag::type_of(mu, list1) {
             Type::Null | Type::Cons => {
                 for elt in ConsIter::new(mu, list1) {
                     append.push(Cons::car(mu, elt))
                 }
-
-                match Tag::type_of(mu, list2) {
-                    Type::Null | Type::Cons => {
-                        for elt in ConsIter::new(mu, list2) {
-                            append.push(Cons::car(mu, elt))
-                        }
-
-                        Cons::vlist(mu, &append)
-                    }
-                    _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
-                }
             }
             _ => {
-                append.push(Cons::car(mu, list1));
-
-                match Tag::type_of(mu, list2) {
-                    Type::Null | Type::Cons => {
-                        for elt in ConsIter::new(mu, list2) {
-                            append.push(Cons::car(mu, elt))
-                        }
-
-                        Cons::vlist(mu, &append)
-                    }
-                    _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
-                }
+                fp.value = list1;
+                return Ok(());
             }
+        };
+
+        fp.value = match Tag::type_of(mu, list2) {
+            Type::Null | Type::Cons => {
+                for elt in ConsIter::new(mu, list2) {
+                    append.push(Cons::car(mu, elt))
+                }
+
+                Cons::vlist(mu, &append)
+            }
+            _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
         };
 
         Ok(())
