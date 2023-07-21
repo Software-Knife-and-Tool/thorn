@@ -3,7 +3,7 @@
 (mu:type-of core:macro-function)	:func
 (mu:type-of core::core-macro)	:func
 (mu:type-of core::compile-macro)	:func
-(core:compile '(defmacro a-macro ()))	(:quote a-macro)
-(mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'a-macro) (core:macroexpand '(core:a-macro) ())))))	a-macro
-(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function core:a-macro ()))))))	:null
+(core:compile '(defmacro core:a-macro ()))	core:a-macro
+(mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'core:a-macro) (core:macroexpand '(core:a-macro) ())))))	a-macro
+(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () core:a-macro) (core:macro-function core:a-macro ()))))))	:null
 (core:macro-function core:macro-function ())	:nil

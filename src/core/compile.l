@@ -73,10 +73,9 @@
    (:lambda (form env)
       ((:lambda (symbol value)
           (:if (mu:eq :symbol (mu:type-of symbol))
-               `(:quote
-                 ,(core::intern
+                  (core::intern
                    symbol
-                   (mu:eval value)))
+                   (mu:eval value))
                (core:raise symbol 'defconst "not a symbol")))
           (mu:nth 1 form)
           (mu:nth 2 form))))
@@ -85,7 +84,9 @@
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (:if (core:symbolp symbol)
-               `(:quote ,(core::intern symbol (core::core-macro-env symbol (core::compile-macro lambda-form env) env)))
+               ((:lambda (macrofn)
+                   (core::intern symbol macrofn))
+                (core::core-macro-env symbol (core::compile-macro lambda-form env)))
                (core:raise symbol 'defmacro "not a symbol")))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
@@ -97,7 +98,7 @@
          (:if (mu:eq :symbol (mu:type-of symbol))
               ((:lambda (pairs)
                 (core::def-ctype (mu:sy-name symbol) pairs)
-                `(:quote ,symbol))
+                symbol)
                (core::pair-list slot-defs))
               (core:raise symbol 'defctype "not a symbol")))
        (mu:nth 1 form)
@@ -112,7 +113,7 @@
           (core:raise-when core:keywordp symbol 'defun "not a symbol")
           (core:raise-unless core:listp lambda-form 'defun "not a lambda list")
           ;;; we get away with this only because core:lambda ignores the initial symbol
-          `(:quote ,(core::intern symbol (core::lambda lambda-form env))))
+          (core::intern symbol (core::lambda lambda-form env)))
        (mu:nth 1 form)
        (mu:nthcdr 1 form))))
 
@@ -169,7 +170,7 @@
                               (:if (core:symbolp fn) ; symbol, function symbol or special form
                                    ((:lambda (special)
                                        (:if special
-                                            (core::compile (mu:apply (mu:sy-val special) `(,form ,env)) env)
+                                            (mu:apply (mu:sy-val special) `(,form ,env))
                                             (:if (core:fboundp fn)
                                                  ((:lambda (macro-fn)
                                                      (:if macro-fn
