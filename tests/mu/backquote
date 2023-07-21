@@ -4,6 +4,9 @@
 `("abc")	("abc")
 `()	:nil
 `(())	(:nil)
+`,(mu:fx-add 1 2)	3
+(mu:type-of `,mu:version)	:vector
+`(,@(mu:fx-add 1 2))	3
 `#(:t 1 2 3)	#(:t 1 2 3)
 `(#(:t 1 2 3))	(#(:t 1 2 3))
 `(a b c)	(a b c)

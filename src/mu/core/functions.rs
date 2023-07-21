@@ -126,8 +126,8 @@ lazy_static! {
         ("wr-byte", Some(Scope::Extern), 2, Stream::mu_write_byte),
         ("wr-char", Some(Scope::Extern), 2, Stream::mu_write_char),
         // interns
-        ("bq-append", None, 2, Mu::mu_bq_append),
-        ("if", None, 3, Mu::mu_if),
+        ("bq-append", None, 2, Mu::_append),
+        ("if", None, 3, Mu::_if),
     ];
 }
 
@@ -206,7 +206,7 @@ pub trait MuFunction {
     fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_if(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn _if(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_real_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_run_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -293,7 +293,7 @@ impl MuFunction for Mu {
         }
     }
 
-    fn mu_if(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn _if(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let test = fp.argv[0];
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
