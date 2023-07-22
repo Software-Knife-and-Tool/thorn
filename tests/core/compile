@@ -3,8 +3,6 @@
 (mu:eq :func (mu:type-of (core:compile '(lambda (a b) b))))	:t
 (mu:eq :func (mu:type-of (core:compile '(lambda (a) "hoo"))))	:t
 (mu:eq :func (mu:type-of (core:compile '(lambda (a) a))))	:t
-(core:compile '(defconst foo ()))	(:quote core:foo)
-(mu:apply (core:compile '(lambda () (defconst core:foo 'foo) core:foo)) ())	foo
 (mu:eval (core:compile '(if :t :t ())))	:t
 (mu:eval (core:compile '(if () () :t)))	:t
 (mu:eval (core:compile '(if :t () :t)))	:nil

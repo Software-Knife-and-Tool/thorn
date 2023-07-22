@@ -25,12 +25,12 @@
 ;;;
 ;;; where the slot-alist is (:name . :type)
 ;;;
-(mu:intern core::ns :intern "def-ctype"
+(mu:intern core::ns :intern "defctype"
    (:lambda (name slots)
-      (core:raise-unless core:stringp name 'core:def-ctype "not a string")
-      (core:raise-unless core:listp slots 'core:def-ctype "not a slot list")
+      (core:raise-unless core:stringp name 'core:defctype "not a string")
+      (core:raise-unless core:listp slots 'core:defctype "not a slot list")
       ((:lambda (symbol)
-          (core:raise-unless core:null symbol 'core:def-ctype "type symbol bound")
+          (core:raise-unless core:null symbol 'core:defctype "type symbol bound")
           (mu:intern core::ctypes :extern name (mu:make-st :ctype `(,name ,slots))))
        (mu:ns-find core::ctypes :extern name))))
 
@@ -73,18 +73,18 @@
 ;;;
 
 ;;; long keyword
-(core::def-ctype "keyword"
+(core::defctype "keyword"
   '((:name . :vector)))
 
 ;;; closure
-(core::def-ctype "core:cl"
+(core::defctype "core:cl"
   '((:env   . :cons)
     (:nreqs . :fixnum)
     (:rest  . :symbol)
     (:func  . :func)))
 
 ;;; sequence
-(core::def-ctype "core:sq"
+(core::defctype "core:sq"
   '((:type   . :symbol)
     (:vector . :vector)
     (:cons   . :cons)))
