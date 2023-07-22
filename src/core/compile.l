@@ -69,38 +69,13 @@
      (mu:nth 1 form)
      (mu:nthcdr 2 form))))
 
-(mu:intern core::ns :intern "defconst"
-   (:lambda (form env)
-      ((:lambda (symbol value)
-          (:if (mu:eq :symbol (mu:type-of symbol))
-                  (core::intern
-                   symbol
-                   (mu:eval value))
-               (core:raise symbol 'defconst "not a symbol")))
-          (mu:nth 1 form)
-          (mu:nth 2 form))))
-
 (mu:intern core::ns :intern "defmacro"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
-          (:if (core:symbolp symbol)
-               ((:lambda (macrofn)
-                   (core::intern symbol macrofn))
-                (core::core-macro-env symbol (core::compile-macro lambda-form env)))
-               (core:raise symbol 'defmacro "not a symbol")))
-       (mu:nth 1 form)
-       (mu:nthcdr 2 form))))
-
-(mu:intern core::ns :intern "defctype"
-   (:lambda (form env)
-      ((:lambda (symbol slot-defs)
-         (core:raise-unless core:listp slot-defs 'defctype "not a slot-defs list")
-         (:if (mu:eq :symbol (mu:type-of symbol))
-              ((:lambda (pairs)
-                (core::def-ctype (mu:sy-name symbol) pairs)
-                symbol)
-               (core::pair-list slot-defs))
-              (core:raise symbol 'defctype "not a symbol")))
+          (core:raise-unless core:symbolp symbol 'defmacro "not a symbol")
+          ((:lambda (macrofn)
+              (core::intern symbol macrofn))
+           (core::core-macro-env symbol (core::compile-macro lambda-form env))))
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
@@ -146,10 +121,8 @@
    (:lambda (symbol)
       (mu:cdr (core:assoc
         symbol
-        '((defconst . core::defconst)
-          (defun    . core::defun)
+        '((defun    . core::defun)
           (defmacro . core::defmacro)
-          (defctype . core::defctype)
           (if       . core::if)
           (lambda   . core::lambda)
           (quote    . core::quote))))))

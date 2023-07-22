@@ -22,7 +22,7 @@ CORE = \
         lambda.l	\
         lists.l		\
         load.l		\
-        macro.l		\
+        macros.l		\
         parse.l		\
         perf.l		\
         backquote.l	\
