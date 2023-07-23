@@ -23,7 +23,7 @@ core       compile        total: 22       passed: 22       failed: 0        abor
 core       core           total: 25       passed: 25       failed: 0        aborted: 0       
 core       exception      total: 11       passed: 11       failed: 0        aborted: 0       
 core       format         total: 15       passed: 15       failed: 0        aborted: 0       
-core       lambda         total: 23       passed: 23       failed: 0        aborted: 0       
+core       lambda         total: 24       passed: 24       failed: 0        aborted: 0       
 core       list           total: 78       passed: 78       failed: 0        aborted: 0       
 core       macro          total: 9        passed: 9        failed: 0        aborted: 0       
 core       reader         total: 56       passed: 56       failed: 0        aborted: 0       
@@ -34,5 +34,5 @@ core       symbol         total: 4        passed: 4        failed: 0        abor
 core       types          total: 5        passed: 5        failed: 0        aborted: 0       
 core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
 -----------------------
-core       passed: 306    total: 312      failed: 0        aborted: 6         
+core       passed: 307    total: 313      failed: 0        aborted: 6         
 
