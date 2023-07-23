@@ -47,7 +47,7 @@
   (:lambda (args env)
     (core:foldr
      (:lambda (elt acc)
-       (mu:cons 'mu:cons (mu:cons (core::compile elt env) `(,acc))))
+        (mu:cons 'mu:cons (mu:cons (core::compile elt env) `(,acc))))
      ()
      args)))
 
@@ -100,10 +100,11 @@
   (:lambda (symbol args env)
     (:if (core:boundp symbol)
          ((:lambda (fn)
-            (:if (core:closurep fn)
+             (core:raise-unless core:functionp fn 'core:compile-symbol-call "not a function")
+             (:if (core:closurep fn)
                  (:if (core::lambda-property :desc fn)
                       `(core:apply ,fn ,(core::compile-flat-arg-list args env))
                       `(,fn ,@(core::compile-quoted-lambda-arg-list fn args env)))
-                 `(mu:apply ,fn ,(core::compile-flat-arg-list args env))))
+                 `(core:apply ,fn ,(core::compile-flat-arg-list args env))))
           (core:symbol-value (core::compile symbol env)))
          `(core:apply ,(core::compile symbol env) ,(core::compile-flat-arg-list args env)))))
