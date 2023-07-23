@@ -118,10 +118,12 @@
 ;;; need to differentiate between uninterned symbols and closed symbols
 ;;;
 (mu:intern core::ns :intern "compile-symbol"
-  (:lambda (symbol env)
-    (:if (core:uninternedp symbol)
-         symbol
-         symbol)))
+   (:lambda (symbol env)
+      (:if (core:null symbol)
+           symbol
+           (:if (core:uninternedp symbol)
+                symbol
+                symbol))))
 
 ;;;
 ;;; resolving body symbols
