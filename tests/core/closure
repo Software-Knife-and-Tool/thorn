@@ -1,7 +1,7 @@
 (mu:type-of core:apply)	:func
-(mu:eval (core:compile '((lambda () (defun core:a-defun (a) a) (core:a-defun 'a-defun)))))	a-defun
-(mu:eval (core:compile '((lambda () (defun core:a-defun (a b) (mu:cons a b)) (core:a-defun 'a-defun 'b-defun)))))	(a-defun . b-defun)
-(mu:eval (core:compile '((lambda () (defun core:a-defun (&rest a) a) (core:a-defun 1 2 3)))))	(1 2 3)
-(mu:eval (core:compile '((lambda () (defun core:a-defun (a &rest b) (mu:cons a b)) (core:a-defun 0 1 2 3)))))	(0 1 2 3)
-(mu:eval (core:compile '((lambda () (defun core:a-defun (a b &rest c) (mu:cons a (mu:cons b c))) (core:a-defun 0 1 2 3)))))	(0 1 2 3)
+((:lambda () (core:compile '(defun core:a-defun (a) a)) (core:a-defun 'a-defun)))	a-defun
+((:lambda () (core:compile '(defun core:a-defun (a b) (mu:cons a b))) (core:a-defun 'a-defun 'b-defun)))	(a-defun . b-defun)
+((:lambda () (core:compile '(defun core:a-defun (&rest a) a)) (core:apply core:a-defun '(1 2 3))))	(1 2 3)
+((:lambda () (core:compile '(defun core:a-defun (a &rest b) (mu:cons a b))) (core:apply core:a-defun '(0 1 2 3))))	(0 1 2 3)
+((:lambda () (core:compile '(defun core:a-defun (a b &rest c) (mu:cons a (mu:cons b c)))) (core:apply core:a-defun '(0 1 2 3))))	(0 1 2 3)
 (core:apply (core:apply (core:compile '(lambda (a) (lambda (b) (mu:fx-add a b)))) '(5)) '(10))	15
