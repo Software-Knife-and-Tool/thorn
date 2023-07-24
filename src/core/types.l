@@ -21,52 +21,54 @@
        (mu:type-of object))))
 
 ;;;
-;;; ctype struct: #s(:ctype #(:t name slot-alist))
+;;; ctype struct: #s(:ctype #(:t name property-alist))
 ;;;
-;;; where the slot-alist is (:name . :type)
+;;; where the property-alist is (:name . :type)
 ;;;
 (mu:intern core::ns :intern "defctype"
-   (:lambda (name slots)
-      (core:raise-unless core:stringp name 'core:defctype "not a string")
-      (core:raise-unless core:listp slots 'core:defctype "not a slot list")
+   (:lambda (name properties)
+      (core:raise-unless core:stringp name 'core::defctype "not a string")
+      (core:raise-unless core:listp properties 'core::defctype "not a property list")
       ((:lambda (symbol)
-          (core:raise-unless core:null symbol 'core:defctype "type symbol bound")
-          (mu:intern core::ctypes :extern name (mu:make-st :ctype `(,name ,slots))))
+          (core:raise-unless core:null symbol 'core::defctype "type symbol bound")
+          (mu:intern core::ctypes :extern name (mu:make-st :ctype `(,name ,properties))))
        (mu:ns-find core::ctypes :extern name))))
 
 (mu:intern core::ns :intern "make-ctype"
-   (:lambda (name slot-values)
-      (core:raise-unless core:stringp name 'core:make-ctype "not a type name")
-      (core:raise-unless core:listp slot-values 'core:make-ctype "not a slot list")
+   (:lambda (name property-values)
+      (core:raise-unless core:stringp name 'core::make-ctype "not a type name")
+      (core:raise-unless core:listp property-values 'core::make-ctype "not a property list")
       ((:lambda (type-symbol)
-          (core:raise-when core:null type-symbol 'core:make-ctype "type unbound")
+          (core:raise-when core:null type-symbol 'core::make-ctype "type unbound")
           (core:mapc
-           (:lambda (slot-value)
-              ((:lambda (slot-def)
-                  (core:raise-when core:null slot-def 'core:make-ctype "undefined slot"))
+           (:lambda (property-value)
+              ((:lambda (property-def)
+                  (core:raise-when core:null property-def 'core::make-ctype "undefined property"))
                (core:findl
-                (:lambda (slot-def)
-                   (:if (mu:eq (mu:car slot-value) (mu:car slot-def))
-                        ((:lambda (name type)      
-                            (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of (mu:cdr slot-value)) type))
-                                 slot-def
-                                 (core:raise slot-value 'core:make-ctype "slot type mismatch")))
-                         (mu:car slot-def)
-                         (mu:cdr slot-def))
+                (:lambda (property-def)
+                   (:if (mu:eq (mu:car property-value) (mu:car property-def))
+                        ((:lambda (name type)
+                            (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of property-value) type))
+                                 property-def
+                                 (:if (core::and (mu:eq :list type) (core:listp property-value))
+                                      property-def
+                                      (core:raise property-value 'core::make-ctype "property type mismatch"))))
+                         (mu:car property-def)
+                         (mu:cdr property-def))
                         ()))
-                (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1))))           
-           slot-values))
+                (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1))))
+           property-values))
        (mu:ns-find core::ctypes :extern name))
-      (mu:make-st :ctype `(,name ,slot-values))))
+      (mu:make-st :ctype `(,name ,property-values))))
 
-(mu:intern core::ns :intern "slot-value"
-   (:lambda (slot-name struct)
-      (core:raise-unless core:ctypep struct 'core::slot-value "not a ctype")
-      (core:raise-unless core:keywordp slot-name 'core:slot-value "not a slot name")
-      ((:lambda (slot)
-          (core:raise-when core:null slot 'core::slot-value "slot not bound")
-          (mu:cdr slot))
-       (core:assoc slot-name (mu:sv-ref (mu:st-vec struct) 1)))))
+(mu:intern core::ns :intern "ctype-ref"
+   (:lambda (property-name struct)
+      (core:raise-unless core:ctypep struct 'core::ctype-ref "not a ctype")
+      (core:raise-unless core:keywordp property-name 'core::ctype-ref "not a property name")
+      ((:lambda (property)
+          (core:raise-when core:null property 'core::ctype-ref "property not bound")
+          (mu:cdr property))
+       (core:assoc property-name (mu:sv-ref (mu:st-vec struct) 1)))))
 
 ;;;
 ;;; core ctypes
@@ -77,14 +79,20 @@
   '((:name . :vector)))
 
 ;;; closure
-(core::defctype "core:cl"
-  '((:env   . :cons)
-    (:nreqs . :fixnum)
-    (:rest  . :symbol)
-    (:func  . :func)))
+(core::defctype "closure"
+  '((:lambda . :struct)
+    (:fn     . :func)))
+
+;;; lambda
+(core::defctype "lambda"
+   '((:syms   . :list)
+     (:reqs   . :list)
+     (:rest   . :t)
+     (:env    . :list)
+     (:closed . :list)))
 
 ;;; sequence
-(core::defctype "core:sq"
+(core::defctype "seq"
   '((:type   . :symbol)
     (:vector . :vector)
     (:cons   . :cons)))

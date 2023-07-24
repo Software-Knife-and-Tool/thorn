@@ -102,7 +102,7 @@
          ((:lambda (fn)
              (core:raise-unless core:functionp fn 'core:compile-symbol-call "not a function")
              (:if (core:closurep fn)
-                 (:if (core::lambda-property :desc fn)
+                 (:if (core::ctype-ref :desc fn)
                       `(core:apply ,fn ,(core::compile-flat-arg-list args env))
                       `(,fn ,@(core::compile-quoted-lambda-arg-list fn args env)))
                  `(core:apply ,fn ,(core::compile-flat-arg-list args env))))

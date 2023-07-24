@@ -17,23 +17,11 @@
 ;;; env:     list of lambda descriptors
 ;;; closed:  list of closed symbol bindings
 ;;;
-(mu:intern core::ns :intern "lambda-property"
-  (:lambda (key desc)
-    (mu:sv-ref
-     (mu:st-vec desc)
-     (mu:cdr
-      (core:assoc
-       key
-       '((:syms   . 0)
-         (:reqs   . 1)
-         (:rest   . 2)
-         (:env    . 3)
-         (:closed . 4)))))))
-
 (mu:intern core::ns :intern "make-lambda"
    (:lambda (lambda req-syms rest-sym env closed)
-     (mu:make-st :lambda
-       `(,lambda ,req-syms ,rest-sym ,env ,closed))))
+      (core::make-ctype "lambda"
+        (core::pair-list
+         `(:syms ,lambda :reqs ,req-syms :rest ,rest-sym :env ,env :closed ,closed)))))
 
 ;;;
 ;;; parse core lambda list
@@ -149,8 +137,8 @@
             ((:lambda (offset)
                (:if offset
                     ((:lambda ()
-                       (mu:compile `(mu::fr-ref ,(core::lambda-property :func frame) ,offset))))
+                       (mu:compile `(mu::fr-ref ,(core::ctype-ref :func frame) ,offset))))
                     ()))
-             (core:positionl (:lambda (el) (mu:eq el symbol)) (core::lambda-property :syms frame)))))
+             (core:positionl (:lambda (el) (mu:eq el symbol)) (core::ctype-ref :syms frame)))))
      ()
      env)))
