@@ -144,7 +144,7 @@
    (:lambda (fn list)
      (core:raise-unless core:functionp fn 'core:findl "not a function")
      (core:raise-unless core:listp list 'core:findl "not a list")
-     (core:foldr
+     (core:foldl
       (:lambda (el acc)
         (:if (core:apply fn `(,el))
              el
@@ -156,7 +156,7 @@
    (:lambda (fn list)
      (core:raise-unless core:functionp fn 'core:findr "not a function")
      (core:raise-unless core:sequencep list 'core:findr "not a list")
-     (core:foldl
+     (core:foldr
       (:lambda (el acc)
         (:if (core:apply fn `(,el))
              el

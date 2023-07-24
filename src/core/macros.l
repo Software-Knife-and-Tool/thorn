@@ -132,7 +132,7 @@
   (:lambda (form env)
     ((:lambda (lambda-desc body)
        (mu:compile
-        `(:lambda ,(core::lambda-property :syms lambda-desc)
+        `(:lambda ,(core::ctype-ref :syms lambda-desc)
                   ,@(core::compile-lambda-body lambda-desc body env))))
      (core::core-macro (mu:car form) env)
      (mu:nthcdr 1 form))))
