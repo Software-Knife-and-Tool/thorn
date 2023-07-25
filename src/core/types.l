@@ -47,13 +47,14 @@
                (core:findl
                 (:lambda (property-def)
                    (:if (mu:eq (mu:car property-value) (mu:car property-def))
-                        ((:lambda (name type)
+                        ((:lambda (type)
                             (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of property-value) type))
                                  property-def
-                                 (:if (core::and (mu:eq :list type) (core:listp property-value))
+                                 (:if (core::and (mu:eq :listp type) (core:listp property-value))
                                       property-def
-                                      (core:raise property-value 'core::make-ctype "property type mismatch"))))
-                         (mu:car property-def)
+                                      (:if (core::and (mu:eq :symbolp type) (core:symbolp property-value))
+                                           property-def
+                                           (core:raise property-value 'core::make-ctype "property type botch")))))
                          (mu:cdr property-def))
                         ()))
                 (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1))))
@@ -85,11 +86,11 @@
 
 ;;; lambda
 (core::defctype "lambda"
-   '((:syms   . :list)
-     (:reqs   . :list)
-     (:rest   . :t)
-     (:env    . :list)
-     (:closed . :list)))
+   '((:syms   . :listp)
+     (:reqs   . :listp)
+     (:rest   . :symbolp)
+     (:env    . :listp)
+     (:closed . :listp)))
 
 ;;; sequence
 (core::defctype "seq"

@@ -27,9 +27,10 @@
          (:func  . 3)))))))
 
 (mu:intern core::ns :intern "make-closure"
-  (:lambda (env nreqs rest func)
-    (mu:make-st :closure
-      `(,env ,nreqs ,rest ,func))))
+   (:lambda (lambda fn)
+      (core::make-ctype "closure"
+        (core::pair-list
+         `(:lambda ,lambda :fn ,fn)))))
 
 ;;;
 ;;; create a closure
