@@ -47,15 +47,16 @@
                (core:findl
                 (:lambda (property-def)
                    (:if (mu:eq (mu:car property-value) (mu:car property-def))
-                        ((:lambda (type)
-                            (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of property-value) type))
+                        ((:lambda (type value)
+                            (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of value) type))
                                  property-def
-                                 (:if (core::and (mu:eq :listp type) (core:listp property-value))
+                                 (:if (core::and (mu:eq :listp type) (core:listp value))
                                       property-def
-                                      (:if (core::and (mu:eq :symbolp type) (core:symbolp property-value))
+                                      (:if (core::and (mu:eq :symbolp type) (core:symbolp value))
                                            property-def
                                            (core:raise property-value 'core::make-ctype "property type botch")))))
-                         (mu:cdr property-def))
+                         (mu:cdr property-def)
+                         (mu:cdr property-value))
                         ()))
                 (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1))))
            property-values))
@@ -67,7 +68,7 @@
       (core:raise-unless core:ctypep struct 'core::ctype-ref "not a ctype")
       (core:raise-unless core:keywordp property-name 'core::ctype-ref "not a property name")
       ((:lambda (property)
-          (core:raise-when core:null property 'core::ctype-ref "property not bound")
+          (core:raise-when core:null property-name 'core::ctype-ref "property not bound")
           (mu:cdr property))
        (core:assoc property-name (mu:sv-ref (mu:st-vec struct) 1)))))
 
@@ -82,6 +83,7 @@
 ;;; closure
 (core::defctype "closure"
   '((:lambda . :struct)
+    (:nreqs  . :fixnum)
     (:fn     . :func)))
 
 ;;; lambda
@@ -89,8 +91,11 @@
    '((:syms   . :listp)
      (:reqs   . :listp)
      (:rest   . :symbolp)
-     (:env    . :listp)
-     (:closed . :listp)))
+     (:env    . :listp)))
+
+(mu:intern core::ns :extern "closurep"
+  (:lambda (fn)
+     (mu:eq (core:type-of fn) 'closure)))
 
 ;;; sequence
 (core::defctype "seq"

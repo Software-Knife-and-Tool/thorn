@@ -6,49 +6,54 @@
 ;;;
 
 ;;;
-;;; [*closure descriptor*] #s(:closure env nreqs rest func)
+;;; [*closure descriptor*] #s(:ctype :closure nreqs fn #s(:ctype :lambda syms reqs rest env))
 ;;;
-;;; env:   list of frame state structs
 ;;; nreqs: number of required arguments
-;;; rest:  rest symbol or nil
-;;; func:  function, mu applyable
+;;; fn:    implementation
 ;;;
-(mu:intern core::ns :intern "closure-property"
-  (:lambda (key closure)
-    (core:raise-unless core:closurep closure 'core::closure-property "is not a closure")
-    (mu:sv-ref
-     (mu:st-vec closure)
-     (mu:cdr
-      (core:assoc
-       key
-       '((:env   . 0)
-         (:nreqs . 1)
-         (:rest  . 2)
-         (:func  . 3)))))))
-
+;;; lambda:
+;;; env:   list of frame state structs
+;;; reqs:  required symbols
+;;; rest:  rest symbol or nil
+;;; syms:  all symbols
+;;;
 (mu:intern core::ns :intern "make-closure"
    (:lambda (lambda fn)
       (core::make-ctype "closure"
         (core::pair-list
-         `(:lambda ,lambda :fn ,fn)))))
+         `(:lambda ,lambda
+           :nreqs ,(mu:length (core::ctype-ref :reqs lambda))
+           :fn ,fn)))))
 
-;;;
-;;; create a closure
-;;;
+(mu:intern core::ns :intern "closure-prop"
+   (:lambda (prop closure)
+      (core:raise-unless core:closurep closure 'closure-prop `(,prop ,(mu:type-of closure) "not a closure"))                 
+      (:if (mu:eq prop :fn)
+           (core::ctype-ref :fn closure)
+           (:if (mu:eq prop :nreqs)
+                (core::ctype-ref :nreqs closure)
+                (core::ctype-ref prop (core::ctype-ref :lambda closure))))))
+
 (mu:intern core::ns :intern "closure"
-  (:lambda (fn)
-    ((:lambda (lambda-desc)
-       (core:raise-when core:null lambda-desc 'core::closure "closing bare function")
-       ((:lambda (desc body)
-          (mu:compile `(:lambda ,(core::ctype-ref :syms desc) ,desc ,@(mu:cdr (core::fn-form fn)))))
-        (core::make-lambda
-         (core::ctype-ref :syms lambda-desc)
-         (core::ctype-ref :reqs lambda-desc)
-         (core::ctype-ref :rest lambda-desc)
-         (core::ctype-ref :env lambda-desc)
-         (core:mapcar
-          (:lambda (desc)
-             (mu:fr-get (core::ctype-ref :frame desc)))
-          (core::ctype-ref :env lambda-desc)))
-        (mu:cdr (core::fn-form fn))))
-     (core::fn-lambda-desc fn))))
+  (:lambda (fn env)
+     (core:raise-unless core:closurep fn 'core::closure "closing bare function")
+     ((:lambda (lambda fn)
+         (core::make-closure lambda fn))
+      (core::make-lambda
+       (core::ctype-ref :syms fn)
+       (core::ctype-ref :reqs fn)
+       (core::ctype-ref :rest fn)
+       env)
+      (core::ctype-ref :fn fn))))
+
+(mu:intern core::ns :intern "closure-apply"
+   (:lambda (fn args)
+      ((:lambda (env)
+        (core:mapc mu:fr-push env)
+        ((:lambda (value)
+           (core:mapc mu:fr-pop env)
+           value)
+         ((:lambda (mu-fn)
+            (mu:apply mu-fn (mu:eval (core::lambda-arg-list fn args))))
+            (core::closure-prop :fn fn))))
+        (core::closure-prop :env fn))))

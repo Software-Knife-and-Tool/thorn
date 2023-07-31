@@ -9,19 +9,18 @@
 ;;;
 
 ;;;
-;;; [*lambda descriptor*] #s(:lambda lambda-syms req-syms rest-sym env closure)
+;;; [*lambda descriptor*] #s(:lambda lambda-syms req-syms rest-sym env)
 ;;;
 ;;; syms:    list of symbols, suitable for :lambda
 ;;; reqs:    list of required symbols
 ;;; rest:    rest symbol or nil
 ;;; env:     list of lambda descriptors
-;;; closed:  list of closed symbol bindings
 ;;;
 (mu:intern core::ns :intern "make-lambda"
-   (:lambda (lambda req-syms rest-sym env closed)
+   (:lambda (lambda req-syms rest-sym env)
       (core::make-ctype "lambda"
         (core::pair-list
-         `(:syms ,lambda :reqs ,req-syms :rest ,rest-sym :env ,env :closed ,closed)))))
+         `(:syms ,lambda :reqs ,req-syms :rest ,rest-sym :env ,env)))))
 
 ;;;
 ;;; parse core lambda list
@@ -34,7 +33,7 @@
          (core:raise lambda 'core::core-lambda "list syntax")
          ((:lambda (desc)
             (:if (core:fixnump desc)
-                 (core::make-lambda lambda lambda () env ())
+                 (core::make-lambda lambda lambda () env)
                  desc))
           (core:foldl
             (:lambda (el acc)
@@ -46,8 +45,7 @@
                            `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
                            (core:dropr lambda 2)
                            (mu:nth (core:1- (mu:length lambda)) lambda)
-                           env
-                           ())
+                           env)
                           (core:raise lambda 'core::core-lambda "rest botch"))
                      (core:1+ acc))))
             0
@@ -81,7 +79,7 @@
           (:if (mu:cdr body)
                compiled-form
                (:if (core:functionp compiled-form)
-                    (core:compile `(core::closure ,@compiled-form))
+                    (core:compile `(core::closure ,@compiled-form env))
                     compiled-form)))
         (core::compile (mu:car body) env)))
      body)))

@@ -47,22 +47,29 @@
 (mu:intern core::ns :intern "quote" (:lambda (form env) form))
 
 ;;;
-;;; lambda compiles to a closure descriptor
+;;; special forms
+;;;
+
+;;;
+;;; lambda compiles to a closure ctype
 ;;;
 (mu:intern core::ns :intern "lambda"
    (:lambda (form env)
     (core:raise-if (mu:fx-lt (mu:length form) 2) form 'lambda "malformed lambda expression")
     ((:lambda (lambda body)
         ((:lambda (lambda-desc)
-            ((:lambda (fn)              
-                (:if (core::or lambda-env restsym)
+            ((:lambda (fn)
+                (:if (core::or (core::ctype-ref :env lambda-desc) (core::ctype-ref :rest lambda-desc))
                      (core::make-closure lambda-desc fn)
                      fn))
-             (mu:compile `(:lambda ,symbols ,@(core::compile-lambda-body lambda-desc body env)))))
+             (mu:compile `(:lambda ,(core::ctype-ref :syms lambda-desc) ,@(core::compile-lambda-body lambda-desc body env)))))
         (core::core-lambda lambda env)))
      (mu:nth 1 form)
      (mu:nthcdr 2 form))))
 
+;;;
+;;; defmacro compiles to a bound macro symbol
+;;;
 (mu:intern core::ns :intern "defmacro"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
@@ -73,8 +80,9 @@
        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
-;;; (mu:compile (core::list-2 :quote (core::intern symbol (core::lambda (mu:cons :lambda lambda) env) env)))
-
+;;;
+;;; defun compiles to a bound function symbol
+;;;
 (mu:intern core::ns :intern "defun"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
@@ -111,6 +119,9 @@
           ,(core::thunk (mu:nth 2 form) env)
           ,(core::thunk (mu:nth 3 form) env)))))
 
+;;;
+;;; compiler
+;;;
 (mu:intern core::ns :intern "special-table"
    (:lambda (symbol)
       (mu:cdr (core:assoc
@@ -121,14 +132,11 @@
           (lambda   . core::lambda)
           (quote    . core::quote))))))
 
-;;;
-;;; compile
-;;;
 (mu:intern core::ns :intern "compile"
    (:lambda (form env)
       (:if (core:consp form)
            ((:lambda (fn args)
-               (:if (core::or (core:closurep fn) (core:functionp fn))
+               (:if (core::appliablep fn)
                     (core::compile-fn-call fn args env)
                     (:if (core:keywordp fn)
                          (mu:compile form)     ; mu special form (:key ...)
