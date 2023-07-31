@@ -19,26 +19,30 @@
 (mu:intern core::ns :intern "lambda-arg-list"
    (:lambda (fn args)
       (:if (core:closurep fn)
-           ((:lambda (nreqs)
-               (:if (core::and (core::closure-property :rest fn) (core:zerop nreqs))
+           ((:lambda (rest nreqs)
+               (:if (core::and rest (core:zerop nreqs))
                     `(mu:cons ,(core::flat-arg-list args) ())
                     ((:lambda (reqs rest)
                         (core::flat-arg-list `(,@reqs ,(core::flat-arg-list rest))))
                      (core:dropr args (mu:fx-sub (mu:length args) nreqs))
                      (core:dropl args nreqs))))
-            (core::closure-property :nreqs fn))
+            (core::closure-prop :rest fn)
+            (core::closure-prop :nreqs fn))
            (core::flat-arg-list args))))
 
 (mu:intern core::ns :intern "quoted-lambda-arg-list"
   (:lambda (fn args)
-    (:if (core:functionp fn)
+     (:if (core::appliablep fn)
          args
-         (:if (core::closure-property :rest fn)
-              (:if (core::and (core:closure-property :rest fn) (core:zerop (core::closure-property :arity fn)))
-                   `(,args)
-                   `(,@(core:dropr args (mu:fx-sub (mu:length args) (core::closure-property :arity fn)))
-                     ,@(core:dropl args (core::closure-property :arity fn))))
-              args))))
+         ((:lambda (rest nreqs)
+             (:if rest
+                  (:if (core::and rest (core:zerop nreqs))
+                       `(,args)
+                       `(,@(core:dropr args (mu:fx-sub (mu:length args) nreqs))
+                         ,@(core:dropl args nreqs)))
+                  args))
+            (core::closure-prop :rest fn)
+            (core::closure-prop :nreqs fn)))))
 
 ;;;
 ;;; compiled argument lists
@@ -56,18 +60,6 @@
      (core::quoted-lambda-arg-list
       fn
       (core:mapcar (:lambda (elt) (core::compile elt env)) args))))
-
-(mu:intern core::ns :intern "closure-apply"
-   (:lambda (fn args)
-    ((:lambda (env)
-        (core:mapc mu:fr-push env)
-        ((:lambda (value)
-           (core:mapc mu:fr-pop env)
-           value)
-         ((:lambda (mu-fn)
-            (mu:apply mu-fn (mu:eval (core::lambda-arg-list fn args))))
-            (core::closure-property :func fn))))
-        (core::closure-property :env fn))))
 
 ;;;
 ;;; compile-application
@@ -98,13 +90,11 @@
 
 (mu:intern core::ns :intern "compile-symbol-call"
   (:lambda (symbol args env)
-    (:if (core:boundp symbol)
-         ((:lambda (fn)
-             (core:raise-unless core:functionp fn 'core:compile-symbol-call "not a function")
+     (:if (core:boundp symbol)
+        ((:lambda (fn)
+             (core:raise-unless core::appliablep fn 'core:compile-symbol-call "not a function designator")
              (:if (core:closurep fn)
-                 (:if (core::ctype-ref :desc fn)
-                      `(core:apply ,fn ,(core::compile-flat-arg-list args env))
-                      `(,fn ,@(core::compile-quoted-lambda-arg-list fn args env)))
-                 `(core:apply ,fn ,(core::compile-flat-arg-list args env))))
-          (core:symbol-value (core::compile symbol env)))
-         `(core:apply ,(core::compile symbol env) ,(core::compile-flat-arg-list args env)))))
+                  `(core:apply ,(core::closure-prop :fn fn) ,(core::compile-quoted-lambda-arg-list fn args env))
+                  `(,fn ,(core::compile-flat-arg-list args env))))
+          (core:symbol-value symbol))
+         `(core:apply ,symbol ,(core::compile-flat-arg-list args env)))))

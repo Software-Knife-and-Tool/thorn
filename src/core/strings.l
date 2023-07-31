@@ -46,7 +46,7 @@
 ;;;
 (mu:intern core::ns :extern "string-position-if"
    (:lambda (fn str)
-     (core:raise-unless core:functionp fn 'core:string-position "not a function")
+     (core:raise-unless core::appliablep fn 'core:string-position "not a function")
      (core:raise-unless core:stringp str 'core:string-position: "not a string")
      (:if (core:zerop (core:length str))
           ()

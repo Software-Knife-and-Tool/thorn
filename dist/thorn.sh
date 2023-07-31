@@ -33,6 +33,7 @@ CORE=(\
 	vectors.l       \
         compile.l    	\
         exceptions.l 	\
+        debug.l         \
         format.l     	\
         lambda.l     	\
         lists.l      	\

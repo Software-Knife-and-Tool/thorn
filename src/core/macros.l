@@ -13,7 +13,8 @@
 ;;;
 ;;; Common Lisp adds an environment argument here for lexial macro expanders.
 ;;;
-;;; an environment is a closure that evaluates its argument.
+;;; an environment is a closure that evaluates its
+;;; arguments, as soon as we get closures working
 ;;;
 
 ;;;
@@ -109,7 +110,7 @@
          (core:raise-if lambda 'core::core-macro "lambda syntax")
          ((:lambda (desc)
              (:if (core:fixnump desc)
-                  (core::make-lambda lambda lambda () env ())
+                  (core::make-lambda lambda lambda () env)
                   desc))
           (core:foldl
             (:lambda (el acc)
@@ -121,8 +122,7 @@
                            `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
                            (core:dropr lambda 2)
                            (mu:nth (core:1- (mu:length lambda)) lambda)
-                           env
-                           ())
+                           env)
                           (core:raise lambda 'core::core-macro "rest botch"))
                      (core:1+ acc))))
             0

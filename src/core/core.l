@@ -45,11 +45,6 @@
 ;;; core classes
 ;;;
 (mu:intern core::ns :extern "sequencep" (:lambda (t) (:if (core:listp t) :t (core:vectorp t))))
-(mu:intern core::ns :extern "closurep"
-  (:lambda (fn)
-    (:if (mu:eq :struct (mu:type-of fn))
-         (mu:eq (mu:st-type fn) :closure)
-         ())))
 
 ;;;
 ;;; syntactic sugar
@@ -70,23 +65,16 @@
   (:lambda (arg1 arg2)
     arg2))
 
-(mu:intern core::ns :intern "princ"
-  (:lambda (obj)
-    (mu:write obj () mu:std-out)))
-
-(mu:intern core::ns :intern "print"
-  (:lambda (obj)
-    (mu:write obj :t mu:std-out)))
-
 ;;;
 ;;; core apply
 ;;;
+(mu:intern core::ns :intern "appliablep"
+   (:lambda (fn)
+      (core::or (core:closurep fn) (core:functionp fn))))
+
 (mu:intern core::ns :extern "apply"
-  (:lambda (fn args)
-     (core:raise-unless
-      (:lambda (fn) (core::or (core:functionp fn) (core:closurep fn)))
-      fn
-      'core:apply "not a function or closure")
-     (:if (core:functionp fn)
-          (mu:apply fn args)
-          (core::closure-apply fn args))))
+   (:lambda (fn args)
+     (core:raise-unless core::appliablep fn 'core:apply "not a function designator")
+     (:if (core:closurep fn)
+          (core::closure-apply fn args)
+          (mu:apply fn args))))

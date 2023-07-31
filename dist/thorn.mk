@@ -18,11 +18,12 @@ CORE = \
 	symbols.l	\
 	vectors.l	\
         exceptions.l	\
+	debug.l		\
 	format.l	\
         lambda.l	\
         lists.l		\
         load.l		\
-        macros.l		\
+        macros.l	\
         parse.l		\
         perf.l		\
         backquote.l	\
