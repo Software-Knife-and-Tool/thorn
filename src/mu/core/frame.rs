@@ -209,11 +209,10 @@ impl Frame {
 }
 
 pub trait MuFunction {
-    fn mu_frames(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
-    fn mu_fr_get(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
-    fn mu_fr_pop(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
-    fn mu_fr_push(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
-    fn mu_fr_ref(mu: &Mu, fp: &mut Frame) -> exception::Result<()>;
+    fn mu_frames(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_fr_pop(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_fr_push(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_fr_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Frame {
@@ -237,23 +236,6 @@ impl MuFunction for Frame {
         }
 
         fp.value = Cons::vlist(mu, &frames);
-        Ok(())
-    }
-
-    fn mu_fr_get(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let func = fp.argv[0];
-
-        fp.value = match Tag::type_of(mu, func) {
-            Type::Function => {
-                let id = Function::id(mu, func).as_u64();
-                let lexical_ref = mu.lexical.read().unwrap();
-                let vec_ref = lexical_ref[&id].read().unwrap();
-
-                vec_ref[0].to_tag(mu)
-            }
-            _ => return Err(Exception::new(Condition::Type, "mu:fr-get", func)),
-        };
-
         Ok(())
     }
 

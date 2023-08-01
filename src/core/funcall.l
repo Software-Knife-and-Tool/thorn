@@ -80,7 +80,7 @@
    (:lambda (fn args env)
     (:if (core:closurep fn)
          `(core:apply ,fn ,(core::compile-flat-arg-list args env))
-         (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env)))))
+         `(,fn ,(core::compile-quoted-lambda-arg-list fn args env)))))
 
 (mu:intern core::ns :intern "compile-macro-call"
   (:lambda (macro-symbol args env)

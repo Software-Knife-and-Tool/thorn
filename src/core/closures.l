@@ -49,9 +49,9 @@
 (mu:intern core::ns :intern "closure-apply"
    (:lambda (fn args)
       ((:lambda (env)
-        (core:mapc mu:fr-push env)
+        (core:mapc mu::fr-push env)
         ((:lambda (value)
-           (core:mapc mu:fr-pop env)
+           (core:mapc mu::fr-pop env)
            value)
          ((:lambda (mu-fn)
             (mu:apply mu-fn (mu:eval (core::lambda-arg-list fn args))))

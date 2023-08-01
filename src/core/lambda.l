@@ -9,7 +9,7 @@
 ;;;
 
 ;;;
-;;; [*lambda descriptor*] #s(:lambda lambda-syms req-syms rest-sym env)
+;;; [*lambda descriptor*] #s(:ctype :lambda (syms reqs rest env))
 ;;;
 ;;; syms:    list of symbols, suitable for :lambda
 ;;; reqs:    list of required symbols
@@ -67,7 +67,7 @@
   (:lambda (lambda-desc body env)
     (:if body
          ((:lambda (env)
-              (core::compile-closure lambda-desc body env))
+             (core::compile-closure lambda-desc body env))
             (core::compile-add-env lambda-desc env))
            ())))
 
