@@ -66,9 +66,8 @@ lazy_static! {
         ("raise", Some(Scope::Extern), 2, Exception::mu_raise),
         // frames
         ("frames", Some(Scope::Intern), 0, Frame::mu_frames),
-        ("fr-get", Some(Scope::Extern), 1, Frame::mu_fr_get),
-        ("fr-pop", Some(Scope::Extern), 1, Frame::mu_fr_pop),
-        ("fr-push", Some(Scope::Extern), 1, Frame::mu_fr_push),
+        ("fr-pop", Some(Scope::Intern), 1, Frame::mu_fr_pop),
+        ("fr-push", Some(Scope::Intern), 1, Frame::mu_fr_push),
         ("fr-ref", Some(Scope::Intern), 2, Frame::mu_fr_ref),
         // fixnums
         ("fx-add", Some(Scope::Extern), 2, Fixnum::mu_fxadd),
