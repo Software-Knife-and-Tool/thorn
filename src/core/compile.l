@@ -18,7 +18,7 @@
 ;;;
 ;;; returns: augmented list of lambda descriptors
 ;;;
-(mu:intern core::ns :intern "compile-add-env"
+(mu:intern core :intern "compile-add-env"
   (:lambda (lambda-desc env)
      (core:raise-unless core:structp lambda-desc 'compile-add-env "not a lambda descriptor")
      (core:raise-unless core:listp env 'compile-add-env "not a list")
@@ -44,7 +44,7 @@
 ;;;
 ;;; returns: mu form
 ;;;
-(mu:intern core::ns :intern "quote" (:lambda (form env) form))
+(mu:intern core :intern "quote" (:lambda (form env) form))
 
 ;;;
 ;;; special forms
@@ -53,13 +53,13 @@
 ;;;
 ;;; lambda compiles to a closure ctype
 ;;;
-(mu:intern core::ns :intern "lambda"
+(mu:intern core :intern "lambda"
    (:lambda (form env)
     (core:raise-if (mu:fx-lt (mu:length form) 2) form 'lambda "malformed lambda expression")
     ((:lambda (lambda body)
         ((:lambda (lambda-desc)
             ((:lambda (fn)
-                (:if (core::or (core::ctype-ref :env lambda-desc) (core::ctype-ref :rest lambda-desc))
+                (:if (core::orf (core::ctype-ref :env lambda-desc) (core::ctype-ref :rest lambda-desc))
                      (core::make-closure lambda-desc fn)
                      fn))
              (mu:compile `(:lambda ,(core::ctype-ref :syms lambda-desc) ,@(core::compile-lambda-body lambda-desc body env)))))
@@ -70,7 +70,7 @@
 ;;;
 ;;; defmacro compiles to a bound macro symbol
 ;;;
-(mu:intern core::ns :intern "defmacro"
+(mu:intern core :intern "defmacro"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (core:raise-unless core:symbolp symbol 'defmacro "not a symbol")
@@ -83,7 +83,7 @@
 ;;;
 ;;; defun compiles to a bound function symbol
 ;;;
-(mu:intern core::ns :intern "defun"
+(mu:intern core :intern "defun"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (core:raise-unless core:symbolp symbol 'defun "not a symbol")
@@ -97,19 +97,19 @@
 ;;;
 ;;; this if form can take two or three arguments
 ;;;
-(mu:intern core::ns :intern "thunk"
+(mu:intern core :intern "thunk"
   (:lambda (form env)
     (core::compile
      `(:lambda () ,form)
      env)))
 
-(mu:intern core::ns :intern "if-body"
+(mu:intern core :intern "if-body"
   (:lambda (term true-fn false-fn)
     (:if term
          (core:apply true-fn ())
          (core:apply false-fn ()))))
 
-(mu:intern core::ns :intern "if"
+(mu:intern core :intern "if"
    (:lambda (form env)
       (core:raise-unless core:listp env 'if "not an environment")
       (core:raise-unless (:lambda (form) (mu:fx-lt 2 (mu:length form))) form 'if "takes two or three arguments")
@@ -122,7 +122,7 @@
 ;;;
 ;;; compiler
 ;;;
-(mu:intern core::ns :intern "special-table"
+(mu:intern core :intern "special-table"
    (:lambda (symbol)
       (mu:cdr (core:assoc
         symbol
@@ -132,7 +132,7 @@
           (lambda   . core::lambda)
           (quote    . core::quote))))))
 
-(mu:intern core::ns :intern "compile"
+(mu:intern core :intern "compile"
    (:lambda (form env)
       (:if (core:consp form)
            ((:lambda (fn args)
@@ -161,6 +161,6 @@
                 (core::compile-symbol form env)
                 form))))
 
-(mu:intern core::ns :extern "compile"
+(mu:intern core :extern "compile"
    (:lambda (form)
      (core::compile form ())))

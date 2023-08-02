@@ -4,27 +4,27 @@
 ;;;
 ;;; core format
 ;;;
-(mu:intern core::ns :intern "fmt-tilde"
+(mu:intern core :intern "fmt-tilde"
   (:lambda (dest args)
     (core:write-char #\~ dest)
     args))
 
-(mu:intern core::ns :intern "fmt-percent"
+(mu:intern core :intern "fmt-percent"
   (:lambda (dest args)
     (core:terpri dest)
     args))
 
-(mu:intern core::ns :intern "fmt-bang"
+(mu:intern core :intern "fmt-bang"
   (:lambda (dest args)
     (mu:cdr args)))
 
-(mu:intern core::ns :intern "fmt-decimal"
+(mu:intern core :intern "fmt-decimal"
   (:lambda (dest args)
     (core:raise-unless core:fixnump (mu:car args) 'core:format "argument to ~D not a fixnum")
     (core:write (mu:car args) () dest)
     (mu:cdr args)))
 
-(mu:intern core::ns :intern "fmt-hex"
+(mu:intern core :intern "fmt-hex"
   (:lambda (dest args)
     ((:lambda (fx)
        (core:raise-unless core:fixnump fx 'core:format "argument to ~X not a fixnum")
@@ -33,7 +33,7 @@
             ((:lambda (str-stream)
                (mu:fix
                 (:lambda (n)
-                  (:if (core::or (core:null n) (core:zerop n))
+                  (:if (core::orf (core:null n) (core:zerop n))
                        ()
                        (core::prog2
                            (mu:write (core:schar "0123456789abcdef" (mu:logand n #xf)) () str-stream)
@@ -55,12 +55,12 @@
             (mu:open :string :output ""))))
        (mu:car args))))
 
-(mu:intern core::ns :intern "fmt-aesthetic"
+(mu:intern core :intern "fmt-aesthetic"
   (:lambda (dest args)
     (core:write (mu:car args) () dest)
     (mu:cdr args)))
 
-(mu:intern core::ns :intern "fmt-standard"
+(mu:intern core :intern "fmt-standard"
   (:lambda (dest args)
     (core:write (mu:car args) :t dest)
     (mu:cdr args)))
@@ -68,7 +68,7 @@
 ;;;
 ;;; control ops
 ;;;
-(mu:intern core::ns :intern "fmt-op"
+(mu:intern core :intern "fmt-op"
   (:lambda (dir dest args)
     ((:lambda (fn)
        (:if fn
@@ -85,7 +85,7 @@
          (#\% . core::fmt-percent)
          (#\! . core::fmt-bang)))))))
 
-(mu:intern core::ns :intern "fmt-loop"
+(mu:intern core :intern "fmt-loop"
   (:lambda (stream dest fmt args)
     (mu:fix
      (:lambda (loop)
@@ -108,7 +108,7 @@
          (core:get-output-stream-string dest)
          ())))
 
-(mu:intern core::ns :extern "format"
+(mu:intern core :extern "format"
    (:lambda (stream fmt args)
      (core:raise-unless core:stringp fmt 'core:format "not a string")
      (core:raise-unless core:listp args 'core:format "not a list")

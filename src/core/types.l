@@ -4,13 +4,13 @@
 ;;;
 ;;; type system
 ;;;
-(mu:intern core::ns :extern "ctypep"
+(mu:intern core :extern "ctypep"
    (:lambda (object)
       (:if (core:structp object)
            (mu:eq :ctype (mu:st-type object))
            ())))
 
-(mu:intern core::ns :extern "type-of"
+(mu:intern core :extern "type-of"
    (:lambda (object)
       ((:lambda (type)
           (:if (mu:eq type :struct)
@@ -25,7 +25,7 @@
 ;;;
 ;;; where the property-alist is (:name . :type)
 ;;;
-(mu:intern core::ns :intern "defctype"
+(mu:intern core :intern "defctype"
    (:lambda (name properties)
       (core:raise-unless core:stringp name 'core::defctype "not a string")
       (core:raise-unless core:listp properties 'core::defctype "not a property list")
@@ -34,7 +34,7 @@
           (mu:intern core::ctypes :extern name (mu:make-st :ctype `(,name ,properties))))
        (mu:ns-find core::ctypes :extern name))))
 
-(mu:intern core::ns :intern "make-ctype"
+(mu:intern core :intern "make-ctype"
    (:lambda (name property-values)
       (core:raise-unless core:stringp name 'core::make-ctype "not a type name")
       (core:raise-unless core:listp property-values 'core::make-ctype "not a property list")
@@ -48,11 +48,11 @@
                 (:lambda (property-def)
                    (:if (mu:eq (mu:car property-value) (mu:car property-def))
                         ((:lambda (type value)
-                            (:if (core::or (mu:eq :t type) (mu:eq (mu:type-of value) type))
+                            (:if (core::orf (mu:eq :t type) (mu:eq (mu:type-of value) type))
                                  property-def
-                                 (:if (core::and (mu:eq :listp type) (core:listp value))
+                                 (:if (core::andf (mu:eq :listp type) (core:listp value))
                                       property-def
-                                      (:if (core::and (mu:eq :symbolp type) (core:symbolp value))
+                                      (:if (core::andf (mu:eq :symbolp type) (core:symbolp value))
                                            property-def
                                            (core:raise property-value 'core::make-ctype "property type botch")))))
                          (mu:cdr property-def)
@@ -63,7 +63,7 @@
        (mu:ns-find core::ctypes :extern name))
       (mu:make-st :ctype `(,name ,property-values))))
 
-(mu:intern core::ns :intern "ctype-ref"
+(mu:intern core :intern "ctype-ref"
    (:lambda (property-name struct)
       (core:raise-unless core:ctypep struct 'core::ctype-ref "not a ctype")
       (core:raise-unless core:keywordp property-name 'core::ctype-ref "not a property name")
@@ -86,6 +86,10 @@
     (:nreqs  . :fixnum)
     (:fn     . :func)))
 
+(mu:intern core :extern "closurep"
+  (:lambda (fn)
+     (mu:eq (core:type-of fn) 'closure)))
+
 ;;; lambda
 (core::defctype "lambda"
    '((:syms   . :listp)
@@ -93,9 +97,9 @@
      (:rest   . :symbolp)
      (:env    . :listp)))
 
-(mu:intern core::ns :extern "closurep"
+(mu:intern core :extern "lambdap"
   (:lambda (fn)
-     (mu:eq (core:type-of fn) 'closure)))
+     (mu:eq (core:type-of fn) 'lambda)))
 
 ;;; sequence
 (core::defctype "seq"

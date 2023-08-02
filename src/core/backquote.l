@@ -4,7 +4,7 @@
 ;;;
 ;;; backquote - list construction DSL
 ;;;
-(mu:intern core::ns :intern "read-backquote"
+(mu:intern core :intern "read-backquote"
    (:lambda (stream ch)
       (mu:un-char #\` stream)
       (mu:read stream () ())))
