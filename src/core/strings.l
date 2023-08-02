@@ -6,9 +6,9 @@
 ;;; strings
 ;;;
 (mu:intern core :extern "stringp"
-   (:lambda (v)
-      (:if (core:vectorp v)
-           (mu:eq :char (mu:sv-type v))
+   (:lambda (string)
+      (:if (core:vectorp string)
+           (mu:eq :char (mu:sv-type string))
            ())))
 
 (mu:intern core :extern "get-output-stream-string"
@@ -39,31 +39,6 @@
                       nth))
                0)
               ()))))
-
-#|
-;;;
-;;; string-position-if
-;;;
-(mu:intern core :extern "string-position-if"
-   (:lambda (fn str)
-     (core:raise-unless core::appliablep fn 'core:string-position "not a function")
-     (core:raise-unless core:stringp str 'core:string-position: "not a string")
-     (:if (core:zerop (core:length str))
-          ()
-          ((:lambda (len)
-             (mu:car
-              (mu:fix
-               (:lambda (loop)
-                 (:if (core:listp loop)
-                      loop
-                      (:if (mu:fx-lt (core:1- len) loop)
-                           ()
-                           (:if (core:apply fn `(,(mu:sv-ref str loop)))
-                                `(,loop)
-                                (core:1+ loop)))))
-               0)))
-           (core:length str)))))
-|#
 
 ;;;
 ;;; string-position
@@ -112,12 +87,6 @@
 ;;;
 ;;; string construction
 ;;;
-(mu:intern core :extern "string-coerce"
-   (:lambda (object)
-      (:if (core:symbolp object)
-           (mu:sy-name object)
-           (core:format () "~A" `(,object)))))
-
 (mu:intern core :extern "string"
    (:lambda (designator)
       (:if (core:stringp designator)
@@ -126,7 +95,7 @@
               (mu:sy-name designator)
               (:if (core:charp designator)
                    (mu:make-sv :char `(,designator))
-                   (core:raise designator 'core::string "not a char"))))))
+                   (core:raise designator 'core::string "not a string designator"))))))
 
 (mu:intern core :extern "string-append"
   (:lambda (list)
