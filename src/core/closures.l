@@ -17,7 +17,7 @@
 ;;; rest:  rest symbol or nil
 ;;; syms:  all symbols
 ;;;
-(mu:intern core::ns :intern "make-closure"
+(mu:intern core :intern "make-closure"
    (:lambda (lambda fn)
       (core::make-ctype "closure"
         (core::pair-list
@@ -25,7 +25,7 @@
            :nreqs ,(mu:length (core::ctype-ref :reqs lambda))
            :fn ,fn)))))
 
-(mu:intern core::ns :intern "closure-prop"
+(mu:intern core :intern "closure-prop"
    (:lambda (prop closure)
       (core:raise-unless core:closurep closure 'closure-prop `(,prop ,(mu:type-of closure) "not a closure"))                 
       (:if (mu:eq prop :fn)
@@ -34,8 +34,9 @@
                 (core::ctype-ref :nreqs closure)
                 (core::ctype-ref prop (core::ctype-ref :lambda closure))))))
 
-(mu:intern core::ns :intern "closure"
+(mu:intern core :intern "closure"
   (:lambda (fn env)
+     (core:warn fn "closure")
      (core:raise-unless core:closurep fn 'core::closure "closing bare function")
      ((:lambda (lambda fn)
          (core::make-closure lambda fn))
@@ -43,15 +44,15 @@
        (core::ctype-ref :syms fn)
        (core::ctype-ref :reqs fn)
        (core::ctype-ref :rest fn)
-       env)
+       (mu::frames))
       (core::ctype-ref :fn fn))))
 
-(mu:intern core::ns :intern "closure-apply"
+(mu:intern core :intern "closure-apply"
    (:lambda (fn args)
       ((:lambda (env)
         (core:mapc mu::fr-push env)
         ((:lambda (value)
-           (core:mapc mu::fr-pop env)
+           (core:mapc (:lambda (frame) (mu::fr-pop (mu:car frame))) env)
            value)
          ((:lambda (mu-fn)
             (mu:apply mu-fn (mu:eval (core::lambda-arg-list fn args))))

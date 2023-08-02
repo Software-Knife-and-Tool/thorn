@@ -5,23 +5,23 @@
 ;;;
 ;;; strings
 ;;;
-(mu:intern core::ns :extern "stringp"
+(mu:intern core :extern "stringp"
    (:lambda (v)
       (:if (core:vectorp v)
            (mu:eq :char (mu:sv-type v))
            ())))
 
-(mu:intern core::ns :extern "get-output-stream-string"
+(mu:intern core :extern "get-output-stream-string"
    (:lambda (stream)
       (mu:get-str stream)))
 
-(mu:intern core::ns :extern "schar"
+(mu:intern core :extern "schar"
   (:lambda (str index)
     (core:raise-unless core:stringp str 'core:schar "not a string")
     (core:raise-unless core:fixnump index 'core:schar "not a string")
     (mu:sv-ref str index)))
 
-(mu:intern core::ns :extern "string="
+(mu:intern core :extern "string="
    (:lambda (str-1 str-2)
       (core:raise-unless core:stringp str-1 'core:string= "not a string")
       (core:raise-unless core:stringp str-2 'core:string= "not a string")
@@ -44,7 +44,7 @@
 ;;;
 ;;; string-position-if
 ;;;
-(mu:intern core::ns :extern "string-position-if"
+(mu:intern core :extern "string-position-if"
    (:lambda (fn str)
      (core:raise-unless core::appliablep fn 'core:string-position "not a function")
      (core:raise-unless core:stringp str 'core:string-position: "not a string")
@@ -68,7 +68,7 @@
 ;;;
 ;;; string-position
 ;;;
-(mu:intern core::ns :extern "string-position"
+(mu:intern core :extern "string-position"
   (:lambda (ch str)
     (core:raise-unless core:charp ch 'core:string-position "not a char")
     (core:raise-unless core:stringp str 'core:string-position "not a string")
@@ -90,7 +90,7 @@
 ;;;
 ;;; string-find
 ;;;
-(mu:intern core::ns :extern "string-find"
+(mu:intern core :extern "string-find"
   (:lambda (ch str)
     (core:raise-unless core:charp ch 'core:string-find "not a char")
     (core:raise-unless core:stringp str 'core:string-find "not a string")
@@ -112,13 +112,13 @@
 ;;;
 ;;; string construction
 ;;;
-(mu:intern core::ns :extern "string-coerce"
+(mu:intern core :extern "string-coerce"
    (:lambda (object)
       (:if (core:symbolp object)
            (mu:sy-name object)
            (core:format () "~A" `(,object)))))
 
-(mu:intern core::ns :extern "string"
+(mu:intern core :extern "string"
    (:lambda (designator)
       (:if (core:stringp designator)
          designator
@@ -128,7 +128,7 @@
                    (mu:make-sv :char `(,designator))
                    (core:raise designator 'core::string "not a char"))))))
 
-(mu:intern core::ns :extern "string-append"
+(mu:intern core :extern "string-append"
   (:lambda (list)
     (core:raise-unless core:listp list 'core:string "is not a list")
     ((:lambda (stream)
@@ -146,7 +146,7 @@
        (mu:get-str stream))
      (mu:open :string :output ""))))
 
-(mu:intern core::ns :extern "substr"
+(mu:intern core :extern "substr"
   (:lambda (str start end)
      (core:raise-unless core:stringp str 'core:substr "is not a string")
      (core:raise-unless core:fixnump start 'core:substr "start is not a fixnum")

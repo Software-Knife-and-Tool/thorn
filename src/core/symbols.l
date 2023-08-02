@@ -4,41 +4,41 @@
 ;;;
 ;;;  symbols
 ;;;
-(mu:intern core::ns :extern "boundp" mu:boundp)
-(mu:intern core::ns :extern "fboundp"
+(mu:intern core :extern "boundp" mu:boundp)
+(mu:intern core :extern "fboundp"
   (:lambda (symbol)
     (:if (core:boundp symbol)
          (core::appliablep (mu:sy-val symbol))
          ())))
 
-(mu:intern core::ns :extern "uninternedp"
+(mu:intern core :extern "uninternedp"
   (:lambda (sym)
     (core:null (mu:sy-ns sym))))
 
-(mu:intern core::ns :extern "keywordp"
+(mu:intern core :extern "keywordp"
    (:lambda (t)
       (mu:eq (core:type-of t) 'keyword)))
 
-(mu:intern core::ns :extern "symbolp"
+(mu:intern core :extern "symbolp"
    (:lambda (t)
-      (core::or (core::or (core:keywordp t) (mu:eq () t))
+      (core::orf (core::orf (core:keywordp t) (mu:eq () t))
                 (mu:eq 'symbol (core:type-of t)))))
 
 ;;;
 ;;; utilities
 ;;;
-(mu:intern core::ns :extern "symbol-name" mu:sy-name)
-(mu:intern core::ns :extern "symbol-ns" mu:sy-ns)
-(mu:intern core::ns :extern "symbol-value" mu:sy-val)
+(mu:intern core :extern "symbol-name" mu:sy-name)
+(mu:intern core :extern "symbol-ns" mu:sy-ns)
+(mu:intern core :extern "symbol-value" mu:sy-val)
 
-(mu:intern core::ns :extern "keyword"
+(mu:intern core :extern "keyword"
    (:lambda (name)
       (core:raise-unless core:stringp name 'core:keyword "not a keyword name")
       (:if (mu:fx-lt (mu:sv-len name) 8)
            (mu:keyword name)
            (core::make-ctype "keyword" `(,(mu:cons :name name))))))
 
-(mu:intern core::ns :intern "intern"
+(mu:intern core :intern "intern"
    (:lambda (symbol value)
       (:if (core:uninternedp symbol)
            ((:lambda (sym)

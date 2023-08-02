@@ -4,7 +4,7 @@
 ;;;
 ;;; exceptions
 ;;;
-(mu:intern core::ns :extern "exceptionp"
+(mu:intern core :extern "exceptionp"
            (:lambda (t)
              (:if (core:structp t)
                   (mu:eq :except (mu:st-type t))
@@ -19,12 +19,12 @@
 ;;; reason:  extended condition, usually a string
 ;;; env:     dynamic environment, list of frames
 ;;;
-(mu:intern core::ns :extern "make-exception"
+(mu:intern core :extern "make-exception"
   (:lambda (cond object source reason env)
     (mu:make-st :except
       `(,cond ,object ,source ,reason ,env))))
 
-(mu:intern core::ns :intern "exception-property"
+(mu:intern core :intern "exception-property"
   (:lambda (key exception)
     (mu:sv-ref
      (mu:st-vec exception)
@@ -37,7 +37,7 @@
           (:reason  . 3)
           (:env     . 4)))))))
 
-(mu:intern core::ns :extern "exceptionf"
+(mu:intern core :extern "exceptionf"
    (:lambda (stream fmt printenv except)
      ((:lambda (cond object source reason env)
          (:if (core:null fmt)                
@@ -57,7 +57,7 @@
      (core::exception-property :reason except)
      (core::exception-property :env except))))
 
-(mu:intern core::ns :extern "with-exception"
+(mu:intern core :extern "with-exception"
   (:lambda (handler thunk)
     (mu:with-ex
      (:lambda (object condition)
@@ -71,42 +71,42 @@
 ;;;
 ;;; exception flavors
 ;;;
-(mu:intern core::ns :extern "raise"
+(mu:intern core :extern "raise"
    (:lambda (object source reason)
       (mu:raise
        (core:make-exception :error object source reason (core:dropl (mu::frames) 2))
        :except)))
 
-(mu:intern core::ns :extern "raise-if"
+(mu:intern core :extern "raise-if"
   (:lambda (test obj source reason)
     (:if test
          (core:raise obj source reason)
          obj)))
 
-(mu:intern core::ns :extern "raise-when"
+(mu:intern core :extern "raise-when"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          (core:raise obj source reason)
          obj)))
 
-(mu:intern core::ns :extern "raise-unless"
+(mu:intern core :extern "raise-unless"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          obj
          (core:raise obj source reason))))
 
-(mu:intern core::ns :extern "warn"
+(mu:intern core :extern "warn"
   (:lambda (obj msg)
      (core:format mu:err-out "warning: ~S ~A~%" `(,obj ,msg))
     obj))
 
-(mu:intern core::ns :extern "warn-when"
+(mu:intern core :extern "warn-when"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          (core:when obj reason)
          obj)))
 
-(mu:intern core::ns :extern "warn-unless"
+(mu:intern core :extern "warn-unless"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          obj

@@ -8,7 +8,7 @@
 ;;;
 ;;; core argument lists
 ;;;
-(mu:intern core::ns :intern "flat-arg-list"
+(mu:intern core :intern "flat-arg-list"
     (:lambda (args)
       (core:foldr
        (:lambda (elt acc)
@@ -16,11 +16,11 @@
        ()
        args)))
 
-(mu:intern core::ns :intern "lambda-arg-list"
+(mu:intern core :intern "lambda-arg-list"
    (:lambda (fn args)
       (:if (core:closurep fn)
            ((:lambda (rest nreqs)
-               (:if (core::and rest (core:zerop nreqs))
+               (:if (core::andf rest (core:zerop nreqs))
                     `(mu:cons ,(core::flat-arg-list args) ())
                     ((:lambda (reqs rest)
                         (core::flat-arg-list `(,@reqs ,(core::flat-arg-list rest))))
@@ -30,13 +30,13 @@
             (core::closure-prop :nreqs fn))
            (core::flat-arg-list args))))
 
-(mu:intern core::ns :intern "quoted-lambda-arg-list"
+(mu:intern core :intern "quoted-lambda-arg-list"
   (:lambda (fn args)
      (:if (core::appliablep fn)
          args
          ((:lambda (rest nreqs)
              (:if rest
-                  (:if (core::and rest (core:zerop nreqs))
+                  (:if (core::andf rest (core:zerop nreqs))
                        `(,args)
                        `(,@(core:dropr args (mu:fx-sub (mu:length args) nreqs))
                          ,@(core:dropl args nreqs)))
@@ -47,7 +47,7 @@
 ;;;
 ;;; compiled argument lists
 ;;;
-(mu:intern core::ns :intern "compile-flat-arg-list"
+(mu:intern core :intern "compile-flat-arg-list"
   (:lambda (args env)
     (core:foldr
      (:lambda (elt acc)
@@ -55,7 +55,7 @@
      ()
      args)))
 
-(mu:intern core::ns :intern "compile-quoted-lambda-arg-list"
+(mu:intern core :intern "compile-quoted-lambda-arg-list"
    (:lambda (fn args env)
      (core::quoted-lambda-arg-list
       fn
@@ -68,7 +68,7 @@
 ;;; convert core lambdas to mu forms
 ;;; compile function applications
 ;;;
-(mu:intern core::ns :intern "compile-lambda-call"
+(mu:intern core :intern "compile-lambda-call"
   (:lambda (form args env)
     ((:lambda (fn)
         (:if (core:closurep fn)
@@ -76,19 +76,19 @@
             (mu:cons fn (core::compile-quoted-lambda-arg-list fn args env))))
      (core::compile form env))))
 
-(mu:intern core::ns :intern "compile-fn-call"
+(mu:intern core :intern "compile-fn-call"
    (:lambda (fn args env)
     (:if (core:closurep fn)
          `(core:apply ,fn ,(core::compile-flat-arg-list args env))
          `(,fn ,(core::compile-quoted-lambda-arg-list fn args env)))))
 
-(mu:intern core::ns :intern "compile-macro-call"
+(mu:intern core :intern "compile-macro-call"
   (:lambda (macro-symbol args env)
     (core::compile
      (core:macroexpand `(macro-symbol ,@args) env)
      env)))
 
-(mu:intern core::ns :intern "compile-symbol-call"
+(mu:intern core :intern "compile-symbol-call"
   (:lambda (symbol args env)
      (:if (core:boundp symbol)
         ((:lambda (fn)

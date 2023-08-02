@@ -4,10 +4,10 @@
 ;;;
 ;;; debugging
 ;;;
-(mu:intern core::ns :intern "describe"
+(mu:intern core :intern "describe"
    (:lambda (obj)))
 
-(mu:intern core::ns :intern "repl"
+(mu:intern core :intern "repl"
    (:lambda ()
       (mu:fix
        (:lambda (loop)

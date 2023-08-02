@@ -4,7 +4,7 @@
 ;;;
 ;;; loader
 ;;;
-(mu:intern core::ns :extern "load"
+(mu:intern core :extern "load"
   (:lambda (source verbose)
     (core:raise-unless core:stringp source 'core:load "not a file designator")
     ((:lambda (ifs)

@@ -37,7 +37,7 @@ While *thorn* has much in common with Scheme, it is meant to be familiar to trad
 
 *thorn/eth* is a work in progress.
 
-*thorn/mu* should build with rust 1.68 or better. *thorn-mu* builds are targeted to:
+*thorn/mu* should build with rust 1.68 or better. *thorn/mu* builds are targeted to:
 
 - x86-64 and AArch-64 Linux distributions
 - x86-64 and M1 MacOs X

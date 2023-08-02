@@ -4,14 +4,14 @@
 ;;;
 ;;; sequences
 ;;;
-(mu:intern core::ns :extern "length"
+(mu:intern core :extern "length"
    (:lambda (seq)
       (core:raise-unless core:sequencep seq 'core:length "not a sequence")
       (:if (core:listp seq)
            (mu:length seq)
            (mu:sv-len seq))))
 
-(mu:intern core::ns :extern "elt"
+(mu:intern core :extern "elt"
    (:lambda (seq nth)
       (core:raise-unless core:sequencep seq 'core:elt "not a sequence")
       (core:raise-unless core:fixnump nth 'core:elt "not a fixnum")

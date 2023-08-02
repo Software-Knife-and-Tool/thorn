@@ -20,7 +20,7 @@
 ;;;
 ;;; macro environment
 ;;;
-(mu:intern core::ns :intern "core-macro-env"
+(mu:intern core :intern "core-macro-env"
   (:lambda (symbol macro-fn)
     ((:lambda (macro-ns-name)
        ((:lambda (macro-ns symbol-ns symbol-name)
@@ -38,7 +38,7 @@
         (mu:sy-name symbol)))
      (core:string-append `(,(mu:ns-name (mu:sy-ns symbol)) ":macrodefs")))))
 
-(mu:intern core::ns :intern "core-find-macro"
+(mu:intern core :intern "core-find-macro"
    (:lambda (symbol env)
       (:if (mu:eq :symbol (mu:type-of symbol))
            ((:lambda (macro-ns symbol-ns symbol-name)
@@ -56,7 +56,7 @@
 ;;;
 ;;; core:macroexpand-1 expands a macro call once.
 ;;;
-(mu:intern core::ns :intern "macroexpand-1"
+(mu:intern core :intern "macroexpand-1"
    (:lambda (form env)
      (:if (core:consp form)
           ((:lambda (fn-symbol args)
@@ -74,7 +74,7 @@
 ;;;
 ;;; core:macroexpand: expand a form until it is no longer a macro call
 ;;;
-(mu:intern core::ns :extern "macroexpand"
+(mu:intern core :extern "macroexpand"
    (:lambda (form env)
      ((:lambda (expanded)
           (:if (mu:eq form expanded)
@@ -87,7 +87,7 @@
 ;;;
 ;;; acts as a predicate
 ;;;
-(mu:intern core::ns :extern "macro-function"
+(mu:intern core :extern "macro-function"
   (:lambda (symbol env)
      (:if (mu:eq :symbol (mu:type-of symbol))
           (:if (core:keywordp symbol)
@@ -104,7 +104,7 @@
 ;;;
 ;;; compile-macro compiles a macro expander function.
 ;;;
-(mu:intern core::ns :intern "core-macro"
+(mu:intern core :intern "core-macro"
    (:lambda (lambda env)
      (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
          (core:raise-if lambda 'core::core-macro "lambda syntax")
@@ -128,7 +128,7 @@
             0
             lambda)))))
 
-(mu:intern core::ns :intern "compile-macro"
+(mu:intern core :intern "compile-macro"
   (:lambda (form env)
     ((:lambda (lambda-desc body)
        (mu:compile

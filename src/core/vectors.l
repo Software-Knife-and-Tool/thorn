@@ -4,18 +4,18 @@
 ;;;
 ;;;  core vectors
 ;;;
-(mu:intern core::ns :extern "vector-type"
+(mu:intern core :extern "vector-type"
   (:lambda (vector)
     (core:raise-unless core:vectorp vector 'core:vector-type "not a vector")
     (mu:sv-type vector)))
 
-(mu:intern core::ns :extern "svref"
+(mu:intern core :extern "svref"
   (:lambda (vector nth)
     (core:raise-unless core:vectorp vector 'core:svref "not a vector")
     (core:raise-unless core:fixnump nth 'core:svref "not a fixnum")
     (mu:sv-ref vector nth)))
 
-(mu:intern core::ns :intern "mapv"
+(mu:intern core :intern "mapv"
   (:lambda (fn vector)
     (mu:fix
      (:lambda (nth)
