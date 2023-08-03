@@ -23,7 +23,7 @@
 ;;;
 ;;; ctype struct: #s(:ctype #(:t name property-alist))
 ;;;
-;;; where the property-alist is (:name . :type)
+;;; where the property-alist is (:name . :predicate)
 ;;;
 (mu:intern core :intern "defctype"
    (:lambda (name properties)
@@ -34,6 +34,28 @@
               (mu:intern core::ctypes :extern str (mu:make-st :ctype `(,str ,properties))))
            (mu:ns-find core::ctypes :extern str)))
        (core:string name))))
+
+(mu:intern core :intern "ctype-predicate-map"
+   `(,(mu:cons :char core:charp)
+     ,(mu:cons :cons core:consp)
+     ,(mu:cons :fixnum core:fixnump)
+     ,(mu:cons :float core:floatp) 
+     ,(mu:cons :func core:functionp)
+     ,(mu:cons :listp core:listp)
+     ,(mu:cons :ns core:namespacep)
+     ,(mu:cons :string core:stringp)
+     ,(mu:cons :struct core:structp)
+     ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
+     ,(mu:cons :symbolp core:symbolp)
+     ,(mu:cons :t (:lambda (t) (core:not (core:null t))))
+     ,(mu:cons :vector core:vectorp)))
+
+(mu:intern core :intern "ctype-predicate"
+   (:lambda (type object)
+      ((:lambda (predicate)
+          (core:raise-when core:null type 'core::ctype-predicate "predicate not bound")
+          (mu:apply predicate `(,object)))
+       (mu:cdr (core:assoc type core::ctype-predicate-map)))))
 
 (mu:intern core :intern "make-ctype"
     (:lambda (name property-values)
@@ -49,13 +71,9 @@
                      (:lambda (property-def)
                         (:if (mu:eq (mu:car property-value) (mu:car property-def))
                              ((:lambda (type value)
-                                 (:if (core::orf (mu:eq :t type) (mu:eq (mu:type-of value) type))
+                                 (:if (core::ctype-predicate type value)
                                       property-def
-                                      (:if (core::andf (mu:eq :listp type) (core:listp value))
-                                           property-def
-                                           (:if (core::andf (mu:eq :symbolp type) (core:symbolp value))
-                                                property-def
-                                                (core:raise property-value 'core::make-ctype "property type botch")))))
+                                      (core:raise property-value 'core::make-ctype "property type botch")))
                               (mu:cdr property-def)
                               (mu:cdr property-value))
                              ()))
