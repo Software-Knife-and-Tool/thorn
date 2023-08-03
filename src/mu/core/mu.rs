@@ -75,7 +75,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.5";
+    const VERSION: &'static str = "0.0.6";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -189,22 +189,22 @@ impl Core for Mu {
                     }
                     Type::Symbol => {
                         if Symbol::is_unbound(self, func) {
-                            Err(Exception::new(Condition::Unbound, "mu:eval", func))
+                            Err(Exception::new(Condition::Unbound, "eval", func))
                         } else {
                             let fnc = Symbol::value(self, func);
                             match Tag::type_of(self, fnc) {
                                 Type::Function => self.apply(fnc, args),
-                                _ => Err(Exception::new(Condition::Type, "mu:eval", func)),
+                                _ => Err(Exception::new(Condition::Type, "eval", func)),
                             }
                         }
                     }
                     Type::Function => self.apply(func, args),
-                    _ => Err(Exception::new(Condition::Type, "mu:eval", func)),
+                    _ => Err(Exception::new(Condition::Type, "eval", func)),
                 }
             }
             Type::Symbol => {
                 if Symbol::is_unbound(self, expr) {
-                    Err(Exception::new(Condition::Unbound, "mu:eval", expr))
+                    Err(Exception::new(Condition::Unbound, "eval", expr))
                 } else {
                     Ok(Symbol::value(self, expr))
                 }

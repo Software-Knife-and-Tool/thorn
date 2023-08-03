@@ -60,7 +60,7 @@
 (mu:intern core :extern "with-exception"
   (:lambda (handler thunk)
     (mu:with-ex
-     (:lambda (object condition)
+     (:lambda (object condition source)
           (:if (mu:eq (mu:type-of condition) :except)
                (core:apply handler `(,condition))
                (core:apply

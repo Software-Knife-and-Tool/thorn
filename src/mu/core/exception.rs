@@ -26,7 +26,7 @@ pub type Result<T> = std::result::Result<T, Exception>;
 pub struct Exception {
     pub object: Tag,
     pub condition: Condition,
-    pub source: String,
+    pub source: Tag,
 }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
@@ -81,7 +81,7 @@ impl Exception {
         Exception {
             object,
             condition,
-            source: src.to_string(),
+            source: Symbol::keyword(src),
         }
     }
 
@@ -128,10 +128,10 @@ impl MuFunction for Exception {
 
         match Tag::type_of(mu, condition) {
             Type::Keyword => match Self::map_condition(condition) {
-                Ok(cond) => Err(Self::new(cond, "mu:raise", src)),
-                Err(_) => Err(Self::new(Condition::Type, "mu:raise", condition)),
+                Ok(cond) => Err(Self::new(cond, "raise", src)),
+                Err(_) => Err(Self::new(Condition::Type, "raise", condition)),
             },
-            _ => Err(Self::new(Condition::Type, "mu:raise", condition)),
+            _ => Err(Self::new(Condition::Type, "raise", condition)),
         }
     }
 
@@ -144,16 +144,17 @@ impl MuFunction for Exception {
                 Type::Function => match mu.apply(thunk, Tag::nil()) {
                     Ok(v) => v,
                     Err(e) => {
-                        let args = vec![e.object, Self::map_condkey(e.condition).unwrap()];
+                        let args =
+                            vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
                         match mu.apply(handler, Cons::vlist(mu, &args)) {
                             Ok(v) => v,
                             Err(e) => return Err(e),
                         }
                     }
                 },
-                _ => return Err(Exception::new(Condition::Type, "mu:with-ex", handler)),
+                _ => return Err(Exception::new(Condition::Type, "with-ex", handler)),
             },
-            _ => return Err(Exception::new(Condition::Type, "mu:with-ex", thunk)),
+            _ => return Err(Exception::new(Condition::Type, "with-ex", thunk)),
         };
 
         Ok(())

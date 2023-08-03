@@ -271,11 +271,7 @@ impl<'a> Core<'a> for Vector {
                             SyntaxType::Escape => match Stream::read_char(mu, stream) {
                                 Ok(Some(ch)) => str.push(ch),
                                 Ok(None) => {
-                                    return Err(Exception::new(
-                                        Condition::Eof,
-                                        "vector::read",
-                                        stream,
-                                    ));
+                                    return Err(Exception::new(Condition::Eof, "read:sv", stream));
                                 }
                                 Err(e) => {
                                     return Err(e);
@@ -284,7 +280,7 @@ impl<'a> Core<'a> for Vector {
                             _ => str.push(ch),
                         },
                         Ok(None) => {
-                            return Err(Exception::new(Condition::Eof, "vector::read", stream));
+                            return Err(Exception::new(Condition::Eof, "read:sv", stream));
                         }
                         Err(e) => return Err(e),
                     }
@@ -296,16 +292,12 @@ impl<'a> Core<'a> for Vector {
                 let vec_list = match Cons::read(mu, stream) {
                     Ok(list) => {
                         if list.null_() {
-                            return Err(Exception::new(
-                                Condition::Type,
-                                "vector::read",
-                                Tag::nil(),
-                            ));
+                            return Err(Exception::new(Condition::Type, "read:sv", Tag::nil()));
                         }
                         list
                     }
                     Err(_) => {
-                        return Err(Exception::new(Condition::Syntax, "vector::read", stream));
+                        return Err(Exception::new(Condition::Syntax, "read:sv", stream));
                     }
                 };
 
@@ -330,11 +322,7 @@ impl<'a> Core<'a> for Vector {
                                         vec.push(ch)
                                     }
                                     _ => {
-                                        return Err(Exception::new(
-                                            Condition::Type,
-                                            "vector::read",
-                                            el,
-                                        ))
+                                        return Err(Exception::new(Condition::Type, "read:sv", el))
                                     }
                                 }
                             }
@@ -351,18 +339,14 @@ impl<'a> Core<'a> for Vector {
                                         if !(0..255).contains(&byte) {
                                             return Err(Exception::new(
                                                 Condition::Range,
-                                                "vector::read",
+                                                "read:sv",
                                                 el,
                                             ));
                                         }
                                         vec.push(byte as u8)
                                     }
                                     _ => {
-                                        return Err(Exception::new(
-                                            Condition::Type,
-                                            "vector::read",
-                                            el,
-                                        ))
+                                        return Err(Exception::new(Condition::Type, "read:sv", el))
                                     }
                                 }
                             }
@@ -377,11 +361,7 @@ impl<'a> Core<'a> for Vector {
                                 match Tag::type_of(mu, el) {
                                     Type::Fixnum => vec.push(Fixnum::as_i64(mu, el)),
                                     _ => {
-                                        return Err(Exception::new(
-                                            Condition::Type,
-                                            "vector::read",
-                                            el,
-                                        ))
+                                        return Err(Exception::new(Condition::Type, "read:sv", el))
                                     }
                                 }
                             }
@@ -396,11 +376,7 @@ impl<'a> Core<'a> for Vector {
                                 match Tag::type_of(mu, el) {
                                     Type::Float => vec.push(Float::as_f32(mu, el)),
                                     _ => {
-                                        return Err(Exception::new(
-                                            Condition::Type,
-                                            "vector::read",
-                                            el,
-                                        ))
+                                        return Err(Exception::new(Condition::Type, "read:sv", el))
                                     }
                                 }
                             }
@@ -409,7 +385,7 @@ impl<'a> Core<'a> for Vector {
                         }
                         _ => panic!(),
                     },
-                    None => Err(Exception::new(Condition::Type, "vector::read", vec_type)),
+                    None => Err(Exception::new(Condition::Type, "read:sv", vec_type)),
                 }
             }
             _ => panic!(),
@@ -461,7 +437,7 @@ impl MuFunction for Vector {
 
         fp.value = match Self::to_type(type_sym) {
             Some(vtype) => match vtype {
-                Type::Null => return Err(Exception::new(Condition::Type, "mu:make-sv", type_sym)),
+                Type::Null => return Err(Exception::new(Condition::Type, "make-sv", type_sym)),
                 Type::T => {
                     let mut vec = Vec::new();
                     for cons in ConsIter::new(mu, list) {
@@ -480,7 +456,7 @@ impl MuFunction for Vector {
                             Type::Char => {
                                 vec.push(Char::as_char(mu, el));
                             }
-                            _ => return Err(Exception::new(Condition::Type, "mu:make-sv", el)),
+                            _ => return Err(Exception::new(Condition::Type, "make-sv", el)),
                         }
                     }
 
@@ -497,12 +473,12 @@ impl MuFunction for Vector {
                                 let byte = Fixnum::as_i64(mu, el);
 
                                 if !(0..=255).contains(&byte) {
-                                    return Err(Exception::new(Condition::Range, "mu:make-sv", el));
+                                    return Err(Exception::new(Condition::Range, "make-sv", el));
                                 }
 
                                 vec.push(byte as u8);
                             }
-                            _ => return Err(Exception::new(Condition::Type, "mu:make-sv", el)),
+                            _ => return Err(Exception::new(Condition::Type, "make-sv", el)),
                         }
                     }
 
@@ -517,7 +493,7 @@ impl MuFunction for Vector {
                             Type::Fixnum => {
                                 vec.push(Fixnum::as_i64(mu, el));
                             }
-                            _ => return Err(Exception::new(Condition::Type, "mu:make-sv", el)),
+                            _ => return Err(Exception::new(Condition::Type, "make-sv", el)),
                         }
                     }
 
@@ -532,18 +508,18 @@ impl MuFunction for Vector {
                             Type::Float => {
                                 vec.push(Float::as_f32(mu, el));
                             }
-                            _ => return Err(Exception::new(Condition::Type, "mu:make-sv", el)),
+                            _ => return Err(Exception::new(Condition::Type, "make-sv", el)),
                         }
                     }
 
                     TypedVec::<Vec<f32>> { vec }.vec.to_vector().evict(mu)
                 }
                 _ => {
-                    return Err(Exception::new(Condition::Type, "mu:make-sv", type_sym));
+                    return Err(Exception::new(Condition::Type, "make-sv", type_sym));
                 }
             },
             None => {
-                return Err(Exception::new(Condition::Type, "mu:make-sv", type_sym));
+                return Err(Exception::new(Condition::Type, "make-sv", type_sym));
             }
         };
 
@@ -559,7 +535,7 @@ impl MuFunction for Vector {
                 let nth = Fixnum::as_i64(mu, index);
 
                 if nth < 0 || nth as usize >= Self::length(mu, vector) {
-                    return Err(Exception::new(Condition::Range, "mu:sv-ref", index));
+                    return Err(Exception::new(Condition::Range, "sv-ref", index));
                 }
 
                 match Tag::type_of(mu, vector) {
@@ -570,10 +546,10 @@ impl MuFunction for Vector {
                         };
                         Ok(())
                     }
-                    _ => Err(Exception::new(Condition::Type, "mu:sv-ref", vector)),
+                    _ => Err(Exception::new(Condition::Type, "sv-ref", vector)),
                 }
             }
-            _ => Err(Exception::new(Condition::Type, "mu:sv-ref", index)),
+            _ => Err(Exception::new(Condition::Type, "sv-ref", index)),
         }
     }
 
@@ -589,7 +565,7 @@ impl MuFunction for Vector {
 
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:sv-type", vector)),
+            _ => Err(Exception::new(Condition::Type, "sv-type", vector)),
         }
     }
 
@@ -601,7 +577,7 @@ impl MuFunction for Vector {
                 fp.value = Fixnum::as_tag(Self::length(mu, vector) as i64);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:sv-len", vector)),
+            _ => Err(Exception::new(Condition::Type, "sv-len", vector)),
         }
     }
 }

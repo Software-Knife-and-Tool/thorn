@@ -274,7 +274,7 @@ impl MuFunction for Namespace {
         let ns = match Tag::type_of(mu, fp.argv[0]) {
             Type::Null => mu.unintern_ns,
             Type::Namespace => fp.argv[0],
-            _ => return Err(Exception::new(Condition::Type, "mu:untern", fp.argv[0])),
+            _ => return Err(Exception::new(Condition::Type, "untern", fp.argv[0])),
         };
 
         let scope_type = match Tag::type_of(mu, scope) {
@@ -284,10 +284,10 @@ impl MuFunction for Namespace {
                 } else if scope.eq_(Symbol::keyword("intern")) {
                     Scope::Intern
                 } else {
-                    return Err(Exception::new(Condition::Type, "mu:untern", scope));
+                    return Err(Exception::new(Condition::Type, "untern", scope));
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mu:untern", scope)),
+            _ => return Err(Exception::new(Condition::Type, "untern", scope)),
         };
 
         fp.value = match Tag::type_of(mu, ns) {
@@ -295,9 +295,9 @@ impl MuFunction for Namespace {
                 Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                     Self::intern(mu, ns, scope_type, Vector::as_string(mu, name), *UNBOUND)
                 }
-                _ => return Err(Exception::new(Condition::Type, "mu:untern", name)),
+                _ => return Err(Exception::new(Condition::Type, "untern", name)),
             },
-            _ => return Err(Exception::new(Condition::Type, "mu:untern", ns)),
+            _ => return Err(Exception::new(Condition::Type, "untern", ns)),
         };
 
         Ok(())
@@ -311,7 +311,7 @@ impl MuFunction for Namespace {
         let ns = match Tag::type_of(mu, fp.argv[0]) {
             Type::Null => mu.unintern_ns,
             Type::Namespace => fp.argv[0],
-            _ => return Err(Exception::new(Condition::Type, "mu:intern", fp.argv[0])),
+            _ => return Err(Exception::new(Condition::Type, "intern", fp.argv[0])),
         };
 
         let scope_type = match Tag::type_of(mu, scope) {
@@ -321,10 +321,10 @@ impl MuFunction for Namespace {
                 } else if scope.eq_(Symbol::keyword("intern")) {
                     Scope::Intern
                 } else {
-                    return Err(Exception::new(Condition::Type, "mu:intern", scope));
+                    return Err(Exception::new(Condition::Type, "intern", scope));
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mu:intern", scope)),
+            _ => return Err(Exception::new(Condition::Type, "intern", scope)),
         };
 
         fp.value = match Tag::type_of(mu, ns) {
@@ -332,9 +332,9 @@ impl MuFunction for Namespace {
                 Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                     Self::intern(mu, ns, scope_type, Vector::as_string(mu, name), value)
                 }
-                _ => return Err(Exception::new(Condition::Type, "mu:intern", name)),
+                _ => return Err(Exception::new(Condition::Type, "intern", name)),
             },
-            _ => return Err(Exception::new(Condition::Type, "mu:intern", ns)),
+            _ => return Err(Exception::new(Condition::Type, "intern", ns)),
         };
 
         Ok(())
@@ -351,9 +351,9 @@ impl MuFunction for Namespace {
                     <Mu as NSMaps>::add_ns(mu, fp.value).unwrap();
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:make_ns", import)),
+                _ => Err(Exception::new(Condition::Type, "make-ns", import)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:make_ns", name)),
+            _ => Err(Exception::new(Condition::Type, "make-ns", name)),
         }
     }
 
@@ -367,7 +367,7 @@ impl MuFunction for Namespace {
                     None => Tag::nil(),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mu:map-ns", ns_name)),
+            _ => return Err(Exception::new(Condition::Type, "map-ns", ns_name)),
         };
 
         Ok(())
@@ -380,7 +380,7 @@ impl MuFunction for Namespace {
         let ns = match Tag::type_of(mu, fp.argv[0]) {
             Type::Null => mu.unintern_ns,
             Type::Namespace => fp.argv[0],
-            _ => return Err(Exception::new(Condition::Type, "mu:intern", fp.argv[0])),
+            _ => return Err(Exception::new(Condition::Type, "intern", fp.argv[0])),
         };
 
         let scope = match Tag::type_of(mu, scope) {
@@ -390,10 +390,10 @@ impl MuFunction for Namespace {
                 } else if scope.eq_(Symbol::keyword("intern")) {
                     Scope::Intern
                 } else {
-                    return Err(Exception::new(Condition::Type, "mu:ns-find", scope));
+                    return Err(Exception::new(Condition::Type, "ns-find", scope));
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mu:ns-find", scope)),
+            _ => return Err(Exception::new(Condition::Type, "ns-find", scope)),
         };
 
         match Tag::type_of(mu, name) {
@@ -407,14 +407,14 @@ impl MuFunction for Namespace {
                             Some(sym) => sym,
                             None => Tag::nil(),
                         },
-                        _ => return Err(Exception::new(Condition::Range, "mu:ns-find", name)),
+                        _ => return Err(Exception::new(Condition::Range, "ns-find", name)),
                     };
 
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:ns-find", ns)),
+                _ => Err(Exception::new(Condition::Type, "ns-find", ns)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:ns-find", name)),
+            _ => Err(Exception::new(Condition::Type, "ns-find", name)),
         }
     }
 
@@ -426,7 +426,7 @@ impl MuFunction for Namespace {
                 fp.value = Self::import(mu, ns);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:ns-ump", ns)),
+            _ => Err(Exception::new(Condition::Type, "ns-ump", ns)),
         }
     }
 
@@ -438,7 +438,7 @@ impl MuFunction for Namespace {
                 fp.value = Self::name(mu, ns);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:ns-name", ns)),
+            _ => Err(Exception::new(Condition::Type, "ns-name", ns)),
         }
     }
 
@@ -450,7 +450,7 @@ impl MuFunction for Namespace {
                 fp.value = Self::externs(mu, ns);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:ns-ext", ns)),
+            _ => Err(Exception::new(Condition::Type, "ns-ext", ns)),
         }
     }
 
@@ -462,7 +462,7 @@ impl MuFunction for Namespace {
                 fp.value = Self::interns(mu, ns);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:ns-int", ns)),
+            _ => Err(Exception::new(Condition::Type, "ns-int", ns)),
         }
     }
 }

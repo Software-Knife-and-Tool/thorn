@@ -100,7 +100,7 @@ impl StreamBuilder {
                         Ok(id) => Self::stream(id, output),
                         Err(e) => Err(e),
                     },
-                    None => Err(Exception::new(Condition::Range, "stream::open", Tag::nil())),
+                    None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
                 },
             },
             None => match &self.string {
@@ -114,7 +114,7 @@ impl StreamBuilder {
                             Ok(id) => Self::stream(id, output),
                             Err(e) => Err(e),
                         },
-                        None => Err(Exception::new(Condition::Range, "stream::open", Tag::nil())),
+                        None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
                     },
                 },
                 None => match self.stdin {
@@ -123,9 +123,7 @@ impl StreamBuilder {
                         Some(_) => Self::stream(STDOUT, Symbol::keyword("output")),
                         None => match self.errout {
                             Some(_) => Self::stream(STDERR, Symbol::keyword("output")),
-                            None => {
-                                Err(Exception::new(Condition::Range, "stream::open", Tag::nil()))
-                            }
+                            None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
                         },
                     },
                 },

@@ -216,7 +216,7 @@ impl MuFunction for Mu {
     fn mu_real_time(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match System::real_time() {
             Ok(us) => Fixnum::as_tag(us as i64),
-            Err(_) => return Err(Exception::new(Condition::Error, "mu:real-us", Tag::nil())),
+            Err(_) => return Err(Exception::new(Condition::Error, "real-us", Tag::nil())),
         };
 
         Ok(())
@@ -268,9 +268,9 @@ impl MuFunction for Mu {
                         Err(e) => return Err(e),
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "mu:apply", args)),
+                _ => return Err(Exception::new(Condition::Type, "apply", args)),
             },
-            _ => return Err(Exception::new(Condition::Type, "mu:apply", func)),
+            _ => return Err(Exception::new(Condition::Type, "apply", func)),
         };
 
         Ok(())
@@ -288,7 +288,7 @@ impl MuFunction for Mu {
                 Ok(_) => Ok(()),
                 Err(e) => Err(e),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:write", stream)),
+            _ => Err(Exception::new(Condition::Type, "write", stream)),
         }
     }
 
@@ -305,9 +305,9 @@ impl MuFunction for Mu {
                         Err(e) => return Err(e),
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "mu::if", false_fn)),
+                _ => return Err(Exception::new(Condition::Type, "::if", false_fn)),
             },
-            _ => return Err(Exception::new(Condition::Type, "mu::if", true_fn)),
+            _ => return Err(Exception::new(Condition::Type, "::if", true_fn)),
         };
 
         Ok(())
@@ -318,7 +318,7 @@ impl MuFunction for Mu {
 
         match Tag::type_of(mu, rc) {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(mu, rc) as i32),
-            _ => Err(Exception::new(Condition::Type, "mu:exit", rc)),
+            _ => Err(Exception::new(Condition::Type, "exit", rc)),
         }
     }
 
@@ -336,7 +336,7 @@ impl MuFunction for Mu {
             Type::Stream => Stream::view(mu, tag),
             Type::Struct => Struct::view(mu, tag),
             Type::Vector => Vector::view(mu, tag),
-            _ => return Err(Exception::new(Condition::Type, "mu:view", tag)),
+            _ => return Err(Exception::new(Condition::Type, "view", tag)),
         };
 
         Ok(())
@@ -368,7 +368,7 @@ impl MuFunction for Mu {
 
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:fix", func)),
+            _ => Err(Exception::new(Condition::Type, "fix", func)),
         }
     }
 }

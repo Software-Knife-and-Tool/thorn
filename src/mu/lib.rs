@@ -220,7 +220,7 @@ impl System {
             "error: condition {:?} on {} raised by {}",
             ex.condition,
             self.write(ex.object, true),
-            ex.source
+            self.write(ex.source, true),
         )
     }
 
@@ -276,7 +276,7 @@ impl System {
         } else {
             Err(Exception::new(
                 Condition::Open,
-                "system:load",
+                "sys:lf",
                 self.mu.read_string(format!("\"{}\"", file_path)).unwrap(),
             ))
         }

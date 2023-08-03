@@ -130,7 +130,8 @@ fn repl(system: &System, _config: &str) {
                         Err(e) => {
                             eprint!(
                                 "eval exception raised by {}, {:?} condition on ",
-                                e.source, e.condition
+                                system.write(e.source, true),
+                                e.condition
                             );
                             mu.write(e.object, true, mu.err_out()).unwrap();
                             eprintln!()
@@ -139,7 +140,8 @@ fn repl(system: &System, _config: &str) {
                     Err(e) => {
                         eprint!(
                             "compile exception raised by {}, {:?} condition on ",
-                            e.source, e.condition
+                            system.write(e.source, true),
+                            e.condition
                         );
                         mu.write(e.object, true, mu.err_out()).unwrap();
                         eprintln!()
@@ -152,7 +154,8 @@ fn repl(system: &System, _config: &str) {
                 } else {
                     eprint!(
                         "reader exception raised by {}, {:?} condition on ",
-                        e.source, e.condition
+                        system.write(e.source, true),
+                        e.condition
                     );
                     mu.write(e.object, true, mu.err_out()).unwrap();
                     eprintln!()
