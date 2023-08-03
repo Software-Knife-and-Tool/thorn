@@ -65,7 +65,7 @@
                (core:apply handler `(,condition))
                (core:apply
                 handler
-                `(,(core:make-exception condition object 'core:with-exception "mu" (core:dropl (mu::frames) 4))))))
+                `(,(core:make-exception condition object source "mu:raise" (core:dropl (mu::frames) 4))))))
        (:lambda () (core:apply thunk ())))))
 
 ;;;

@@ -15,7 +15,7 @@
                loop
                (core:with-exception
                 (:lambda (ex)
-                   (core:exceptionf mu:err-out "exception: condition: ~A on ~A by ~S from ~A~%" () ex)
+                   (core:exceptionf mu:err-out "exception: condition: ~A on ~A by ~S from ~A~%" :t ex)
                    (core:null loop))
                 (:lambda ()
                    (core:format :t "core> " ())
