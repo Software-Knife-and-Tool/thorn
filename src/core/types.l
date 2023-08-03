@@ -47,7 +47,7 @@
      ,(mu:cons :struct core:structp)
      ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
      ,(mu:cons :symbolp core:symbolp)
-     ,(mu:cons :t (:lambda (t) (core:not (core:null t))))
+     ,(mu:cons :t (:lambda (t) :t))
      ,(mu:cons :vector core:vectorp)))
 
 (mu:intern core :intern "ctype-predicate"
