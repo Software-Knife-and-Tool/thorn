@@ -37,13 +37,13 @@ impl Backquote for Mu {
     //
     fn bq_comma(mu: &Mu, in_list: bool, stream: Tag) -> exception::Result<Tag> {
         match Stream::read_char(mu, stream) {
-            Ok(None) => Err(Exception::new(Condition::Eof, "mu:bq_comma", stream)),
+            Ok(None) => Err(Exception::new(Condition::Eof, "comma", stream)),
             Ok(Some(ch)) => match ch {
                 '@' => {
                     if in_list {
                         Reader::read(mu, stream, false, Tag::nil(), false)
                     } else {
-                        Err(Exception::new(Condition::Range, "mu:bq_comma", stream))
+                        Err(Exception::new(Condition::Range, "comma", stream))
                     }
                 }
                 _ => {
@@ -132,13 +132,13 @@ impl Backquote for Mu {
     #[allow(clippy::only_used_in_recursion)]
     fn bq_read(mu: &Mu, in_list: bool, stream: Tag, recursivep: bool) -> exception::Result<Tag> {
         match Reader::read_ws(mu, stream) {
-            Ok(None) => return Err(Exception::new(Condition::Eof, "reader:bq_read", stream)),
+            Ok(None) => return Err(Exception::new(Condition::Eof, "read:bq", stream)),
             Ok(_) => (),
             Err(e) => return Err(e),
         };
 
         match Stream::read_char(mu, stream) {
-            Ok(None) => Err(Exception::new(Condition::Eof, "reader:bq_read", stream)),
+            Ok(None) => Err(Exception::new(Condition::Eof, "read:bq", stream)),
             Ok(Some(ch)) => match map_char_syntax(ch) {
                 Some(stype) => match stype {
                     SyntaxType::Constituent => match Reader::read_atom(mu, ch, stream) {
@@ -171,7 +171,7 @@ impl Backquote for Mu {
                         },
                         _ => Err(Exception::new(
                             Condition::Type,
-                            "read::read",
+                            "read::bq",
                             Fixnum::as_tag(ch as i64),
                         )),
                     },
@@ -216,7 +216,7 @@ impl Backquote for Mu {
                             if recursivep {
                                 Ok(mu.reader.eol)
                             } else {
-                                Err(Exception::new(Condition::Syntax, "reader:bq_read", stream))
+                                Err(Exception::new(Condition::Syntax, "read:bq", stream))
                             }
                         }
                         ';' => match Reader::read_comment(mu, stream) {
@@ -225,21 +225,13 @@ impl Backquote for Mu {
                         },
                         _ => Err(Exception::new(
                             Condition::Range,
-                            "reader:bq_read",
+                            "read:bq",
                             Char::as_tag(ch),
                         )),
                     },
-                    _ => Err(Exception::new(
-                        Condition::Read,
-                        "reader:bq_read",
-                        Char::as_tag(ch),
-                    )),
+                    _ => Err(Exception::new(Condition::Read, "read:bq", Char::as_tag(ch))),
                 },
-                _ => Err(Exception::new(
-                    Condition::Read,
-                    "reader:bq_read",
-                    Char::as_tag(ch),
-                )),
+                _ => Err(Exception::new(Condition::Read, "read:bq", Char::as_tag(ch))),
             },
             Err(e) => Err(e),
         }
@@ -277,7 +269,7 @@ impl MuFunction for Mu {
 
                 Cons::vlist(mu, &append)
             }
-            _ => return Err(Exception::new(Condition::Type, "reader:bq_append", list2)),
+            _ => return Err(Exception::new(Condition::Type, ":append", list2)),
         };
 
         Ok(())

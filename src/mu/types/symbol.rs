@@ -217,11 +217,7 @@ impl Core for Symbol {
             match map_char_syntax(ch) {
                 Some(SyntaxType::Constituent) => (),
                 _ => {
-                    return Err(Exception::new(
-                        Condition::Range,
-                        "symbol::parse",
-                        Char::as_tag(ch),
-                    ));
+                    return Err(Exception::new(Condition::Range, "symbol", Char::as_tag(ch)));
                 }
             }
         }
@@ -233,7 +229,7 @@ impl Core for Symbol {
                 {
                     return Err(Exception::new(
                         Condition::Syntax,
-                        "read::read_atom",
+                        "read:sy",
                         Vector::from_string(&token).evict(mu),
                     ));
                 }
@@ -252,7 +248,7 @@ impl Core for Symbol {
                             }
                             None => Err(Exception::new(
                                 Condition::Unbound,
-                                "read::read_atom",
+                                "read:sy",
                                 Vector::from_string(sym[0]).evict(mu),
                             )),
                         }
@@ -267,14 +263,14 @@ impl Core for Symbol {
                             }
                             None => Err(Exception::new(
                                 Condition::Unbound,
-                                "read::read_atom",
+                                "read:sy",
                                 Vector::from_string(sym[0]).evict(mu),
                             )),
                         }
                     }
                     _ => Err(Exception::new(
                         Condition::Syntax,
-                        "read::read_atom",
+                        "read:sy",
                         Vector::from_string(&token).evict(mu),
                     )),
                 }
@@ -358,7 +354,7 @@ impl MuFunction for Symbol {
 
         fp.value = match Tag::type_of(mu, symbol) {
             Type::Null | Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
-            _ => return Err(Exception::new(Condition::Type, "mu:sy-name", symbol)),
+            _ => return Err(Exception::new(Condition::Type, "sy-name", symbol)),
         };
 
         Ok(())
@@ -370,7 +366,7 @@ impl MuFunction for Symbol {
         fp.value = match Tag::type_of(mu, symbol) {
             Type::Symbol => Symbol::namespace(mu, symbol),
             Type::Keyword => Self::keyword("keyword"),
-            _ => return Err(Exception::new(Condition::Type, "mu:sy-ns", symbol)),
+            _ => return Err(Exception::new(Condition::Type, "sy-ns", symbol)),
         };
 
         Ok(())
@@ -382,13 +378,13 @@ impl MuFunction for Symbol {
         fp.value = match Tag::type_of(mu, symbol) {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, symbol) {
-                    return Err(Exception::new(Condition::Type, "mu:sy-val", symbol));
+                    return Err(Exception::new(Condition::Type, "sy-val", symbol));
                 } else {
                     Symbol::value(mu, symbol)
                 }
             }
             Type::Keyword => symbol,
-            _ => return Err(Exception::new(Condition::Type, "mu:sy-ns", symbol)),
+            _ => return Err(Exception::new(Condition::Type, "sy-ns", symbol)),
         };
 
         Ok(())
@@ -406,7 +402,7 @@ impl MuFunction for Symbol {
                     symbol
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mu:unboundp", symbol)),
+            _ => return Err(Exception::new(Condition::Type, "unboundp", symbol)),
         };
 
         Ok(())
@@ -425,7 +421,7 @@ impl MuFunction for Symbol {
                 fp.value = Self::keyword(&str);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:make-kw", symbol)),
+            _ => Err(Exception::new(Condition::Type, "keyword", symbol)),
         }
     }
 
@@ -438,7 +434,7 @@ impl MuFunction for Symbol {
                 fp.value = Self::new(mu, Tag::nil(), Scope::Extern, &str, *UNBOUND).evict(mu);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:make-sy", symbol)),
+            _ => Err(Exception::new(Condition::Type, "make-sy", symbol)),
         }
     }
 }

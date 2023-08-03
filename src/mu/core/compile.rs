@@ -46,11 +46,7 @@ pub trait Compiler {
 impl Compiler for Mu {
     fn compile_if(mu: &Mu, args: Tag) -> exception::Result<Tag> {
         if Cons::length(mu, args) != Some(3) {
-            return Err(Exception::new(
-                Condition::Syntax,
-                "compile::compile_quoted_list",
-                args,
-            ));
+            return Err(Exception::new(Condition::Syntax, ":if", args));
         }
 
         let if_fn = match Mu::map_internal(mu, "if".to_string()) {
@@ -95,11 +91,7 @@ impl Compiler for Mu {
 
     fn compile_quoted_list(mu: &Mu, list: Tag) -> exception::Result<Tag> {
         if Cons::length(mu, list) != Some(1) {
-            return Err(Exception::new(
-                Condition::Syntax,
-                "compile::compile_quoted_list",
-                list,
-            ));
+            return Err(Exception::new(Condition::Syntax, ":quote", list));
         }
 
         Ok(Cons::new(Symbol::keyword("quote"), list).evict(mu))
@@ -108,11 +100,7 @@ impl Compiler for Mu {
     fn compile_special_form(mu: &Mu, name: Tag, args: Tag) -> exception::Result<Tag> {
         match SPECMAP.iter().copied().find(|spec| name.eq_(spec.0)) {
             Some(spec) => spec.1(mu, args),
-            None => Err(Exception::new(
-                Condition::Syntax,
-                "compile::special_form",
-                args,
-            )),
+            None => Err(Exception::new(Condition::Syntax, ":specf", args)),
         }
     }
 
@@ -138,21 +126,11 @@ impl Compiler for Mu {
             let symbol = Cons::car(mu, cons);
             if Tag::type_of(mu, symbol) == Type::Symbol {
                 match symv.iter().rev().position(|lex| symbol.eq_(*lex)) {
-                    Some(_) => {
-                        return Err(Exception::new(
-                            Condition::Syntax,
-                            "compile::compile_frame_symbols",
-                            symbol,
-                        ))
-                    }
+                    Some(_) => return Err(Exception::new(Condition::Syntax, ":lexical", symbol)),
                     _ => symv.push(symbol),
                 }
             } else {
-                return Err(Exception::new(
-                    Condition::Type,
-                    "compile::compile_frame_symbols",
-                    symbol,
-                ));
+                return Err(Exception::new(Condition::Type, ":lexical", symbol));
             }
         }
 
@@ -189,22 +167,10 @@ impl Compiler for Mu {
 
                 match Tag::type_of(mu, lambda) {
                     Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
-                    _ => {
-                        return Err(Exception::new(
-                            Condition::Type,
-                            "compile::compile_lambda",
-                            args,
-                        ))
-                    }
+                    _ => return Err(Exception::new(Condition::Type, ":lambda", args)),
                 }
             }
-            _ => {
-                return Err(Exception::new(
-                    Condition::Syntax,
-                    "compile::compile_lambda",
-                    args,
-                ))
-            }
+            _ => return Err(Exception::new(Condition::Syntax, ":lambda", args)),
         };
 
         let id = Symbol::new(mu, Tag::nil(), Scope::Extern, "lambda", Tag::nil()).evict(mu);
@@ -220,7 +186,7 @@ impl Compiler for Mu {
         let form = match Self::compile_list(mu, body) {
             Ok(form) => match Cons::length(mu, lambda) {
                 Some(len) => Ok(Function::new(Fixnum::as_tag(len as i64), form, id).evict(mu)),
-                None => panic!("compile:compile-lambda"),
+                None => panic!(":lambda"),
             },
             Err(e) => Err(e),
         };
@@ -250,13 +216,13 @@ impl Compiler for Mu {
                         Ok(arglist) => match Self::compile(mu, func) {
                             Ok(fnc) => match Tag::type_of(mu, fnc) {
                                 Type::Function => Ok(Cons::new(fnc, arglist).evict(mu)),
-                                _ => Err(Exception::new(Condition::Type, "compile::compile", func)),
+                                _ => Err(Exception::new(Condition::Type, ":compile", func)),
                             },
                             Err(e) => Err(e),
                         },
                         Err(e) => Err(e),
                     },
-                    _ => Err(Exception::new(Condition::Type, "compile::compile", func)),
+                    _ => Err(Exception::new(Condition::Type, ":compile", func)),
                 }
             }
             _ => Ok(expr),

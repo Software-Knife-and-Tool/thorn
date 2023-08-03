@@ -124,13 +124,7 @@ impl Core for System {
 
         let file = match stream {
             Some(Stream::File(f)) => f,
-            _ => {
-                return Err(Exception {
-                    object: Tag::nil(),
-                    condition: Condition::Open,
-                    source: "system::open".to_string(),
-                })
-            }
+            _ => return Err(Exception::new(Condition::Open, "open", Tag::nil())),
         };
 
         let mut stream_info_ref: RefMut<Vec<Stream>> = system.stream_info.borrow_mut();
@@ -156,13 +150,7 @@ impl Core for System {
 
         let string = match stream {
             Some(Stream::String(str)) => str,
-            _ => {
-                return Err(Exception {
-                    object: Tag::nil(),
-                    condition: Condition::Open,
-                    source: "system::open".to_string(),
-                })
-            }
+            _ => return Err(Exception::new(Condition::Open, "open", Tag::nil())),
         };
 
         let mut stream_info_ref: RefMut<Vec<Stream>> = system.stream_info.borrow_mut();
@@ -209,11 +197,7 @@ impl Core for System {
                         Ok(Some(buf[0]))
                     }
                 }
-                Err(_) => Err(Exception {
-                    object: Tag::nil(),
-                    condition: Condition::Read,
-                    source: "system::read_byte".to_string(),
-                }),
+                Err(_) => Err(Exception::new(Condition::Read, "rd_byte", Tag::nil())),
             },
             _ if stream_id < stream_info_ref.len() => match stream_info_ref.get(stream_id).unwrap()
             {
@@ -227,11 +211,7 @@ impl Core for System {
                                 Ok(Some(buf[0]))
                             }
                         }
-                        Err(_) => Err(Exception {
-                            object: Tag::nil(),
-                            condition: Condition::Read,
-                            source: "system::read_byte".to_string(),
-                        }),
+                        Err(_) => Err(Exception::new(Condition::Read, "rd-byte", Tag::nil())),
                     }
                 }
                 Stream::String(string) => {
@@ -255,19 +235,11 @@ impl Core for System {
         match stream_id {
             STDOUT => match std::io::stdout().write(&buf) {
                 Ok(_) => Ok(None),
-                Err(_) => Err(Exception {
-                    object: Tag::nil(),
-                    condition: Condition::Write,
-                    source: "system::write_byte".to_string(),
-                }),
+                Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
             },
             STDERR => match std::io::stderr().write(&buf) {
                 Ok(_) => Ok(None),
-                Err(_) => Err(Exception {
-                    object: Tag::nil(),
-                    condition: Condition::Write,
-                    source: "system::write_byte".to_string(),
-                }),
+                Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
             },
             _ if stream_id < stream_info_ref.len() => {
                 match stream_info_ref.get(stream_id).unwrap() {
@@ -275,11 +247,7 @@ impl Core for System {
                         let mut file_ref: RefMut<fs::File> = file.borrow_mut();
                         match file_ref.write(&buf) {
                             Ok(_) => Ok(None),
-                            Err(_) => Err(Exception {
-                                object: Tag::nil(),
-                                condition: Condition::Write,
-                                source: "system::write_byte".to_string(),
-                            }),
+                            Err(_) => Err(Exception::new(Condition::Write, "wr-byte", Tag::nil())),
                         }
                     }
                     Stream::String(string) => {

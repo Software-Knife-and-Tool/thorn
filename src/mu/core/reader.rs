@@ -124,9 +124,7 @@ impl Core for Reader {
                         break;
                     }
                 }
-                Ok(None) => {
-                    return Err(Exception::new(Condition::Eof, "read::read_comment", stream))
-                }
+                Ok(None) => return Err(Exception::new(Condition::Eof, "read:;", stream)),
                 Err(e) => return Err(e),
             }
         }
@@ -152,23 +150,13 @@ impl Core for Reader {
                                 }
                             }
                             Ok(None) => {
-                                return Err(Exception::new(
-                                    Condition::Eof,
-                                    "read::read_block_comment",
-                                    stream,
-                                ))
+                                return Err(Exception::new(Condition::Eof, "read:#|", stream))
                             }
                             Err(e) => return Err(e),
                         }
                     }
                 }
-                Ok(None) => {
-                    return Err(Exception::new(
-                        Condition::Eof,
-                        "read::read_block_comment",
-                        stream,
-                    ))
-                }
+                Ok(None) => return Err(Exception::new(Condition::Eof, "read:#|", stream)),
                 Err(e) => return Err(e),
             }
         }
@@ -193,17 +181,9 @@ impl Core for Reader {
                             Stream::unread_char(mu, stream, ch).unwrap();
                             break;
                         }
-                        _ => {
-                            return Err(Exception::new(
-                                Condition::Range,
-                                "read::read_token",
-                                stream,
-                            ))
-                        }
+                        _ => return Err(Exception::new(Condition::Range, "read:tk", stream)),
                     },
-                    None => {
-                        return Err(Exception::new(Condition::Range, "read::read_token", stream))
-                    }
+                    None => return Err(Exception::new(Condition::Range, "read:tk", stream)),
                 },
                 Ok(None) => {
                     break;
@@ -237,7 +217,7 @@ impl Core for Reader {
                         _ => {
                             return Err(Exception::new(
                                 Condition::Range,
-                                "read::read_atom",
+                                "read:at",
                                 Char::as_tag(ch),
                             ))
                         }
@@ -245,7 +225,7 @@ impl Core for Reader {
                     None => {
                         return Err(Exception::new(
                             Condition::Range,
-                            "read::read_atom",
+                            "read:at",
                             Char::as_tag(ch),
                         ))
                     }
@@ -290,18 +270,12 @@ impl Core for Reader {
                                         "space" => Ok(Some(Char::as_tag(' '))),
                                         "page" => Ok(Some(Char::as_tag('\x0c'))),
                                         "return" => Ok(Some(Char::as_tag('\r'))),
-                                        _ => Err(Exception::new(
-                                            Condition::Range,
-                                            "read::read_char_literal",
-                                            stream,
-                                        )),
+                                        _ => {
+                                            Err(Exception::new(Condition::Range, "read:ch", stream))
+                                        }
                                     }
                                 }
-                                Ok(None) => Err(Exception::new(
-                                    Condition::Eof,
-                                    "read::read_char_literal",
-                                    stream,
-                                )),
+                                Ok(None) => Err(Exception::new(Condition::Eof, "read:ch", stream)),
                                 Err(e) => Err(e),
                             }
                         }
@@ -310,20 +284,12 @@ impl Core for Reader {
                             Ok(Some(Char::as_tag(ch)))
                         }
                     },
-                    None => Err(Exception::new(
-                        Condition::Syntax,
-                        "read::read_char_literal",
-                        stream,
-                    )),
+                    None => Err(Exception::new(Condition::Syntax, "read:ch", stream)),
                 },
                 Ok(None) => Ok(Some(Char::as_tag(ch))),
                 Err(e) => Err(e),
             },
-            Ok(None) => Err(Exception::new(
-                Condition::Eof,
-                "read::read_char_literal",
-                stream,
-            )),
+            Ok(None) => Err(Exception::new(Condition::Eof, "read:ch", stream)),
             Err(e) => Err(e),
         }
     }
@@ -340,11 +306,11 @@ impl Core for Reader {
                     Ok(Some(ch)) => match Self::read_atom(mu, ch, stream) {
                         Ok(atom) => match Tag::type_of(mu, atom) {
                             Type::Symbol => Ok(Some(atom)),
-                            _ => Err(Exception::new(Condition::Type, "read::sharp_macro", stream)),
+                            _ => Err(Exception::new(Condition::Type, "read:#", stream)),
                         },
                         Err(e) => Err(e),
                     },
-                    Ok(None) => Err(Exception::new(Condition::Eof, "read::sharp_macro", stream)),
+                    Ok(None) => Err(Exception::new(Condition::Eof, "read:#", stream)),
                     Err(e) => Err(e),
                 },
                 '|' => match Self::read_block_comment(mu, stream) {
@@ -366,7 +332,7 @@ impl Core for Reader {
                             Ok(fx) => Ok(Some(Fixnum::as_tag(fx))),
                             Err(_) => Err(Exception::new(
                                 Condition::Syntax,
-                                "read::sharp_macro",
+                                "read:#",
                                 Char::as_tag(ch),
                             )),
                         },
@@ -374,17 +340,13 @@ impl Core for Reader {
                     },
                     Err(_) => Err(Exception::new(
                         Condition::Syntax,
-                        "read::sharp_macro",
+                        "read:#",
                         Char::as_tag(ch),
                     )),
                 },
-                _ => Err(Exception::new(
-                    Condition::Type,
-                    "read::sharp_macro",
-                    Char::as_tag(ch),
-                )),
+                _ => Err(Exception::new(Condition::Type, "read:#", Char::as_tag(ch))),
             },
-            Ok(None) => Err(Exception::new(Condition::Eof, "read::sharp_macro", stream)),
+            Ok(None) => Err(Exception::new(Condition::Eof, "read:#", stream)),
             Err(e) => Err(e),
         }
     }
@@ -408,7 +370,7 @@ impl Core for Reader {
                 if eofp {
                     return Ok(eof_value);
                 } else {
-                    return Err(Exception::new(Condition::Eof, "read::read", stream));
+                    return Err(Exception::new(Condition::Eof, "read:eo", stream));
                 }
             }
             Ok(_) => (),
@@ -420,7 +382,7 @@ impl Core for Reader {
                 if eofp {
                     Ok(eof_value)
                 } else {
-                    Err(Exception::new(Condition::Eof, "read::read", stream))
+                    Err(Exception::new(Condition::Eof, "read:st", stream))
                 }
             }
             Ok(Some(ch)) => match map_char_syntax(ch) {
@@ -434,7 +396,7 @@ impl Core for Reader {
                         },
                         _ => Err(Exception::new(
                             Condition::Type,
-                            "read::read",
+                            "read:sx",
                             Fixnum::as_tag(ch as i64),
                         )),
                     },
@@ -469,26 +431,18 @@ impl Core for Reader {
                         },
                         ',' => Err(Exception::new(
                             Condition::Range,
-                            "reader::comma_invalid",
+                            "reader:,",
                             Char::as_tag(ch),
                         )),
                         _ => Err(Exception::new(
                             Condition::Range,
-                            "read::read_atom",
+                            "read::at",
                             Char::as_tag(ch),
                         )),
                     },
-                    _ => Err(Exception::new(
-                        Condition::Read,
-                        "read::read_atom",
-                        Char::as_tag(ch),
-                    )),
+                    _ => Err(Exception::new(Condition::Read, "read:at", Char::as_tag(ch))),
                 },
-                _ => Err(Exception::new(
-                    Condition::Read,
-                    "read::read_atom",
-                    Char::as_tag(ch),
-                )),
+                _ => Err(Exception::new(Condition::Read, "read:at", Char::as_tag(ch))),
             },
             Err(e) => Err(e),
         }

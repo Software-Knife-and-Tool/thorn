@@ -141,16 +141,12 @@ impl<'a> Core<'a> for Struct {
                     let vec_list = match Cons::read(mu, stream) {
                         Ok(list) => {
                             if list.null_() {
-                                return Err(Exception::new(
-                                    Condition::Type,
-                                    "struct::read",
-                                    Tag::nil(),
-                                ));
+                                return Err(Exception::new(Condition::Type, "read:st", Tag::nil()));
                             }
                             list
                         }
                         Err(_) => {
-                            return Err(Exception::new(Condition::Syntax, "struct::read", stream));
+                            return Err(Exception::new(Condition::Syntax, "read:st", stream));
                         }
                     };
 
@@ -164,12 +160,12 @@ impl<'a> Core<'a> for Struct {
 
                             Ok(Self::to_tag(mu, stype, vec))
                         }
-                        _ => Err(Exception::new(Condition::Type, "struct::read", stype)),
+                        _ => Err(Exception::new(Condition::Type, "read:st", stype)),
                     }
                 }
-                _ => Err(Exception::new(Condition::Eof, "struct::read", stream)),
+                _ => Err(Exception::new(Condition::Eof, "read:st", stream)),
             },
-            Ok(None) => Err(Exception::new(Condition::Eof, "struct::read", stream)),
+            Ok(None) => Err(Exception::new(Condition::Eof, "read:st", stream)),
             Err(e) => Err(e),
         }
     }
@@ -205,7 +201,7 @@ impl MuFunction for Struct {
                 fp.value = image.stype;
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:st-type", tag)),
+            _ => Err(Exception::new(Condition::Type, "st-type", tag)),
         }
     }
 
@@ -219,7 +215,7 @@ impl MuFunction for Struct {
                 fp.value = image.vector;
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:st-vec", tag)),
+            _ => Err(Exception::new(Condition::Type, "st-vec", tag)),
         }
     }
 
@@ -239,7 +235,7 @@ impl MuFunction for Struct {
                 Struct { stype, vector }.evict(mu)
             }
             _ => {
-                return Err(Exception::new(Condition::Type, "mu:make-st", stype));
+                return Err(Exception::new(Condition::Type, "make-st", stype));
             }
         };
 

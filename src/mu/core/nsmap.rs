@@ -36,7 +36,7 @@ impl NSMaps for Mu {
         let mut ns_ref = mu.ns_map.write().unwrap();
 
         if ns_ref.contains_key(&ns.as_u64()) {
-            return Err(Exception::new(Condition::Type, "mu::add-ns-map", ns));
+            return Err(Exception::new(Condition::Type, "make-ns", ns));
         }
 
         ns_ref.insert(

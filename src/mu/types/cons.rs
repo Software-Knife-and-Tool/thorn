@@ -151,9 +151,7 @@ impl Core for Cons {
                                 Ok(cdr) => {
                                     match Reader::read(mu, stream, false, Tag::nil(), true) {
                                         Ok(eol) if mu.reader.eol.eq_(eol) => Ok(cdr),
-                                        Ok(_) => {
-                                            Err(Exception::new(Condition::Eof, "mu:car", stream))
-                                        }
+                                        Ok(_) => Err(Exception::new(Condition::Eof, "car", stream)),
                                         Err(e) => Err(e),
                                     }
                                 }
@@ -277,7 +275,7 @@ impl MuFunction for Cons {
         fp.value = match Tag::type_of(mu, list) {
             Type::Null => list,
             Type::Cons => Self::car(mu, list),
-            _ => return Err(Exception::new(Condition::Type, "mu:car", list)),
+            _ => return Err(Exception::new(Condition::Type, "car", list)),
         };
 
         Ok(())
@@ -289,7 +287,7 @@ impl MuFunction for Cons {
         fp.value = match Tag::type_of(mu, list) {
             Type::Null => list,
             Type::Cons => Self::cdr(mu, list),
-            _ => return Err(Exception::new(Condition::Type, "mu:cdr", list)),
+            _ => return Err(Exception::new(Condition::Type, "cdr", list)),
         };
 
         Ok(())
@@ -307,9 +305,9 @@ impl MuFunction for Cons {
             Type::Null => Fixnum::as_tag(0),
             Type::Cons => match Cons::length(mu, list) {
                 Some(len) => Fixnum::as_tag(len as i64),
-                None => return Err(Exception::new(Condition::Type, "mu:length", list)),
+                None => return Err(Exception::new(Condition::Type, "length", list)),
             },
-            _ => return Err(Exception::new(Condition::Type, "mu:length", list)),
+            _ => return Err(Exception::new(Condition::Type, "length", list)),
         };
 
         Ok(())
@@ -320,7 +318,7 @@ impl MuFunction for Cons {
         let list = fp.argv[1];
 
         if Tag::type_of(mu, nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
-            return Err(Exception::new(Condition::Type, "mu:nth", nth));
+            return Err(Exception::new(Condition::Type, "nth", nth));
         }
 
         match Tag::type_of(mu, list) {
@@ -331,12 +329,12 @@ impl MuFunction for Cons {
             Type::Cons => {
                 fp.value = match Self::nth(mu, Fixnum::as_i64(mu, nth) as usize, list) {
                     Some(tag) => tag,
-                    None => return Err(Exception::new(Condition::Type, "mu:nth", list)),
+                    None => return Err(Exception::new(Condition::Type, "nth", list)),
                 };
 
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:nth", list)),
+            _ => Err(Exception::new(Condition::Type, "nth", list)),
         }
     }
 
@@ -345,7 +343,7 @@ impl MuFunction for Cons {
         let list = fp.argv[1];
 
         if Tag::type_of(mu, nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
-            return Err(Exception::new(Condition::Type, "mu:nthcdr", nth));
+            return Err(Exception::new(Condition::Type, "nthcdr", nth));
         }
 
         match Tag::type_of(mu, list) {
@@ -356,12 +354,12 @@ impl MuFunction for Cons {
             Type::Cons => {
                 fp.value = match Self::nthcdr(mu, Fixnum::as_i64(mu, nth) as usize, list) {
                     Some(tag) => tag,
-                    None => return Err(Exception::new(Condition::Type, "mu:nth", list)),
+                    None => return Err(Exception::new(Condition::Type, "nth", list)),
                 };
 
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "mu:nthcdr", list)),
+            _ => Err(Exception::new(Condition::Type, "nthcdr", list)),
         }
     }
 }

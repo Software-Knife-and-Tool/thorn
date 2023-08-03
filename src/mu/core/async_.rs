@@ -60,9 +60,9 @@ impl MuFunction for Async {
 
                     Struct::to_tag(mu, Symbol::keyword(":event"), vec![sym, func, args])
                 }
-                _ => return Err(Exception::new(Condition::Type, "make_ev::args", args)),
+                _ => return Err(Exception::new(Condition::Type, "make-ev", args)),
             },
-            _ => return Err(Exception::new(Condition::Type, "make_ev::function", func)),
+            _ => return Err(Exception::new(Condition::Type, "make-ev", func)),
         };
 
         Ok(())

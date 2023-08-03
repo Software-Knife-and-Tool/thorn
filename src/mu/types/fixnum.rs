@@ -75,9 +75,9 @@ impl MuFunction for Fixnum {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) + Fixnum::as_i64(mu, fx1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fx-add", fx1)),
+                _ => Err(Exception::new(Condition::Type, "fx-add", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fx-add", fx0)),
+            _ => Err(Exception::new(Condition::Type, "fx-add", fx0)),
         }
     }
 
@@ -91,9 +91,9 @@ impl MuFunction for Fixnum {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) - Fixnum::as_i64(mu, fx1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fx-sub", fx1)),
+                _ => Err(Exception::new(Condition::Type, "fx-sub", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fx-sub", fx0)),
+            _ => Err(Exception::new(Condition::Type, "fx-sub", fx0)),
         }
     }
 
@@ -107,9 +107,9 @@ impl MuFunction for Fixnum {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) * Fixnum::as_i64(mu, fx1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fx-mul", fx1)),
+                _ => Err(Exception::new(Condition::Type, "fx-mul", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fx-mul", fx0)),
+            _ => Err(Exception::new(Condition::Type, "fx-mul", fx0)),
         }
     }
 
@@ -128,9 +128,9 @@ impl MuFunction for Fixnum {
 
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fx-lt", fx1)),
+                _ => Err(Exception::new(Condition::Type, "fx-lt", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fx-lt", fx0)),
+            _ => Err(Exception::new(Condition::Type, "fx-lt", fx0)),
         }
     }
 
@@ -145,15 +145,15 @@ impl MuFunction for Fixnum {
                     let divisor = Fixnum::as_i64(mu, fx1);
 
                     if divisor == 0 {
-                        return Err(Exception::new(Condition::ZeroDivide, "mu:fx-div", fx0));
+                        return Err(Exception::new(Condition::ZeroDivide, "fx-div", fx0));
                     }
 
                     fp.value = Self::as_tag(dividend / divisor);
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fx-div", fx1)),
+                _ => Err(Exception::new(Condition::Type, "fx-div", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fx-div", fx0)),
+            _ => Err(Exception::new(Condition::Type, "fx-div", fx0)),
         }
     }
 
@@ -167,9 +167,9 @@ impl MuFunction for Fixnum {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) & Fixnum::as_i64(mu, fx1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:logand", fx1)),
+                _ => Err(Exception::new(Condition::Type, "logand", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:logand", fx0)),
+            _ => Err(Exception::new(Condition::Type, "logand", fx0)),
         }
     }
 
@@ -183,9 +183,9 @@ impl MuFunction for Fixnum {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) | Fixnum::as_i64(mu, fx1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:logor", fx1)),
+                _ => Err(Exception::new(Condition::Type, "logor", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:logor", fx0)),
+            _ => Err(Exception::new(Condition::Type, "logor", fx0)),
         }
     }
 }

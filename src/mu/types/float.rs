@@ -81,9 +81,9 @@ impl MuFunction for Float {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) + Self::as_f32(mu, fl1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fl-add", fl1)),
+                _ => Err(Exception::new(Condition::Type, "fl-add", fl1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fl-add", fl0)),
+            _ => Err(Exception::new(Condition::Type, "fl-add", fl0)),
         }
     }
 
@@ -97,9 +97,9 @@ impl MuFunction for Float {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) - Self::as_f32(mu, fl1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fl-sub", fl1)),
+                _ => Err(Exception::new(Condition::Type, "fl-sub", fl1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fl-sub", fl0)),
+            _ => Err(Exception::new(Condition::Type, "fl-sub", fl0)),
         }
     }
 
@@ -113,9 +113,9 @@ impl MuFunction for Float {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) * Self::as_f32(mu, fl1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fl-mul", fl1)),
+                _ => Err(Exception::new(Condition::Type, "fl-mul", fl1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fl-mul", fl0)),
+            _ => Err(Exception::new(Condition::Type, "fl-mul", fl0)),
         }
     }
 
@@ -134,9 +134,9 @@ impl MuFunction for Float {
 
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fl-lt", fl1)),
+                _ => Err(Exception::new(Condition::Type, "fl-lt", fl1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fl-lt", fl0)),
+            _ => Err(Exception::new(Condition::Type, "fl-lt", fl0)),
         }
     }
 
@@ -150,9 +150,9 @@ impl MuFunction for Float {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) / Self::as_f32(mu, fl1));
                     Ok(())
                 }
-                _ => Err(Exception::new(Condition::Type, "mu:fl-div", fl1)),
+                _ => Err(Exception::new(Condition::Type, "fl-div", fl1)),
             },
-            _ => Err(Exception::new(Condition::Type, "mu:fl-div", fl0)),
+            _ => Err(Exception::new(Condition::Type, "fl-div", fl0)),
         }
     }
 }
