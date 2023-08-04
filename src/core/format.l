@@ -9,6 +9,11 @@
     (core:write-char #\~ dest)
     args))
 
+(mu:intern core :intern "fmt-tab"
+  (:lambda (dest args)
+    (core:write-char #\tab dest)
+    args))
+
 (mu:intern core :intern "fmt-percent"
   (:lambda (dest args)
     (core:terpri dest)
@@ -81,6 +86,7 @@
          (#\S . core::fmt-standard)
          (#\X . core::fmt-hex)
          (#\D . core::fmt-decimal)
+         (#\T . core::fmt-tab)
          (#\~ . core::fmt-tilde)
          (#\% . core::fmt-percent)
          (#\! . core::fmt-bang)))))))
