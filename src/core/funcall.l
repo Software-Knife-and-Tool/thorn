@@ -92,7 +92,7 @@
   (:lambda (symbol args env)
      (:if (core:boundp symbol)
         ((:lambda (fn)
-             (core:raise-unless core::appliablep fn 'core:compile-symbol-call "not a function designator")
+             (core:raise-unless core::appliablep fn 'core::compile-symbol-call "not a function designator")
              (:if (core:closurep fn)
                   `(core:apply ,(core::closure-prop :fn fn) ,(core::compile-quoted-lambda-arg-list fn args env))
                   `(core:apply ,fn ,(core::compile-flat-arg-list args env))))
