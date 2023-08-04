@@ -36,7 +36,7 @@
 (mu:intern core :intern "read-sharp-vector"
     (:lambda (ch stream)
       ((:lambda (type)
-          (core:raise-unless core:keywordp type 'core:read-sharp-vector "not a type keyword")
+          (core:raise-unless core:keywordp type 'core::read-sharp-vector "not a type keyword")
           (mu:make-sv type (core::read-list #\( stream)))
        (core::read-atom ch stream))))
 
@@ -174,8 +174,8 @@
          (#\( . core::read-list)
          (#\) . core::read-list)
          (#\; . core::read-line-comment)
-         (#\, . core::backquote)
-         (#\` . core::backquote)))))
+         (#\, . core::read-backquote)
+         (#\` . core::read-backquote)))))
 
 ;;;
 ;;; get/set-macro-character

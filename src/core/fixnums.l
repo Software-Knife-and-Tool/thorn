@@ -52,28 +52,3 @@
      (core:raise-unless core:fixnump n 'core:round "not a fixnum")
      (core:raise-unless core:fixnump m 'core:round "not a fixnum")
      (mu:fx-sub (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
-
-;;; ash
-(mu:intern core :extern "ash"
-    (:lambda (fix count)
-      (core:raise-unless core:fixnump fix 'core:ash "not a fixnum")
-      (core:raise-unless core:fixnump count 'core:ash "not a fixnum")
-      (:if (core:zerop count)
-           fix
-           (:if (mu:fx-lt count 0)
-                (mu:fix
-                 (:lambda (self count fix)
-                   (:if (core:zerop count)
-                       fix
-                       (core::prog2
-                          (mu:fr-setv (core::fn-frame-id self) 1 (core:1- count))
-                          (mu:fr-setv (core::fn-frame-id self) 2 (mu:fx-divXS fix 2)))))
-                 `(,(mu:fx-mul -1 count) fix))
-                (mu:fix
-                 (:lambda (self count fix)
-                   (:if (core:zerop count)
-                       fix
-                       (core::prog2
-                          (mu:fr-setv (core::fn-frame-id self) 1 (core:1- count))
-                          (mu:fr-setv (core::fn-frame-id self) 2 (mu:fx-mul fix 2)))))
-                 `(,count ,fix))))))

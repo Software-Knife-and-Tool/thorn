@@ -95,7 +95,7 @@
               (mu:sy-name designator)
               (:if (core:charp designator)
                    (mu:make-sv :char `(,designator))
-                   (core:raise designator 'core::string "not a string designator"))))))
+                   (core:raise designator 'core:string "not a string designator"))))))
 
 (mu:intern core :extern "string-append"
   (:lambda (list)

@@ -47,9 +47,9 @@
 ;;;
 (mu:intern core :extern "fix"
    (:lambda (fn list)
-     (core:raise-unless core:functionp fn 'core:fix "not a function")
+     (core:raise-unless core::appliablep fn 'core:fix "not a function designator")
      (core:raise-unless core:listp list 'core:fix "not a list")
-     (:if (core::fn-applyp fn)
+     (:if (core:closurep fn)
           (mu:fix (:lambda (arg) (core:apply fn `(,arg))) list)
           (mu:fix fn list))))
 
