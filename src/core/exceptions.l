@@ -45,10 +45,10 @@
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv
               ((:lambda ()
-                  (core:format stream "environment:~%" ())
+                  (core:format stream "  env:~%" ())
                   (core:mapc
                    (:lambda (frame)
-                      (core:format stream "(~A)~%" frame))
+                      (core:format stream "    (~A)~%" frame))
                    env)))
              ()))
      (core::exception-property :cond except)
@@ -103,7 +103,7 @@
 (mu:intern core :extern "warn-when"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
-         (core:when obj reason)
+         (core:warn obj reason)
          obj)))
 
 (mu:intern core :extern "warn-unless"

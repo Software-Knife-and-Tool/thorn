@@ -7,6 +7,24 @@
 (mu:intern core :intern "describe"
    (:lambda (obj)))
 
+(mu:untern core :intern "core-symbols")
+
+(mu:intern core :intern "lookup-symbol-by-value"
+   (:lambda (obj)
+      (:if (mu:unboundp 'core::core-symbols)
+           (mu:intern core :intern "symbols" `(,(mu:ns-ext core) ,(mu:ns-int core)))
+           ())
+      (mu:fix
+       (:lambda (list)
+          (:if (core:consp list)
+               ((:lambda (symbol)
+                   (:if (mu:eq (mu:sy-val symbol) obj)
+                        symbol
+                        (mu:cdr list)))
+                (mu:car list))
+               list))
+       (mu:car core::core-symbols))))
+
 (mu:intern core :intern "repl"
    (:lambda ()
       (mu:fix
@@ -15,7 +33,7 @@
                loop
                (core:with-exception
                 (:lambda (ex)
-                   (core:exceptionf mu:err-out "exception: condition: ~A on ~A by ~S from ~A~%" :t ex)
+                   (core:exceptionf mu:err-out "exception: ~A on ~A by ~S from ~A~%" :t ex)
                    (core:null loop))
                 (:lambda ()
                    (core:format :t "core> " ())
