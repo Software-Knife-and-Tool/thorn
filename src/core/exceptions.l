@@ -61,8 +61,9 @@
   (:lambda (handler thunk)
     (mu:with-ex
      (:lambda (object condition source)
-          (:if (mu:eq (mu:type-of condition) :except)
-               (core:apply handler `(,condition))
+          (core:warn condition "raise")
+          (:if (mu:eq condition :except)
+               (core:apply handler `(,object))
                (core:apply
                 handler
                 `(,(core:make-exception condition object source "mu:raise" (core:dropl (mu::frames) 4))))))
