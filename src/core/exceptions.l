@@ -61,13 +61,12 @@
   (:lambda (handler thunk)
     (mu:with-ex
      (:lambda (object condition source)
-          (core:warn condition "raise")
-          (:if (mu:eq condition :except)
-               (core:apply handler `(,object))
-               (core:apply
-                handler
-                `(,(core:make-exception condition object source "mu:raise" (core:dropl (mu::frames) 4))))))
-       (:lambda () (core:apply thunk ())))))
+        (:if (mu:eq condition :except)
+             (core:apply handler `(,object))
+             (core:apply
+              handler
+              `(,(core:make-exception condition object source "mu:raise" (core:dropl (mu::frames) 4))))))
+     (:lambda () (core:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
