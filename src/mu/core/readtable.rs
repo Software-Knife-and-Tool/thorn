@@ -70,6 +70,7 @@ lazy_static! {
         ('R', SyntaxType::Constituent),
         ('S', SyntaxType::Constituent),
         ('T', SyntaxType::Constituent),
+        ('U', SyntaxType::Constituent),
         ('V', SyntaxType::Constituent),
         ('W', SyntaxType::Constituent),
         ('X', SyntaxType::Constituent),
