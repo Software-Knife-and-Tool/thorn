@@ -48,7 +48,10 @@
                   (core:format stream "  env:~%" ())
                   (core:mapc
                    (:lambda (frame)
-                      (core:format stream "    (~A)~%" frame))
+                      (core:format stream "  [~A] (~A ~A)~%"
+                                   `(,(core::lookup-symbol-by-value frame)
+                                     ,(mu:car frame)
+                                     ,(mu:cdr frame))))
                    env)))
              ()))
      (core::exception-property :cond except)
