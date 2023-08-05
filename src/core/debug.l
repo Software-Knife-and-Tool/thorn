@@ -11,9 +11,9 @@
 
 (mu:intern core :intern "lookup-symbol-by-value"
    (:lambda (obj)
-      (:if (mu:unboundp 'core::core-symbols)
-           (mu:intern core :intern "symbols" `(,(mu:ns-ext core) ,(mu:ns-int core)))
-           ())
+      (:if (mu:boundp 'core::core-symbols)
+           ()
+           (mu:intern core :intern "core-symbols" `(,(mu:ns-ext core) ,(mu:ns-int core))))
       (mu:fix
        (:lambda (list)
           (:if (core:consp list)
@@ -23,7 +23,7 @@
                         (mu:cdr list)))
                 (mu:car list))
                list))
-       (mu:car core::core-symbols))))
+       (mu:nth 0 core::core-symbols))))
 
 (mu:intern core :intern "repl"
    (:lambda ()
