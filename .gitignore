@@ -3,7 +3,7 @@ thorn*.tgz
 dist/runtime
 dist/core.l
 target
-crossref.out
+xref.out
 doc/rustdoc
 base.report
 perf.report

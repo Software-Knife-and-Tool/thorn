@@ -37,6 +37,12 @@
           (:reason  . 3)
           (:env     . 4)))))))
 
+(mu:intern core :intern "fmt-mapped-symbol"
+   (:lambda (obj)
+      ((:lambda (symbol)
+          (core::orf (mu:nth 0 symbol) (mu:nth 1 symbol))) 
+      (core::debug-map-symbol obj))))
+             
 (mu:intern core :extern "exceptionf"
    (:lambda (stream fmt printenv except)
      ((:lambda (cond object source reason env)
@@ -45,11 +51,11 @@
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv
               ((:lambda ()
-                  (core:format stream "  env:~%" ())
+                  (core:format stream "env:~%" ())
                   (core:mapc
                    (:lambda (frame)
-                      (core:format stream "  [~A] (~A ~A)~%"
-                                   `(,(core::lookup-symbol-by-value frame)
+                      (core:format stream "  ~A~T(~A ~A)~%"
+                                   `(,(core::fmt-mapped-symbol (mu:car frame))
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
                    env)))
