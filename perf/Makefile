@@ -18,11 +18,11 @@ help:
 	@echo "    namespaces - list namespaces"
 	@echo "    list - tests in \$$NAMESPACE"
 	@echo "    format - print test totals"
-	@echo "    \$$NAMESPACE - run all tests in namespace, unformatted output"
+	@echo "    \$$NS - run all tests in namespace, unformatted output"
 	@echo "    base - run all tests in all namespaces, establish baseline"
-	@echo "    summary - "
-	@echo "    run - individual test: NAMESPACE=namespace TEST=test unformatted output"
-	@echo "    report - individual test: NAMESPACE=namespace TEST=test formatted output (storage only)"
+	@echo "    summary - run all tests in all namespace, establish summary"
+	@echo "    run - individual test: NS=namespace TEST=test unformatted output"
+	@echo "    report - individual test: NS=namespace TEST=test formatted output (storage only)"
 	@echo "    commit - rust tests, print perf report"
 	@echo "    valgrind - run memcheck, callgrind, cachegrind reports"
 
@@ -50,12 +50,12 @@ list:
 	@cat $$NAMESPACE/tests
 
 run:
-	@for test in `cat $$NAMESPACE/tests`; do \
-	    bash $$NAMESPACE/run-perf $$NAMESPACE/$$test;	\
+	@for test in `cat $$NS/tests`; do \
+	    bash $$NS/run-perf $$NS/$$test;	\
 	done
 
 report:
-	@bash $(NAMESPACE)/run-perf $(NAMESPACE)/$(TEST) > $(TMPF)
+	@bash $(NS)/run-perf $(NS)/$(TEST) > $(TMPF)
 	@python3 storage.py $(TMPF)
 	@rm -f $(TMPF)
 

@@ -12,8 +12,10 @@
          ())))
 
 (mu:intern core :extern "uninternedp"
-  (:lambda (sym)
-    (core:null (mu:sy-ns sym))))
+   (:lambda (sym)
+      (:if (core:null sym)
+           ()
+           (core:null (mu:sy-ns sym)))))
 
 (mu:intern core :extern "keywordp"
    (:lambda (t)

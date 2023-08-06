@@ -60,7 +60,7 @@
         ((:lambda (lambda-desc)
             ((:lambda (fn)
                 (:if (core::orf (core::ctype-ref :env lambda-desc) (core::ctype-ref :rest lambda-desc))
-                     (core::make-closure lambda-desc fn)
+                     (core::make-closure lambda-desc fn ())
                      fn))
              (mu:compile `(:lambda ,(core::ctype-ref :syms lambda-desc) ,@(core::compile-lambda-body lambda-desc body env)))))
         (core::core-lambda lambda env)))
@@ -142,7 +142,7 @@
                          (mu:compile form)     ; mu special form (:key ...)
                          (:if (core:consp fn)  ; application ((...) ...), native or core
                               (core::compile-lambda-call fn args env)
-                              (:if (core:symbolp fn) ; symbol, function symbol or special form
+                              (:if (mu:eq :symbol (mu:type-of fn)) ; symbol, function symbol or special form
                                    ((:lambda (special)
                                        (:if special
                                             (mu:apply (mu:sy-val special) `(,form ,env))
@@ -157,7 +157,7 @@
                                    (core:raise form 'core::compile "not a function designator"))))))
             (mu:car form)
             (mu:cdr form))
-           (:if (core:symbolp form)
+           (:if (mu:eq :symbol (mu:type-of form))
                 (core::compile-symbol form env)
                 form))))
 

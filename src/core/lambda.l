@@ -11,10 +11,10 @@
 ;;;
 ;;; [*lambda descriptor*] #s(:ctype :lambda (syms reqs rest env))
 ;;;
-;;; syms:    list of symbols, suitable for :lambda
-;;; reqs:    list of required symbols
-;;; rest:    rest symbol or nil
-;;; env:     list of lambda descriptors
+;;; reqs:   required symbols
+;;; rest:   rest symbol or nil
+;;; syms:   all symbols
+;;; env:    lexical environment, list of lambdas
 ;;;
 (mu:intern core :intern "make-lambda"
    (:lambda (lambda req-syms rest-sym env)
@@ -79,7 +79,7 @@
           (:if (mu:cdr body)
                compiled-form
                (:if (core:functionp compiled-form)
-                    (:if (core:consp (mu:car body))
+                    (:if (core::andf (core:null (mu:cdr body)) (core:consp (mu:car body)))
                          (:if (mu:eq 'lambda (mu:car (mu:car body)))
                               (core:compile `(core::closure ,@compiled-form env))
                               compiled-form)
@@ -100,9 +100,7 @@
 ;;; current lexical environment.
 ;;;
 ;;; `symbol:` symbol to be compiled
-;;;
 ;;; `env:` compiled environment
-;;;
 ;;; `returns:` qualified symbol or *frame-ref*
 ;;;
 ;;; need to differentiate between uninterned symbols and closed symbols
@@ -123,7 +121,6 @@
 ;;; if found return a compiled frame reference, otherwise *nil*.
 ;;;
 ;;; `symbol:` symbol to be compiled
-;;;
 ;;; `env:` lexical compiled environment
 ;;;
 ;;; `returns:` *frame-ref* or *nil*
