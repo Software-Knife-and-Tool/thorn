@@ -18,11 +18,17 @@ for symbol in xref:
         tag = value[:-2].split()
         a, b, r, t = tag
         addr = t[4:].rjust(16, ' ')
-        revxref.append((addr, type, name))
+
+        scope = 'extern'
+        if name[0] == ':':
+            name = name[1:]
+            scope = 'intern'
+
+        revxref.append((addr, type, scope, name))
 
 revxref.sort()
 for symbol in revxref:
     line_no += 1
-    addr, type, name = symbol;
+    addr, type, scope, name = symbol;
 
-    print(f'{line_no:<5} {addr:<20} {type:<10} {name:<30}')
+    print(f'{line_no:<5} {addr:<16}    {type}  {scope}  {name:<30}')

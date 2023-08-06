@@ -9,8 +9,8 @@ usage () {
     echo "  --config=config-list       runtime configuration." >&2
     echo "[runtime options]" >&2
     echo "  --eval=form                evaluate form and print result." >&2
-    echo "  --load=src-file            load src-file in sequence." >&2
     echo "  --quiet-eval=form          evaluate form quietly." >&2
+    echo "  --load=src-file            load src-file in sequence." >&2
     echo "  --pipe                     run in pipe mode." >&2
     echo "  --version                  print version and exit." >&2
     exit 2
@@ -69,12 +69,12 @@ while getopts "$optspec" optchar; do
                 quiet-eval=*)
                     val=${OPTARG#*=}
                     opt=${OPTARG%=$val}
-                    OPTIONS+=" -q ${val}"
+                    OPTIONS+=" -q \"${val}\""
                     ;;
                 configure=*)
                     val=${OPTARG#*=}
                     opt=${OPTARG%=$val}
-                    OPTIONS+=" -c ${val}"
+                    OPTIONS+=" -c \"${val}\""
                     ;;
                 help)
                     usage

@@ -7,23 +7,26 @@
 (mu:intern core :intern "describe"
    (:lambda (obj)))
 
-(mu:untern core :intern "core-symbols")
+(mu:untern core :intern "debug-core-symbols")
 
-(mu:intern core :intern "lookup-symbol-by-value"
+(mu:intern core :intern "debug-map-symbol"
    (:lambda (obj)
-      (:if (mu:boundp 'core::core-symbols)
+      (:if (mu:boundp 'core::debug-core-symbols)
            ()
-           (mu:intern core :intern "core-symbols" `(,(mu:ns-ext core) ,(mu:ns-int core))))
-      (mu:fix
-       (:lambda (list)
-          (:if (core:consp list)
-               ((:lambda (symbol)
-                   (:if (mu:eq (mu:sy-val symbol) obj)
-                        symbol
-                        (mu:cdr list)))
-                (mu:car list))
-               list))
-       (mu:nth 0 core::core-symbols))))
+           (mu:intern core :intern "debug-core-symbols" `(,(mu:ns-ext core) ,(mu:ns-int core))))
+      (core:mapcar
+       (:lambda (scope)
+          (mu:fix
+           (:lambda (list)
+              (:if (core:consp list)
+                   ((:lambda (symbol)
+                       (:if (mu:eq (mu:sy-val symbol) obj)
+                            symbol
+                            (mu:cdr list)))
+                    (mu:car list))
+                   list))
+           scope))
+       core::debug-core-symbols)))
 
 (mu:intern core :intern "repl"
    (:lambda ()
