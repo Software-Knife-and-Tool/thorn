@@ -91,7 +91,7 @@
    (:lambda (designator)
       (:if (core:stringp designator)
          designator
-         (:if (core:symbolp designator)
+         (:if (mu:eq :symbol (mu:type-of designator))
               (mu:sy-name designator)
               (:if (core:charp designator)
                    (mu:make-sv :char `(,designator))

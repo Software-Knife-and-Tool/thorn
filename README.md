@@ -1,5 +1,7 @@
 
 
+
+
 <img src="https://github.com/Software-Knife-and-Tool/thorn/blob/main/.github/thorn-eth.png?raw=true" width="20%" height="%20">
 
 # *thorn/eth* - a system programming environment
@@ -147,6 +149,17 @@ The `tests` makefile has additional facilities for development, including report
 
 ```
 % make -C tests help
+
+--- test options
+    cargo - run rust tests
+    namespaces - list namespaces
+    commit - create test summary
+    list - tests in $NAMESPACE
+    $NS - run all tests in namespace, raw output
+    raw - run $TEST in $NS, unprocessed output
+    report - run $TEST in $NS, report output
+    summary - run all tests in all namespaces and print summary
+    
 ```
 
 
@@ -159,7 +172,7 @@ Metrics include the average amount of time (in microsconds) taken for an individ
 
 The NTESTS environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a Core I7 CPU at 3+ GHz, the default perf tests take approximately three minutes of elapsed time for the *mu* namespace.
+On a Core I7 CPU at 3+ GHz, the default perf tests take approximately four minutes of elapsed time for the *mu* and *core* namespace.
 
 ```
 % make -C perf base
@@ -186,6 +199,25 @@ For convenience, the *thorn* Makefile provides:
 % make perf/commit		# produce a condensed report
 ```
 
+The  `perf`  makefile offers some development options.
+
+```
+% make -C perf help
+
+--- perf options
+    namespaces - list namespaces
+    list - tests in $NAMESPACE
+    format - print test totals
+    $NS - run all tests in namespace, unformatted output
+    base - run all tests in all namespaces, establish baseline
+    summary - run all tests in all namespace, establish summary
+    run - individual test: NS=namespace TEST=test unformatted output
+    report - individual test: NS=namespace TEST=test formatted output (storage only)
+    commit - rust tests, print perf report
+    valgrind - run memcheck, callgrind, cachegrind reports
+
+```
+
 
 
 #### Running the *thorn* system
@@ -208,16 +240,16 @@ USAGE: runtime [options] [file...]
 
 runtime: x.y.z: [-h?psvcelq] [file...]
 OPTIONS:
-  -h					print this message
-  -?					print this message
-  -v					print version string and exit
-  -e					enable debugging
-  -p					pipe mode, no repl
-  -l SRCFILE			load SRCFILE in sequence
-  -e SEXPR				evaluate SEXPR and print result
-  -q SEXPR				evaluate SEXPR quietly
-  -c name:value[,...]	environment configuration  	   
-  [file ...]			load source file(s)
+  -h                   print this message
+  -?                   print this message
+  -v                   print version string and exit
+  -e                   enable debugging
+  -p                   pipe mode, no repl
+  -l SRCFILE           load SRCFILE in sequence
+  -e SEXPR             evaluate SEXPR and print result
+  -q SEXPR             evaluate SEXPR quietly
+  -c name:value[,...]  environment configuration  	   
+  [file ...]           load source file(s)
   
 ```
 

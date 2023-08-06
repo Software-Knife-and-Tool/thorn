@@ -73,7 +73,7 @@
                              ((:lambda (type value)
                                  (:if (core::ctype-predicate type value)
                                       property-def
-                                      (core:raise property-value 'core::make-ctype "property type botch")))
+                                      (core:raise property-value 'core::make-ctype `(,type ,value "property type botch"))))
                               (mu:cdr property-def)
                               (mu:cdr property-value))
                              ()))
@@ -102,9 +102,10 @@
 
 ;;; closure
 (core::defctype "closure"
-  '((:lambda . :struct)
-    (:nreqs  . :fixnum)
-    (:fn     . :func)))
+  '((:lambda  . :struct)
+    (:nreqs   . :fixnum)
+    (:fn      . :func)
+    (:env     . :listp)))
 
 (mu:intern core :extern "closurep"
   (:lambda (fn)
@@ -112,10 +113,10 @@
 
 ;;; lambda
 (core::defctype "lambda"
-   '((:syms   . :listp)
-     (:reqs   . :listp)
-     (:rest   . :symbolp)
-     (:env    . :listp)))
+   '((:syms . :listp)
+     (:reqs . :listp)
+     (:rest . :symbolp)
+     (:env  . :listp)))
 
 (mu:intern core :extern "lambdap"
   (:lambda (fn)

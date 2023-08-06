@@ -16,9 +16,9 @@ help:
 	@echo "    namespaces - list namespaces"
 	@echo "    commit - create test summary"
 	@echo "    list - tests in \$$NAMESPACE"
-	@echo "    \$$NAMESPACE - run all tests in namespace, raw output"
-	@echo "    raw - run \$$TEST in \$$NAMESPACE, unprocessed output"
-	@echo "    report - run \$$TEST in \$$NAMESPACE, report output"
+	@echo "    \$$NS - run all tests in namespace, raw output"
+	@echo "    raw - run \$$TEST in \$$NS, unprocessed output"
+	@echo "    report - run \$$TEST in \$$NS, report output"
 	@echo "    summary - run all tests in all namespaces and print summary"
 
 cargo:
@@ -28,7 +28,7 @@ namespaces:
 	@echo $(NAMESPACES)
 
 list:
-	@cat $$NAMESPACE/tests
+	@cat $$NS/tests
 
 mu:
 	@for test in `cat mu/tests`; do 		\
@@ -61,11 +61,11 @@ summary:
 	@rm -f $(TMPF)
 
 raw:
-	@python3 $(NAMESPACE)/runner.py $(NAMESPACE)/$(TEST)
+	@python3 $(NS)/runner.py $(NS)/$(TEST)
 
 report:
-	@python3 $(NAMESPACE)/runner.py $(NAMESPACE)/$(TEST) > $(TMPF)
-	@python3 report.py $(NAMESPACE) $(TEST) $(TMPF)
+	@python3 $(NS)/runner.py $(NS)/$(TEST) > $(TMPF)
+	@python3 report.py $(NS) $(TEST) $(TMPF)
 	@rm -f $(TMPF)
 
 clean:
