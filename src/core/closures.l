@@ -18,9 +18,9 @@
       (core::make-ctype "closure"
         (core::pair-list
          `(:lambda ,lambda
-           :nreqs ,(mu:length (core::ctype-ref :syms lambda))
-           :fn ,fn
-           :env ,env)))))
+           :nreqs  ,(mu:length (core::ctype-ref :reqs lambda))
+           :fn     ,fn
+           :env    ,env)))))
 
 (mu:intern core :intern "closure-prop"
    (:lambda (prop closure)

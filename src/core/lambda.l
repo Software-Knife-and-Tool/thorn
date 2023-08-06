@@ -20,12 +20,18 @@
    (:lambda (lambda req-syms rest-sym env)
       (core::make-ctype "lambda"
         (core::pair-list
-         `(:syms ,lambda :reqs ,req-syms :rest ,rest-sym :env ,env)))))
+         `(:syms ,lambda
+           :reqs ,req-syms
+           :rest ,rest-sym
+           :env ,env)))))
 
 ;;;
-;;; parse core lambda list
+;;; `core::core-lambda` compiles a core lambda form to a lambda descriptor
 ;;;
-;;; compile a core lambda form to a lambda descriptor
+;;; `lambda:` lambda form
+;;; `env:`    lexical environment
+;;;
+;;; `returns:` lambda descriptor
 ;;;
 (mu:intern core :intern "core-lambda"
    (:lambda (lambda env)
@@ -68,8 +74,8 @@
     (:if body
          ((:lambda (env)
              (core::compile-closure lambda-desc body env))
-            (core::compile-add-env lambda-desc env))
-           ())))
+          (core::compile-add-env lambda-desc env))
+         ())))
 
 (mu:intern core :intern "compile-closure"
   (:lambda (lambda-desc body env)
@@ -116,7 +122,7 @@
 ;;;
 ;;; resolving body symbols
 ;;;
-;;; *symbol-frame-ref* looks up *symbol* in a compiled environment.
+;;; *symbol-frame-ref* looks up *symbol* in the lexical environment.
 ;;;
 ;;; if found return a compiled frame reference, otherwise *nil*.
 ;;;
@@ -124,8 +130,6 @@
 ;;; `env:` lexical compiled environment
 ;;;
 ;;; `returns:` *frame-ref* or *nil*
-;;;
-;;; used only for closed symbols
 ;;;
 (mu:intern core :intern "symbol-frame-ref"
   (:lambda (symbol env)
