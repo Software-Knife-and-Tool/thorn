@@ -17,9 +17,9 @@
           (:if (core:eof ifs)
                loop
                (core:with-exception
-                   (:lambda (exception)
-                     (core:exceptionf mu:err-out "load exception: ~A~%" () exception))
-                 (:lambda ()
+                (:lambda (exception)
+                     (core:exceptf mu:err-out "load exception: ~A~%" () exception))
+                (:lambda ()
                    ((:lambda (form)
                       (:if (core:eof ifs)
                            loop

@@ -6,7 +6,7 @@
 ;;;
 
 ;;;
-;;; [*closure descriptor*] #s(:ctype :closure lambda nreqs fn dyn-env)
+;;; [*closure descriptor*] #s(:ctype :closure (lambda nreqs fn env))
 ;;;
 ;;; lambda: lambda struct
 ;;; nreqs:  number of reqs plus rest
@@ -15,32 +15,40 @@
 ;;;
 (mu:intern core :intern "make-closure"
    (:lambda (lambda fn env)
-      (core::make-ctype "closure"
-        (core::pair-list
-         `(:lambda ,lambda
-           :nreqs  ,(mu:length (core::ctype-ref :reqs lambda))
-           :fn     ,fn
-           :env    ,env)))))
+     (core::make-ctype "closure"
+       (core::pair-list
+        `(:lambda ,lambda
+          :nreqs  ,(mu:length (core::lambda-prop :reqs lambda))
+          :fn     ,fn
+          :env    ,env)))))
 
 (mu:intern core :intern "closure-prop"
    (:lambda (prop closure)
-      (core:raise-unless core:closurep closure 'closure-prop "not a closure")                 
-      (:if (mu:eq prop :nreqs)
-           (core::ctype-ref :nreqs closure)
-           (:if (mu:eq prop :fn)
-                (core::ctype-ref :fn closure)
-                (:if (mu:eq prop :lambda)
-                     (core::ctype-ref :fn closure)
-                     (:if (mu:eq prop :env)
-                          (core::ctype-ref :env closure)
-                          (core::ctype-ref prop (core::ctype-ref :lambda closure))))))))
+      (core:raise-unless core:closurep closure 'closure-prop "not a closure")
+      (:if (core:findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :nreqs :fn :env))
+           ((:lambda (ref)
+               (core:raise-when core:null prop 'closure-prop "property not bound")
+               (mu:cdr ref))
+            (core::ctype-ref prop closure))
+           (core::lambda-prop prop (core::closure-prop :lambda closure)))))
 
-(mu:intern core :intern "closure"
-  (:lambda (fn env)
-     ((:lambda (lambda fn)
-         (core::make-closure lambda fn (mu::frames)))
-      (core::ctype-ref :lambda fn))
-      (core::ctype-ref :fn fn)))
+(mu:intern core :intern "compile-closure"
+  (:lambda (lambda-desc body env)
+    (core:maplist
+     (:lambda (body)
+       ((:lambda (form)
+          (:if (mu:cdr body)
+               form
+               (:if (core:consp (mu:car body))
+                    (:if (mu:eq 'lambda (mu:car (mu:car body)))
+                         ((:lambda (lambda fn)
+                             (core::make-closure lambda fn (mu:nthcdr 2 (mu::frames))))
+                          (mu:cdr (core::ctype-ref :lambda form))
+                          (mu:cdr (core::ctype-ref :fn form)))
+                         form)
+                    form)))
+        (core::compile (mu:car body) env)))
+     body)))
 
 ;;;
 ;;;

@@ -14,16 +14,25 @@
 ;;; reqs:   required symbols
 ;;; rest:   rest symbol or nil
 ;;; syms:   all symbols
-;;; env:    lexical environment, list of lambdas
+;;; lexenv:    lexical environment, list of lambdas
 ;;;
 (mu:intern core :intern "make-lambda"
    (:lambda (lambda req-syms rest-sym env)
       (core::make-ctype "lambda"
         (core::pair-list
-         `(:syms ,lambda
-           :reqs ,req-syms
-           :rest ,rest-sym
-           :env ,env)))))
+         `(:syms   ,lambda
+           :reqs   ,req-syms
+           :rest   ,rest-sym
+           :lexenv ,env)))))
+
+(mu:intern core :intern "lambda-prop"
+   (:lambda (prop lambda)
+      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:syms :reqs :rest :lexenv))
+           ((:lambda (ref)
+               (core:raise-when core:null prop 'lambda-prop "property not bound")
+               (mu:cdr ref))
+            (core::ctype-ref prop lambda))
+           (core:raise prop 'lambda-prop "not a lambda property"))))
 
 ;;;
 ;;; `core::core-lambda` compiles a core lambda form to a lambda descriptor
@@ -77,23 +86,6 @@
           (core::compile-add-env lambda-desc env))
          ())))
 
-(mu:intern core :intern "compile-closure"
-  (:lambda (lambda-desc body env)
-    (core:maplist
-     (:lambda (body)
-       ((:lambda (compiled-form)
-          (:if (mu:cdr body)
-               compiled-form
-               (:if (core:functionp compiled-form)
-                    (:if (core::andf (core:null (mu:cdr body)) (core:consp (mu:car body)))
-                         (:if (mu:eq 'lambda (mu:car (mu:car body)))
-                              (core:compile `(core::closure ,@compiled-form env))
-                              compiled-form)
-                         compiled-form)
-                    compiled-form)))
-        (core::compile (mu:car body) env)))
-     body)))
-
 ;;;
 ;;; Compiling symbols
 ;;;
@@ -140,8 +132,8 @@
             ((:lambda (offset)
                (:if offset
                     ((:lambda ()
-                       (mu:compile `(mu::fr-ref ,(core::ctype-ref :func frame) ,offset))))
+                       (mu:compile `(mu::fr-ref ,(mu:cdr (core::ctype-ref :func frame)) ,offset))))
                     ()))
-             (core:positionl (:lambda (el) (mu:eq el symbol)) (core::ctype-ref :syms frame)))))
+             (core:positionl (:lambda (el) (mu:eq el symbol)) (mu:cdr (core::ctype-ref :syms frame))))))
      ()
      env)))
