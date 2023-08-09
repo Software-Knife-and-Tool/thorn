@@ -83,14 +83,14 @@
            (mu:make-st :ctype `(,str ,property-values)))
        (core:string name))))
 
+;;;
+;;; returns () if not found
+;;;
 (mu:intern core :intern "ctype-ref"
    (:lambda (property-name struct)
       (core:raise-unless core:ctypep struct 'core::ctype-ref "not a ctype")
       (core:raise-unless core:keywordp property-name 'core::ctype-ref "not a property name")
-      ((:lambda (property)
-          (core:raise-when core:null property-name 'core::ctype-ref "property not bound")
-          (mu:cdr property))
-       (core:assoc property-name (mu:sv-ref (mu:st-vec struct) 1)))))
+      (core:assoc property-name (mu:sv-ref (mu:st-vec struct) 1))))
 
 ;;;
 ;;; core ctypes
@@ -113,10 +113,10 @@
 
 ;;; lambda
 (core::defctype "lambda"
-   '((:syms . :listp)
-     (:reqs . :listp)
-     (:rest . :symbolp)
-     (:env  . :listp)))
+   '((:syms   . :listp)
+     (:reqs   . :listp)
+     (:rest   . :symbolp)
+     (:lexenv . :listp)))
 
 (mu:intern core :extern "lambdap"
   (:lambda (fn)

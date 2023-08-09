@@ -43,10 +43,10 @@
           (core::orf (mu:nth 0 symbol) (mu:nth 1 symbol))) 
       (core::debug-map-symbol obj))))
              
-(mu:intern core :extern "exceptionf"
+(mu:intern core :extern "exceptf"
    (:lambda (stream fmt printenv except)
      ((:lambda (cond object source reason env)
-         (:if (core:null fmt)                
+         (:if (core:null fmt)           
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv
@@ -58,7 +58,7 @@
                                    `(,(core::fmt-mapped-symbol (mu:car frame))
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
-                   env)))
+                   (mu:cdr env))))
              ()))
      (core::exception-property :cond except)
      (core::exception-property :object except)
@@ -72,9 +72,12 @@
      (:lambda (object condition source)
         (:if (mu:eq condition :except)
              (core:apply handler `(,object))
-             (core:apply
-              handler
-              `(,(core:make-exception condition object source "mu:raise" (core:dropl (mu::frames) 4))))))
+             (core:apply handler `(,(core:make-exception
+                                    condition
+                                    object
+                                    source
+                                    "mu:raise"
+                                    (core:dropl (mu::frames) 4))))))
      (:lambda () (core:apply thunk ())))))
 
 ;;;
@@ -106,7 +109,7 @@
 
 (mu:intern core :extern "warn"
   (:lambda (obj msg)
-     (core:format mu:err-out "warning: ~S ~A~%" `(,obj ,msg))
+     (core:format mu:err-out ";;; warning: ~S ~A~%" `(,obj ,msg))
     obj))
 
 (mu:intern core :extern "warn-when"

@@ -27,7 +27,6 @@
 ;;;
 ;;; compiling special/macro forms
 ;;;
-;;;    core::defconst form env => list
 ;;;    core::defmacro form env => list
 ;;;    core::defun form env => list
 ;;;    core::if form env => list
@@ -39,12 +38,11 @@
 ;;;
 ;;; arguments:
 ;;;
-;;;   form : any form
+;;;   form : special/macro form
 ;;;   env  : lexical environment list
 ;;;
 ;;; returns: mu form
 ;;;
-(mu:intern core :intern "quote" (:lambda (form env) form))
 
 ;;;
 ;;; special forms
@@ -54,16 +52,24 @@
 ;;; lambda compiles to a closure ctype
 ;;;
 (mu:intern core :intern "lambda"
-   (:lambda (form env)
+    (:lambda (form env)
     (core:raise-if (mu:fx-lt (mu:length form) 2) form 'lambda "malformed lambda expression")
     ((:lambda (lambda body)
         ((:lambda (lambda-desc)
             ((:lambda (fn)
-                (:if (core::orf (core::ctype-ref :env lambda-desc) (core::ctype-ref :rest lambda-desc))
+                (:if (core::orf
+                      (core::lambda-prop :lexenv lambda-desc)
+                      (core::lambda-prop :rest lambda-desc))
                      (core::make-closure lambda-desc fn ())
                      fn))
-             (mu:compile `(:lambda ,(core::ctype-ref :syms lambda-desc) ,@(core::compile-lambda-body lambda-desc body env)))))
-        (core::core-lambda lambda env)))
+             (mu:compile
+              `(:lambda
+                ,(core::lambda-prop :syms lambda-desc)
+                ,@(core::compile-lambda-body
+                   lambda-desc
+                   body
+                   env)))))
+         (core::core-lambda lambda env)))
      (mu:nth 1 form)
      (mu:nthcdr 2 form))))
 
@@ -109,6 +115,7 @@
          (core:apply true-fn ())
          (core:apply false-fn ()))))
 
+;;; fix this to use the mu internal
 (mu:intern core :intern "if"
    (:lambda (form env)
       (core:raise-unless core:listp env 'if "not an environment")
@@ -118,6 +125,11 @@
         `(,(mu:cons (core::thunk (mu:nth 1 form) env) ())
           ,(core::thunk (mu:nth 2 form) env)
           ,(core::thunk (mu:nth 3 form) env)))))
+
+;;;
+;;; quote
+;;;
+(mu:intern core :intern "quote" (:lambda (form env) form))
 
 ;;;
 ;;; compiler

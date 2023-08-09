@@ -4,10 +4,32 @@
 ;;;
 ;;; debugging
 ;;;
-(mu:intern core :intern "describe"
-   (:lambda (obj)))
-
 (mu:untern core :intern "debug-core-symbols")
+
+(mu:intern core :intern "describe-function"
+   (:lambda (fn)
+      ((:lambda (view)
+          (core:format :t "simple function: [~A] arity: ~A body ~A~%"
+                       (mu:sv-ref view 2)
+                       (mu:sv-ref view 0)
+                       (mu:sv-ref view 1)))
+       (mu::view fn))))
+
+(mu:intern core :intern "describe"
+   (:lambda (obj)
+      (mu:fix
+       (:lambda (list)
+          (:if (core:null list)
+               ()
+               ((:lambda (predicate fn)
+                   (:if (mu:apply predicate obj)
+                        ((:lambda ()
+                            (mu:apply fn obj)
+                            ()))
+                        (mu:cdr list)))
+               (mu:car (mu:car list))
+               (mu:cdr (mu:car list))))
+          `(,(mu:cons core:functionp core::describe-function))))))
 
 (mu:intern core :intern "debug-map-symbol"
    (:lambda (obj)
@@ -36,7 +58,7 @@
                loop
                (core:with-exception
                 (:lambda (ex)
-                   (core:exceptionf mu:err-out "exception: ~A on ~A by ~S from ~A~%" :t ex)
+                   (core:exceptf mu:err-out "exception: ~A on ~A by ~S from ~A~%" :t ex)
                    (core:null loop))
                 (:lambda ()
                    (core:format :t "core> " ())

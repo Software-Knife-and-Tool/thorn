@@ -61,6 +61,12 @@
       fn
       (core:mapcar (:lambda (elt) (core::compile elt env)) args))))
 
+(mu:intern core :intern "compile-lambda-arg-list"
+   (:lambda (fn args env)
+     (core::lambda-arg-list
+      fn
+      (core:mapcar (:lambda (elt) (core::compile elt env)) args))))
+
 ;;;
 ;;; compile-application
 ;;;
@@ -70,10 +76,9 @@
 ;;;
 (mu:intern core :intern "compile-lambda-call"
   (:lambda (form args env)
-    ((:lambda (fn)
-        (core:warn fn "compile-lambda-call")
+     ((:lambda (fn)
         (:if (core:closurep fn)
-             `(,core::closure-apply ,fn ,(core::compile-quoted-lambda-arg-list fn args env))
+             `(,mu:apply ,(core::closure-prop :fn fn) ,(core::compile-lambda-arg-list fn args env))
              `(,mu:apply ,fn ,(core::compile-arg-list args env))))
      (core::compile form env))))
 

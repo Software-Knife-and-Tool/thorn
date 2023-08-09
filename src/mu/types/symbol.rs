@@ -201,7 +201,7 @@ impl Core for Symbol {
         let len = str.len();
 
         if len > Tag::DIRECT_STR_MAX || len == 0 {
-            panic!()
+            panic!("{:?}", str)
         }
 
         let str = name.to_string();
