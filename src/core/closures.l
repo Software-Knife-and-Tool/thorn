@@ -15,12 +15,16 @@
 ;;;
 (mu:intern core :intern "make-closure"
    (:lambda (lambda fn env)
-     (core::make-ctype "closure"
-       (core::pair-list
-        `(:lambda ,lambda
-          :nreqs  ,(mu:length (core::lambda-prop :reqs lambda))
-          :fn     ,fn
-          :env    ,env)))))
+      ((:lambda (nreqs) 
+          (core::make-ctype "closure"
+            (core::pair-list
+             `(:lambda ,lambda
+               :nreqs  ,nreqs
+               :fn     ,fn
+               :env    ,env))))
+       (mu:fx-sub
+        (mu:length (core::lambda-prop :bound lambda))
+        (:if (core::lambda-prop :rest lambda) 1 0)))))
 
 (mu:intern core :intern "closure-prop"
    (:lambda (prop closure)
