@@ -17,11 +17,10 @@
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
 (mu:intern core :intern "make-lambda"
-   (:lambda (lambda-list req-syms rest-sym env)
+   (:lambda (lambda-list rest-sym env)
       (core::make-ctype "lambda"
         (core::pair-list
          `(:bound  ,lambda-list
-           :reqs   ,req-syms
            :rest   ,rest-sym
            :lexenv ,env)))))
 
@@ -48,7 +47,7 @@
          (core:raise lambda 'core::core-lambda "list syntax")
          ((:lambda (desc)
             (:if (core:fixnump desc)
-                 (core::make-lambda lambda lambda () env)
+                 (core::make-lambda lambda () env)
                  desc))
           (core:foldl
             (:lambda (el acc)
@@ -58,7 +57,6 @@
                      (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
                           (core::make-lambda
                            `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
-                           (core:dropr lambda 2)
                            (mu:nth (core:1- (mu:length lambda)) lambda)
                            env)
                           (core:raise lambda 'core::core-lambda "rest botch"))
