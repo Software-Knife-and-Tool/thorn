@@ -64,7 +64,7 @@
                      fn))
              (mu:compile
               `(:lambda
-                ,(core::lambda-prop :syms lambda-desc)
+                ,(core::lambda-prop :bound lambda-desc)
                 ,@(core::compile-lambda-body
                    lambda-desc
                    body

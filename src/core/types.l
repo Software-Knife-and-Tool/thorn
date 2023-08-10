@@ -113,7 +113,7 @@
 
 ;;; lambda
 (core::defctype "lambda"
-   '((:syms   . :listp)
+   '((:bound  . :listp)
      (:reqs   . :listp)
      (:rest   . :symbolp)
      (:lexenv . :listp)))

@@ -9,25 +9,25 @@
 ;;;
 
 ;;;
-;;; [*lambda descriptor*] #s(:ctype :lambda (syms reqs rest env))
+;;; [*lambda descriptor*] #s(:ctype :lambda (bound reqs rest lexenv))
 ;;;
+;;; bound:  bound symbols
 ;;; reqs:   required symbols
 ;;; rest:   rest symbol or nil
-;;; syms:   all symbols
-;;; lexenv:    lexical environment, list of lambdas
+;;; lexenv: lexical environment, list of lambdas
 ;;;
 (mu:intern core :intern "make-lambda"
-   (:lambda (lambda req-syms rest-sym env)
+   (:lambda (lambda-list req-syms rest-sym env)
       (core::make-ctype "lambda"
         (core::pair-list
-         `(:syms   ,lambda
+         `(:bound  ,lambda-list
            :reqs   ,req-syms
            :rest   ,rest-sym
            :lexenv ,env)))))
 
 (mu:intern core :intern "lambda-prop"
    (:lambda (prop lambda)
-      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:syms :reqs :rest :lexenv))
+      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :reqs :rest :lexenv))
            ((:lambda (ref)
                (core:raise-when core:null prop 'lambda-prop "property not bound")
                (mu:cdr ref))
@@ -134,6 +134,6 @@
                     ((:lambda ()
                        (mu:compile `(mu::fr-ref ,(mu:cdr (core::ctype-ref :func frame)) ,offset))))
                     ()))
-             (core:positionl (:lambda (el) (mu:eq el symbol)) (mu:cdr (core::ctype-ref :syms frame))))))
+             (core:positionl (:lambda (el) (mu:eq el symbol)) (mu:cdr (core::ctype-ref :bound frame))))))
      ()
      env)))
