@@ -110,7 +110,7 @@
          (core:raise-if lambda 'core::core-macro "lambda syntax")
          ((:lambda (desc)
              (:if (core:fixnump desc)
-                  (core::make-lambda lambda lambda () env)
+                  (core::make-lambda lambda () env)
                   desc))
           (core:foldl
             (:lambda (el acc)
@@ -120,7 +120,6 @@
                      (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
                           (core::make-lambda
                            `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
-                           (core:dropr lambda 2)
                            (mu:nth (core:1- (mu:length lambda)) lambda)
                            env)
                           (core:raise lambda 'core::core-macro "rest botch"))
