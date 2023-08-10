@@ -78,11 +78,9 @@
 ;;;
 (mu:intern core :intern "compile-lambda-body"
   (:lambda (lambda-desc body env)
-    (:if body
-         ((:lambda (env)
-             (core::compile-closure lambda-desc body env))
-          (core::compile-add-env lambda-desc env))
-         ())))
+     (:if body
+          (core::compile-closure lambda-desc body (mu:cons lambda-desc env))
+          ())))
 
 ;;;
 ;;; Compiling symbols
