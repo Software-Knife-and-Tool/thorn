@@ -2,27 +2,8 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; compile.l: core compiler
+;;; core compiler
 ;;;
-;;; compiling an environment
-;;;
-;;;    core::compile-add-env lambda-desc env => list
-;;;
-;;; core::complle-add-env adds a lambda descriptor to a list of
-;;; lambda descriptors.
-;;;
-;;; arguments:
-;;;
-;;;   lambda-desc : lambda descriptor
-;;;   env         : lexical environment list
-;;;
-;;; returns: augmented list of lambda descriptors
-;;;
-(mu:intern core :intern "compile-add-env"
-  (:lambda (lambda-desc env)
-     (core:raise-unless core:structp lambda-desc 'compile-add-env "not a lambda descriptor")
-     (core:raise-unless core:listp env 'compile-add-env "not a list")
-     (mu:cons lambda-desc env)))
 
 ;;;
 ;;; compiling special/macro forms
