@@ -52,6 +52,7 @@ lazy_static! {
         ("await", Some(Scope::Extern), 2, Async::mu_await),
         // mu
         ("apply", Some(Scope::Extern), 2, Mu::mu_apply),
+        ("arity", Some(Scope::Intern), 1, Mu::mu_arity),
         ("compile", Some(Scope::Extern), 1, Mu::mu_compile),
         ("eval", Some(Scope::Extern), 1, Mu::mu_eval),
         ("exit", Some(Scope::Intern), 1, Mu::mu_exit),
@@ -201,6 +202,7 @@ impl Core for Mu {
 
 pub trait MuFunction {
     fn mu_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_arity(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -244,6 +246,20 @@ impl MuFunction for Mu {
         fp.value = match mu.eval(fp.argv[0]) {
             Ok(tag) => tag,
             Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_arity(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let func = fp.argv[0];
+
+        fp.value = match Tag::type_of(mu, func) {
+            Type::Function => match Tag::type_of(mu, func) {
+                Type::Function => Function::nreq(mu, func),
+                _ => return Err(Exception::new(Condition::Type, "arity", func)),
+            },
+            _ => return Err(Exception::new(Condition::Type, "arity", func)),
         };
 
         Ok(())
