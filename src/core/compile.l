@@ -116,7 +116,7 @@
 ;;;
 ;;; compiler
 ;;;
-(mu:intern core :intern "special-table"
+(mu:intern core :intern "core-special-table"
    (:lambda (symbol)
       (mu:cdr (core:assoc
         symbol
@@ -147,7 +147,7 @@
                                                           (core::compile-symbol-call fn args env)))
                                                   (core:macro-function fn env))
                                                  (core::compile-symbol-call fn args env))))
-                                    (core::special-table fn))
+                                    (core::core-special-table fn))
                                    (core:raise form 'core::compile "not a function designator"))))))
             (mu:car form)
             (mu:cdr form))
