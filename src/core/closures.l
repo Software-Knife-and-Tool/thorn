@@ -36,24 +36,6 @@
             (core::ctype-ref prop closure))
            (core::lambda-prop prop (core::closure-prop :lambda closure)))))
 
-(mu:intern core :intern "compile-closure"
-  (:lambda (lambda-desc body env)
-    (core:maplist
-     (:lambda (body)
-       ((:lambda (form)
-          (:if (mu:cdr body)
-               form
-               (:if (core:consp (mu:car body))
-                    (:if (mu:eq 'lambda (mu:car (mu:car body)))
-                         ((:lambda (lambda fn)
-                             (core::make-closure lambda fn (mu:nthcdr 2 (mu::frames))))
-                          (mu:cdr (core::ctype-ref :lambda form))
-                          (mu:cdr (core::ctype-ref :fn form)))
-                         form)
-                    form)))
-        (core::compile (mu:car body) env)))
-     body)))
-
 ;;;
 ;;;
 ;;; [*frame descriptor*] (function . vector)
