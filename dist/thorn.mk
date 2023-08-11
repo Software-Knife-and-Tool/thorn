@@ -4,32 +4,32 @@
 .PHONY: thorn core
 SRC = ../src
 
-# order dependent
+# core.l needs to be first
 CORE = \
 	core.l		\
 	closures.l	\
-	funcall.l	\
 	compile.l	\
+	debug.l		\
+	exceptions.l	\
 	fixnums.l	\
+	format.l	\
+	funcall.l	\
+	lambda.l	\
+	lists.l		\
+	load.l		\
+	macros.l	\
+	maps.l		\
+	parse.l		\
+	perf.l		\
 	read-macro.l	\
 	read.l		\
 	sequences.l	\
+	streams.l	\
+	strings.l	\
 	symbol-macro.l	\
 	symbols.l	\
-	vectors.l	\
-        exceptions.l	\
-	debug.l		\
-	format.l	\
-        lambda.l	\
-        lists.l		\
-        load.l		\
-        macros.l	\
-        parse.l		\
-        perf.l		\
-        backquote.l	\
-        streams.l	\
-	strings.l	\
-	types.l
+	types.l         \
+	vectors.l
 
 PREFACE = \
 	preface.l   	\

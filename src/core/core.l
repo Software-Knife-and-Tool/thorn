@@ -78,3 +78,14 @@
      (:if (core:closurep fn)
           (core::closure-apply fn args)
           (mu:apply fn args))))
+
+;;;
+;;; fixpoint loop
+;;;
+(mu:intern core :extern "fix"
+   (:lambda (fn list)
+     (core:raise-unless core::appliablep fn 'core:fix "not a function designator")
+     (core:raise-unless core:listp list 'core:fix "not a list")
+     (:if (core:closurep fn)
+          (mu:fix (:lambda (arg) (core:apply fn `(,arg))) list)
+          (mu:fix fn list))))

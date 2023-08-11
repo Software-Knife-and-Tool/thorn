@@ -9,10 +9,9 @@
 ;;;
 
 ;;;
-;;; [*lambda descriptor*] #s(:ctype :lambda (bound reqs rest lexenv))
+;;; [*lambda descriptor*] #s(:ctype :lambda (bound rest lexenv))
 ;;;
 ;;; bound:  bound symbols
-;;; reqs:   required symbols
 ;;; rest:   rest symbol or nil
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
@@ -26,7 +25,7 @@
 
 (mu:intern core :intern "lambda-prop"
    (:lambda (prop lambda)
-      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :reqs :rest :lexenv))
+      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :rest :lexenv))
            ((:lambda (ref)
                (core:raise-when core:null prop 'lambda-prop "property not bound")
                (mu:cdr ref))
@@ -77,22 +76,6 @@
 ;;;
 ;;; `returns:` compiled body/closure
 ;;;
-(mu:intern core :intern "compile-closure"
-   (:lambda (form env)
-       ((:lambda (lambda)
-          ((:lambda (fn)               
-              (core::make-closure lambda fn (mu::frames)))
-           (mu:fix
-            (:lambda (loop)
-               (:if (core:null loop)
-                    ()
-                     ((:lambda (form)
-
-                               )
-                       (mu:car loop)))
-           )))
-       (core::core-lambda (mu:nth 1 form) env)))))
-
 (mu:intern core :intern "compile-lambda-body"
    (:lambda (lambda-desc body env)
       (:if (core:null body)

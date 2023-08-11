@@ -37,6 +37,24 @@
            (core::lambda-prop prop (core::closure-prop :lambda closure)))))
 
 ;;;
+;;; compile closed lambda
+;;;
+(mu:intern core :intern "compile-closure"
+   (:lambda (form env)
+       ((:lambda (lambda)
+          ((:lambda (fn)               
+              (core::make-closure lambda fn (mu::frames)))
+           (mu:fix
+            (:lambda (loop)
+               (:if (core:null loop)
+                    ()
+                     ((:lambda (form)
+                               )
+                       (mu:car loop)))
+           )))
+       (core::core-lambda (mu:nth 1 form) env)))))
+
+;;;
 ;;;
 ;;; [*frame descriptor*] (function . vector)
 ;;;
