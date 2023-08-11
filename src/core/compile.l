@@ -31,6 +31,7 @@
 
 ;;;
 ;;; lambda compiles to a closure ctype
+;;; should return a function?
 ;;;
 (mu:intern core :intern "lambda"
     (:lambda (form env)
