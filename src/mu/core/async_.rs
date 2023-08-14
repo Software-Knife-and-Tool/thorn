@@ -58,7 +58,7 @@ impl MuFunction for Async {
                     // assert!(event_map_ref.contains_key(&sym.as_u64()));
                     // event_map_ref.insert( sym.as_u64(), Event { handler, start } );
 
-                    Struct::to_tag(mu, Symbol::keyword(":event"), vec![sym, func, args])
+                    Struct::to_tag(mu, Symbol::keyword("event"), vec![sym, func, args])
                 }
                 _ => return Err(Exception::new(Condition::Type, "make-ev", args)),
             },
