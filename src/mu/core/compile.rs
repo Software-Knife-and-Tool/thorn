@@ -100,7 +100,7 @@ impl Compiler for Mu {
     fn compile_special_form(mu: &Mu, name: Tag, args: Tag) -> exception::Result<Tag> {
         match SPECMAP.iter().copied().find(|spec| name.eq_(spec.0)) {
             Some(spec) => spec.1(mu, args),
-            None => Err(Exception::new(Condition::Syntax, ":specf", args)),
+            None => Err(Exception::new(Condition::Syntax, "specf", args)),
         }
     }
 
@@ -126,11 +126,11 @@ impl Compiler for Mu {
             let symbol = Cons::car(mu, cons);
             if Tag::type_of(mu, symbol) == Type::Symbol {
                 match symv.iter().rev().position(|lex| symbol.eq_(*lex)) {
-                    Some(_) => return Err(Exception::new(Condition::Syntax, ":lexical", symbol)),
+                    Some(_) => return Err(Exception::new(Condition::Syntax, "lexical", symbol)),
                     _ => symv.push(symbol),
                 }
             } else {
-                return Err(Exception::new(Condition::Type, ":lexical", symbol));
+                return Err(Exception::new(Condition::Type, "lexical", symbol));
             }
         }
 
@@ -167,10 +167,10 @@ impl Compiler for Mu {
 
                 match Tag::type_of(mu, lambda) {
                     Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
-                    _ => return Err(Exception::new(Condition::Type, ":lambda", args)),
+                    _ => return Err(Exception::new(Condition::Type, "lambda", args)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Syntax, ":lambda", args)),
+            _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
         };
 
         let id = Symbol::new(mu, Tag::nil(), Scope::Extern, "lambda", Tag::nil()).evict(mu);
