@@ -173,9 +173,7 @@
          (#\' . core::read-quote)
          (#\( . core::read-list)
          (#\) . core::read-list)
-         (#\; . core::read-line-comment)
-         (#\, . core::read-backquote)
-         (#\` . core::read-backquote)))))
+         (#\; . core::read-line-comment)))))
 
 ;;;
 ;;; get/set-macro-character

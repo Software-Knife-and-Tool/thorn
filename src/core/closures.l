@@ -6,20 +6,20 @@
 ;;;
 
 ;;;
-;;; [*closure descriptor*] #s(:ctype :closure (lambda nreqs fn env))
+;;; [*closure descriptor*] #s(:ctype :closure (lambda nargs fn env))
 ;;;
 ;;; lambda: lambda struct
-;;; nreqs:  number of reqs plus rest
+;;; nargs:  number of reqs plus rest
 ;;; fn:     implementation
 ;;; env:    dynamic environment, list of frames
 ;;;
 (mu:intern core :intern "make-closure"
    (:lambda (lambda fn env)
-      ((:lambda (nreqs) 
+      ((:lambda (nargs)
           (core::make-ctype "closure"
             (core::pair-list
              `(:lambda ,lambda
-               :nreqs  ,nreqs
+               :nargs  ,nargs
                :fn     ,fn
                :env    ,env))))
        (mu:fx-sub
@@ -29,7 +29,7 @@
 (mu:intern core :intern "closure-prop"
    (:lambda (prop closure)
       (core:raise-unless core:closurep closure 'closure-prop "not a closure")
-      (:if (core:findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :nreqs :fn :env))
+      (:if (core:findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :nargs :fn :env))
            ((:lambda (ref)
                (core:raise-when core:null prop 'closure-prop "property not bound")
                (mu:cdr ref))
@@ -37,27 +37,78 @@
            (core::lambda-prop prop (core::closure-prop :lambda closure)))))
 
 ;;;
-;;; compile closed lambda
+;;; create closed environment => env
+;;;
+(mu:intern core :intern "closure-env"
+   (:lambda (lambda forms env)
+      ((:lambda (bound-symbols)
+          (core:foldl
+           (:lambda (form acc)
+              (:if (core:consp form)
+                   ((:lambda (fn)
+                       (:if (core:consp fn)
+                            `(,@(core::closure-env lambda fn env) ,@acc)
+                            `(,@(core::closure-env lambda (mu:cdr form) env) ,@acc)))
+                    (mu:car form))
+                   (:if (mu:eq :symbol (mu:type-of form))
+                        (:if (core:uninternedp form)
+                             ((:lambda (symbol)
+                                 (:if symbol
+                                      acc
+                                      ((:lambda (binding-lambda)
+                                          (:if binding-lambda
+                                                (mu:cons (mu:cons form binding-lambda) acc)  
+                                                acc))
+                                       (core:findl
+                                        (:lambda (lambda)
+                                           (core:findl
+                                            (:lambda (symbol) (mu:eq symbol form))
+                                            (core::ctype-ref :bound lambda)))
+                                        env))))
+                                 (core:findl (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
+                             acc)
+                        acc)))
+           ()
+           forms))
+       (core::ctype-ref :bound lambda))))
+
+;;;
+;;; close-env = > closure
+;;;
+;;; mu::frames => list of [*frame descriptor*] (function . vector)
+;;; env => list of (symbol . lambda)
+;;;
+(mu:intern core :intern "close-env"
+  (:lambda (closure env)
+     (core:raise-unless core:closurep closure 'core::close-env "closing bare function")
+     ((:lambda (lambda fn env)
+         (core::make-closure lambda fn env))
+      (core::make-lambda
+       (core::lambda-prop :bound fn)
+       (core::lambda-prop :rest fn)
+       (core:foldl
+        (:lambda (frame))
+        (core::closure-prop :env closure)
+       (mu::frames))
+      (core::closure-prop :fn fn)))))
+
+;;;
+;;; compile closed lambda => closure
 ;;;
 (mu:intern core :intern "compile-closure"
    (:lambda (form env)
-       ((:lambda (lambda)
-          ((:lambda (fn)               
-              (core::make-closure lambda fn (mu::frames)))
-           (mu:fix
-            (:lambda (loop)
-               (:if (core:null loop)
-                    ()
-                     ((:lambda (form)
-                               )
-                       (mu:car loop)))
-           )))
-       (core::core-lambda (mu:nth 1 form) env)))))
+      ((:lambda (lambda)
+          ((:lambda (fn env)
+              (core::make-closure lambda fn env))
+           (mu:compile
+            `(:lambda
+              ,(core::lambda-prop :bound lambda)
+              ,(core::compile-lambda-body lambda (mu:nthcdr 2 form) env)))
+            env))
+       (core::core-lambda (mu:nth 1 form) env))))
 
 ;;;
-;;;
-;;; [*frame descriptor*] (function . vector)
-;;;
+;;; apply closure to list of args => obj
 ;;;
 (mu:intern core :intern "closure-apply"
    (:lambda (fn args)

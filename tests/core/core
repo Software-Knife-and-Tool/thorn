@@ -5,7 +5,7 @@
 (mu:type-of core:closurep)	:func
 (mu:type-of core:consp)	:func
 (mu:type-of core:exceptionp)	:func
-(mu:type-of core:dottedp)	:func
+(mu:type-of core:dotted-pair-p)	:func
 (mu:type-of core:fixnump)	:func
 (mu:type-of core:floatp)	:func
 (mu:type-of core:floor)	:func
