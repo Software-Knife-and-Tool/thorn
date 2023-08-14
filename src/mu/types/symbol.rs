@@ -201,7 +201,7 @@ impl Core for Symbol {
         let len = str.len();
 
         if len > Tag::DIRECT_STR_MAX || len == 0 {
-            panic!("{:?}", str)
+            panic!("{} {:?}", std::str::from_utf8(str).unwrap(), str)
         }
 
         let str = name.to_string();

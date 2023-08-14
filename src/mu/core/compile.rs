@@ -216,13 +216,13 @@ impl Compiler for Mu {
                         Ok(arglist) => match Self::compile(mu, func) {
                             Ok(fnc) => match Tag::type_of(mu, fnc) {
                                 Type::Function => Ok(Cons::new(fnc, arglist).evict(mu)),
-                                _ => Err(Exception::new(Condition::Type, ":compile", func)),
+                                _ => Err(Exception::new(Condition::Type, "compile", func)),
                             },
                             Err(e) => Err(e),
                         },
                         Err(e) => Err(e),
                     },
-                    _ => Err(Exception::new(Condition::Type, ":compile", func)),
+                    _ => Err(Exception::new(Condition::Type, "compile", func)),
                 }
             }
             _ => Ok(expr),

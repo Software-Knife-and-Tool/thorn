@@ -40,13 +40,13 @@
 (mu:intern core :intern "fmt-mapped-symbol"
    (:lambda (obj)
       ((:lambda (symbol)
-          (core::orf (mu:nth 0 symbol) (mu:nth 1 symbol))) 
+          (core::orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
       (core::debug-map-symbol obj))))
-             
+
 (mu:intern core :extern "exceptf"
    (:lambda (stream fmt printenv except)
      ((:lambda (cond object source reason env)
-         (:if (core:null fmt)           
+         (:if (core:null fmt)
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv

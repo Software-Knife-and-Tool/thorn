@@ -8,7 +8,7 @@
 (mu:intern core :extern "null" (:lambda (t) (mu:eq () t)))
 (mu:intern core :extern "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
 
-(mu:intern core :extern "dottedp"
+(mu:intern core :extern "dotted-pair-p"
   (:lambda (obj)
     (:if (core:consp obj)
          (core:atom (mu:cdr obj))

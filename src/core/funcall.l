@@ -27,7 +27,7 @@
                      (core:dropr args (mu:fx-sub (mu:length args) nreqs))
                      (core:dropl args nreqs))))
             (core::closure-prop :rest fn)
-            (core::closure-prop :nreqs fn))
+            (core::closure-prop :nargs fn))
            (core::arg-list args))))
 
 (mu:intern core :intern "quoted-lambda-arg-list"
@@ -42,7 +42,7 @@
                          ,@(core:dropl args nreqs)))
                   args))
             (core::closure-prop :rest fn)
-            (core::closure-prop :nreqs fn)))))
+            (core::closure-prop :nargs fn)))))
 
 ;;;
 ;;; compiled argument lists

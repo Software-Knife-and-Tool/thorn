@@ -39,7 +39,7 @@
    `(,(mu:cons :char core:charp)
      ,(mu:cons :cons core:consp)
      ,(mu:cons :fixnum core:fixnump)
-     ,(mu:cons :float core:floatp) 
+     ,(mu:cons :float core:floatp)
      ,(mu:cons :func core:functionp)
      ,(mu:cons :listp core:listp)
      ,(mu:cons :ns core:namespacep)
@@ -103,7 +103,7 @@
 ;;; closure
 (core::defctype "closure"
   '((:lambda  . :struct)
-    (:nreqs   . :fixnum)
+    (:nargs   . :fixnum)
     (:fn      . :func)
     (:env     . :listp)))
 
