@@ -98,13 +98,12 @@
 (mu:intern core :intern "compile-closure"
    (:lambda (form env)
       ((:lambda (lambda)
-          ((:lambda (fn env)
-              (core::make-closure lambda fn env))
+          ((:lambda (fn)
+              (core::make-closure lambda fn ()))
            (mu:compile
             `(:lambda
               ,(core::lambda-prop :bound lambda)
-              ,(core::compile-lambda-body lambda (mu:nthcdr 2 form) env)))
-            env))
+              ,(core::compile-lambda-body lambda (mu:nthcdr 2 form) env)))))
        (core::core-lambda (mu:nth 1 form) env))))
 
 ;;;
