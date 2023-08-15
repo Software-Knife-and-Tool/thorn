@@ -22,7 +22,7 @@
 ;;;   form : special/macro form
 ;;;   env  : lexical environment list
 ;;;
-;;; returns: mu form
+;;; returns: mu form or closure
 ;;;
 
 ;;;
@@ -31,7 +31,6 @@
 
 ;;;
 ;;; lambda compiles to a closure ctype
-;;; should return a function?
 ;;;
 (mu:intern core :intern "lambda"
     (:lambda (form env)
@@ -151,9 +150,7 @@
                                    (core:raise form 'core::compile "not a function designator"))))))
             (mu:car form)
             (mu:cdr form))
-           (:if (mu:eq :symbol (mu:type-of form))
-                (core::compile-symbol form env)
-                form))))
+           form)))
 
 (mu:intern core :extern "compile"
    (:lambda (form)
