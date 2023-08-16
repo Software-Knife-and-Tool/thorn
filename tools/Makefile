@@ -1,19 +1,14 @@
 #
 #  tools makefile
 #
-PHONY: xref revxref help
+PHONY: core-xref help
 
 help:
-	@echo "xref:    core cross reference"
-	@echo "revxref: core reverse cross reference"
+	@echo "core-xref:    core cross reference"
 
-xref:
-	@thorn --pipe --load=./xref.l --quiet-eval='(core::xref \"xref.out\")'
-	@python3 xref.py xref.out
-
-revxref:
-	@thorn --pipe --load=./xref.l --quiet-eval='(core::xref \"xref.out\")'
-	@python3 revxref.py xref.out
+core-xref:
+	@thorn --pipe --load=./core-xref.l --quiet-eval='(core::xref \"core-xref.out\")'
+	@python3 core-xref.py core-xref.out
 
 clean:
-	@rm -f xref.out
+	@rm -f core-xref.out
