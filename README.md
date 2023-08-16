@@ -24,6 +24,7 @@ While *thorn* has much in common with Scheme, it is meant to be familiar to trad
 
 - *thorn*, a functional forward system language
 - *thorn/mu*, minimal POSIX runtime suitable for containers
+- *thorn/eth*, a native code compiler
 - small and simple installation, no external dependencies
 - add interactivity and extensibility to application implementations
 - Rust FFI system
@@ -64,7 +65,7 @@ The runtime implements 64 bit tagged pointers, is available as a crate, extends 
 
 The *thorn* 2-LISP system is organized as a stack of compilers, culminating in the *thorn-eth* native code compiler/system builder.
 
-The *core* library provides *rest* lambdas, closures, a type system, *defun/defconst/defmacro/defctype* and a reader/compiler for those forms.
+The *core* library provides *rest* lambdas, closures, expanded struct types, *defun/defconst/defmacro* and a reader/compiler for those forms.
 
 The *preface* library extends *core* with various lexical binding forms, *cond/and/or/progn*, and a library loading facility.
 
@@ -141,11 +142,13 @@ Failures in the *mu* tests are almost guaranteed to cause complete failure of su
 % make tests/commit
 ```
 
-The `summary` target produces a test report. This summary will be checked into the repo at the next commit.
+The `summary` target produces a human readable test report. This summary will be checked into the repo at the next commit.
 
  The `commit` target will produce a diff between the current summary and the repo summary.
 
-The `tests` makefile has additional facilities for development, including reporting on individual and all tests. The makefile `help` target will list them.
+The `tests` makefile has additional facilities for development. The `help` target will list them.
+
+Additional `tests` tools will be located in the tools directory.
 
 ```
 % make -C tests help
@@ -154,10 +157,8 @@ The `tests` makefile has additional facilities for development, including report
     cargo - run rust tests
     namespaces - list namespaces
     commit - create test summary
-    list - tests in $NAMESPACE
-    $NS - run all tests in namespace, raw output
-    raw - run $TEST in $NS, unprocessed output
-    report - run $TEST in $NS, report output
+    tests - tests in $NS
+    mu core - run all tests in namespace, raw output
     summary - run all tests in all namespaces and print summary
     
 ```
