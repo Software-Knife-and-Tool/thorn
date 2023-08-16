@@ -4,8 +4,6 @@
 ;;;
 ;;; cross reference
 ;;;
-(mu:untern core :intern "core-symbols")
-
 (mu:intern core :intern "xref"
    (:lambda (file-name)
       ((:lambda (stream symbols)
