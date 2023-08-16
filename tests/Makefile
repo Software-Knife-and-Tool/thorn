@@ -1,7 +1,7 @@
 #
 # tests makefile
 #
-.PHONY: help cargo clean commit namespaces list raw report summary mu core
+.PHONY: help cargo clean commit namespaces tests summary mu core
 
 TMPF:=$(shell mktemp)
 NAMESPACES=	\
@@ -15,10 +15,8 @@ help:
 	@echo "    cargo - run rust tests"
 	@echo "    namespaces - list namespaces"
 	@echo "    commit - create test summary"
-	@echo "    list - tests in \$$NAMESPACE"
-	@echo "    \$$NS - run all tests in namespace, raw output"
-	@echo "    raw - run \$$TEST in \$$NS, unprocessed output"
-	@echo "    report - run \$$TEST in \$$NS, report output"
+	@echo "    tests - tests in \$$NS"
+	@echo "    $(NAMESPACES) - run all tests in namespace, raw output"
 	@echo "    summary - run all tests in all namespaces and print summary"
 
 cargo:
@@ -31,18 +29,10 @@ list:
 	@cat $$NS/tests
 
 mu:
-	@for test in `cat mu/tests`; do 		\
-	    python3 mu/runner.py mu/$$test > $(TMPF);	\
-	    python3 test.py mu $$test $(TMPF);		\
-	done
-	@rm -f $(TMPF)
+	@python3 ./test-ns.py mu .
 
 core:
-	@for test in `cat core/tests`; do 			\
-	    python3 core/runner.py core/$$test > $(TMPF);	\
-	    python3 test.py core $$test $(TMPF);		\
-	done
-	@rm -f $(TMPF)
+	@python3 ./test-ns.py core .	
 
 commit:
 	@make summary --no-print-directory > tests.summary
@@ -56,16 +46,8 @@ commit:
 summary:
 	@for namespace in $(NAMESPACES); do			\
 	    make $$namespace --no-print-directory > $(TMPF);	\
-	    python3 summary.py $(TMPF);				\
+	    python3 summarize-ns.py $(TMPF);			\
 	done
-	@rm -f $(TMPF)
-
-raw:
-	@python3 $(NS)/runner.py $(NS)/$(TEST)
-
-report:
-	@python3 $(NS)/runner.py $(NS)/$(TEST) > $(TMPF)
-	@python3 report.py $(NS) $(TEST) $(TMPF)
 	@rm -f $(TMPF)
 
 clean:

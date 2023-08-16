@@ -37,4 +37,4 @@ for test in test_results:
         print(f'{line_no:>3} {ftest:<30} {fexpect:<15} {ferr:<30} {status:<15}')
 
 print('----------------------')
-print(f'total tests: {totals[0]:<5} passed: {totals[1]:<5} failed: {totals[2]:<5} aborted: {totals[3]:<5}')    
+print(f'total tests: {totals[0]:<5} passed: {totals[1]:<5} failed: {totals[2]:<5} aborted: {totals[3]:<5}')
