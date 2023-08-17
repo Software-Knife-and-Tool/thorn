@@ -34,4 +34,4 @@ for group in test_results['results']:
 
 for test in results:
     test_name, line, storage, times = test.values()
-    print(f'{line:>2} {test_name:<18} {storage:>6} {times:8.2f}')
+    print(f'{line:>02d} {test_name:<18} {storage:>6} {times:8.2f}')
