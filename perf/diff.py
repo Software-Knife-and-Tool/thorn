@@ -16,7 +16,7 @@ def report(info_list):
     global nth_test
     global ntimes
     global test_in
-    
+
     if len(info_list) == 5:
         test_name = info_list[0]
         then_bytes = int(info_list[1])
@@ -26,7 +26,7 @@ def report(info_list):
 
         if then_bytes == 0:
             return
-        
+
         bytes_ratio = float(bytes) / float(then_bytes)
         time_ratio = time / then_time
 
@@ -46,10 +46,9 @@ def report(info_list):
             nth_test = 1
             test_in = test_name
 
-        if b == '*' or t == '*':
-            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes-then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time-then_time:.2f}, {time_ratio:.2f})')
+        print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes-then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time-then_time:.2f}, {time_ratio:.2f})')
 
-print(f'Perf Report {date:<10}')
+print(f'Diff Report {date:<10}')
 print('-------------------------')
 
 for test in test_results[1:]:

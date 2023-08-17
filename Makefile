@@ -83,8 +83,9 @@ commit:
 	@make -C tests commit --no-print-directory
 	@make -C perf commit --no-print-directory
 
-clean:
+clobber:
 	@rm -f TAGS
 	@make -C docker clean --no-print-directory
 	@make -C dist clean --no-print-directory
 	@make -C tests clean --no-print-directory
+	@make -C perf clean --no-print-directory
