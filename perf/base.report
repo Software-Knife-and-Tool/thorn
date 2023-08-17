@@ -1,260 +1,260 @@
- 1 mu/compile            288     9.65
- 2 mu/compile            688    15.15
+ 1 mu/compile            288     9.80
+ 2 mu/compile            688    14.95
  3 mu/compile            504    11.05
  4 mu/compile            328     5.60
- 1 mu/core               272     4.80
- 2 mu/core               272     5.00
- 3 mu/core               272     4.85
- 4 mu/core               272    25.90
- 5 mu/core               272     5.85
- 6 mu/core               272     5.60
- 7 mu/core               272     5.85
- 8 mu/core               272     5.15
- 9 mu/core               272     5.10
-10 mu/core               272     5.20
-11 mu/core               272     4.85
-12 mu/core               272     5.05
-13 mu/core               272     4.75
-14 mu/core               272     5.30
-15 mu/core               296     5.30
-16 mu/core               304     5.55
-17 mu/core               296     5.10
-18 mu/core               296     5.20
-19 mu/core               304     5.30
-20 mu/core               304     5.30
-21 mu/core               320     5.65
-22 mu/core               320     5.80
-23 mu/core               320     5.45
-24 mu/core               272     6.30
- 1 mu/gcd                656   159.35
- 1 mu/list               272     5.00
- 2 mu/list               272     4.85
- 3 mu/list               272     4.95
- 4 mu/list               272     4.75
- 5 mu/list               288     5.05
+ 1 mu/core               272     5.05
+ 2 mu/core               272     5.10
+ 3 mu/core               272     5.20
+ 4 mu/core               272    26.30
+ 5 mu/core               272     5.95
+ 6 mu/core               272     5.95
+ 7 mu/core               272     5.40
+ 8 mu/core               272     4.95
+ 9 mu/core               272     5.00
+10 mu/core               272     5.00
+11 mu/core               272     4.90
+12 mu/core               272     4.95
+13 mu/core               272     5.05
+14 mu/core               272     4.95
+15 mu/core               296     5.05
+16 mu/core               304     5.30
+17 mu/core               296     5.20
+18 mu/core               296     5.45
+19 mu/core               304     5.70
+20 mu/core               304     5.20
+21 mu/core               320     5.70
+22 mu/core               320     5.70
+23 mu/core               320     6.85
+24 mu/core               272     6.55
+ 1 mu/gcd                656   160.80
+ 1 mu/list               272     5.05
+ 2 mu/list               272     5.00
+ 3 mu/list               272     5.05
+ 4 mu/list               272     4.95
+ 5 mu/list               288     4.90
  6 mu/list               272     4.90
- 7 mu/list               272     5.25
- 8 mu/list               272     4.90
+ 7 mu/list               272     5.20
+ 8 mu/list               272     4.75
  9 mu/list               272     5.25
-10 mu/list               272     5.45
+10 mu/list               272     5.40
 11 mu/list               272     5.05
-12 mu/list               272     5.25
-13 mu/list               272     5.35
-14 mu/list               272     5.05
-15 mu/list               272     5.70
-16 mu/list               272     5.35
-17 mu/list               272     5.45
-18 mu/list               272     5.15
-19 mu/list               272     5.25
+12 mu/list               272     5.30
+13 mu/list               272     5.45
+14 mu/list               272     4.90
+15 mu/list               272     5.50
+16 mu/list               272     5.30
+17 mu/list               272     5.40
+18 mu/list               272     4.85
+19 mu/list               272     5.20
 20 mu/list               272     5.25
-21 mu/list               272     4.95
-22 mu/list               272     5.25
+21 mu/list               272     4.90
+22 mu/list               272     5.55
  1 mu/namespace          272     3.90
  1 mu/number             272     5.05
  2 mu/number             272     5.00
- 3 mu/number             272     5.00
- 4 mu/number             272     5.00
- 5 mu/number             272     5.00
- 6 mu/number             272     4.95
- 7 mu/number             272     5.05
- 8 mu/number             272     5.00
+ 3 mu/number             272     4.95
+ 4 mu/number             272     5.30
+ 5 mu/number             272     5.20
+ 6 mu/number             272     5.10
+ 7 mu/number             272     5.20
+ 8 mu/number             272     5.05
  9 mu/number             272     4.95
-10 mu/number             272     4.90
-11 mu/number             272     4.85
-12 mu/number             272     4.90
+10 mu/number             272     4.85
+11 mu/number             272     5.00
+12 mu/number             272     6.35
  1 mu/reader             272     4.15
- 2 mu/reader             272     4.70
- 3 mu/reader             272     4.30
- 4 mu/reader             272     4.25
- 5 mu/reader             272     4.15
- 6 mu/reader             272     4.40
- 7 mu/reader             272     4.35
- 8 mu/reader             272     4.10
- 9 mu/reader             272     4.40
+ 2 mu/reader             272     4.30
+ 3 mu/reader             272     4.15
+ 4 mu/reader             272     4.15
+ 5 mu/reader             272     4.30
+ 6 mu/reader             272     4.35
+ 7 mu/reader             272     4.50
+ 8 mu/reader             272     4.50
+ 9 mu/reader             272     4.45
 10 mu/reader             272     4.30
-11 mu/reader             272     4.30
-12 mu/reader             272     4.25
-13 mu/reader             272     4.45
-14 mu/reader             272     4.45
-15 mu/reader             272     4.30
-16 mu/reader             272     4.60
-17 mu/reader             272     4.60
-18 mu/reader             272     5.05
-19 mu/reader             272     4.30
-20 mu/reader             272     4.15
-21 mu/reader             272     4.20
-22 mu/reader             272     4.10
-23 mu/reader             272     4.45
- 1 mu/special-form       272     4.85
- 2 mu/special-form       272     4.70
- 3 mu/special-form       272     4.60
- 4 mu/special-form       272     4.60
- 5 mu/special-form       272     5.70
- 6 mu/special-form       272     6.40
- 7 mu/special-form       272     5.60
- 8 mu/special-form       272     6.15
- 9 mu/special-form       272     6.80
-10 mu/special-form       272     6.75
- 1 mu/stream             272     4.85
- 2 mu/stream             272     5.15
- 3 mu/stream             304     6.95
- 1 mu/struct             304     5.70
- 2 mu/struct             336     7.50
+11 mu/reader             272     4.25
+12 mu/reader             272     4.45
+13 mu/reader             272     4.50
+14 mu/reader             272     4.50
+15 mu/reader             272     4.40
+16 mu/reader             272     4.55
+17 mu/reader             272     4.45
+18 mu/reader             272     5.20
+19 mu/reader             272     4.15
+20 mu/reader             272     4.40
+21 mu/reader             272     4.35
+22 mu/reader             272     4.40
+23 mu/reader             272     4.35
+ 1 mu/special-form       272     4.75
+ 2 mu/special-form       272     4.60
+ 3 mu/special-form       272     4.45
+ 4 mu/special-form       272     5.00
+ 5 mu/special-form       272     5.55
+ 6 mu/special-form       272     6.55
+ 7 mu/special-form       272     5.75
+ 8 mu/special-form       272     6.50
+ 9 mu/special-form       272     7.15
+10 mu/special-form       272     6.95
+ 1 mu/stream             272     5.10
+ 2 mu/stream             272     5.05
+ 3 mu/stream             304     7.05
+ 1 mu/struct             304     5.85
+ 2 mu/struct             336     6.55
  1 mu/symbol             272     5.00
- 2 mu/symbol             272     4.95
- 3 mu/symbol               0     0.00
- 4 mu/symbol               0     0.00
- 5 mu/symbol             272     5.05
- 1 mu/vector             272     4.95
- 2 mu/vector             272     5.25
- 3 mu/vector             272     5.05
- 4 mu/vector             272     4.95
- 5 mu/vector             272     6.65
- 6 mu/vector             272     5.35
- 7 mu/vector             272     5.30
- 8 mu/vector             272     5.55
- 9 mu/vector             272     5.20
-10 mu/vector             272     5.70
+ 2 mu/symbol             272     5.05
+ 3 mu/symbol             272     5.65
+ 4 mu/symbol             272     5.60
+ 5 mu/symbol             272     5.10
+ 1 mu/vector             272     4.75
+ 2 mu/vector             272     5.40
+ 3 mu/vector             272     5.00
+ 4 mu/vector             272     4.90
+ 5 mu/vector             272     5.25
+ 6 mu/vector             272     5.10
+ 7 mu/vector             272     4.80
+ 8 mu/vector             272     5.00
+ 9 mu/vector             272     5.15
+10 mu/vector             272     5.80
 11 mu/vector             272     5.10
-12 mu/vector             272     5.05
-13 mu/vector             272     5.80
-14 mu/vector             272     5.10
-15 mu/vector             291     6.30
-16 mu/vector             312     6.40
-17 mu/vector             312     7.15
-18 mu/vector             300     7.05
- 1 core/closure         7624  4538.00
- 2 core/closure         8264  4743.95
- 3 core/closure        16088  9315.60
- 4 core/closure        11060  6299.40
- 5 core/closure        27348 15954.95
- 1 core/compile         1440   639.65
- 2 core/compile         1224   367.60
- 3 core/compile         1208   371.80
- 4 core/compile         1240   362.25
- 5 core/compile         1272   362.80
- 6 core/compile         1288   360.40
- 7 core/compile        29142 16804.40
- 1 core/core             304    18.10
- 2 core/core             272     7.40
- 3 core/core             400    57.25
- 1 core/exception        600    22.35
- 2 core/exception        600    26.85
- 3 core/exception       1168   150.95
- 4 core/exception        352    52.90
- 1 core/format          2059  1294.55
- 2 core/format          5579  4073.95
- 3 core/format          5335  4024.70
- 4 core/format          4047  2825.35
- 5 core/format          5543  3809.25
- 1 core/lambda          7944  4361.15
- 2 core/lambda          9830  5412.10
- 3 core/lambda         10020  5558.05
- 4 core/lambda         10148  5593.60
- 5 core/lambda          9812  5453.70
- 6 core/lambda          8296  4651.15
- 7 core/lambda          8648  4889.05
- 8 core/lambda          9862  5540.65
- 9 core/lambda         10180  5722.20
-10 core/lambda         24920 13643.20
-11 core/lambda         26936 14746.00
-12 core/lambda         27672 15061.45
-13 core/lambda         28344 15517.80
-14 core/lambda         29016 15754.50
-15 core/lambda         29832 16117.30
-16 core/lambda          8904  4953.60
-17 core/lambda         27416 14803.80
-18 core/lambda         28724 15519.25
- 1 core/list             272     4.95
- 2 core/list            1648   741.10
- 3 core/list            2320  1052.95
- 4 core/list            2976  1355.40
- 5 core/list            1792   783.30
- 6 core/list             336    32.15
- 7 core/list            1120   422.70
- 8 core/list            1024   478.60
- 9 core/list             960   477.80
-10 core/list            1568   745.40
-11 core/list            1504   743.20
-12 core/list             752   261.00
-13 core/list             688   319.70
-14 core/list             848   285.70
-15 core/list             528   112.60
-16 core/list             400    59.20
-17 core/list             704   223.35
-18 core/list            1296   527.50
-19 core/list            1232   582.40
-20 core/list            1472   598.85
-21 core/list             832   276.75
-22 core/list             576   171.60
-23 core/list            1248   489.30
-24 core/list             304    54.85
-25 core/list             576   201.80
-26 core/list             384    54.10
-27 core/list            1152   398.95
-28 core/list             464   102.60
-29 core/list             576   198.05
-30 core/list             384    56.05
-31 core/list             864   221.55
-32 core/list             400    59.80
-33 core/list             464   127.55
-34 core/list             560   198.70
-35 core/list             480   128.65
-36 core/list             864   431.75
-37 core/list             496   137.40
-38 core/list             496   138.80
-39 core/list             896   441.25
-40 core/list             512   137.80
-41 core/list             880   284.35
-42 core/list             304    34.10
-43 core/list             336    59.40
+12 mu/vector             272     5.25
+13 mu/vector             272     6.05
+14 mu/vector             272     5.25
+15 mu/vector             291     6.55
+16 mu/vector             312     6.55
+17 mu/vector             312     6.60
+18 mu/vector             300     6.65
+ 1 core/closure         7624  4548.85
+ 2 core/closure         8264  4719.10
+ 3 core/closure        16088  9248.55
+ 4 core/closure        11060  5939.80
+ 5 core/closure        27348 15213.95
+ 1 core/compile         1440   655.30
+ 2 core/compile         1224   376.35
+ 3 core/compile         1208   366.60
+ 4 core/compile         1240   367.70
+ 5 core/compile         1272   371.00
+ 6 core/compile         1288   366.20
+ 7 core/compile        29142 16909.65
+ 1 core/core             304    18.15
+ 2 core/core             272     7.70
+ 3 core/core             400    59.85
+ 1 core/exception        600    23.15
+ 2 core/exception        600    28.95
+ 3 core/exception       1168   160.50
+ 4 core/exception        352    53.10
+ 1 core/format          2059  1308.75
+ 2 core/format          5579  4142.75
+ 3 core/format          5335  3828.85
+ 4 core/format          4047  2831.90
+ 5 core/format          5543  3953.75
+ 1 core/lambda          7944  4317.55
+ 2 core/lambda          9830  5337.95
+ 3 core/lambda         10020  5434.55
+ 4 core/lambda         10148  5578.15
+ 5 core/lambda          9812  5346.35
+ 6 core/lambda          8296  4521.55
+ 7 core/lambda          8648  4705.05
+ 8 core/lambda          9862  5395.15
+ 9 core/lambda         10180  5502.95
+10 core/lambda         24920 13797.30
+11 core/lambda         26936 15183.95
+12 core/lambda         27672 15212.65
+13 core/lambda         28344 15456.50
+14 core/lambda         29016 16032.25
+15 core/lambda         29832 16830.55
+16 core/lambda          8904  4967.40
+17 core/lambda         27416 14727.35
+18 core/lambda         28724 15516.30
+ 1 core/list             272     4.90
+ 2 core/list            1648   755.70
+ 3 core/list            2320  1089.75
+ 4 core/list            2976  1447.60
+ 5 core/list            1792   847.65
+ 6 core/list             336    33.45
+ 7 core/list            1120   460.30
+ 8 core/list            1024   509.95
+ 9 core/list             960   512.50
+10 core/list            1568   794.80
+11 core/list            1504   795.00
+12 core/list             752   279.35
+13 core/list             688   345.15
+14 core/list             848   297.30
+15 core/list             528   119.75
+16 core/list             400    61.70
+17 core/list             704   226.10
+18 core/list            1296   559.05
+19 core/list            1232   596.65
+20 core/list            1472   626.60
+21 core/list             832   283.15
+22 core/list             576   174.15
+23 core/list            1248   496.90
+24 core/list             304    55.60
+25 core/list             576   203.20
+26 core/list             384    55.30
+27 core/list            1152   400.25
+28 core/list             464   102.45
+29 core/list             576   201.95
+30 core/list             384    57.75
+31 core/list             864   223.10
+32 core/list             400    63.50
+33 core/list             464   132.60
+34 core/list             560   209.65
+35 core/list             480   135.20
+36 core/list             864   457.50
+37 core/list             496   138.75
+38 core/list             496   140.65
+39 core/list             896   443.20
+40 core/list             512   138.95
+41 core/list             880   285.00
+42 core/list             304    34.45
+43 core/list             336    60.40
  1 core/macro              0     0.00
- 2 core/macro          16374  9053.75
- 3 core/macro          16272  8896.10
- 4 core/macro            272     8.60
- 1 core/reader           272     5.00
- 2 core/reader           272     5.00
- 3 core/reader          4576  3423.70
- 4 core/reader         12240  9616.35
- 5 core/reader         14256 11621.55
- 6 core/reader         21053 17205.05
- 7 core/reader         32640 26771.10
- 8 core/reader         39437 32291.75
- 9 core/reader          3824  3072.80
-10 core/reader          7760  6413.80
-11 core/reader          5840  4722.80
-12 core/reader         10664  8877.80
-13 core/reader          8816  7301.55
-14 core/reader         19664 15366.45
-15 core/reader          9312  7329.55
-16 core/reader         14720 11662.15
-17 core/reader         15120 11889.60
-18 core/reader         16512 13204.70
-19 core/reader         18672 14843.60
-20 core/reader         20816 16616.25
-21 core/reader         25856 20755.20
-22 core/reader         36208 29159.25
- 1 core/sequence         272     4.95
- 2 core/sequence         272     4.90
- 1 core/stream           304     7.05
- 2 core/stream           304     7.85
- 3 core/stream           368    39.90
- 4 core/stream           368    44.75
- 1 core/string           400    74.70
- 2 core/string           336    37.90
- 3 core/string           400   137.20
- 4 core/string           272    11.60
- 5 core/string           432   150.90
- 6 core/string           624   273.35
- 7 core/string           432   137.85
- 8 core/string           624   265.95
- 9 core/string           528   163.55
+ 2 core/macro          16374  9107.80
+ 3 core/macro          16272  9194.35
+ 4 core/macro            272     9.00
+ 1 core/reader           272     5.50
+ 2 core/reader           272     5.25
+ 3 core/reader          4576  3646.05
+ 4 core/reader         12240  9794.75
+ 5 core/reader         14256 11677.65
+ 6 core/reader         21053 17254.00
+ 7 core/reader         32640 27115.15
+ 8 core/reader         39437 33693.25
+ 9 core/reader          3824  3126.00
+10 core/reader          7760  6391.65
+11 core/reader          5840  4761.70
+12 core/reader         10664  8967.15
+13 core/reader          8816  7134.25
+14 core/reader         19664 15209.75
+15 core/reader          9312  7400.20
+16 core/reader         14720 11974.55
+17 core/reader         15120 12135.95
+18 core/reader         16512 13385.30
+19 core/reader         18672 15393.45
+20 core/reader         20816 17588.40
+21 core/reader         25856 21170.65
+22 core/reader         36208 29074.25
+ 1 core/sequence         272     4.85
+ 2 core/sequence         272     4.85
+ 1 core/stream           304     6.95
+ 2 core/stream           304     7.75
+ 3 core/stream           368    39.70
+ 4 core/stream           368    44.35
+ 1 core/string           400    75.50
+ 2 core/string           336    37.50
+ 3 core/string           400   135.30
+ 4 core/string           272    11.75
+ 5 core/string           432   152.05
+ 6 core/string           624   269.90
+ 7 core/string           432   141.80
+ 8 core/string           624   272.35
+ 9 core/string           528   161.45
  1 core/vector           272     4.95
- 2 core/vector           272     4.90
- 3 core/vector           336    27.70
- 4 core/vector           336    28.20
- 5 core/vector           336    27.70
- 6 core/vector           336    27.80
- 7 core/vector           336    27.70
- 8 core/vector           336    27.45
- 9 core/vector           304    16.40
+ 2 core/vector           272     4.95
+ 3 core/vector           336    27.30
+ 4 core/vector           336    27.70
+ 5 core/vector           336    27.20
+ 6 core/vector           336    27.70
+ 7 core/vector           336    27.50
+ 8 core/vector           336    27.90
+ 9 core/vector           304    16.30

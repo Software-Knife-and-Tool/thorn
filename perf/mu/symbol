@@ -1,5 +1,5 @@
 (mu:boundp 'mu:foo)
 (mu:boundp 'mu:std-in)
-(mu:keyp 'abcd)
-(mu:keyp :abcd)
+(mu:eq :keyword (mu:type-of 'abcd))
+(mu:eq :keyword (mu:type-of :abcd))
 (mu:sy-val 'mu:std-in)
