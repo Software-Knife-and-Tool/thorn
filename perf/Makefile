@@ -22,21 +22,26 @@ help:
 	@echo "    current - run all tests in all namespace, establish current report"
 	@echo "    commit - compare current with base, promote current to base"
 	@echo "    diff - compare current report with base report"
-	@echo "    metrics - verbose print"
+	@echo "    metrics/base - verbose metrics"
+	@echo "    metrics/current - verbose metrics"
+	@echo "    summary/base - summary metrics"
+	@echo "    summary/current - summary metrics"
 	@echo "    valgrind - run memcheck, callgrind, cachegrind reports"
 
 valgrind: memcheck callgrind cachegrind clean
 
 diff:
 	@sed -e '1,$$s/^.[^ ]*.[ ]*//' current.report | paste base.report - > $(TMPF)
-	@python3 summary.py $(TMPF)
+	@python3 commit.py $(TMPF)
 	@rm -f $(TMPF)
 
 commit:
-	@sed -e '1,$$s/^.[^ ]*.[ ]*//' current.report | paste base.report - > $(TMPF)
-	@python3 summary.py $(TMPF)
-	@rm -f $(TMPF)
-	@mv current.report base.report
+	@if test -f current.report; then	\
+	    sed -e '1,$$s/^.[^ ]*.[ ]*//' current.report | paste base.report - > $(TMPF); \
+	    python3 commit.py $(TMPF);		\
+	    rm -f $(TMPF);			\
+	    mv current.report base.report;	\
+	fi
 
 mu:
 	@python3 ./perf-ns.py mu . $(NTESTS)
@@ -52,26 +57,39 @@ list:
 
 base:
 	@rm -f base.report
-	@for namespace in $(NAMESPACES); do			\
-	    make -s $$namespace > $(TMPF);			\
-	    python3 report-ns.py $(TMPF) >> base.report;	\
+	@mkdir -p json
+	@for ns in $(NAMESPACES); do					\
+	    make -s $$ns > json/base.$$ns.json;				\
+	    python3 report-ns.py json/base.$$ns.json >> base.report;	\
 	done
-	@rm -f $(TMPF)
 
 current:
 	@rm -f current.report
-	@for namespace in $(NAMESPACES); do			\
-	    make -s $$namespace > $(TMPF);			\
-	    python3 report-ns.py $(TMPF) >> current.report;	\
+	@mkdir -p json
+	@for ns in $(NAMESPACES); do						\
+	    make -s $$ns > json/current.$$ns.json;				\
+	    python3 report-ns.py json/current.$$ns.json>> current.report;	\
 	done
-	@rm -f $(TMPF)
 
-metrics:
-	@for namespace in $(NAMESPACES); do			\
-	    make -s $$namespace > $(TMPF);			\
-	    python3 metrics-ns.py $(TMPF);			\
+metrics/base:
+	@for ns in $(NAMESPACES); do				\
+	    python3 metrics-ns.py json/base.$$ns.json;		\
 	done
-	@rm -f $(TMPF)
+
+metrics/current:
+	@for ns in $(NAMESPACES); do				\
+	    python3 metrics-ns.py json/current.$$ns.json;	\
+	done
+
+summary/base:
+	@for ns in $(NAMESPACES); do				\
+	    python3 summary-ns.py json/base.$$ns.json;		\
+	done
+
+summary/current:
+	@for ns in $(NAMESPACES); do				\
+	    python3 summary-ns.py json/current.$$ns.json;	\
+	done
 
 memcheck:
 	@valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=10 \
@@ -92,3 +110,4 @@ cachegrind:
 		    -q $(VALGRIND) > cachegrind.report 2>&1 || true
 
 clean:
+	@rm -rf json current.report

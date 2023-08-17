@@ -5,8 +5,8 @@ dist/core.l
 target
 *.out
 doc/rustdoc
-base.report
-perf.report
-cachegrind.report
-callgrind.report
-memcheck.report
+perf/json
+perf/current.report
+perf/cachegrind.report
+perf/callgrind.report
+perf/memcheck.report
