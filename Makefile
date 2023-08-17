@@ -26,7 +26,9 @@ help:
 	@echo "    tests/summary - test summary"
 	@echo "    tests/report - full test report"
 	@echo "--- perf options"
-	@echo "    perf/summary - performance summary"
+	@echo "    perf/base - baseline report"
+	@echo "    perf/current - current report"
+	@echo "    perf/diff - compare abseline and current"
 	@echo "    perf/commit - condensed report"
 
 world: release dist
@@ -63,11 +65,14 @@ tests/summary:
 perf/base:
 	@make -C perf base --no-print-directory
 
+perf/current:
+	@make -C perf current --no-print-directory
+
+perf/diff:
+	@make -C perf diff --no-print-directory
+
 perf/commit:
 	@make -C perf commit --no-print-directory
-
-perf/summary:
-	@make -C perf summary --no-print-directory
 
 commit:
 	@cargo fmt

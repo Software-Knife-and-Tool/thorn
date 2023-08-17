@@ -6,14 +6,22 @@
 ;;;
 (mu:untern core :intern "debug-core-symbols")
 
+(mu:intern core :intern "describe-type-table"
+   (:lambda (obj)
+      (mu:cdr (core:assoc
+        (core:type-of obj)
+        '((:func . core::describe-function)
+
+          )))))
+
 (mu:intern core :intern "describe-function"
    (:lambda (fn)
       ((:lambda (view)
           (core:format :t "simple function: [~A] arity: ~A body ~A~%"
-                       (mu:sv-ref view 2)
-                       (mu:sv-ref view 0)
-                       (mu:sv-ref view 1)))
-       (mu::view fn))))
+                       `(,(mu:sv-ref view 2)
+                         ,(mu:sv-ref view 0)
+                         ,(mu:sv-ref view 1))))
+       (mu:view fn))))
 
 (mu:intern core :intern "describe"
    (:lambda (obj)
