@@ -422,7 +422,7 @@ impl Core for Reader {
                             if recursivep {
                                 Ok(mu.reader.eol)
                             } else {
-                                Err(Exception::new(Condition::Syntax, "read:read", stream))
+                                Err(Exception::new(Condition::Syntax, "read:)", stream))
                             }
                         }
                         ';' => match Self::read_comment(mu, stream) {
