@@ -177,27 +177,30 @@ On a Core I7 CPU at 3+ GHz, the default perf tests take approximately four minut
 
 ```
 % make -C perf base
-% make -C perf summary
+% make -C perf current
+% make -C perf diff
+% make -C perf commit
 ```
 
-The `base` target produces a performance run and establishes a base line. The `summary` target produces a secondary performance run. The secondary summary will be checked into the repo at the next commit.
+The `base` target produces a performance run and establishes a base line. The `current`  target produces a secondary performance run. The current summary will be checked into the repo as the base at the next commit. The `diff` target produces human-readable diff between `base` and `current`. 
 
 The `perf` makefile has additional facilities for development, including reporting on individual tests. The`help` target will list them. 
 
-In specific, a summary of significant performance changes (differences in measured resource consumption and/or a large difference in average test time between the current summary and the repo summary.)
+In specific, a summary of significant performance changes (differences in measured resource consumption and/or a large difference in average test time between the current summary and the baseline summary.) Timing metrics are heavily CPU/clock speed dependent.
 
 ```
 % make -C perf commit
 ```
 
-produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary, and timing changes greater than 20% for any individual test.
+produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary, and timing changes greater than 20% for any individual test. `commit` also establishes the `current` report as the new baseline in preparation for a commit to the rep.
 
 For convenience, the *thorn* Makefile provides:
 
 ```
-% make perf/base		# establish a baseline summary
-% make perf/summary		# produce a secondary summary
-% make perf/commit		# produce a condensed report
+% make perf/base		# establish a baseline report
+% make perf/current		# produce a secondary report
+% make perf/diff		# diff baseline and current
+% make perf/commit		# diff baseline and current, prepare for commit
 ```
 
 The  `perf`  makefile offers some development options.
@@ -207,14 +210,13 @@ The  `perf`  makefile offers some development options.
 
 --- perf options
     namespaces - list namespaces
-    list - tests in $NAMESPACE
-    format - print test totals
+    list - tests in $NS
     $NS - run all tests in namespace, unformatted output
-    base - run all tests in all namespaces, establish baseline
-    summary - run all tests in all namespace, establish summary
-    run - individual test: NS=namespace TEST=test unformatted output
-    report - individual test: NS=namespace TEST=test formatted output (storage only)
-    commit - rust tests, print perf report
+    base - run all tests in all namespaces, establish baseline report
+    current - run all tests in all namespace, establish current report
+    commit - compare current with base, promote current to base
+    diff - compare current report with base report
+    metrics - run tests and verbose report
     valgrind - run memcheck, callgrind, cachegrind reports
 
 ```

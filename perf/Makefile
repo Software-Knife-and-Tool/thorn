@@ -1,7 +1,7 @@
 #
 # perf makefile
 #
-.PHONY: help clean commit report run summary mu core format
+.PHONY: help base clean commit current diff summary metrics mu core
 
 NTESTS ?= 20
 TMPF:=$(shell mktemp)
@@ -16,67 +16,62 @@ help:
 	@echo
 	@echo "--- perf options"
 	@echo "    namespaces - list namespaces"
-	@echo "    list - tests in \$$NAMESPACE"
-	@echo "    format - print test totals"
+	@echo "    list - tests in \$$NS"
 	@echo "    \$$NS - run all tests in namespace, unformatted output"
-	@echo "    base - run all tests in all namespaces, establish baseline"
-	@echo "    summary - run all tests in all namespace, establish summary"
-	@echo "    run - individual test: NS=namespace TEST=test unformatted output"
-	@echo "    report - individual test: NS=namespace TEST=test formatted output (storage only)"
-	@echo "    commit - rust tests, print perf report"
+	@echo "    base - run all tests in all namespaces, establish baseline report"
+	@echo "    current - run all tests in all namespace, establish current report"
+	@echo "    commit - compare current with base, promote current to base"
+	@echo "    diff - compare current report with base report"
+	@echo "    metrics - verbose print"
 	@echo "    valgrind - run memcheck, callgrind, cachegrind reports"
 
 valgrind: memcheck callgrind cachegrind clean
 
+diff:
+	@sed -e '1,$$s/^.[^ ]*.[ ]*//' current.report | paste base.report - > $(TMPF)
+	@python3 summary.py $(TMPF)
+	@rm -f $(TMPF)
+
 commit:
-	@sed -e '1,$$s/^.[^ ]*.[ ]*//' perf.report | paste base.report - > perf.anomaly
-	@python3 summary.py perf.anomaly
-	@rm -f perf.repo perf.anomaly
+	@sed -e '1,$$s/^.[^ ]*.[ ]*//' current.report | paste base.report - > $(TMPF)
+	@python3 summary.py $(TMPF)
+	@rm -f $(TMPF)
+	@mv current.report base.report
 
 mu:
-	@for test in `cat mu/tests`; do 	\
-	    python3 mu/runner.py $(NTESTS) mu/$$test;	\
-	done
+	@python3 ./perf-ns.py mu . $(NTESTS)
 
 core:
-	@for test in `cat core/tests`; do 	\
-	    python3 core/runner.py $(NTESTS) core/$$test;	\
-	done
+	@python3 ./perf-ns.py core . $(NTESTS)	
 
 namespaces:
 	@echo $(NAMESPACES)
 
 list:
-	@cat $$NAMESPACE/tests
-
-run:
-	@for test in `cat $$NS/tests`; do \
-	    bash $$NS/run-perf $$NS/$$test;	\
-	done
-
-report:
-	@bash $(NS)/run-perf $(NS)/$(TEST) > $(TMPF)
-	@python3 storage.py $(TMPF)
-	@rm -f $(TMPF)
+	@cat $$NS/tests
 
 base:
-	@for namespace in $(NAMESPACES); do	\
-	    make $$namespace >> $(TMPF);	\
+	@rm -f base.report
+	@for namespace in $(NAMESPACES); do			\
+	    make -s $$namespace > $(TMPF);			\
+	    python3 report-ns.py $(TMPF) >> base.report;	\
 	done
-	@python3 report.py $(TMPF) > base.report
-
-format:
-	@echo ------ base.report -----
-	@python3 format.py base.report
-	@echo -e \\n------ perf.report -----
-	@python3 format.py perf.report
-
-summary:
 	@rm -f $(TMPF)
-	@for namespace in $(NAMESPACES); do	\
-	    make $$namespace >> $(TMPF);	\
+
+current:
+	@rm -f current.report
+	@for namespace in $(NAMESPACES); do			\
+	    make -s $$namespace > $(TMPF);			\
+	    python3 report-ns.py $(TMPF) >> current.report;	\
 	done
-	@python3 report.py $(TMPF) > perf.report
+	@rm -f $(TMPF)
+
+metrics:
+	@for namespace in $(NAMESPACES); do			\
+	    make -s $$namespace > $(TMPF);			\
+	    python3 metrics-ns.py $(TMPF);			\
+	done
+	@rm -f $(TMPF)
 
 memcheck:
 	@valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=10 \
