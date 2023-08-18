@@ -46,6 +46,7 @@ impl Backquote for Mu {
                         Err(Exception::new(Condition::Range, "comma", stream))
                     }
                 }
+                ',' => Self::bq_comma(mu, in_list, stream),
                 _ => {
                     Stream::unread_char(mu, stream, ch).unwrap();
                     if in_list {

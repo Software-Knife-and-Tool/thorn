@@ -50,15 +50,15 @@
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv
-              ((:lambda ()
-                  (core:format stream "env:~%" ())
-                  (core:mapc
-                   (:lambda (frame)
-                      (core:format stream "  ~A~T(~A ~A)~%"
-                                   `(,(core::fmt-mapped-symbol (mu:car frame))
-                                     ,(mu:car frame)
-                                     ,(mu:cdr frame))))
-                   (mu:cdr env))))
+              (core::prog2
+               (core:format stream "env:~%" ())
+               (core:mapc
+                (:lambda (frame)
+                   (core:format stream "  ~A~T(~A ~A)~%"
+                                `(,(core::fmt-mapped-symbol (mu:car frame))
+                                  ,(mu:car frame)
+                                  ,(mu:cdr frame))))
+                (mu:cdr env)))
              ()))
      (core::exception-property :cond except)
      (core::exception-property :object except)
@@ -68,17 +68,17 @@
 
 (mu:intern core :extern "with-exception"
   (:lambda (handler thunk)
-    (mu:with-ex
-     (:lambda (object condition source)
-        (:if (mu:eq condition :except)
-             (core:apply handler `(,object))
-             (core:apply handler `(,(core:make-exception
-                                    condition
-                                    object
-                                    source
-                                    "mu:raise"
-                                    (core:dropl (mu::frames) 4))))))
-     (:lambda () (core:apply thunk ())))))
+     (mu:with-ex
+      (:lambda (object condition source)
+         (:if (mu:eq condition :except)
+              (core:apply handler `(,object))
+              (core:apply handler `(,(core:make-exception
+                                      condition
+                                      object
+                                      source
+                                      "mu:raise"
+                                      (core:dropl (mu::frames) 4))))))
+      (:lambda () (core:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
