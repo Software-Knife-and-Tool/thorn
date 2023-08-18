@@ -79,6 +79,7 @@ pub trait Core {
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
     fn write(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn write_string(&self, _: String, _: Tag) -> exception::Result<()>;
@@ -162,6 +163,12 @@ impl Core for Mu {
         mu.reader = mu.reader.build(&mu);
 
         mu
+    }
+
+    fn apply_(&self, func: Tag, argv: Vec<Tag>) -> exception::Result<Tag> {
+        let value = Tag::nil();
+
+        Frame { func, argv, value }.apply(self, func)
     }
 
     fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {

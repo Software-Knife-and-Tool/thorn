@@ -12,10 +12,7 @@ use {
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },
-        types::{
-            cons::{Cons, Core as _},
-            symbol::{Core as _, Symbol},
-        },
+        types::symbol::{Core as _, Symbol},
     },
     std::fmt,
 };
@@ -146,7 +143,7 @@ impl MuFunction for Exception {
                     Err(e) => {
                         let args =
                             vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
-                        match mu.apply(handler, Cons::vlist(mu, &args)) {
+                        match mu.apply_(handler, args) {
                             Ok(v) => v,
                             Err(e) => return Err(e),
                         }
