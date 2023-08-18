@@ -47,6 +47,9 @@ pub struct Mu {
     pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
+    // exception dynamic unwind stack
+    pub unwind: RwLock<Vec<usize>>,
+
     // functions
     pub functions: Vec<LibFunction>,
     pub internals: Vec<InternalFunction>,
@@ -98,6 +101,9 @@ impl Core for Mu {
             compile: RwLock::new(Vec::new()),
             dynamic: RwLock::new(Vec::new()),
             lexical: RwLock::new(HashMap::new()),
+
+            // exception unwind stack
+            unwind: RwLock::new(Vec::new()),
 
             // functions
             functions: Vec::new(),
