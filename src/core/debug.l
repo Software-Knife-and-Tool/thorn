@@ -73,7 +73,7 @@
                    (mu:flush mu:std-out)
                    ((:lambda (form)
                        (:if (core:eof :t)
-                            ()
+                            loop
                             ((:lambda (form)
                                 (core:format :t "[~A] ~S~%" `(,(mu:type-of form) ,form))
                                 (core:null loop))

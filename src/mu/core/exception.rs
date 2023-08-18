@@ -138,17 +138,37 @@ impl MuFunction for Exception {
 
         fp.value = match Tag::type_of(mu, thunk) {
             Type::Function => match Tag::type_of(mu, handler) {
-                Type::Function => match mu.apply(thunk, Tag::nil()) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        let args =
-                            vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
-                        match mu.apply_(handler, args) {
-                            Ok(v) => v,
-                            Err(e) => return Err(e),
+                Type::Function => {
+                    {
+                        let dynamic_ref = mu.dynamic.read().unwrap();
+                        let mut unwind_ref = mu.unwind.write().unwrap();
+
+                        unwind_ref.push(dynamic_ref.len())
+                    }
+
+                    match mu.apply(thunk, Tag::nil()) {
+                        Ok(value) => value,
+                        Err(e) => {
+                            let args =
+                                vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
+                            match mu.apply_(handler, args) {
+                                Ok(value) => {
+                                    let mut dynamic_ref = mu.dynamic.write().unwrap();
+                                    let mut unwind_ref = mu.unwind.write().unwrap();
+
+                                    match unwind_ref.pop() {
+                                        Some(len) => {
+                                            dynamic_ref.resize(len, (0, 0));
+                                            value
+                                        }
+                                        None => panic!("dynamic stack underflow"),
+                                    }
+                                }
+                                Err(e) => return Err(e),
+                            }
                         }
                     }
-                },
+                }
                 _ => return Err(Exception::new(Condition::Type, "with-ex", handler)),
             },
             _ => return Err(Exception::new(Condition::Type, "with-ex", thunk)),
