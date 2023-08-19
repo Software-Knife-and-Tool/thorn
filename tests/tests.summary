@@ -31,8 +31,8 @@ core       sequence       total: 2        passed: 2        failed: 0        abor
 core       stream         total: 22       passed: 22       failed: 0        aborted: 0       
 core       string         total: 20       passed: 20       failed: 0        aborted: 0       
 core       symbol         total: 2        passed: 2        failed: 0        aborted: 0       
-core       types          total: 5        passed: 5        failed: 0        aborted: 0       
+core       types          total: 6        passed: 5        failed: 0        aborted: 1       
 core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
 -----------------------
-core       passed: 310    total: 311      failed: 0        aborted: 1         
+core       passed: 310    total: 312      failed: 0        aborted: 2         
 

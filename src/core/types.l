@@ -25,14 +25,14 @@
 ;;;
 ;;; ctype struct: #s(:<ctype> #(:t name property-alist))
 ;;;
-;;; where the property-alist is ((:name . :predicate) ...)
+;;; where the property-alist is ((:predicate . :predicate) ...)
 ;;;
-(mu:intern core :intern "defcoretype"
+(mu:intern core :intern "define-core-type"
    (:lambda (name properties)
       ((:lambda (str)
-          (core:raise-unless core:listp properties 'core::defcoretype "not a property list")
+          (core:raise-unless core:listp properties 'core::define-core-type "not a property list")
           ((:lambda (symbol)
-              (core:raise-unless core:null symbol 'core::defcoretype "type symbol bound")
+              (core:raise-unless core:null symbol 'core::define-core-type "type symbol bound")
               (mu:intern core::core-types :extern str (mu:make-st :<ctype> `(,str ,properties))))
            (mu:ns-find core::core-types :extern str)))
        (core:string name))))

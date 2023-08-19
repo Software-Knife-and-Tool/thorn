@@ -7,26 +7,25 @@
 (mu:intern core :intern "describe-function"
    (:lambda (fn)
       ((:lambda (view)
-          (core:format :t "function: :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
-                       `(,(core:type-of fn) 
-                         ,(mu:sv-ref view 2)
-                         ,(mu:sv-ref view 0)
-                         ,(mu:sv-ref view 1))))
+          (core:format :t
+            "function: :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
+            `(,(core:type-of fn) 
+              ,(mu:sv-ref view 2)
+              ,(mu:sv-ref view 0)
+              ,(mu:sv-ref view 1))))
        (mu:view fn))))
 
 (mu:intern core :intern "describe-core-type"
    (:lambda (core-type)
-      (core:format
-       :t
+      (core:format :t
        "core-type: :<ctype> ~A~%    type:  ~A~%    props: ~A~%"       
        `(,(core:type-of core-type)
-         ,(mu:sv-ref (mu:st-vec core--type) 0)
-         ,(mu:sv-ref (mu:st-vec core--type) 0)))))
+         ,(mu:sv-ref (mu:st-vec core-type) 0)
+         ,(mu:sv-ref (mu:st-vec core-type) 0)))))
 
 (mu:intern core :intern "describe-struct"
    (:lambda (struct)
-      (core:format
-       :t
+      (core:format :t
        "closure: :struct ~A~%    type:  ~A~%    props: ~A~%"       
        `(,(core:type-of struct)
          ,(mu:st-type struct)
@@ -34,8 +33,7 @@
 
 (mu:intern core :intern "describe-closure"
    (:lambda (closure)
-      (core:format
-       :t
+      (core:format :t
        "closure: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"       
        `(,(core:type-of closure)
          ,(core::closure-prop :nargs closure)
@@ -45,19 +43,16 @@
 (mu:intern core :intern "describe-symbol"
    (:lambda (symbol)
       (:if (core:null symbol) 
-           (core:format
-            :t
+           (core:format :t
             "symbol: :null null~%    ns:    ()~%    scope: :extern~%    name:  :nil~%    value: ()~%"
             ())
            (:if (core:keywordp symbol)
-                (core:format
-                 :t
+                (core:format :t
                  "symbol: :symbol keyword~%    ns:    ()~%    scope: :extern~%    name:  ~A~%    value: ~A~%"
                  `(,(mu:sy-name symbol) ,(mu:sy-val symbol)))
                 (:if (mu:boundp symbol)
                      ((:lambda (view)
-                         (core:format
-                          :t
+                         (core:format :t
                           "symbol: :symbol symbol~%    ns:    ~A~%    scope: ~A~%    name:  ~A~%    value: ~A~%"
                           `(,(mu:sv-ref view 0)
                             ,(mu:sv-ref view 1)
@@ -65,8 +60,7 @@
                             ,(mu:sv-ref view 3))))
                       (mu:view symbol))
                      ((:lambda (view)
-                         (core:format
-                          :t
+                         (core:format :t
                           "symbol: :symbol symbol~%    ns:      ~A~%    scope:   ~A~%    name:    ~A~%    unbound: :t~%"
                           `(,(mu:sv-ref view 0)
                             ,(mu:sv-ref view 1)
@@ -80,34 +74,29 @@
 
 (mu:intern core :intern "describe-float"
    (:lambda (fl)
-      (core:format
-       :t
+      (core:format :t
        "float: :float ~A~%    format: 32b IEEE single float~%    value:  ~A~%"
        `(,(core:type-of fl) ,fl))))
 
 (mu:intern core :intern "describe-string"
    (:lambda (str)
-      (core:format
-       :t
+      (core:format :t
        "string: :vector string~%    format: unsigned 8bit character vector~%    length: ~A~%    value:  ~A~%"
        `(,(mu:sv-len str) ,str))))
 
 (mu:intern core :intern "describe-vector"
    (:lambda (vec)
-      (core:format
-       :t
+      (core:format :t
        "string: :vector ~A~%    format: ~A~%    length: ~A~%    value:  ~A~%"
        `(,(core:type-of vec) ,(mu:sv-type vec) ,(mu:sv-type vec) ,vec))))
 
 (mu:intern core :intern "describe-cons"
    (:lambda (cons)
       (:if (core:dotted-pair-p cons)
-           (core:format
-            :t
+           (core:format :t
             "dotted pair: :cons ~A~%    value:  ~A~%"
             `(,(core:type-of cons) ,cons))
-           (core:format
-            :t
+           (core:format :t
             "cons: :cons ~A~%    length: ~A~%    value:  ~A~%"
             `(,(core:type-of cons) ,(mu:length cons) ,cons)))))
 

@@ -21,7 +21,8 @@ help:
 	@echo "    base - run all tests in all namespaces, establish baseline report"
 	@echo "    current - run all tests in all namespace, establish current report"
 	@echo "    commit - compare current with base (terse diff), promote current to base"
-	@echo "    diff - compare current with base (verbose diff)"
+	@echo "    diff - compare current with base (terse diff)"
+	@echo "    full-diff - compare current with base (verbose diff)"
 	@echo "    metrics/base - verbose metrics"
 	@echo "    metrics/current - verbose metrics"
 	@echo "    summary/base - summary metrics"
@@ -31,6 +32,11 @@ help:
 valgrind: memcheck callgrind cachegrind clean
 
 diff:
+	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
+	@python3 commit.py $(TMPF)
+	@rm -f $(TMPF)
+
+full-diff:
 	@sed -e '1,$$s/^.. .[^ ]*.[ ]*//' current.report | paste base.report - | sed -e '1,$$s/^.. //' > $(TMPF)
 	@python3 diff.py $(TMPF)
 	@rm -f $(TMPF)
