@@ -34,11 +34,11 @@
        ())))
 
 (mu:intern core :intern "read-sharp-vector"
-    (:lambda (ch stream)
+   (:lambda (ch stream)
       ((:lambda (type)
           (core:raise-unless core:keywordp type 'core::read-sharp-vector "not a type keyword")
           (mu:make-sv type (core::read-list #\( stream)))
-       (core::read-atom ch stream))))
+       (core::read stream))))
 
 (mu:intern core :intern "read-sharp-symbol"
    (:lambda (ch stream)
@@ -101,7 +101,7 @@
              (:if (core:eof stream)
                   stream
                   ((:lambda (el)
-                     (:if (core::orf (core:eof stream) (mu:eq el core::read-list-eol))
+                      (:if (core::orf (core:eof stream) (mu:eq el core::read-list-eol))
                           loop
                           (:if (mu:eq :symbol (mu:type-of el))
                                (:if (mu:eq (mu:sy-name el) ".")

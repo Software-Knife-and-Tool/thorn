@@ -48,6 +48,11 @@
 (core:read (core:make-string-stream :input "#\\a") () ())	#\a
 (core:read (core:make-string-stream :input "#\\ ") () ())	#\space
 (core:read (core:make-string-stream :input "#\\)") () ())	#\)
+(core:read (core:make-string-stream :input "#(:t 1 2 3)") () ())	#(:t 1 2 3)
+(core:read (core:make-string-stream :input "#(:byte 1 2 3)") () ())	#(:byte 1 2 3)
+(core:read (core:make-string-stream :input "#(:fixnum 1 2 3)") () ())	#(:fixnum 1 2 3)
+(core:read (core:make-string-stream :input "#(:char #\\a #\\b #\\c)") () ())	"abc"
+(core:read (core:make-string-stream :input "#(:float 1.0 2.0 3.0)") () ())	#(:float 1.0000 2.0000 3.0000)
 (core:read (core:make-string-stream :input "'a") () ())	(:quote a)
 (core:read (core:make-string-stream :input "'core:a") () ())	(:quote core:a)
 (core:read (core:make-string-stream :input "'abc") () ())	(:quote abc)
