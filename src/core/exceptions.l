@@ -37,6 +37,27 @@
           (:reason  . 3)
           (:env     . 4)))))))
 
+(mu:untern core :intern "debug-core-symbols")
+
+(mu:intern core :intern "debug-map-symbol"
+   (:lambda (obj)
+      (:if (mu:boundp 'core::debug-core-symbols)
+           ()
+           (mu:intern core :intern "debug-core-symbols" `(,(mu:ns-ext core) ,(mu:ns-int core))))
+      (core:mapcar
+       (:lambda (scope)
+          (mu:fix
+           (:lambda (list)
+              (:if (core:consp list)
+                   ((:lambda (symbol)
+                       (:if (mu:eq (mu:sy-val symbol) obj)
+                            symbol
+                            (mu:cdr list)))
+                    (mu:car list))
+                   list))
+           scope))
+       core::debug-core-symbols)))
+
 (mu:intern core :intern "fmt-mapped-symbol"
    (:lambda (obj)
       ((:lambda (symbol)

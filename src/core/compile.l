@@ -30,7 +30,7 @@
 ;;;
 
 ;;;
-;;; lambda compiles to a closure ctype
+;;; lambda compiles to a closure core-type
 ;;;
 (mu:intern core :intern "lambda"
     (:lambda (form env)

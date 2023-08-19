@@ -1,5 +1,5 @@
-(mu:type-of core:ctypep)	:func
+(mu:type-of core:core-type-p)	:func
 (mu:type-of core:type-of)	:func
-(mu:type-of (mu:eval (core:compile '((:lambda () (core::defctype "test" '((:v . :t))) (core::make-ctype "test" '((:v . 2))))))))	:struct
-(core:type-of (mu:eval (core:compile '((:lambda () (core::defctype "test" '((:v . :t))) (core::make-ctype "test" '((:v . 2))))))))	test
-((:lambda () (core::defctype "test" '((:v . :t))) (core::ctype-ref :v (core::make-ctype "test" '((:v . 2))))))	(:v . 2)
+(mu:type-of (mu:eval (core:compile '((:lambda () (core::defcoretype "test" '((:v . :t))) (core::make-core-type "test" '((:v . 2))))))))	:struct
+(core:type-of (mu:eval (core:compile '((:lambda () (core::defcoretype "test" '((:v . :t))) (core::make-core-type "test" '((:v . 2))))))))	test
+((:lambda () (core::defcoretype "test" '((:v . :t))) (core::core-type-ref :v (core::make-core-type "test" '((:v . 2))))))	(:v . 2)

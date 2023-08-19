@@ -9,7 +9,7 @@
 ;;;
 
 ;;;
-;;; [*lambda descriptor*] #s(:ctype :lambda (bound rest lexenv))
+;;; [*lambda descriptor*] #s(:<ctype> :lambda (bound rest lexenv))
 ;;;
 ;;; bound:  bound symbols
 ;;; rest:   rest symbol or nil
@@ -17,7 +17,7 @@
 ;;;
 (mu:intern core :intern "make-lambda"
    (:lambda (lambda-list rest-sym env)
-      (core::make-ctype "lambda"
+      (core::make-core-type "lambda"
         (core::pair-list
          `(:bound  ,lambda-list
            :rest   ,rest-sym
@@ -29,7 +29,7 @@
            ((:lambda (ref)
                (core:raise-when core:null prop 'lambda-prop "property not bound")
                (mu:cdr ref))
-            (core::ctype-ref prop lambda))
+            (core::core-type-ref prop lambda))
            (core:raise prop 'lambda-prop "not a lambda property"))))
 
 ;;;
@@ -118,11 +118,11 @@
                (:if offset
                     (mu:compile
                      `(mu::fr-ref
-                       ,(mu:cdr (core::ctype-ref :func frame))
+                       ,(mu:cdr (core::core-type-ref :func frame))
                        ,offset))
                     ()))
             (core:positionl
              (:lambda (el) (mu:eq el symbol))
-             (mu:cdr (core::ctype-ref :bound frame))))))
+             (mu:cdr (core::core-type-ref :bound frame))))))
      ()
      env)))

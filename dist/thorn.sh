@@ -25,7 +25,7 @@ CORE=(\
 	core.l	     	\
 	closures.l      \
 	compile.l    	\
-	debug.l	        \
+	describe.l      \
 	exceptions.l 	\
 	fixnums.l       \
 	format.l     	\
@@ -39,6 +39,7 @@ CORE=(\
 	perf.l       	\
 	read-macro.l    \
 	read.l       	\
+        repl.l          \
 	sequences.l  	\
 	streams.l    	\
 	strings.l    	\
