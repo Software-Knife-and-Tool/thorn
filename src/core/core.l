@@ -6,7 +6,7 @@
 ;;;
 (mu:make-ns "core" (mu:map-ns "mu"))
 (mu:intern () :extern "core" (mu:map-ns "core"))
-(mu:intern core :intern "ctypes" (mu:make-ns "ctypes" core))
+(mu:intern core :intern "core-types" (mu:make-ns "core-types" core))
 (mu:intern core :intern "core-char-macro-ns" (mu:make-ns "core:char-macro-ns" ()))
 (mu:intern core :intern "core-symbol-macro-ns" (mu:make-ns "core:symbol-macro-ns" ()))
 

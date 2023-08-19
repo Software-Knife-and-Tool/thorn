@@ -38,7 +38,7 @@
       (core:raise-unless core:stringp name 'core:keyword "not a keyword name")
       (:if (mu:fx-lt (mu:sv-len name) 8)
            (mu:keyword name)
-           (core::make-ctype "keyword" `(,(mu:cons :name name))))))
+           (core::make-core-type "keyword" `(,(mu:cons :name name))))))
 
 (mu:intern core :intern "intern"
    (:lambda (symbol value)

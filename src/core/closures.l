@@ -6,7 +6,7 @@
 ;;;
 
 ;;;
-;;; [*closure descriptor*] #s(:ctype :closure (lambda nargs fn env))
+;;; [*closure descriptor*] #s(:<ctype> :closure (lambda nargs fn env))
 ;;;
 ;;; lambda: lambda struct
 ;;; nargs:  number of reqs plus rest
@@ -16,7 +16,7 @@
 (mu:intern core :intern "make-closure"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
-          (core::make-ctype "closure"
+          (core::make-core-type "closure"
             (core::pair-list
              `(:lambda ,lambda
                :nargs  ,nargs
@@ -33,7 +33,7 @@
            ((:lambda (ref)
                (core:raise-when core:null prop 'closure-prop "property not bound")
                (mu:cdr ref))
-            (core::ctype-ref prop closure))
+            (core::core-type-ref prop closure))
            (core::lambda-prop prop (core::closure-prop :lambda closure)))))
 
 ;;;
@@ -63,14 +63,14 @@
                                         (:lambda (lambda)
                                            (core:findl
                                             (:lambda (symbol) (mu:eq symbol form))
-                                            (core::ctype-ref :bound lambda)))
+                                            (core::core-type-ref :bound lambda)))
                                         env))))
                                  (core:findl (:lambda (symbol) (mu:eq symbol form)) bound-symbols))
                              acc)
                         acc)))
            ()
            forms))
-       (core::ctype-ref :bound lambda))))
+       (core::core-type-ref :bound lambda))))
 
 ;;;
 ;;; close-env = > closure
