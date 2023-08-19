@@ -26,13 +26,13 @@ core       format         total: 15       passed: 15       failed: 0        abor
 core       lambda         total: 24       passed: 24       failed: 0        aborted: 0       
 core       list           total: 78       passed: 78       failed: 0        aborted: 0       
 core       macro          total: 9        passed: 9        failed: 0        aborted: 0       
-core       reader         total: 56       passed: 56       failed: 0        aborted: 0       
+core       reader         total: 61       passed: 61       failed: 0        aborted: 0       
 core       sequence       total: 2        passed: 2        failed: 0        aborted: 0       
 core       stream         total: 22       passed: 22       failed: 0        aborted: 0       
 core       string         total: 20       passed: 20       failed: 0        aborted: 0       
 core       symbol         total: 2        passed: 2        failed: 0        aborted: 0       
-core       types          total: 6        passed: 5        failed: 0        aborted: 1       
+core       types          total: 6        passed: 6        failed: 0        aborted: 0       
 core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
 -----------------------
-core       passed: 310    total: 312      failed: 0        aborted: 2         
+core       passed: 316    total: 317      failed: 0        aborted: 1         
 

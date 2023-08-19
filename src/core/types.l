@@ -27,12 +27,12 @@
 ;;;
 ;;; where the property-alist is ((:predicate . :predicate) ...)
 ;;;
-(mu:intern core :intern "define-core-type"
+(mu:intern core :extern "define-core-type"
    (:lambda (name properties)
       ((:lambda (str)
-          (core:raise-unless core:listp properties 'core::define-core-type "not a property list")
+          (core:raise-unless core:listp properties 'core:define-core-type "not a property list")
           ((:lambda (symbol)
-              (core:raise-unless core:null symbol 'core::define-core-type "type symbol bound")
+              (core:raise-unless core:null symbol 'core:define-core-type "type symbol bound")
               (mu:intern core::core-types :extern str (mu:make-st :<ctype> `(,str ,properties))))
            (mu:ns-find core::core-types :extern str)))
        (core:string name))))
@@ -99,11 +99,11 @@
 ;;;
 
 ;;; long keyword
-(core::defcoretype "keyword"
+(core:define-core-type "keyword"
   '((:name . :vector)))
 
 ;;; closure
-(core::defcoretype "closure"
+(core:define-core-type "closure"
   '((:lambda  . :struct)
     (:nargs   . :fixnum)
     (:fn      . :func)
@@ -114,7 +114,7 @@
      (mu:eq (core:type-of fn) 'closure)))
 
 ;;; lambda
-(core::defcoretype "lambda"
+(core:define-core-type "lambda"
    '((:bound  . :listp)
      (:rest   . :symbolp)
      (:lexenv . :listp)))
@@ -124,7 +124,7 @@
      (mu:eq (core:type-of fn) 'lambda)))
 
 ;;; sequence
-(core::defcoretype "seq"
+(core:define-core-type "seq"
   '((:type   . :symbol)
     (:vector . :vector)
     (:cons   . :cons)))
