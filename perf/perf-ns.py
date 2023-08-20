@@ -17,6 +17,7 @@ def storage(ns, test):
                              '-l../dist/core.l',
                              '-q (core::init-core-ns)',
                              '-p',
+                             '-l./perf.l',
                              '-e (core::storage-delta (:lambda ()' + test + ') :nil)'],\
                             stdout=subprocess.PIPE,\
                             stderr=subprocess.PIPE)
@@ -33,6 +34,7 @@ def timing(ns, test):
                              '-l../dist/core.l',
                              '-q (core::init-core-ns)',
                              '-p',
+                             '-l./perf.l',
                              '-e (core::time-delta (:lambda ()' + test + ') :nil)'],\
                             stdout=subprocess.PIPE,\
                             stderr=subprocess.PIPE)
