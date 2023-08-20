@@ -1,10 +1,10 @@
 #
 #  tools makefile
 #
-PHONY: core-xref help
+.PHONY: core-xref help
 
 help:
-	@echo "core-xref:    core cross reference"
+	@echo "core-xref: core cross reference"
 
 core-xref:
 	@thorn --pipe --load=./core-xref.l --quiet-eval='(core::xref \"core-xref.out\")'

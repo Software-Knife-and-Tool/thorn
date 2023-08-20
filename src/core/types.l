@@ -4,6 +4,8 @@
 ;;;
 ;;; type system
 ;;;
+(mu:intern core :intern "core-types" (mu:make-ns "core-types" core))
+
 (mu:intern core :extern "core-type-p"
    (:lambda (object)
       (:if (core:structp object)
@@ -94,37 +96,4 @@
       (core:raise-unless core:keywordp property-name 'core::core-type-ref "not a property name")
       (core:assoc property-name (mu:sv-ref (mu:st-vec struct) 1))))
 
-;;;
-;;; core types
-;;;
-
-;;; long keyword
-(core:define-core-type "keyword"
-  '((:name . :vector)))
-
-;;; closure
-(core:define-core-type "closure"
-  '((:lambda  . :struct)
-    (:nargs   . :fixnum)
-    (:fn      . :func)
-    (:env     . :listp)))
-
-(mu:intern core :extern "closurep"
-  (:lambda (fn)
-     (mu:eq (core:type-of fn) 'closure)))
-
-;;; lambda
-(core:define-core-type "lambda"
-   '((:bound  . :listp)
-     (:rest   . :symbolp)
-     (:lexenv . :listp)))
-
-(mu:intern core :extern "lambdap"
-  (:lambda (fn)
-     (mu:eq (core:type-of fn) 'lambda)))
-
-;;; sequence
-(core:define-core-type "seq"
-  '((:type   . :symbol)
-    (:vector . :vector)
-    (:cons   . :cons)))
+;;; (core::init-core-types)
