@@ -13,6 +13,12 @@
 ;;; fn:     implementation
 ;;; env:    dynamic environment, list of frames
 ;;;
+;;; closure
+;;;
+(mu:intern core :extern "closurep"
+  (:lambda (fn)
+     (mu:eq (core:type-of fn) 'closure)))
+
 (mu:intern core :intern "make-closure"
    (:lambda (lambda fn env)
       ((:lambda (nargs)

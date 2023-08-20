@@ -15,6 +15,10 @@
 ;;; rest:   rest symbol or nil
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
+(mu:intern core :extern "lambdap"
+   (:lambda (fn)
+      (mu:eq (core:type-of fn) 'lambda)))
+
 (mu:intern core :intern "make-lambda"
    (:lambda (lambda-list rest-sym env)
       (core::make-core-type "lambda"

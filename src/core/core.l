@@ -4,11 +4,37 @@
 ;;;
 ;;;  core namespace
 ;;;
-(mu:make-ns "core" (mu:map-ns "mu"))
-(mu:intern () :extern "core" (mu:map-ns "core"))
-(mu:intern core :intern "core-types" (mu:make-ns "core-types" core))
+(mu:intern () :extern "core" (mu:make-ns "core" (mu:map-ns "mu")))
 (mu:intern core :intern "core-char-macro-ns" (mu:make-ns "core:char-macro-ns" ()))
 (mu:intern core :intern "core-symbol-macro-ns" (mu:make-ns "core:symbol-macro-ns" ()))
+
+;;;
+;;; core types
+;;;
+(mu:intern core :intern "init-core-ns"
+   (:lambda ()
+      ;;; keyword                 
+      (core:define-core-type "keyword"
+        '((:name . :vector)))
+
+      ;;; closure
+      (core:define-core-type "closure"
+        '((:lambda  . :struct)
+          (:nargs   . :fixnum)
+          (:fn      . :func)
+          (:env     . :listp)))
+
+      ;;; lambda
+      (core:define-core-type "lambda"
+        '((:bound  . :listp)
+          (:rest   . :symbolp)
+          (:lexenv . :listp)))
+
+      ;;; sequence
+      (core:define-core-type "seq"
+        '((:type   . :symbol)
+          (:vector . :vector)
+          (:cons   . :cons)))))
 
 ;;;
 ;;; predicates

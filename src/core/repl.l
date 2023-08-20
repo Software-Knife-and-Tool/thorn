@@ -6,7 +6,7 @@
 ;;;
 (mu:intern core :intern "repl"
    (:lambda ()
-      (mu:fix
+     (mu:fix
        (:lambda (loop)
           (:if (core:eof :t)
                loop

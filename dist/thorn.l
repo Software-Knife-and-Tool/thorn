@@ -5,10 +5,9 @@
 ;;;
 ;;;  thorn runtime environment
 ;;;
-; (core::repl)
-#|
-(core:load "/opt/thorn/thorn/preface/preface.l" () ())
+(core:load "/opt/thorn/thorn/preface/preface.l" ())
 
+#|
 (mu:eval (core:compile '(defconst preface::require-path "/opt/thorn/lib")))
 
 (core:in-namespace (mu:ns "user" (mu:map-ns "preface")))

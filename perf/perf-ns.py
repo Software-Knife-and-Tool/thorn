@@ -15,21 +15,23 @@ with open(os.path.join(ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 def storage(ns, test):
     proc = subprocess.Popen(['../dist/runtime',
                              '-l../dist/core.l',
+                             '-q (core::init-core-ns)',
                              '-p',
                              '-e (core::storage-delta (:lambda ()' + test + ') :nil)'],\
                             stdout=subprocess.PIPE,\
                             stderr=subprocess.PIPE)
     
-    storage = proc.stdout.read()[:-1].decode('utf8')
+    storage_ = proc.stdout.read()[:-1].decode('utf8')
     err = proc.stderr.read()[:-1].decode('utf8')
 
     proc.communicate()
 
-    return None if proc.poll == 0 else storage
+    return None if proc.poll == 0 else storage_
 
 def timing(ns, test):
     proc = subprocess.Popen(['../dist/runtime',
                              '-l../dist/core.l',
+                             '-q (core::init-core-ns)',
                              '-p',
                              '-e (core::time-delta (:lambda ()' + test + ') :nil)'],\
                             stdout=subprocess.PIPE,\
