@@ -20,7 +20,6 @@ CORE = \
 	macros.l	\
 	maps.l		\
 	parse.l		\
-	perf.l		\
 	read-macro.l	\
 	read.l		\
 	repl.l		\
