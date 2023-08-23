@@ -3,7 +3,7 @@
 #
 .PHONY: reference clobber
 
-# SRCDIRS = foreward core mu hrafn preface system
+# SRCDIRS = foreward core mu thorn preface system
 SRCDIRS = foreward core/
 
 # page break <div style="page-break-after: always"></div>

@@ -34,7 +34,7 @@ Compiling a *core* form results in an object that can be evaluated by the  *mu* 
 
 
 
-The *defconst* special operator binds *name* in the designated namespace to the value of *form* when evaluated. Multiple invocations of *defconst* on the same symbol have undefined consequences. Do not confuse *defconst* with the similarly named Common Lisp macro, it has very different semantics due to the lack of dynamic variables in *hrafn*.
+The *defconst* special operator binds *name* in the designated namespace to the value of *form* when evaluated. Multiple invocations of *defconst* on the same symbol have undefined consequences. Do not confuse *defconst* with the similarly named Common Lisp macro, it has very different semantics due to the lack of dynamic variables in *thorn/eth*.
 
 
 

@@ -24,7 +24,6 @@ dist:
 
 	@install -m 644 $(DIST)/thorn.l $(BASE)/$(BASE)
 
-	@strip $(RUNTIME)
 	@install -m 755 $(RUNTIME) $(BASE)/bin
 	@install -m 755 ./thorn.sh $(BASE)/bin/thorn
 

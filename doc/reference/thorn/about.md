@@ -1,12 +1,12 @@
 ---
-title: The *eko* Programming Environment
+title: The *thorn/etc* Programming Environment
 ---
 
 ### Foreward
 
 ------
 
-The *eko* programming environment is a collection of facilities for meta-programming.
+The *thorn/etc* programming environment is a collection of facilities for meta-programming.
 
 Modern programming languages do a wide variety of things well, but most fail to support layered design
 and domain-specific languages. Large programs are comprised as much as ten percent of their code as
@@ -19,20 +19,20 @@ LISP-derived languages like *Clojure* and *Scheme* have macro systems that can d
 level transformations at compile time. Those macro systems have the advantage of using the host language
 to program the transformation pipeline.
 
-While many langauges incorporate functional features (higher order functions, monads, composition, etc)
+While many languages incorporate functional features (higher order functions, monads, composition, etc)
 most of them rely on programs based on mutable objects supplemented with an object system. There is a great
 deal to gain by being mostly immutable and replacing objects with an effective type system and algebraic
 data types.
 
-*eko* explores functional meta-programming techniques by creating a stratified implementation of a programming
-environment from the ground up. *eko* itself is constructed as a stack of language compilers, culminating in a
+*thorn/etc* explores functional meta-programming techniques by creating a stratified implementation of a programming
+environment from the ground up. *thorn/eth* itself is constructed as a stack of language compilers, culminating in a
 native code compiler. The majority of the system code is easily visible and can be as easily modified.
 
-### About *eko*
+### About *thorn/eth*
 
 ------
 
-*eko* is a program development platform for x86_64 and AArch64 POSIX operating systems. The *mu* runtime kernel is
+*thorn/eth* is a program development platform for x86_64 and AArch64 POSIX operating systems. The *mu* runtime kernel is
 written in C++20, compiles with recent g++ or clang++, requires only the standard library, and supports traditional
 Lisp-style data types in a garbage collected environment.
 
@@ -46,7 +46,7 @@ The *core* language is written in *mu*, and provides variadic lambdas, closures,
 The *preface* language, predictably written in *core*, provides lexical binding constructs, conditionals, structs,
 and foreign function modules.
 
-The *eko* language stack extends syntax and functions familiar to the traditional Lisp programmer while retaining the
-conceptual simplicity of a Scheme. As such, *eko* is intended as a workbench for creating extensible programs.
+The *thorn/eth* language stack extends syntax and functions familiar to the traditional Lisp programmer while retaining the
+conceptual simplicity of a Scheme. As such, *thorn/eth* is intended as a workbench for creating extensible programs.
 
 <a href="toc.html">Table of Contents</a>

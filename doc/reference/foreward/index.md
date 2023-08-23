@@ -1,20 +1,20 @@
 ---
-title: hrafn - a minimal LISP environment
+title: thorn/eth - a minimal LISP environment
 ---
 
 ### **Foreward**
 
 <hr>
 
-Welcome to *hrafn*. We hope it serves you well, and is easily extended to meet your needs.
+Welcome to *thorn/eth*. We hope it serves you well, and is easily extended to meet your needs.
 
-Dynamic languages for low overhead environments must be lightweight, but developing applications in the target environment can be painful. *hrafn* is a general development and execution environment for containers, shells, and other utilities that need small installation and runtime footprints.
+Dynamic languages for low overhead environments must be lightweight, but developing applications in the target environment can be painful. *thorn/eth* is a general development and execution environment for containers, shells, and other utilities that need small installation and runtime footprints.
 
-*hrafn* was designed to operate effectively on *Raspberry Pi* class machines and containers, and consists of a small native-code kernel runtime and a set of layered libraries in source form.
+*thorn/eth* was designed to operate effectively on *Raspberry Pi* class machines and containers, and consists of a small native-code kernel runtime and a set of layered libraries in source form.
 
-The *hrafn* runtime is a native code library that directly interprets *mu* kernel code. A great deal of useful work can be done directly with the limited kernel language, though it lacks the niceties of a more canonical LISP programming environment. More advanced language features require the use of the included *core* library. 
+The *thorn/eth* runtime is a native code library that directly interprets *mu* kernel code. A great deal of useful work can be done directly with the limited kernel language, though it lacks the niceties of a more canonical LISP programming environment. More advanced language features require the use of the included *core* library. 
 
-The *preface* library provides traditional LISP forms and a collection of functional programming features like pattern matching and monads. *hrafn* *core* and *preface* code are human-readable and portable between machine architectures.
+The *preface* library provides traditional LISP forms and a collection of functional programming features like pattern matching and monads. *thorn/eth* *core* and *preface* code are human-readable and portable between machine architectures.
 
 Questions? You can contact the author at putnamjm.design@gmail.com.
 
@@ -40,7 +40,7 @@ Questions? You can contact the author at putnamjm.design@gmail.com.
 2.11 *utilities* ......................................................................................................... [2.11](2-11utilities.html)</br>
 2.12 *core symbols* ............................................................................................... [2.12](2-12core-symbols.html)</br>
 **preface** ............................................................................................................</br>
-**hrafn** ...................................................................................................................</br>
+**thorn/eth** ...................................................................................................................</br>
 **system** ..............................................................................................................</br>
 **Appendices** ......................................................................................................</br>
 
