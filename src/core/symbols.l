@@ -13,9 +13,7 @@
 
 (mu:intern core "uninternedp"
    (:lambda (sym)
-      (:if (core:null sym)
-           ()
-           (core:null (mu:sy-ns sym)))))
+      (core:null (core:symbol-ns sym))))
 
 (mu:intern core "keywordp"
    (:lambda (t)
@@ -30,7 +28,13 @@
 ;;; utilities
 ;;;
 (mu:intern core "symbol-name" mu:sy-name)
-(mu:intern core "symbol-ns" mu:sy-ns)
+
+(mu:intern core "symbol-ns"
+   (:lambda (sym)
+      (:if (core:null sym)
+           (mu:map-ns "mu")     
+           (mu:sy-ns sym))))
+
 (mu:intern core "symbol-value" mu:sy-val)
 
 (mu:intern core "keyword"
@@ -55,5 +59,5 @@
                 (core:%read-get-ns)
                 name
                 value))
-            (mu:sy-ns symbol)
+            (core:symbol-ns symbol)
             (mu:sy-name symbol)))))

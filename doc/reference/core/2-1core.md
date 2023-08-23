@@ -15,24 +15,21 @@ title: 2. Core library
 
 <hr>
 
-Functions and special operators described in this reference specify type designators for arguments and returned values. Most of these map directly onto the *mu* type class, but *core* documentation cites a few synthetic classes that are not strictly *mu* types.
+Functions and special operators described in this reference specify type designators for arguments and returned values. Most of these map directly onto the *mu* type class, but *core* documentation cites a few synthetic classes that are not strictly *mu* types. In general, a ***core type*** is a ***struct*** with supporting predicate, constructor, and accessors.
 
-- ***value*** designates any *core* or *mu* type, used to type a value that has no more specialized class.
-- ***form*** is an ***value*** or a special operator application.
-- ***list*** is either a proper list or ***()***.
-- ***byte*** is a small *fixnum* in the range of [0..255].
 - ***boolean*** indicates one of ***t***  or ***:t*** for *true* and ***()*** or ***:nil*** for  *false*. 
-
-- ***generalized boolean*** indicates ***()*** or ***:nil*** as *false*, and otherwise *true*.
-
-- ***string*** is a *vector* of *characters*. *mu* has no separate string type.
-
+- ***byte*** is a small *fixnum* in the range of [0..255].
+- ***closure*** is an applicative type that implements lambda rest functions and environment closures.
+- ***struct*** is a *mu* product type.
+- ***form*** is a ***value*** or a special operator application.
+- ***function*** is a fixed-arity function created by the *mu* compiler.
 - ***function-designator*** is a *mu* function type or a *symbol* bound to a function.
-
-- ***stream-designator*** is a  *mu*  *stream* or a ***boolean*** which maps to a standard stream.
+- ***generalized boolean*** indicates ***()*** or ***:nil*** as *false*, and otherwise *true*.
+- ***list*** is either a proper list or ***()***.
 - ***sequence*** is either a ***list*** or a ***vector***.
-
-
+- ***stream-designator*** is a  *mu*  *stream* or a ***boolean*** which maps to a standard stream.
+- ***string*** is a *vector* of *characters*.
+- ***value*** designates any *core* or *mu* type, used to type a value that has no more specialized class.
 
 ##### Synopsis of *core* additions to the *mu* language
 
@@ -47,6 +44,6 @@ simple format facility</br>
 stream designators</br>
 improved exception handling, break loop</br>
 lambdas with rest arguments</br>
-macro definition and expansion</br>
-file loader</br>
+macro definition and expansion</br
+file loader and compiler</br>
 </div>

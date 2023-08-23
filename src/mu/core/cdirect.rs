@@ -51,9 +51,14 @@ impl ConsDirect {
                 Some(cdr_) => {
                     let data = (car_ as u64) << 34 | (cdr_ as u64) & 0x3fffffff;
 
+                    if (data >> 60) != 0 || (data >> 59) & 1 != 0 {
+                        return None;
+                    }
+                    /*
                     if (data >> 60) & 1 == 1 {
                         return None;
                     }
+                     */
 
                     let cons = ConsDirectTag::new()
                         .with_data(data)
