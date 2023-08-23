@@ -5,7 +5,7 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(mu:intern core "time-delta"
+(mu:intern mu "%tdelta"
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:fx-sub stop start))
@@ -15,22 +15,22 @@
           (mu:run-us))))))
 
 ;;;
-;;; return an info vector of storage consumed
+;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(mu:intern core "storage-delta"
+(mu:intern mu "%sdelta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
        (mu:fix
         (:lambda (loop)
-          (:if (core:vectorp loop)
+          (:if (mu:eq :vector (mu:type-of loop))
                loop
                ((:lambda (list n)
                   ((:lambda (offset)
                      (:if (mu:fx-lt offset (mu:sv-len start-vec))
                           ((:lambda (type total alloc in-use)
                              ((:lambda (type-stats)
-                                (mu:cons `(,@list ,@type-stats) (core:1+ n)))
+                                (mu:cons `(,@list ,@type-stats) (mu:fx-add 1 n)))
                               `(,type ,total ,alloc ,in-use)))
                            (mu:sv-ref start-vec (mu:fx-add offset 0))
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 1)) (mu:sv-ref start-vec (mu:fx-add offset 1)))
@@ -42,6 +42,6 @@
                  (mu:cdr loop))))
          (mu:cons () 1)))
      (mu:hp-info)
-     (core:%prog2
+     ((:lambda ()
          (mu:apply fn args)
-         (mu:hp-info)))))
+         (mu:hp-info))))))

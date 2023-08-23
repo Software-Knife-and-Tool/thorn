@@ -17,6 +17,7 @@ help:
 	@echo "    commit - create test summary"
 	@echo "    tests - tests in \$$NS"
 	@echo "    $(NAMESPACES) - run all tests in namespace, raw output"
+	@echo "    test - run single test in \$$NS/\$$TEST"
 	@echo "    summary - run all tests in all namespaces and print summary"
 
 cargo:
@@ -42,6 +43,11 @@ commit:
 	@echo "Test Diffs"
 	@echo "-------------"
 	@git diff --unified=0 tests.summary
+
+test:
+	@python3 test.py $$NS . $$TEST > $(TMPF)
+	@python3 summarize-test.py $(TMPF)
+	@rm -f $(TMPF)
 
 summary:
 	@for namespace in $(NAMESPACES); do			\

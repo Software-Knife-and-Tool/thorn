@@ -47,27 +47,27 @@
 ;;;
 (mu:intern core "findl"
    (:lambda (fn list)
-     (core:raise-unless core:%appliablep fn 'core:findl "not a function")
-     (core:raise-unless core:listp list 'core:findl "not a list")
-     (core:foldl
-      (:lambda (el acc)
-        (:if (core:apply fn `(,el))
-             el
-             acc))
-      ()
-      list)))
+      (core:raise-unless core:%appliablep fn 'core:findl "not a function")
+      (core:raise-unless core:listp list 'core:findl "not a list")
+      (mu:cdr
+       (mu:fix
+        (:lambda (loop)
+           (:if (mu:eq :t (mu:car loop))
+               loop
+               (:if (mu:cdr loop)
+                    ((:lambda (el)
+                        (:if (core:apply fn `(,el))
+                             (mu:cons :t el)
+                             (mu:cons () (mu:cdr (mu:cdr loop)))))
+                     (mu:car (mu:cdr loop)))
+                    loop)))
+        (mu:cons () list)))))
 
 (mu:intern core "findr"
    (:lambda (fn list)
      (core:raise-unless core:%appliablep fn 'core:findr "not a function")
      (core:raise-unless core:sequencep list 'core:findr "not a list")
-     (core:foldr
-      (:lambda (el acc)
-        (:if (core:apply fn `(,el))
-             el
-             acc))
-      ()
-      list)))
+     (core:findl fn (core:reverse list))))
 
 ;;;
 ;;; position

@@ -37,7 +37,7 @@
 (core:read (core:make-string-stream :input "(:a :b )") () ())	(:a :b)
 (core:read (core:make-string-stream :input "(:a :b)") () ())	(:a :b)
 (core:read (core:make-string-stream :input "(:abc ())") () ())	(:abc :nil)
-(core:read (core:make-string-stream :input "(() :abc )") () ())	(:l :abc)
+(core:read (core:make-string-stream :input "(() :abc )") () ())	(:nil :abc)
 (core:read (core:make-string-stream :input "(1 2)") () ())	(1 2)
 (core:read (core:make-string-stream :input "(1 . 2)") () ())	(1 . 2)
 (core:read (core:make-string-stream :input "(1 2 . 3)") () ())	(1 2 . 3)
