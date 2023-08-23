@@ -4,13 +4,13 @@
 ;;;
 ;;; core reader
 ;;;
-(mu:intern core :intern "reader-stream" (mu:open :string :output ""))
-(mu:intern core :intern "reader-ns-stream" (mu:open :string :output "core"))
+(mu:intern core "%reader-stream" (mu:open :string :output ""))
+(mu:intern core "%reader-ns-stream" (mu:open :string :output "core"))
 
 ;;;
 ;;; readtable
 ;;;
-(mu:intern core :intern "read-char-syntax"
+(mu:intern core "%read-char-syntax"
    (:lambda (ch)
      ((:lambda (read-table) (mu:cdr (core:assoc ch read-table)))
       '((#\return . :wspace) (#\linefeed . :wspace) (#\page . :wspace)
@@ -40,7 +40,7 @@
         (#\v . :const)  (#\w . :const)  (#\x . :const)  (#\y . :const)
         (#\z . :const)))))
 
-(mu:intern core :intern "read-number"
+(mu:intern core "%read-number"
   (:lambda (atom)
     ((:lambda (fx)
         (:if fx
@@ -55,9 +55,9 @@
 ;;;
 ;;; atom reader
 ;;;
-(mu:intern core :intern "read-atom"
+(mu:intern core "%read-atom"
   (:lambda (ch stream)
-    (core:write-char ch core::reader-stream)
+    (core:write-char ch core:%reader-stream)
     (mu:fix
      (:lambda (loop)
        (:if (core:consp loop)
@@ -69,65 +69,65 @@
                          loop
                          ((:lambda (syntax-type)
                             (:if (mu:eq :const syntax-type)
-                                 (core::prog2
-                                     (core:write-char ch core::reader-stream)
+                                 (core:%prog2
+                                     (core:write-char ch core:%reader-stream)
                                      (core:null loop))
-                                 (core::prog2
+                                 (core:%prog2
                                      (core:unread-char ch stream)
                                      loop)))
-                          (core::read-char-syntax ch))))
+                          (core:%read-char-syntax ch))))
                   (core:read-char stream () ())))))
      ())
     ((:lambda (token)
        ((:lambda (number)
           (:if number
                number
-               (core::symbol-macro-expand (core::read-symbol token))))
-        (core::read-number token)))
-     (core:get-output-stream-string core::reader-stream))))
+               (core:%symbol-macro-expand (core:%read-symbol token))))
+        (core:%read-number token)))
+     (core:get-output-stream-string core:%reader-stream))))
 
 ;;;
 ;;; parser
 ;;;
-(mu:intern core :intern "read-dispatch"
+(mu:intern core "%read-dispatch"
   (:lambda (ch stream)
     ((:lambda (dispatch-table)
        (mu:apply
-        (mu:sy-val (mu:cdr (core:assoc (core::read-char-syntax ch) dispatch-table)))
+        (mu:sy-val (mu:cdr (core:assoc (core:%read-char-syntax ch) dispatch-table)))
         `(,ch ,stream)))
-     '((:const   . core::read-atom)
-       (:escape  . core::read-atom)
-       (:macro   . core::read-macro)
-       (:tmacro  . core::read-macro)
-       (:mescape . core::read-atom)))))
+     '((:const   . core:%read-atom)
+       (:escape  . core:%read-atom)
+       (:macro   . core:%read-macro)
+       (:tmacro  . core:%read-macro)
+       (:mescape . core:%read-atom)))))
 
 ;;;
 ;;; consume whitespace and comments
 ;;;
-(mu:intern core :intern "read-consume-ws"
+(mu:intern core "%read-consume-ws"
   (:lambda (stream)
     (mu:fix
      (:lambda (loop)
-       (:if (core::orf (core:streamp loop) (core:charp loop))
+       (:if (core:%orf (core:streamp loop) (core:charp loop))
             loop
             ((:lambda (ch)
                (:if (core:null ch)
                     stream
-                    (:if (mu:eq :wspace (core::read-char-syntax ch))
+                    (:if (mu:eq :wspace (core:%read-char-syntax ch))
                          (core:null loop)
                          (:if (mu:eq ch #\#)
                               ((:lambda (ch)
                                  (:if (mu:eq ch #\|)
-                                      (core::prog2
-                                          (core::read-sharp-comment ch stream)
+                                      (core:%prog2
+                                          (core:%read-sharp-comment ch stream)
                                           (core:null loop))
-                                      (core::prog2
+                                      (core:%prog2
                                           (core:unread-char ch stream)
                                           #\#)))
                                (core:read-char stream () ()))
                               (:if (mu:eq ch #\;)
-                                   (core::prog2
-                                       (core::read-line-comment ch stream)
+                                   (core:%prog2
+                                       (core:%read-line-comment ch stream)
                                        (core:null loop))
                                    ch)))))
              (core:read-char stream () ()))))
@@ -136,7 +136,7 @@
 ;;;
 ;;; recursive reader
 ;;;
-(mu:intern core :intern "read"
+(mu:intern core "%read"
   (:lambda (stream)
     ((:lambda (ch)
        (:if (core:eof stream)
@@ -144,6 +144,6 @@
             ((:lambda (macro)
                (:if macro
                     (core:apply (mu:car macro) `(,stream ,ch))
-                    (core::read-dispatch ch stream)))
+                    (core:%read-dispatch ch stream)))
              (core:get-macro-character ch))))
-     (core::read-consume-ws stream))))
+     (core:%read-consume-ws stream))))

@@ -7,7 +7,6 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
-        functions::Core as _,
         mu::Mu,
         types::{Tag, Type},
     },
@@ -15,7 +14,7 @@ use crate::{
         cons::{Cons, ConsIter, Core as _},
         fixnum::Fixnum,
         function::Function,
-        namespace::{Core as _, Namespace, Scope},
+        namespace::{Core as _, Namespace},
         symbol::{Core as _, Symbol},
     },
 };
@@ -49,11 +48,7 @@ impl Compiler for Mu {
             return Err(Exception::new(Condition::Syntax, ":if", args));
         }
 
-        let if_fn = match Mu::map_internal(mu, "if".to_string()) {
-            Some(fn_) => fn_,
-            None => panic!(),
-        };
-
+        let if_fn = Namespace::intern(mu, mu.mu_ns, "%if".to_string(), Tag::nil());
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
@@ -145,7 +140,7 @@ impl Compiler for Mu {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(*lex)) {
                 let lex_ref = vec![
-                    Namespace::mu_int_symbol(mu, "fr-ref".to_string()),
+                    Namespace::intern(mu, mu.mu_ns, "fr-ref".to_string(), Tag::nil()),
                     Fixnum::as_tag(tag.as_u64() as i64),
                     Fixnum::as_tag(nth as i64),
                 ];
@@ -173,7 +168,7 @@ impl Compiler for Mu {
             _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
         };
 
-        let id = Symbol::new(mu, Tag::nil(), Scope::Extern, "lambda", Tag::nil()).evict(mu);
+        let id = Symbol::new(mu, Tag::nil(), "lambda", Tag::nil()).evict(mu);
 
         match Self::compile_frame_symbols(mu, lambda) {
             Ok(lexicals) => {

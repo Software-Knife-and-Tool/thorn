@@ -9,7 +9,7 @@ use {
             async_, exception,
             exception::{Condition, Exception},
             frame::Frame,
-            functions::{Core as _, InternalFunction, LibFunction},
+            functions::{Core as _, LibMuFunction},
             nsmap::NSMaps,
             reader::{Core as _, Reader},
             types::{Tag, Type},
@@ -51,10 +51,10 @@ pub struct Mu {
     pub unwind: RwLock<Vec<usize>>,
 
     // functions
-    pub functions: Vec<LibFunction>,
-    pub internals: Vec<InternalFunction>,
+    pub functions: Vec<LibMuFunction>,
 
     // namespaces
+    pub keyword_ns: Tag,
     pub mu_ns: Tag,
     pub unintern_ns: Tag,
 
@@ -78,7 +78,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.7";
+    const VERSION: &'static str = "0.0.8";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -107,9 +107,9 @@ impl Core for Mu {
 
             // functions
             functions: Vec::new(),
-            internals: Vec::new(),
 
             // namespaces
+            keyword_ns: Tag::nil(),
             mu_ns: Tag::nil(),
             unintern_ns: Tag::nil(),
             ns_map: RwLock::new(HashMap::new()),
@@ -130,42 +130,52 @@ impl Core for Mu {
             async_map: RwLock::new(HashMap::new()),
         };
 
-        // a lot of this is order dependent
-        mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
-
-        mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
-            Ok(stdin) => stdin.evict(&mu),
-            Err(_) => panic!(),
-        };
-
-        mu.stdout = match StreamBuilder::new().stdout().build(&mu) {
-            Ok(stdout) => stdout.evict(&mu),
-            Err(_) => panic!(),
-        };
-
-        mu.errout = match StreamBuilder::new().errout().build(&mu) {
-            Ok(errout) => errout.evict(&mu),
-            Err(_) => panic!(),
-        };
-
-        mu.unintern_ns = Namespace::new(&mu, "", Tag::nil()).evict(&mu);
-
-        match <Mu as NSMaps>::add_ns(&mu, mu.unintern_ns) {
-            Ok(_) => (),
-            Err(_) => panic!(),
-        };
-
+        // establish the namespaces first
         mu.mu_ns = Namespace::new(&mu, "mu", Tag::nil()).evict(&mu);
-
         match <Mu as NSMaps>::add_ns(&mu, mu.mu_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
-        let (functions, internals) = Self::install_lib_functions(&mu);
-        mu.functions = functions;
-        mu.internals = internals;
+        mu.unintern_ns = Namespace::new(&mu, "", Tag::nil()).evict(&mu);
+        match <Mu as NSMaps>::add_ns(&mu, mu.unintern_ns) {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        };
 
+        mu.keyword_ns = Namespace::new(&mu, "keyword", Tag::nil()).evict(&mu);
+        match <Mu as NSMaps>::add_ns(&mu, mu.keyword_ns) {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        };
+
+        // the version string
+        mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
+        Namespace::intern(&mu, mu.mu_ns, "version".to_string(), mu.version);
+
+        // the standard streams
+        mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
+            Ok(stdin) => stdin.evict(&mu),
+            Err(_) => panic!(),
+        };
+        Namespace::intern(&mu, mu.mu_ns, "std-in".to_string(), mu.stdin);
+
+        mu.stdout = match StreamBuilder::new().stdout().build(&mu) {
+            Ok(stdout) => stdout.evict(&mu),
+            Err(_) => panic!(),
+        };
+        Namespace::intern(&mu, mu.mu_ns, "std-out".to_string(), mu.stdout);
+
+        mu.errout = match StreamBuilder::new().errout().build(&mu) {
+            Ok(errout) => errout.evict(&mu),
+            Err(_) => panic!(),
+        };
+        Namespace::intern(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
+
+        // mu functions
+        mu.functions = Self::install_lib_functions(&mu);
+
+        // the reader, has to be last
         mu.reader = mu.reader.build(&mu);
 
         mu

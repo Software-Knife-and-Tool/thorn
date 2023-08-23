@@ -26,9 +26,9 @@
 (core:dropr '(1 2 3) 0)	(1 2 3)
 (core:dropr '(1 2 3) 1)	(1 2)
 (core:findr core:symbolp '(1 2 3))	:nil
-(core:findr core:symbolp '(a b c))	a
+(core:findr core:symbolp '(a b c))	c
 (core:findl core:symbolp '(1 2 3))	:nil
-(core:findl core:symbolp '(a b c))	c
+(core:findl core:symbolp '(a b c))	a
 (core:foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(1 2 3))	:nil
 (core:foldl (:lambda (el acc) (:if (core:null acc) :nil (core:symbolp el))) :t '(a b c))	:t
 (core:foldl (:lambda (el acc) (mu:cons el acc)) () '(1 2 3 4))	(4 3 2 1)

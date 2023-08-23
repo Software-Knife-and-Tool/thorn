@@ -4,7 +4,7 @@
 ;;;
 ;;; repl
 ;;;
-(mu:intern core :intern "repl"
+(mu:intern core "repl"
    (:lambda ()
      (mu:fix
        (:lambda (loop)

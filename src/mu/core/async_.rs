@@ -12,7 +12,6 @@ use {
             types::{Tag, Type},
         },
         types::{
-            namespace::Scope,
             struct_::Struct,
             symbol::{Core as _, Symbol, UNBOUND},
         },
@@ -38,8 +37,7 @@ impl MuFunction for Async {
         fp.value = match Tag::type_of(mu, func) {
             Type::Function => match Tag::type_of(mu, args) {
                 Type::Cons | Type::Null => {
-                    let sym =
-                        Symbol::new(mu, Tag::nil(), Scope::Extern, "thread", *UNBOUND).evict(mu);
+                    let sym = Symbol::new(mu, Tag::nil(), "thread", *UNBOUND).evict(mu);
                     // let start = sync::Mutex::new(0);
                     let builder = thread::Builder::new();
                     // start.lock();

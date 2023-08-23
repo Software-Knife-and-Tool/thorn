@@ -4,11 +4,13 @@
 ;;;
 ;;; exceptions
 ;;;
-(mu:intern core :extern "exceptionp"
-           (:lambda (t)
-             (:if (core:structp t)
-                  (mu:eq :except (mu:st-type t))
-                  ())))
+(mu:untern core "%debug-core-symbols%")
+
+(mu:intern core "exceptionp"
+   (:lambda (t)
+      (:if (core:structp t)
+           (mu:eq :except (mu:st-type t))
+           ())))
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond obj source reason env)
@@ -19,12 +21,12 @@
 ;;; reason:  extended condition, usually a string
 ;;; env:     dynamic environment, list of frames
 ;;;
-(mu:intern core :extern "make-exception"
+(mu:intern core "make-exception"
   (:lambda (cond object source reason env)
     (mu:make-st :except
       `(,cond ,object ,source ,reason ,env))))
 
-(mu:intern core :intern "exception-property"
+(mu:intern core "%exception-property"
   (:lambda (key exception)
     (mu:sv-ref
      (mu:st-vec exception)
@@ -37,57 +39,52 @@
           (:reason  . 3)
           (:env     . 4)))))))
 
-(mu:untern core :intern "debug-core-symbols")
-
-(mu:intern core :intern "debug-map-symbol"
+(mu:intern core "%debug-map-symbol"
    (:lambda (obj)
-      (:if (mu:boundp 'core::debug-core-symbols)
+      (:if (mu:boundp 'core:%debug-core-symbols%)
            ()
-           (mu:intern core :intern "debug-core-symbols" `(,(mu:ns-ext core) ,(mu:ns-int core))))
-      (core:mapcar
-       (:lambda (scope)
-          (mu:fix
-           (:lambda (list)
-              (:if (core:consp list)
-                   ((:lambda (symbol)
-                       (:if (mu:eq (mu:sy-val symbol) obj)
-                            symbol
-                            (mu:cdr list)))
-                    (mu:car list))
-                   list))
-           scope))
-       core::debug-core-symbols)))
+           (mu:intern core "%debug-core-symbols%" `(mu:ns-syms core)))
+      (mu:fix
+       (:lambda (list)
+          (:if (core:consp list)
+               ((:lambda (symbol)
+                   (:if (mu:eq (mu:sy-val symbol) obj)
+                        symbol
+                        (mu:cdr list)))
+                (mu:car list))
+               list))
+       core:%debug-core-symbols%)))
 
-(mu:intern core :intern "fmt-mapped-symbol"
+(mu:intern core "%fmt-mapped-symbol"
    (:lambda (obj)
       ((:lambda (symbol)
-          (core::orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
-      (core::debug-map-symbol obj))))
+          (core:%orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
+      (core:%debug-map-symbol obj))))
 
-(mu:intern core :extern "exceptf"
+(mu:intern core "exceptf"
    (:lambda (stream fmt printenv except)
      ((:lambda (cond object source reason env)
          (:if (core:null fmt)
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv
-              (core::prog2
+              (core:%prog2
                (core:format stream "env:~%" ())
                (core:mapc
                 (:lambda (frame)
                    (core:format stream "  ~A~T(~A ~A)~%"
-                                `(,(core::fmt-mapped-symbol (mu:car frame))
+                                `(,(core:%fmt-mapped-symbol (mu:car frame))
                                   ,(mu:car frame)
                                   ,(mu:cdr frame))))
                 (mu:cdr env)))
              ()))
-     (core::exception-property :cond except)
-     (core::exception-property :object except)
-     (core::exception-property :source except)
-     (core::exception-property :reason except)
-     (core::exception-property :env except))))
+     (core:%exception-property :cond except)
+     (core:%exception-property :object except)
+     (core:%exception-property :source except)
+     (core:%exception-property :reason except)
+     (core:%exception-property :env except))))
 
-(mu:intern core :extern "with-exception"
+(mu:intern core "with-exception"
   (:lambda (handler thunk)
      (mu:with-ex
       (:lambda (object condition source)
@@ -98,48 +95,48 @@
                                       object
                                       source
                                       "mu:raise"
-                                      (core:dropl (mu::frames) 4))))))
+                                      (core:dropl (mu:frames) 4))))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;
 ;;; exception flavors
 ;;;
-(mu:intern core :extern "raise"
+(mu:intern core "raise"
    (:lambda (object source reason)
       (mu:raise
-       (core:make-exception :error object source reason (core:dropl (mu::frames) 2))
+       (core:make-exception :error object source reason (core:dropl (mu:frames) 2))
        :except)))
 
-(mu:intern core :extern "raise-if"
+(mu:intern core "raise-if"
   (:lambda (test obj source reason)
     (:if test
          (core:raise obj source reason)
          obj)))
 
-(mu:intern core :extern "raise-when"
+(mu:intern core "raise-when"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          (core:raise obj source reason)
          obj)))
 
-(mu:intern core :extern "raise-unless"
+(mu:intern core "raise-unless"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          obj
          (core:raise obj source reason))))
 
-(mu:intern core :extern "warn"
+(mu:intern core "warn"
   (:lambda (obj msg)
      (core:format mu:err-out ";;; warning: ~S ~A~%" `(,obj ,msg))
     obj))
 
-(mu:intern core :extern "warn-when"
+(mu:intern core "warn-when"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          (core:warn obj reason)
          obj)))
 
-(mu:intern core :extern "warn-unless"
+(mu:intern core "warn-unless"
   (:lambda (fn obj source reason)
     (:if (mu:apply fn `(,obj))
          obj

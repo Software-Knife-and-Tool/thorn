@@ -27,7 +27,6 @@
 'a-symbol	a-symbol
 'symbol	symbol
 'mu:eq	mu:eq
-'mu::eq	mu::eq
 's	s
 (mu:type-of '#:abc)	:symbol
 :a	:a

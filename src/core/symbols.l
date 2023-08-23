@@ -4,58 +4,55 @@
 ;;;
 ;;;  symbols
 ;;;
-(mu:intern core :extern "boundp" mu:boundp)
-(mu:intern core :extern "fboundp"
+(mu:intern core "boundp" mu:boundp)
+(mu:intern core "fboundp"
   (:lambda (symbol)
     (:if (core:boundp symbol)
-         (core::appliablep (mu:sy-val symbol))
+         (core:%appliablep (mu:sy-val symbol))
          ())))
 
-(mu:intern core :extern "uninternedp"
+(mu:intern core "uninternedp"
    (:lambda (sym)
       (:if (core:null sym)
            ()
            (core:null (mu:sy-ns sym)))))
 
-(mu:intern core :extern "keywordp"
+(mu:intern core "keywordp"
    (:lambda (t)
       (mu:eq (core:type-of t) 'keyword)))
 
-(mu:intern core :extern "symbolp"
+(mu:intern core "symbolp"
    (:lambda (t)
-      (core::orf (core::orf (core:keywordp t) (mu:eq () t))
+      (core:%orf (core:%orf (core:keywordp t) (mu:eq () t))
                 (mu:eq 'symbol (core:type-of t)))))
 
 ;;;
 ;;; utilities
 ;;;
-(mu:intern core :extern "symbol-name" mu:sy-name)
-(mu:intern core :extern "symbol-ns" mu:sy-ns)
-(mu:intern core :extern "symbol-value" mu:sy-val)
+(mu:intern core "symbol-name" mu:sy-name)
+(mu:intern core "symbol-ns" mu:sy-ns)
+(mu:intern core "symbol-value" mu:sy-val)
 
-(mu:intern core :extern "keyword"
+(mu:intern core "keyword"
    (:lambda (name)
       (core:raise-unless core:stringp name 'core:keyword "not a keyword name")
       (:if (mu:fx-lt (mu:sv-len name) 8)
            (mu:keyword name)
-           (core::make-core-type "keyword" `(,(mu:cons :name name))))))
+           (core:%make-core-type "keyword" `(,(mu:cons :name name))))))
 
-(mu:intern core :intern "intern"
+(mu:intern core "intern"
    (:lambda (symbol value)
       (:if (core:uninternedp symbol)
            ((:lambda (sym)
                (:if sym
                     (:if (core:boundp sym)
                          symbol
-                         (mu:intern (core::read-get-ns) :extern (mu:sy-name symbol) value))
-                    (mu:intern (core::read-get-ns) :extern (mu:sy-name symbol) value)))
-            (mu:ns-find (core::read-get-ns) :extern (mu:sy-name symbol)))
+                         (mu:intern (core:%read-get-ns) (mu:sy-name symbol) value))
+                    (mu:intern (core:%read-get-ns) (mu:sy-name symbol) value)))
+            (mu:ns-find (core:%read-get-ns) (mu:sy-name symbol)))
            ((:lambda (ns name)
                (mu:intern
-                (core::read-get-ns)
-                (:if (mu:ns-find ns :extern name)
-                     :extern
-                     :intern)
+                (core:%read-get-ns)
                 name
                 value))
             (mu:sy-ns symbol)

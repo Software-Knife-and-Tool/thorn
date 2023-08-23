@@ -1,8 +1,6 @@
-(mu:type-of core::macroexpand-1)	:func
+(mu:type-of core:macroexpand-1)	:func
 (mu:type-of core:macroexpand)	:func
 (mu:type-of core:macro-function)	:func
-(mu:type-of core::core-macro)	:func
-(mu:type-of core::compile-macro)	:func
 (core:compile '(defmacro core:a-macro ()))	core:a-macro
 ((:lambda () (core:compile '(defmacro core:a-macro () 'core:a-macro)) (core:macroexpand '(core:a-macro) ())))	core:a-macro
 ((:lambda () (core:compile '(defmacro core:a-macro () core:a-macro)) (core:macro-function core:a-macro ())))	:nil

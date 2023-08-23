@@ -1,5 +1,3 @@
-(mu:type-of core::read-stream-designator)	:func
-(mu:type-of core::write-stream-designator)	:func
 (mu:type-of core:close)	:func
 (mu:type-of core:eof)	:func
 (mu:type-of core:get-output-stream-string)	:func

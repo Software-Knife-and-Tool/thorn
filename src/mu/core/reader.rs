@@ -7,7 +7,6 @@ use crate::{
         backquote::Backquote,
         direct::DirectType,
         exception::{self, Condition, Exception},
-        functions::Core as _,
         mu::Mu,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
@@ -55,9 +54,6 @@ pub trait Core {
 }
 
 impl Core for Reader {
-    //
-    // reader creation:
-    //
     fn new() -> Self {
         Reader {
             cons: Tag::nil(),
@@ -70,14 +66,14 @@ impl Core for Reader {
     fn build(&self, mu: &Mu) -> Self {
         Reader {
             eol: self.eol,
-            cons: Namespace::mu_ext_symbol(mu, "cons".to_string()),
+            cons: Namespace::intern(mu, mu.mu_ns, "cons".to_string(), Tag::nil()),
             bq_str: StreamBuilder::new()
                 .string("".to_string())
                 .output()
                 .build(mu)
                 .unwrap()
                 .evict(mu),
-            bq_append: Mu::map_internal(mu, "bq-append".to_string()).unwrap(),
+            bq_append: Namespace::intern(mu, mu.mu_ns, "%append".to_string(), Tag::nil()),
         }
     }
 

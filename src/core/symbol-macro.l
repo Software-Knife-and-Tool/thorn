@@ -4,33 +4,33 @@
 ;;;
 ;;; symbol macros
 ;;;
-(mu:intern core :extern "in-namespace"
+(mu:intern core "in-namespace"
    (:lambda (ns)
      (core:raise-unless core:namespacep ns 'core:in-namespace "not a namespace")
      (mu:make-ns ns)
-     (core::read-set-ns ns)
+     (core:%read-set-ns ns)
      ns))
 
-(mu:intern core :intern "read-get-ns"
+(mu:intern core "%read-get-ns"
    (:lambda ()
      ((:lambda (name)
-        (mu:write name () core::reader-ns-stream)
+        (mu:write name () core:%reader-ns-stream)
         (mu:map-ns name))
-      (core:get-output-stream-string core::reader-ns-stream))))
+      (core:get-output-stream-string core:%reader-ns-stream))))
 
-(mu:intern core :intern "read-set-ns"
+(mu:intern core "%read-set-ns"
    (:lambda (ns)
-      (core:get-output-stream-string core::reader-ns-stream)
-      (mu:write (mu:ns-name ns) () core::reader-ns-stream)))
+      (core:get-output-stream-string core:%reader-ns-stream)
+      (mu:write (mu:ns-name ns) () core:%reader-ns-stream)))
 
 ;;;
 ;;; symbol readers
 ;;;
-(mu:intern core :intern "read-keywordp"
+(mu:intern core "%read-keywordp"
   (:lambda (name)
       (mu:eq #\: (core:schar name 0))))
 
-(mu:intern core :intern "read-symbol-scope"
+(mu:intern core "%read-symbol-scope"
   (:lambda (name)
      ((:lambda (colon)
         (:if (core:null colon)
@@ -40,7 +40,7 @@
                   :extern)))
         (core:string-position #\: name))))
 
-(mu:intern core :intern "read-symbol-ns"
+(mu:intern core "%read-symbol-ns"
   (:lambda (name)
     ((:lambda (colon)
        (:if (core:null colon)
@@ -48,7 +48,7 @@
             (mu:map-ns (core:substr name 0 (core:1- colon)))))
      (core:string-position #\: name))))
 
-(mu:intern core :intern "read-symbol-name"
+(mu:intern core "%read-symbol-name"
    (:lambda (name)
      ((:lambda (colon)
         (:if (core:null colon)
@@ -62,42 +62,41 @@
                                (mu:fx-add colon (mu:fx-sub (core:length name) (core:1+ colon)))))))
      (core:string-position #\: name))))
 
-(mu:intern core :intern "read-symbol"
+(mu:intern core "%read-symbol"
    (:lambda (symbol)
-     (:if (core::read-keywordp symbol)
-          (core:keyword (core::read-symbol-name symbol))
-          ((:lambda (ns scope name)
+     (:if (core:%read-keywordp symbol)
+          (core:keyword (core:%read-symbol-name symbol))
+          ((:lambda (ns name)
              (:if (core:null ns)
-                  (mu:untern () :extern name)
-                  (mu:untern ns scope name)))
-           (core::read-symbol-ns symbol)
-           (core::read-symbol-scope symbol)
-           (core::read-symbol-name symbol)))))
+                  (mu:untern () name)
+                  (mu:untern ns name)))
+           (core:%read-symbol-ns symbol)
+           (core:%read-symbol-name symbol)))))
 
 ;;;
 ;;; symbol macros
 ;;;
-(mu:intern core :intern "symbol-macro-expand"
+(mu:intern core "%symbol-macro-expand"
    (:lambda (symbol)
      (:if (core:uninternedp symbol)
           ((:lambda (sym)
              (:if sym
                   (mu:eval (core:symbol-value sym))
                   symbol))
-           (core::get-symbol-macro symbol))
+           (core:%get-symbol-macro symbol))
           symbol)))
 
-(mu:intern core :intern "get-symbol-macro"
+(mu:intern core "%get-symbol-macro"
    (:lambda (symbol)
       (:if (mu:eq :symbol (mu:type-of symbol))
-           (mu:ns-find core::core-symbol-macro-ns :extern (core:symbol-name symbol))
+           (mu:ns-find core:%core-symbol-macro-ns% (core:symbol-name symbol))
            (core:raise symbol 'get-symbol-macro-form "not a symbol"))))
 
-(mu:intern core :extern "define-symbol-macro"
+(mu:intern core "define-symbol-macro"
    (:lambda (symbol form)
       (:if (mu:eq :symbol (mu:type-of symbol))
-           (mu:intern core::core-symbol-macro-ns :extern (mu:sy-name symbol) form)
-           (core:raise symbol 'define-symbol-macro "not a symbol"))))
+           (mu:intern core:%core-symbol-macro-ns% (mu:sy-name symbol) form)
+           (core:raise symbol 'core:define-symbol-macro "not a symbol"))))
 
 ;;; (core:define-symbol-macro 't :t)
 ;;; (core:define-symbol-macro 'nil :nil)
