@@ -4,7 +4,7 @@ from datetime import datetime
 
 with open(sys.argv[1]) as f: test_results = json.load(f)
 
-print(f'Test Summary:')
+print(f'Namespace Test Summary:')
 print('-----------------------')
 
 ns = test_results['ns']

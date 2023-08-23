@@ -56,7 +56,7 @@
 
 (mu:intern core "mapl"
    (:lambda (fn list)
-      (core:raise-unless core:$appliablep fn 'core:mapl "not a function")
+      (core:raise-unless core:%appliablep fn 'core:mapl "not a function")
       (core:raise-unless core:listp list 'core:mapl "not a list")
       (mu:fix
        (:lambda (list)
