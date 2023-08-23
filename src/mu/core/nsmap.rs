@@ -10,7 +10,7 @@ use {
             types::Tag,
         },
         types::{
-            namespace::{Namespace, Scope},
+            namespace::Namespace,
             symbol::Symbol,
             vector::{Core as _, Vector},
         },
@@ -23,13 +23,13 @@ pub trait NSMaps {
     type NSMap;
 
     fn add_ns(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn intern(_: &Mu, _: Tag, _: Scope, _: Tag);
-    fn map(_: &Mu, _: Tag, _: Scope, _: &str) -> Option<Tag>;
+    fn intern(_: &Mu, _: Tag, _: Tag);
+    fn map(_: &Mu, _: Tag, _: &str) -> Option<Tag>;
     fn map_ns(_: &Mu, _: &str) -> Option<Tag>;
 }
 
 impl NSMaps for Mu {
-    type NSCache = (RwLock<HashMap<String, Tag>>, RwLock<HashMap<String, Tag>>);
+    type NSCache = RwLock<HashMap<String, Tag>>;
     type NSMap = HashMap<u64, (Tag, Self::NSCache)>;
 
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
@@ -41,13 +41,7 @@ impl NSMaps for Mu {
 
         ns_ref.insert(
             ns.as_u64(),
-            (
-                ns,
-                (
-                    RwLock::new(HashMap::<String, Tag>::new()),
-                    RwLock::new(HashMap::<String, Tag>::new()),
-                ),
-            ),
+            (ns, RwLock::new(HashMap::<String, Tag>::new())),
         );
 
         Ok(ns)
@@ -56,25 +50,22 @@ impl NSMaps for Mu {
     fn map_ns(mu: &Mu, name: &str) -> Option<Tag> {
         let ns_ref = mu.ns_map.read().unwrap();
 
-        for (_, ns_cache) in ns_ref.iter() {
-            let (ns, _) = ns_cache;
-            let map_name = Vector::as_string(mu, Namespace::name(mu, *ns));
+        for (_, ns) in ns_ref.iter() {
+            let (ns_name, _) = ns;
+            let map_name = Vector::as_string(mu, Namespace::name(mu, *ns_name));
 
             if name == map_name {
-                return Some(*ns);
+                return Some(*ns_name);
             }
         }
 
         None
     }
 
-    fn map(mu: &Mu, ns: Tag, scope: Scope, name: &str) -> Option<Tag> {
+    fn map(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
         let ns_ref = mu.ns_map.read().unwrap();
-        let (_, (externs, interns)) = &ns_ref[&ns.as_u64()];
-        let hash = match scope {
-            Scope::Intern => externs.read().unwrap(),
-            Scope::Extern => interns.read().unwrap(),
-        };
+        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+        let hash = ns_cache.read().unwrap();
 
         if hash.contains_key(name) {
             Some(hash[name])
@@ -83,16 +74,12 @@ impl NSMaps for Mu {
         }
     }
 
-    fn intern(mu: &Mu, ns: Tag, scope: Scope, symbol: Tag) {
+    fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
         let ns_ref = mu.ns_map.read().unwrap();
-        let (_, (externs, interns)) = &ns_ref[&ns.as_u64()];
+        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(mu, Symbol::name(mu, symbol));
 
-        let mut hash = match scope {
-            Scope::Intern => externs.write().unwrap(),
-            Scope::Extern => interns.write().unwrap(),
-        };
-
+        let mut hash = ns_cache.write().unwrap();
         hash.insert(name, symbol);
     }
 }

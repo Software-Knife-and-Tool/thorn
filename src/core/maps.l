@@ -4,9 +4,9 @@
 ;;;
 ;;; folds and maps
 ;;;
-(mu:intern core :extern "foldl"
+(mu:intern core "foldl"
   (:lambda (fn init list)
-      (core:raise-unless core::appliablep fn 'core:foldl "not a function")
+      (core:raise-unless core:%appliablep fn 'core:foldl "not a function")
       (core:raise-unless core:listp list 'core:foldl "not a list")
       (mu:cdr
        (mu:fix
@@ -21,32 +21,32 @@
            (mu:cdr arg)))
         (mu:cons list init)))))
 
-(mu:intern core :extern "foldr"
+(mu:intern core "foldr"
   (:lambda (fn init list)
-    (core:raise-unless core::appliablep fn 'core:foldr "not a function")
+    (core:raise-unless core:%appliablep fn 'core:foldr "not a function")
     (core:raise-unless core:listp list 'core:foldr "not a list")
     (core:foldl fn init (core:reverse list))))
 
 ;;;
 ;;; maps
 ;;;
-(mu:intern core :extern "mapc"
+(mu:intern core "mapc"
    (:lambda (fn list)
-     (core:raise-unless core::appliablep fn 'core:mapc "not a function")
+     (core:raise-unless core:%appliablep fn 'core:mapc "not a function")
      (core:raise-unless core:listp list 'core:mapc "not a list")
      (mu:fix
       (:lambda (lst)
         (:if lst
-             (core::prog2
+             (core:%prog2
                  (core:apply fn `(,(mu:car lst)))
                  (mu:cdr lst))
              ()))
       list)
      list))
 
-(mu:intern core :extern "mapcar"
+(mu:intern core "mapcar"
    (:lambda (fn list)
-     (core:raise-unless core::appliablep fn 'core:mapcar "not a function")
+     (core:raise-unless core:%appliablep fn 'core:mapcar "not a function")
      (core:raise-unless core:listp list 'core:mapcar "not a list")
      (core:foldl
       (:lambda (elt acc)
@@ -54,23 +54,23 @@
       ()
       list)))
 
-(mu:intern core :extern "mapl"
+(mu:intern core "mapl"
    (:lambda (fn list)
-      (core:raise-unless core::appliablep fn 'core:mapl "not a function")
+      (core:raise-unless core:$appliablep fn 'core:mapl "not a function")
       (core:raise-unless core:listp list 'core:mapl "not a list")
       (mu:fix
        (:lambda (list)
          (:if list
-              (core::prog2
+              (core:%prog2
                   (core:apply fn `(,list))
                   (mu:cdr list))
               ()))
        list)
       list))
 
-(mu:intern core :extern "maplist"
+(mu:intern core "maplist"
    (:lambda (fn list)
-     (core:raise-unless core::appliablep fn 'core:maplist "not a function")
+     (core:raise-unless core:%appliablep fn 'core:maplist "not a function")
      (core:raise-unless core:listp list 'core:maplist "not a list")
      (mu:car
       (mu:fix
@@ -85,7 +85,7 @@
           (mu:cdr loop)))
        `(() ,@list)))))
 
-(mu:intern core :extern "assoc"
+(mu:intern core "assoc"
   (:lambda (item list)
     (mu:car
      (mu:fix

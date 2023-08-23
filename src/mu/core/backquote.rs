@@ -240,11 +240,11 @@ impl Backquote for Mu {
 }
 
 pub trait MuFunction {
-    fn _append(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
+    fn append_(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
-    fn _append(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn append_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list1 = fp.argv[0];
         let list2 = fp.argv[1];
 

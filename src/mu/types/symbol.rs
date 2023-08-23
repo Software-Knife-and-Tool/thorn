@@ -15,7 +15,7 @@ use {
         },
         types::{
             char::Char,
-            namespace::{Core as _, Namespace, Scope},
+            namespace::{Core as _, Namespace},
             stream::{Core as _, Stream},
             vecimage::{TypedVec, VecType},
             vector::{Core as _, Vector},
@@ -31,7 +31,6 @@ pub enum Symbol {
 
 pub struct SymbolImage {
     pub namespace: Tag,
-    pub scope: Tag,
     pub name: Tag,
     pub value: Tag,
 }
@@ -41,33 +40,13 @@ lazy_static! {
 }
 
 impl Symbol {
-    pub fn new(mu: &Mu, namespace: Tag, scope: Scope, name: &str, value: Tag) -> Self {
+    pub fn new(mu: &Mu, namespace: Tag, name: &str, value: Tag) -> Self {
         let str = name.as_bytes();
-        let len = str.len();
 
         match str[0] as char {
-            ':' => {
-                if len > Tag::DIRECT_STR_MAX + 1 || len == 1 {
-                    panic!()
-                }
-
-                let str = name[1..].to_string();
-                let mut data: [u8; 8] = 0u64.to_le_bytes();
-                for (src, dst) in str.as_bytes().iter().zip(data.iter_mut()) {
-                    *dst = *src
-                }
-                Symbol::Keyword(Tag::to_direct(
-                    u64::from_le_bytes(data),
-                    (len - 1) as u8,
-                    DirectType::Keyword,
-                ))
-            }
+            ':' => Symbol::Keyword(Self::keyword(&name[1..])),
             _ => Symbol::Symbol(SymbolImage {
                 namespace,
-                scope: match scope {
-                    Scope::Extern => Symbol::keyword("extern"),
-                    Scope::Intern => Symbol::keyword("intern"),
-                },
                 name: Vector::from_string(name).evict(mu),
                 value,
             }),
@@ -82,14 +61,11 @@ impl Symbol {
                     namespace: Tag::from_slice(
                         heap_ref.of_length(main.offset() as usize, 8).unwrap(),
                     ),
-                    scope: Tag::from_slice(
+                    name: Tag::from_slice(
                         heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
                     ),
-                    name: Tag::from_slice(
-                        heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
-                    ),
                     value: Tag::from_slice(
-                        heap_ref.of_length(main.offset() as usize + 24, 8).unwrap(),
+                        heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
                     ),
                 },
                 _ => panic!(),
@@ -100,23 +76,9 @@ impl Symbol {
 
     pub fn namespace(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
-            Type::Keyword => Tag::nil(),
+            Type::Keyword => mu.keyword_ns,
             Type::Symbol => match symbol {
                 Tag::Indirect(_) => Self::to_image(mu, symbol).namespace,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn scope(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(mu, symbol) {
-            Type::Keyword => match symbol {
-                Tag::Direct(_) => Symbol::keyword("extern"),
-                _ => panic!(),
-            },
-            Type::Symbol => match symbol {
-                Tag::Indirect(_) => Self::to_image(mu, symbol).scope,
                 _ => panic!(),
             },
             _ => panic!(),
@@ -162,7 +124,6 @@ impl Core for Symbol {
     fn view(mu: &Mu, symbol: Tag) -> Tag {
         let vec = vec![
             Self::namespace(mu, symbol),
-            Self::scope(mu, symbol),
             Self::name(mu, symbol),
             if Self::is_unbound(mu, symbol) {
                 Symbol::keyword("UNBOUND")
@@ -180,7 +141,6 @@ impl Core for Symbol {
             Symbol::Symbol(image) => {
                 let slices: &[[u8; 8]] = &[
                     image.namespace.as_slice(),
-                    image.scope.as_slice(),
                     image.name.as_slice(),
                     image.value.as_slice(),
                 ];
@@ -233,55 +193,23 @@ impl Core for Symbol {
                         Vector::from_string(&token).evict(mu),
                     ));
                 }
-                Ok(Symbol::new(mu, Tag::nil(), Scope::Extern, &token, *UNBOUND).evict(mu))
+                Ok(Symbol::new(mu, Tag::nil(), &token, *UNBOUND).evict(mu))
             }
             Some(_) => {
                 let sym: Vec<&str> = token.split(':').collect();
-                match sym.len() {
-                    2 => {
-                        let ns = sym[0].to_string();
-                        let name = sym[1].to_string();
+                let ns = sym[0].to_string();
+                let name = sym[1].to_string();
 
-                        match Mu::map_ns(mu, &ns) {
-                            Some(ns) => {
-                                Ok(Namespace::intern(mu, ns, Scope::Extern, name, *UNBOUND))
-                            }
-                            None => Err(Exception::new(
-                                Condition::Unbound,
-                                "read:sy",
-                                Vector::from_string(sym[0]).evict(mu),
-                            )),
-                        }
-                    }
-                    3 => {
-                        let ns = sym[0].to_string();
-                        let name = sym[2].to_string();
-
-                        match Mu::map_ns(mu, &ns) {
-                            Some(ns) => {
-                                Ok(Namespace::intern(mu, ns, Scope::Intern, name, *UNBOUND))
-                            }
-                            None => Err(Exception::new(
-                                Condition::Unbound,
-                                "read:sy",
-                                Vector::from_string(sym[0]).evict(mu),
-                            )),
-                        }
-                    }
-                    _ => Err(Exception::new(
-                        Condition::Syntax,
+                match Mu::map_ns(mu, &ns) {
+                    Some(ns) => Ok(Namespace::intern(mu, ns, name, *UNBOUND)),
+                    None => Err(Exception::new(
+                        Condition::Unbound,
                         "read:sy",
-                        Vector::from_string(&token).evict(mu),
+                        Vector::from_string(sym[0]).evict(mu),
                     )),
                 }
             }
-            None => Ok(Namespace::intern(
-                mu,
-                mu.unintern_ns,
-                Scope::Extern,
-                token,
-                *UNBOUND,
-            )),
+            None => Ok(Namespace::intern(mu, mu.unintern_ns, token, *UNBOUND)),
         }
     }
 
@@ -312,19 +240,9 @@ impl Core for Symbol {
                             Err(e) => return Err(e),
                         }
 
-                        let scope = Symbol::scope(mu, symbol);
-                        if scope.eq_(Symbol::keyword("extern")) {
-                            match mu.write_string(":".to_string(), stream) {
-                                Ok(_) => (),
-                                Err(e) => return Err(e),
-                            }
-                        } else if scope.eq_(Symbol::keyword("intern")) {
-                            match mu.write_string("::".to_string(), stream) {
-                                Ok(_) => (),
-                                Err(e) => return Err(e),
-                            }
-                        } else {
-                            panic!()
+                        match mu.write_string(":".to_string(), stream) {
+                            Ok(_) => (),
+                            Err(e) => return Err(e),
                         }
                     }
                 }
@@ -364,8 +282,7 @@ impl MuFunction for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match Tag::type_of(mu, symbol) {
-            Type::Symbol => Symbol::namespace(mu, symbol),
-            Type::Keyword => Self::keyword("keyword"),
+            Type::Symbol | Type::Keyword => Symbol::namespace(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "sy-ns", symbol)),
         };
 
@@ -431,7 +348,7 @@ impl MuFunction for Symbol {
         match Tag::type_of(mu, symbol) {
             Type::Vector => {
                 let str = Vector::as_string(mu, symbol);
-                fp.value = Self::new(mu, Tag::nil(), Scope::Extern, &str, *UNBOUND).evict(mu);
+                fp.value = Self::new(mu, Tag::nil(), &str, *UNBOUND).evict(mu);
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "make-sy", symbol)),

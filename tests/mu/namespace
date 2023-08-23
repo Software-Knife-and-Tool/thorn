@@ -1,16 +1,15 @@
 (mu:eq :func (mu:type-of mu:make-ns))	:t
-(mu:intern (mu:map-ns "mu") :extern "foo" "foo")	mu:foo
-(mu:boundp (mu:intern (mu:map-ns "mu") :extern "foo" ()))	mu:foo
-(mu:untern (mu:map-ns "mu") :extern "foo")	mu:foo
-(mu:boundp (mu:untern (mu:map-ns "mu") :extern "foo"))	:nil
+(mu:intern (mu:map-ns "mu") "foo" "foo")	mu:foo
+(mu:boundp (mu:intern (mu:map-ns "mu") "foo" ()))	mu:foo
+(mu:untern (mu:map-ns "mu") "foo")	mu:foo
+(mu:boundp (mu:untern (mu:map-ns "mu") "foo"))	:nil
 (mu:make-ns "core" (mu:map-ns "mu"))	#<namespace: "core">
 (mu:map-ns "mu")	#<namespace: "mu">
 (mu:map-ns "notfound")	:nil
 (mu:map-ns (mu:ns-name (mu:make-ns "core" (mu:map-ns "mu"))))	#<namespace: "core">
 (mu:ns-imp (mu:make-ns "core" (mu:map-ns "mu")))	#<namespace: "mu">
 (mu:ns-imp (mu:map-ns "mu"))	:nil
-(mu:ns-find (mu:map-ns "mu") :extern "eq")	mu:eq
-(mu:ns-find (mu:map-ns "mu") :extern "foo")	:nil
+(mu:ns-find (mu:map-ns "mu") "eq")	mu:eq
+(mu:ns-find (mu:map-ns "mu") "foo")	:nil
 (mu:ns-name (mu:map-ns "mu"))	"mu"
-(mu:type-of (mu:ns-ext (mu:map-ns "mu")))	:cons
-(mu:type-of (mu:ns-int (mu:map-ns "mu")))	:cons
+(mu:type-of (mu:ns-syms (mu:map-ns "mu")))	:cons

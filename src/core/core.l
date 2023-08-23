@@ -4,14 +4,16 @@
 ;;;
 ;;;  core namespace
 ;;;
-(mu:intern () :extern "core" (mu:make-ns "core" (mu:map-ns "mu")))
-(mu:intern core :intern "core-char-macro-ns" (mu:make-ns "core:char-macro-ns" ()))
-(mu:intern core :intern "core-symbol-macro-ns" (mu:make-ns "core:symbol-macro-ns" ()))
+(mu:intern () "mu" (mu:map-ns "mu"))
+(mu:intern () "core" (mu:make-ns "core" (mu:map-ns "mu")))
+
+(mu:intern core "%core-char-macro-ns%" (mu:make-ns "%char-macro-ns%" ()))
+(mu:intern core "%core-symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%" ()))
 
 ;;;
 ;;; core types
 ;;;
-(mu:intern core :intern "init-core-ns"
+(mu:intern core "%init-core-ns"
    (:lambda ()
       ;;; keyword                 
       (core:define-core-type "keyword"
@@ -39,79 +41,76 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern core :extern "not" (:lambda (t) (core:null t)))
-(mu:intern core :extern "atom"
+(mu:intern core "not" (:lambda (t) (core:null t)))
+(mu:intern core "atom"
   (:lambda (obj)
     (core:not (core:consp obj))))
 
-(mu:intern core :extern "numberp"
+(mu:intern core "numberp"
   (:lambda (n)
      (:if (core:fixnump n)
           :t
           (core:floatp n))))
 
-(mu:intern core :extern "zerop"
+(mu:intern core "zerop"
   (:lambda (n)
-    (:if (mu:eq 0 n)
-         :t
-         (mu:eq 0.0 n))))
+     (:if (mu:eq 0 n)
+          :t
+          (mu:eq 0.0 n))))
 
 ;;;
 ;;; system classes
 ;;;
-(mu:intern core :extern "charp" (:lambda (t) (mu:eq :char (mu:type-of t))))
-(mu:intern core :extern "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
-(mu:intern core :extern "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
-(mu:intern core :extern "functionp" (:lambda (t) (mu:eq :func (mu:type-of t))))
-(mu:intern core :extern "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
-(mu:intern core :extern "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
-(mu:intern core :extern "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))
-
-;;;
-;;; core classes
-;;;
-(mu:intern core :extern "sequencep" (:lambda (t) (:if (core:listp t) :t (core:vectorp t))))
+(mu:intern core "charp" (:lambda (t) (mu:eq :char (mu:type-of t))))
+(mu:intern core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
+(mu:intern core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
+(mu:intern core "functionp" (:lambda (t) (mu:eq :func (mu:type-of t))))
+(mu:intern core "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
+(mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
+(mu:intern core "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))
 
 ;;;
 ;;; syntactic sugar
 ;;;
-(mu:intern core :intern "orf"
+(mu:intern core "%orf"
   (:lambda (arg arg1)
     (:if arg arg arg1)))
 
-(mu:intern core :intern "andf"
+(mu:intern core "%andf"
   (:lambda (arg arg1)
     (:if arg arg1 ())))
 
-(mu:intern core :intern "prog1"
+(mu:intern core "%prog1"
   (:lambda (arg1 arg2)
     arg1))
 
-(mu:intern core :intern "prog2"
+(mu:intern core "%prog2"
   (:lambda (arg1 arg2)
     arg2))
 
 ;;;
 ;;; core apply
 ;;;
-(mu:intern core :intern "appliablep"
+(mu:intern core "%appliablep"
    (:lambda (fn)
-      (core::orf (core:closurep fn) (core:functionp fn))))
+      (core:%orf (core:closurep fn) (core:functionp fn))))
 
-(mu:intern core :extern "apply"
+(mu:intern core "apply"
    (:lambda (fn args)
-     (core:raise-unless core::appliablep fn 'core:apply "not a function designator")
+     (core:raise-unless core:%appliablep fn 'core:apply "not a function designator")
      (:if (core:closurep fn)
-          (core::closure-apply fn args)
+          (core:%closure-apply fn args)
           (mu:apply fn args))))
 
 ;;;
 ;;; fixpoint loop
 ;;;
-(mu:intern core :extern "fix"
+(mu:intern core "fix"
    (:lambda (fn list)
-     (core:raise-unless core::appliablep fn 'core:fix "not a function designator")
+     (core:raise-unless core:%appliablep fn 'core:fix "not a function designator")
      (core:raise-unless core:listp list 'core:fix "not a list")
-     (:if (core:closurep fn)
-          (mu:fix (:lambda (arg) (core:apply fn `(,arg))) list)
-          (mu:fix fn list))))
+     ((:lambda (fn)
+        (mu:fix fn list))
+      (:if (core:closurep fn)
+          (:lambda (arg) (core:apply fn `(,arg)))
+          fn))))

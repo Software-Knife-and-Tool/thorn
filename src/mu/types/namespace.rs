@@ -22,16 +22,9 @@ use {
     std::str,
 };
 
-#[derive(Copy, Clone, Debug)]
-pub enum Scope {
-    Intern,
-    Extern,
-}
-
 pub struct Namespace {
     name: Tag,    // string
-    externs: Tag, // list of symbols
-    interns: Tag, // list of symbols
+    symbols: Tag, // list of symbols
     import: Tag,  // import namespace
 }
 
@@ -40,8 +33,7 @@ impl Namespace {
         match Tag::type_of(mu, import) {
             Type::Null | Type::Namespace => Namespace {
                 name: Vector::from_string(name).evict(mu),
-                externs: Tag::nil(),
-                interns: Tag::nil(),
+                symbols: Tag::nil(),
                 import,
             },
             _ => panic!(),
@@ -51,8 +43,7 @@ impl Namespace {
     pub fn evict(&self, mu: &Mu) -> Tag {
         let image: &[[u8; 8]] = &[
             self.name.as_slice(),
-            self.externs.as_slice(),
-            self.interns.as_slice(),
+            self.symbols.as_slice(),
             self.import.as_slice(),
         ];
 
@@ -74,14 +65,11 @@ impl Namespace {
                         name: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize, 8).unwrap(),
                         ),
-                        externs: Tag::from_slice(
+                        symbols: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
                         ),
-                        interns: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
-                        ),
                         import: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 24, 8).unwrap(),
+                            heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
                         ),
                     }
                 }
@@ -101,20 +89,10 @@ impl Namespace {
         }
     }
 
-    pub fn externs(mu: &Mu, ns: Tag) -> Tag {
+    pub fn symbols(mu: &Mu, ns: Tag) -> Tag {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
-                Tag::Indirect(_) => Self::to_image(mu, ns).externs,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn interns(mu: &Mu, ns: Tag) -> Tag {
-        match Tag::type_of(mu, ns) {
-            Type::Namespace => match ns {
-                Tag::Indirect(_) => Self::to_image(mu, ns).interns,
+                Tag::Indirect(_) => Self::to_image(mu, ns).symbols,
                 _ => panic!(),
             },
             _ => panic!(),
@@ -133,22 +111,12 @@ impl Namespace {
 }
 
 pub trait Core {
-    fn intern(_: &Mu, _: Tag, _: Scope, _: String, _: Tag) -> Tag;
-    fn mu_ext_symbol(_: &Mu, _: String) -> Tag;
-    fn mu_int_symbol(_: &Mu, _: String) -> Tag;
+    fn intern(_: &Mu, _: Tag, _: String, _: Tag) -> Tag;
     fn view(_: &Mu, _: Tag) -> Tag;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Namespace {
-    fn mu_ext_symbol(mu: &Mu, name: String) -> Tag {
-        Namespace::intern(mu, mu.mu_ns, Scope::Extern, name, Tag::nil())
-    }
-
-    fn mu_int_symbol(mu: &Mu, name: String) -> Tag {
-        Namespace::intern(mu, mu.mu_ns, Scope::Intern, name, Tag::nil())
-    }
-
     fn view(mu: &Mu, ns: Tag) -> Tag {
         let vec = vec![Self::name(mu, ns), Self::import(mu, ns)];
 
@@ -173,10 +141,10 @@ impl Core for Namespace {
         }
     }
 
-    fn intern(mu: &Mu, ns: Tag, scope: Scope, name: String, value: Tag) -> Tag {
+    fn intern(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
-                Tag::Indirect(_) => match <Mu as NSMaps>::map(mu, ns, scope, &name) {
+                Tag::Indirect(_) => match <Mu as NSMaps>::map(mu, ns, &name) {
                     Some(symbol) => {
                         // if the symbol is unbound, bind it.
                         // otherwise, we ignore the new binding.
@@ -187,7 +155,6 @@ impl Core for Namespace {
 
                             let slices: &[[u8; 8]] = &[
                                 image.namespace.as_slice(),
-                                image.scope.as_slice(),
                                 image.name.as_slice(),
                                 value.as_slice(),
                             ];
@@ -211,28 +178,19 @@ impl Core for Namespace {
                             } else {
                                 ns
                             },
-                            scope,
                             &name,
                             value,
                         )
                         .evict(mu);
 
-                        <Mu as NSMaps>::intern(mu, ns, scope, symbol);
+                        <Mu as NSMaps>::intern(mu, ns, symbol);
 
                         let mut image = Self::to_image(mu, ns);
-                        match scope {
-                            Scope::Intern => {
-                                image.interns = Cons::new(symbol, image.interns).evict(mu)
-                            }
-                            Scope::Extern => {
-                                image.externs = Cons::new(symbol, image.externs).evict(mu)
-                            }
-                        };
+                        image.symbols = Cons::new(symbol, image.symbols).evict(mu);
 
                         let slices: &[[u8; 8]] = &[
                             image.name.as_slice(),
-                            image.externs.as_slice(),
-                            image.interns.as_slice(),
+                            image.symbols.as_slice(),
                             image.import.as_slice(),
                         ];
 
@@ -262,38 +220,24 @@ pub trait MuFunction {
     fn mu_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_import(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_ns_interns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_ns_externs(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Namespace {
     fn mu_untern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let scope = fp.argv[1];
-        let name = fp.argv[2];
+        let ns = fp.argv[0];
+        let name = fp.argv[1];
 
-        let ns = match Tag::type_of(mu, fp.argv[0]) {
+        let ns = match Tag::type_of(mu, ns) {
             Type::Null => mu.unintern_ns,
-            Type::Namespace => fp.argv[0],
-            _ => return Err(Exception::new(Condition::Type, "untern", fp.argv[0])),
-        };
-
-        let scope_type = match Tag::type_of(mu, scope) {
-            Type::Keyword => {
-                if scope.eq_(Symbol::keyword("extern")) {
-                    Scope::Extern
-                } else if scope.eq_(Symbol::keyword("intern")) {
-                    Scope::Intern
-                } else {
-                    return Err(Exception::new(Condition::Type, "untern", scope));
-                }
-            }
-            _ => return Err(Exception::new(Condition::Type, "untern", scope)),
+            Type::Namespace => ns,
+            _ => return Err(Exception::new(Condition::Type, "untern", ns)),
         };
 
         fp.value = match Tag::type_of(mu, ns) {
             Type::Namespace => match Tag::type_of(mu, name) {
                 Type::Vector if Vector::type_of(mu, name) == Type::Char => {
-                    Self::intern(mu, ns, scope_type, Vector::as_string(mu, name), *UNBOUND)
+                    Self::intern(mu, ns, Vector::as_string(mu, name), *UNBOUND)
                 }
                 _ => return Err(Exception::new(Condition::Type, "untern", name)),
             },
@@ -304,33 +248,20 @@ impl MuFunction for Namespace {
     }
 
     fn mu_intern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let scope = fp.argv[1];
-        let name = fp.argv[2];
-        let value = fp.argv[3];
+        let ns = fp.argv[0];
+        let name = fp.argv[1];
+        let value = fp.argv[2];
 
-        let ns = match Tag::type_of(mu, fp.argv[0]) {
+        let ns = match Tag::type_of(mu, ns) {
             Type::Null => mu.unintern_ns,
-            Type::Namespace => fp.argv[0],
-            _ => return Err(Exception::new(Condition::Type, "intern", fp.argv[0])),
-        };
-
-        let scope_type = match Tag::type_of(mu, scope) {
-            Type::Keyword => {
-                if scope.eq_(Symbol::keyword("extern")) {
-                    Scope::Extern
-                } else if scope.eq_(Symbol::keyword("intern")) {
-                    Scope::Intern
-                } else {
-                    return Err(Exception::new(Condition::Type, "intern", scope));
-                }
-            }
-            _ => return Err(Exception::new(Condition::Type, "intern", scope)),
+            Type::Namespace => ns,
+            _ => return Err(Exception::new(Condition::Type, "intern", ns)),
         };
 
         fp.value = match Tag::type_of(mu, ns) {
             Type::Namespace => match Tag::type_of(mu, name) {
                 Type::Vector if Vector::type_of(mu, name) == Type::Char => {
-                    Self::intern(mu, ns, scope_type, Vector::as_string(mu, name), value)
+                    Self::intern(mu, ns, Vector::as_string(mu, name), value)
                 }
                 _ => return Err(Exception::new(Condition::Type, "intern", name)),
             },
@@ -374,26 +305,13 @@ impl MuFunction for Namespace {
     }
 
     fn mu_ns_find(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let scope = fp.argv[1];
-        let name = fp.argv[2];
+        let ns = fp.argv[0];
+        let name = fp.argv[1];
 
-        let ns = match Tag::type_of(mu, fp.argv[0]) {
+        let ns = match Tag::type_of(mu, ns) {
             Type::Null => mu.unintern_ns,
-            Type::Namespace => fp.argv[0],
-            _ => return Err(Exception::new(Condition::Type, "intern", fp.argv[0])),
-        };
-
-        let scope = match Tag::type_of(mu, scope) {
-            Type::Keyword => {
-                if scope.eq_(Symbol::keyword("extern")) {
-                    Scope::Extern
-                } else if scope.eq_(Symbol::keyword("intern")) {
-                    Scope::Intern
-                } else {
-                    return Err(Exception::new(Condition::Type, "ns-find", scope));
-                }
-            }
-            _ => return Err(Exception::new(Condition::Type, "ns-find", scope)),
+            Type::Namespace => ns,
+            _ => return Err(Exception::new(Condition::Type, "intern", ns)),
         };
 
         match Tag::type_of(mu, name) {
@@ -403,7 +321,7 @@ impl MuFunction for Namespace {
                     let sy_name = Vector::as_string(mu, name);
 
                     fp.value = match <Mu as NSMaps>::map_ns(mu, &ns_name) {
-                        Some(ns) => match <Mu as NSMaps>::map(mu, ns, scope, &sy_name) {
+                        Some(ns) => match <Mu as NSMaps>::map(mu, ns, &sy_name) {
                             Some(sym) => sym,
                             None => Tag::nil(),
                         },
@@ -426,7 +344,7 @@ impl MuFunction for Namespace {
                 fp.value = Self::import(mu, ns);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "ns-ump", ns)),
+            _ => Err(Exception::new(Condition::Type, "ns-imp", ns)),
         }
     }
 
@@ -442,27 +360,15 @@ impl MuFunction for Namespace {
         }
     }
 
-    fn mu_ns_externs(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                fp.value = Self::externs(mu, ns);
+                fp.value = Self::symbols(mu, ns);
                 Ok(())
             }
-            _ => Err(Exception::new(Condition::Type, "ns-ext", ns)),
-        }
-    }
-
-    fn mu_ns_interns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let ns = fp.argv[0];
-
-        match Tag::type_of(mu, ns) {
-            Type::Namespace => {
-                fp.value = Self::interns(mu, ns);
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "ns-int", ns)),
+            _ => Err(Exception::new(Condition::Type, "ns-syms", ns)),
         }
     }
 }

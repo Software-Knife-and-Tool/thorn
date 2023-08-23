@@ -4,24 +4,24 @@
 ;;;
 ;;; core streams
 ;;;
-(mu:intern core :extern "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
+(mu:intern core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
 
-(mu:intern core :extern "eof"
+(mu:intern core "eof"
   (:lambda (designator)
-    (mu:eof (core::read-stream-designator designator))))
+    (mu:eof (core:%read-stream-designator designator))))
 
 ;;;
 ;;; utilities
 ;;;
-(mu:intern core :intern "write-stream-designator"
+(mu:intern core "%write-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
          mu:std-out
          (:if (core:streamp designator)
               designator
-              (core:raise-unless core:streamp designator 'core::write-stream-designator "not a stream")))))
+              (core:raise-unless core:streamp designator 'core:%write-stream-designator "not a stream")))))
 
-(mu:intern core :intern "read-stream-designator"
+(mu:intern core "%read-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
          mu:std-in
@@ -29,12 +29,12 @@
               mu:std-in
               (:if (core:streamp designator)
                    designator
-                   (core:raise-unless core:streamp designator 'core::read-stream-designator "not a stream"))))))
+                   (core:raise-unless core:streamp designator 'core:%read-stream-designator "not a stream"))))))
 
 ;;;
 ;;; constructors
 ;;;
-(mu:intern core :extern "make-string-stream"
+(mu:intern core "make-string-stream"
   (:lambda (dir init)
     (core:raise-unless core:keywordp dir 'core:make-string-stream "not a direction keyword")
     (core:raise-unless core:stringp init 'core:make-string-stream "not a string initializer")
@@ -44,7 +44,7 @@
               (mu:open :string :output init)
               (core:raise dir 'core:make-string-stream "not a direction keyword")))))
 
-(mu:intern core :extern "open"
+(mu:intern core "open"
   (:lambda (dir path)
      (core:raise-unless core:stringp path 'core:open "not a path string")
      (core:raise-unless core:keywordp dir 'core:open "not a direction keyword")
@@ -54,7 +54,7 @@
                (mu:open :file :output path)
                (core:raise dir 'core:open "not a direction keyword")))))
 
-(mu:intern core :extern "close"
+(mu:intern core "close"
   (:lambda (stream)
     (core:raise-unless core:streamp stream 'core:close "not a string")
     (mu:close stream)))
@@ -62,15 +62,15 @@
 ;;;
 ;;; chars, bytes, and unread
 ;;;
-(mu:intern core :extern "write-char"
+(mu:intern core "write-char"
    (:lambda (char designator)
-     (mu:wr-char char (core::write-stream-designator designator))))
+     (mu:wr-char char (core:%write-stream-designator designator))))
 
-(mu:intern core :extern "write-byte"
+(mu:intern core "write-byte"
    (:lambda (byte designator)
-     (mu:wr-byte byte (core::write-stream-designator designator))))
+     (mu:wr-byte byte (core:%write-stream-designator designator))))
 
-(mu:intern core :extern "read-char"
+(mu:intern core "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
        ((:lambda (ch)
@@ -80,9 +80,9 @@
                     eof-value)
                ch))
         (mu:rd-char stream () ())))
-     (core::read-stream-designator designator))))
+     (core:%read-stream-designator designator))))
 
-(mu:intern core :extern "read-byte"
+(mu:intern core "read-byte"
    (:lambda (designator error-eofp eof-value)
      ((:lambda (stream)
         (:if (core:eof stream)
@@ -90,36 +90,36 @@
                   (core:raise stream 'core:read-byte "end of file")
                   eof-value)
              (mu:rd-byte stream () ())))
-      (core::read-stream-designator designator))))
+      (core:%read-stream-designator designator))))
 
-(mu:intern core :extern "unread-char"
+(mu:intern core "unread-char"
   (:lambda (ch designator)
     (core:raise-unless core:charp ch 'core:unread-char "not a char")
-    (mu:un-char ch (core::write-stream-designator designator))))
+    (mu:un-char ch (core:%write-stream-designator designator))))
 
 ;;;
 ;;; read/write
 ;;;
-(mu:intern core :extern "read"
+(mu:intern core "read"
    (:lambda (designator eof-error eof-value)
      ((:lambda (stream)
         (:if (core:eof stream)
              (:if eof-error
-                  (core::prog2
+                  (core:%prog2
                      (core:raise stream 'core:read "unexpected end of file")
                      eof-value)
                   ())
              ((:lambda (form)
-                (:if (mu:eq form core::read-list-eol)
+                (:if (mu:eq form core:%read-list-eol%)
                      (core:raise stream 'core:read "unmatched close parenthesis")
                      form))
-              (core::read stream))))
-      (core::read-stream-designator designator))))
+              (core:%read stream))))
+      (core:%read-stream-designator designator))))
 
-(mu:intern core :extern "write"
+(mu:intern core "write"
   (:lambda (object escape designator)
-     (mu:write object escape (core::write-stream-designator designator))))
+     (mu:write object escape (core:%write-stream-designator designator))))
 
-(mu:intern core :extern "terpri"
+(mu:intern core "terpri"
    (:lambda (designator)
      (core:write-char #\linefeed designator)))

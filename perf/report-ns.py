@@ -25,7 +25,7 @@ for group in test_results['results']:
             results.append({ 'test': ns + '/' + group['group'],
                              'line': test['line'],
                              'storage': 0,
-                             'times': 0 })
+                             'times': 0.0 })
         else:
             results.append({ 'test': ns + '/' + group['group'],
                              'line': test['line'],
