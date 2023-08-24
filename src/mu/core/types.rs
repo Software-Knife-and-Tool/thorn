@@ -89,10 +89,10 @@ impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:x}: ", self.as_u64()).unwrap();
         match self {
-            Tag::Fixnum(_i64) => write!(f, "fixnum: {}", _i64 >> 3),
+            Tag::Fixnum(i64_) => write!(f, "fixnum: {}", i64_ >> 3),
             Tag::Direct(direct) => write!(f, "direct: type {:?}", direct.dtype() as u8),
             Tag::Indirect(indirect) => write!(f, "indirect: type {:?}", indirect.tag()),
-            Tag::ConsDirect(_) => write!(f, "cdrcode:"),
+            Tag::ConsDirect(_) => write!(f, "cons-direct:"),
         }
     }
 }
@@ -110,7 +110,7 @@ impl Tag {
                 },
                 None => panic!(),
             },
-            Tag::ConsDirect(tag) => tag.data(),
+            Tag::ConsDirect(tag) => u64::from(tag.car() << 30 | tag.cdr()),
         }
     }
 
