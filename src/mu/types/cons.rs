@@ -56,7 +56,7 @@ impl Cons {
         match Tag::type_of(mu, cons) {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::ConsDirect(_) => ConsDirect::car(mu, cons),
+                Tag::ConsDirect(_) => ConsDirect::car(cons),
                 Tag::Indirect(_) => Self::to_image(mu, cons).car,
                 _ => panic!(),
             },
@@ -69,7 +69,7 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(mu, cons).cdr,
-                Tag::ConsDirect(_) => ConsDirect::cdr(mu, cons),
+                Tag::ConsDirect(_) => ConsDirect::cdr(cons),
                 _ => panic!(),
             },
             _ => panic!(),

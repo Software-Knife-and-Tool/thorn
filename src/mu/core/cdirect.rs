@@ -5,10 +5,7 @@
 #![allow(unused_braces)]
 #![allow(clippy::identity_op)]
 use {
-    crate::core::{
-        mu::Mu,
-        types::{Tag, TagType},
-    },
+    crate::core::types::{Tag, TagType},
     modular_bitfield::specifiers::{B1, B30},
 };
 
@@ -64,7 +61,7 @@ impl ConsDirect {
         }
     }
 
-    pub fn car(_mu: &Mu, cons: Tag) -> Tag {
+    pub fn car(cons: Tag) -> Tag {
         let mut u64_: u64 = ConsDirectTag::from(cons.as_u64()).car() as u64;
         let sign = (u64_ >> 29) & 1;
 
@@ -76,7 +73,7 @@ impl ConsDirect {
         Tag::from_u64(u64_)
     }
 
-    pub fn cdr(_mu: &Mu, cons: Tag) -> Tag {
+    pub fn cdr(cons: Tag) -> Tag {
         let mut u64_: u64 = ConsDirectTag::from(cons.as_u64()).cdr() as u64;
         let sign = (u64_ >> 29) & 1;
 
