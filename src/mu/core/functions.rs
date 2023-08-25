@@ -24,6 +24,7 @@ use crate::{
         stream::{Core as _, MuFunction as _, Stream},
         struct_::{Core as _, MuFunction as _, Struct},
         symbol::{Core as _, MuFunction as _, Symbol},
+        vecimage::{TypedVec, VecType},
         vector::{Core as _, MuFunction as _, Vector},
     },
 };
@@ -56,6 +57,7 @@ lazy_static! {
         ("fix", 2, Mu::mu_fix),
         ("hp-info", 0, Mu::mu_hp_info),
         ("view", 1, Mu::mu_view),
+        ("repr", 2, Mu::mu_repr),
         // time
         ("real-tm", 0, Mu::mu_real_time),
         ("run-us", 0, Mu::mu_run_time),
@@ -165,6 +167,7 @@ pub trait MuFunction {
     fn mu_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_real_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_run_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -292,6 +295,50 @@ impl MuFunction for Mu {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(mu, rc) as i32),
             _ => Err(Exception::new(Condition::Type, "exit", rc)),
         }
+    }
+
+    fn mu_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let conv = fp.argv[0];
+        let arg = fp.argv[1];
+
+        // if conv is (), convert a byte vector to a tag
+        // if not, convert arg to a byte vector
+
+        fp.value = match Tag::null_(&conv) {
+            true => {
+                let mut slice = arg.as_slice();
+
+                // little endian
+                slice.reverse();
+
+                TypedVec::<Vec<u8>> {
+                    vec: slice.to_vec(),
+                }
+                .vec
+                .to_vector()
+                .evict(mu)
+            }
+            false => match Tag::type_of(mu, arg) {
+                Type::Vector
+                    if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 =>
+                {
+                    let mut u64_: u64 = 0;
+
+                    for index in 0..8 {
+                        u64_ <<= 8;
+                        u64_ |= match Vector::ref_(mu, arg, index as usize) {
+                            Some(byte) => Fixnum::as_i64(mu, byte) as u64,
+                            None => panic!(),
+                        }
+                    }
+
+                    Tag::from_u64(u64_)
+                }
+                _ => return Err(Exception::new(Condition::Type, "repr", arg)),
+            },
+        };
+
+        Ok(())
     }
 
     fn mu_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
