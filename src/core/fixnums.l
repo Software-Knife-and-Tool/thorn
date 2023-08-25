@@ -52,3 +52,20 @@
      (core:raise-unless core:fixnump n 'core:round "not a fixnum")
      (core:raise-unless core:fixnump m 'core:round "not a fixnum")
      (mu:fx-sub (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
+
+(mu:intern core "ash"
+   (:lambda (n count)
+     (core:raise-unless core:fixnump n 'core:ash "not a fixnum")
+     (core:raise-unless core:fixnump count 'core:ash "not a fixnum")
+     (mu:car
+      (mu:fix
+       (:lambda (loop)
+          ((:lambda (n count)
+              (:if (core:zerop count)
+                   loop
+                   (:if (core:minusp count) 
+                        (mu:cons (mu:fx-div n 2) (core:1+ count))
+                        (mu:cons (mu:fx-mul n 2) (core:1- count)))))
+           (mu:car loop)
+           (mu:cdr loop)))
+       (mu:cons n count)))))

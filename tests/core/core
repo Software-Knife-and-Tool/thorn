@@ -1,5 +1,6 @@
 (mu:type-of core:1+)	:func
 (mu:type-of core:1-)	:func
+(mu:type-of core:ash)	:func
 (mu:type-of core:boundp)	:func
 (mu:type-of core:ceiling)	:func
 (mu:type-of core:closurep)	:func
