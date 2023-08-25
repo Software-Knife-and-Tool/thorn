@@ -28,7 +28,7 @@ CORE=(\
 	describe.l             \
 	exceptions.l 	       \
 	fixnums.l              \
-        file-utilities.l       \
+        fasl.l                 \
 	format.l     	       \
 	funcall.l              \
 	lambda.l     	       \
