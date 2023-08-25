@@ -11,7 +11,7 @@ CORE = \
 	compile.l		\
 	describe.l		\
 	exceptions.l		\
-	file-utilities.l	\
+	fasl.l			\
 	fixnums.l		\
 	format.l		\
 	funcall.l		\
