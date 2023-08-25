@@ -301,15 +301,12 @@ impl MuFunction for Mu {
         let conv = fp.argv[0];
         let arg = fp.argv[1];
 
-        // if conv is (), convert a byte vector to a tag
-        // if not, convert arg to a byte vector
+        // if conv is (), convert arg tag bits to a byte vector
+        // if not, convert arg byte vector to a tag
 
         fp.value = match Tag::null_(&conv) {
             true => {
-                let mut slice = arg.as_slice();
-
-                // little endian
-                slice.reverse();
+                let slice = arg.as_slice();
 
                 TypedVec::<Vec<u8>> {
                     vec: slice.to_vec(),
@@ -324,7 +321,7 @@ impl MuFunction for Mu {
                 {
                     let mut u64_: u64 = 0;
 
-                    for index in 0..8 {
+                    for index in (0..8).rev() {
                         u64_ <<= 8;
                         u64_ |= match Vector::ref_(mu, arg, index as usize) {
                             Some(byte) => Fixnum::as_i64(mu, byte) as u64,
