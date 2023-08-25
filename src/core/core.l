@@ -58,6 +58,20 @@
           :t
           (mu:eq 0.0 n))))
 
+(mu:intern core "minusp"
+   (:lambda (n)
+      (core:raise-unless core:numberp n 'core:minusp "not a number")                 
+      (:if (core:floatp n)
+           (mu:fl-lt n 0.0)
+           (mu:fx-lt n 0))))
+
+(mu:intern core "plusp"
+   (:lambda (n)
+      (core:raise-unless core:numberp n 'core:plusp "not a number")                 
+      (:if (core:floatp n)
+           (mu:fl-lt 0.0 n)
+           (mu:fx-lt 0 n))))
+
 ;;;
 ;;; system classes
 ;;;
