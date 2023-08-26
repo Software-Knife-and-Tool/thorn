@@ -80,7 +80,7 @@
             (core:apply (mu:sy-val fn) `(,dest ,args))
             (core:raise dir 'core:format "unrecognized format directive")))
      (mu:cdr
-      (core:assoc
+      (core:%assoc
        dir
        '((#\A . core:%fmt-aesthetic)
          (#\S . core:%fmt-standard)

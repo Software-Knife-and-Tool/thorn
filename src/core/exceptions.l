@@ -31,7 +31,7 @@
     (mu:sv-ref
      (mu:st-vec exception)
       (mu:cdr
-       (core:assoc
+       (core:%assoc
         key
         '((:cond    . 0)
           (:object  . 1)

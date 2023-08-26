@@ -77,7 +77,7 @@
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
        (mu:apply
-        (mu:sy-val (mu:cdr (core:assoc ch sharp-table)))
+        (mu:sy-val (mu:cdr (core:%assoc ch sharp-table)))
         `(,ch ,stream)))
      (core:read-char stream () ())
      '((#\| . core:%read-sharp-comment)
@@ -166,7 +166,7 @@
   (:lambda (ch stream)
     ((:lambda (macro-table)
        (mu:apply
-            (mu:sy-val (mu:cdr (core:assoc ch macro-table)))
+            (mu:sy-val (mu:cdr (core:%assoc ch macro-table)))
             `(,ch ,stream)))
        '((#\" . core:%read-string)
          (#\# . core:%read-sharp)
