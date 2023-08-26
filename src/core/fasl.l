@@ -85,45 +85,70 @@
                (core:write-char byte stream)
                (:if (core:fixnump byte)
                     (core:write-byte byte stream)
-                    (:if (core:stringp byte)
-                         (core:%mapv
-                          (:lambda (ch)
-                             (core:write-char ch stream))
-                          byte)
-                         (core:raise byte 'core:elf64-write-bytes "untranslated type")))))
+                    (core:%prog2
+                     (core:raise-unless
+                      core:stringp
+                      byte
+                      'core:elf64-write-bytes
+                      "untranslated type")
+                     (core:%mapv
+                      (:lambda (ch)
+                         (core:write-char ch stream))
+                      byte)))))
        bytes)))
 
-#|
+(mu:intern core "elf64-read-bytes"
+   (:lambda (nbytes stream)
+      ((:lambda (list)
+          (mu:sv-list :byte (mu:cdr list)))
+       (mu:fix
+        (:lambda (loop)
+           ((:lambda (nbytes list)
+               (:if (core:zerop nbytes)
+                    loop
+                    (mu:cons
+                     (core:1- nbytes)
+                     `(,@list ,@(core:read-byte stream :t ())))))
+            (mu:car loop)
+            (mu:cdr loop)))
+        (mu:cons nbytes ())))))
+         
 (mu:intern core "elf64-read"
-   (:lambda (type elf64)
-  (let ((elf64-read (lambda (type stream) (funcall core:lf64-read type stream))))
-    (cond
-      ((eq type :half)
-       (mu:fx-add (read-byte elf64 t ()) (core:ash (read-byte elf64 :t ()) 8)))
-      ((eq type :word)
-       (fixnum+ (elf64-read :half elf64) (core:ash (elf64-read :half elf64) 16)))
-      ((eq type :u64)
-       (fixnum+ (elf64-read :word elf64) (core:ash (elf64-read :word elf64) 32)))
-      ((eq type :tag) (mu:of-tag (elf64-read :u64 elf64)))
-      (t (error size "elf64-read: not a legal type")))))
+   (:lambda (type stream)
+      (:if (mu:eq type :half)
+           (mu:fx-add
+            (core:read-byte stream t ())
+            (core:ash (core:read-byte stream :t ()) 8))
+           (:if (mu:eq type :word)
+                (mu:fx-add
+                 (core:elf64-read :half stream)
+                 (core:ash (core:elf64-read :half stream) 16))
+                (:if (mu:eq type :u64)
+                     (mu:fx-add
+                      (core:elf64-read :word stream)
+                      (core:ash (core:elf64-read :word stream) 32))
+                     (:if (mu:eq type :tag)
+                          (mu:%repr :t (core:elf64-read-bytes 8 stream))
+                          (core:raise size 'core:elf64-read "not a legal type")))))))
 
-(mu:intern core elf64-write (type n stream)
-  (let ((core:elf64-write (lambda (type n stream) (funcall preface:core:elf64-write type n stream))))
-    (cond
-      ((mu:eq type :half)
-       (core:elf64-write-bytes stream
-                    (core:logand n #xff)
-                    (core:logand (core:ash n -8) #xff)))
-      ((mu:eq type :word)
-       (core:elf64-write :half n stream)
-       (core:elf64-write :half (core:ash n -16) stream))
-      ((mu:eq type :u64)
-       (core:elf64-write :half n stream)
-       (core:elf64-write :half (core:ash n -32) stream))
-      ((mu:eq type :tag)
-       (core:elf64-write :u64 (mu:tag-of n) stream))
-      (t (core:raise size 'el64-write "not a legal type")))))
-|#
+(mu:intern core "elf64-write"
+   (:lambda (type n stream)
+      (:if (mu:eq type :half)
+           (core:elf64-write-bytes
+            stream
+            (core:logand n #xff)
+            (core:logand (core:ash n -8) #xff))
+           (:if (mu:eq type :word)
+                (core:%prog2
+                 (core:elf64-write :half n stream)
+                 (core:elf64-write :half (core:ash n -16) stream))
+                (:if (mu:eq type :u64)
+                     (core:%prog2
+                      (core:elf64-write :half n stream)
+                      (core:elf64-write :half (core:ash n -32) stream))
+                     (:if (mu:eq type :tag)
+                          (core:elf64-write :u64 (mu:tag-of n) stream)
+                          (t (core:raise size 'el64-write "not a legal type"))))))))
 
 (mu:intern core "elf64-write-header"
    (:lambda (out size)
@@ -155,71 +180,78 @@
       (core:elf64-write :u64 0 out)      ; 110 sh_addralign
       (core:elf64-write :u64 0 out)))    ; 118 sh_entsize
 
-#|
-(mu:intern core "core:elf64-read-header" (elf64)
-  (mu:with-ex
-      (lambda (ex)
-        (format t "error: exception while reading header~%")
-        (print-except ex "read-header")
-        ())
-    (lambda ()
-      (let ((top
-             (list
-              (cons "magic" (core:elf64-read :u64 elf64))
-              (cons "class" (read-byte elf64 t ()))
-              (cons "data-encoding" (read-byte elf64 t ()))
-              (cons "file-version" (read-byte elf64 t ()))
-              (cons "OS-ABI" (read-byte elf64 t ()))
-              (cons "ABI-version" (read-byte elf64 t ())))))
-        (dotimes (i 6) (read-byte elf64 t ()))
-        (append top
-                (list
-                 (cons "e_object" (core:elf64-read :half elf64))
-                 (cons "e_machine" (core:elf64-read :half elf64))
-                 (cons "e_version" (core:elf64-read :half elf64))
-                 (cons "e_entry" (core:elf64-read :half elf64))
-                 (cons "e_phoff" (core:elf64-read :u64 elf64))
-                 (cons "e_shoff" (core:elf64-read :u64 elf64))
-                 (cons "e_flags" (core:elf64-read :word elf64))
-                 (cons "e_ehsize" (core:elf64-read :half elf64))
-                 (cons "e_phentsize" (core:elf64-read :half elf64))
-                 (cons "e_phnum" (core:elf64-read :half elf64))
-                 (cons "e_shentsize" (core:elf64-read :half elf64))
-                 (cons "e_shnum" (core:elf64-read :half elf64))
-                 (cons "e_shstrndx" (core:elf64-read :half elf64))
-                 (cons "sh_name" (core:elf64-read :word elf64))
-                 (cons "sh_type" (core:elf64-read :word elf64))
-                 (cons "sh_flags" (core:elf64-read :u64 elf64))
-                 (cons "sh_addr" (core:elf64-read :u64 elf64))
-                 (cons "sh_offset" (core:elf64-read :u64 elf64))
-                 (cons "sh_size" (core:elf64-read :u64 elf64))
-                 (cons "sh_link" (core:elf64-read :word elf64))
-                 (cons "sh_info" (core:elf64-read :word elf64))
-                 (cons "sh_addralign" (core:elf64-read :u64 elf64))
-                 (cons "sh_entsize" (core:elf64-read :u64 elf64))))))))
+(mu:intern core "core:elf64-read-header"
+   (:lambda (stream)
+      (mu:with-ex
+       (:lambda (ex)
+          (core:exceptf
+           mu:err-out
+           "elf64-read-header exception: ~A on ~A by ~S from ~A~%"
+           ()
+           ex))
+       (:lambda ()
+          `(,(mu:cons "magic" (core:elf64-read :u64 elf64))
+            ,(mu:cons "class" (core:read-byte elf64 :t ()))
+            ,(mu:cons "data-encoding" (core:read-byte elf64 :t ()))
+            ,(mu:cons "file-version" (core:read-byte elf64 t ()))
+            ,(mu:cons "OS-ABI" (core:read-byte elf64 :t ()))
+            ,(mu:cons "ABI-version" (core:read-byte elf64 :t ()))
+            ,(mu:cons "e_object" (core:elf64-read :half elf64))
+            ,(mu:cons "e_machine" (core:elf64-read :half elf64))
+            ,(mu:cons "e_version" (core:elf64-read :half elf64))
+            ,(mu:cons "e_entry" (core:elf64-read :half elf64))
+            ,(mu:cons "e_phoff" (core:elf64-read :u64 elf64))
+            ,(mu:cons "e_shoff" (core:elf64-read :u64 elf64))
+            ,(mu:cons "e_flags" (core:elf64-read :word elf64))
+            ,(mu:cons "e_ehsize" (core:elf64-read :half elf64))
+            ,(mu:cons "e_phentsize" (core:elf64-read :half elf64))
+            ,(mu:cons "e_phnum" (core:elf64-read :half elf64))
+            ,(mu:cons "e_shentsize" (core:elf64-read :half elf64))
+            ,(mu:cons "e_shnum" (core:elf64-read :half elf64))
+            ,(mu:cons "e_shstrndx" (core:elf64-read :half elf64))
+            ,(mu:cons "sh_name" (core:elf64-read :word elf64))
+            ,(mu:cons "sh_type" (core:elf64-read :word elf64))
+            ,(mu:cons "sh_flags" (core:elf64-read :u64 elf64))
+            ,(mu:cons "sh_addr" (core:elf64-read :u64 elf64))
+            ,(mu:cons "sh_offset" (core:elf64-read :u64 elf64))
+            ,(mu:cons "sh_size" (core:elf64-read :u64 elf64))
+            ,(mu:cons "sh_link" (core:elf64-read :word elf64))
+            ,(mu:cons "sh_info" (core:elf64-read :word elf64))
+            ,(mu:cons "sh_addralign" (core:elf64-read :u64 elf64))
+            ,(mu:cons "sh_entsize" (core:elf64-read :u64 elf64)))))))
 
-(mu:intern core core:elf64-print-header (core:elf64-header)
-  (errorp-unless consp core:elf64-header "print-header: not an association list")
-  (mapc
-   (lambda (entry)
-     (format t "    ~A: ~A~%" (car entry) (cdr entry)))
-   core:elf64-header))
+(mu:intern core "elf64-print-header"
+  (:lambda (elf64-header)
+     (core:raise-unless core:consp elf64-header 'core:elf64-print-header "not an association list")
+     (core:mapc
+      (:lambda (entry)
+         (core:format t "    ~A: ~A~%" `(,(mu:car entry) ,(mu:cdr entry))))
+      elf64-header)))
 
-(mu:intern core core:elf64-dump (path)
-  (errorp-unless stringp path "core:elf64-dump: not a pathname")
-  (with-open-file elf64 path :input
-     (let ((magic (read-byte elf64 () ())))
-       (if (or (null magic) (eofp elf64) (not (eq #x7f magic)))
-           (format t "~A: not a elf64 file, magic #x~X~%" path magic)            
-           (progn
-             (format t "~A: elf64 file (magic #x~X ~A~A~A)~%" path magic
-                     (ansi-ch (read-byte elf64 t ()))
-                     (ansi-ch (read-byte elf64 t ()))
-                     (ansi-ch (read-byte elf64 t ())))
-             (format t "~A: elf64 file header~%" path)
-             (core:elf64-print-header (core:elf64-read-header elf64))
-             (format t "~A: body:~%" path)
-             (do* ((tag (core:elf64-read :tag elf64) (core:elf64-read :tag elf64)))
-                  ((eofp elf64) t)
-               (format t "[~A]~%" (type-of tag) tag)))))))
-|#
+(mu:intern core "elf64-dump"
+   (:lambda (path)
+      (core:raise-unless core:stringp path 'core:elf64-dump "not a pathname")
+      ((:lambda (elf64)
+          ((:lambda (magic)
+              (core:raise-when core:null magic 'core:elf64-dump "error reading magic")
+              (core:raise-unless (:lambda (magic) (mu:eq #x7f magic)) magic 'core:elf64-dump "wrong magic")
+              (core:format :t "~A: elf64 file (magic #x~X ~A~A~A)~%"
+                           `(path
+                             magic
+                             (core:read-char elf64 :t ())
+                             (core:read-char elf64 :t ())
+                             (core:read-char elf64 :t ())))
+              (core:format :t "~A: elf64 file header~%" `(path))
+              (core:elf64-print-header (core:elf64-read-header elf64))
+              (core:format t "~A: body:~%" path)
+              (mu:fix
+               (:lambda (loop)
+                  (:if (core:eof elf64)
+                       loop
+                       ((:lambda (tag)
+                           (core:format :t "[~A]~%" `(,(core:type-of tag) ,tag))
+                           (core:null loop))
+                        (core:elf64-read :tag elf64))))
+               ()))
+             (core:read-byte elf64 () ()))
+          (mu:open :file :input path)))))
