@@ -116,7 +116,7 @@
 ;;;
 (mu:intern core "%core-special-table"
    (:lambda (symbol)
-      (mu:cdr (core:assoc
+      (mu:cdr (core:%assoc
         symbol
         '((defun    . core:defun-compiler)
           (defmacro . core:defmacro-compiler)

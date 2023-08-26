@@ -59,7 +59,7 @@
       ((:lambda (predicate)
           (core:raise-when core:null type 'core:%core-type-predicate% "predicate not bound")
           (mu:apply predicate `(,object)))
-       (mu:cdr (core:assoc type core:%core-type-predicate-map%)))))
+       (mu:cdr (core:%assoc type core:%core-type-predicate-map%)))))
 
 (mu:intern core "%make-core-type"
     (:lambda (name property-values)
@@ -94,4 +94,4 @@
    (:lambda (property-name struct)
       (core:raise-unless core:core-type-p struct 'core:%core-type-ref "not a core-type")
       (core:raise-unless core:keywordp property-name 'core:%core-type-ref "not a property name")
-      (core:assoc property-name (mu:sv-ref (mu:st-vec struct) 1))))
+      (core:%assoc property-name (mu:sv-ref (mu:st-vec struct) 1))))
