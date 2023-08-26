@@ -47,7 +47,7 @@
 (mu:intern core "%closure-env"
    (:lambda (lambda forms env)
       ((:lambda (bound-symbols)
-          (core:foldl
+          (core:%foldl
            (:lambda (form acc)
               (:if (core:consp form)
                    ((:lambda (fn)
@@ -90,7 +90,7 @@
       (core:%make-lambda
        (core:%lambda-prop :bound fn)
        (core:%lambda-prop :rest fn)
-       (core:foldl
+       (core:%foldl
         (:lambda (frame))
         (core:%closure-prop :env closure)
        (mu:frames))
@@ -116,9 +116,9 @@
 (mu:intern core "%closure-apply"
    (:lambda (fn args)
       ((:lambda (env)
-        (core:mapc mu:fr-push env)
+        (core:%mapc mu:fr-push env)
         ((:lambda (value)
-           (core:mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
+           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
            value)
          ((:lambda (mu-fn)
             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list fn args))))

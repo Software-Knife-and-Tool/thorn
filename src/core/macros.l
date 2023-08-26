@@ -110,7 +110,7 @@
              (:if (core:fixnump desc)
                   (core:%make-lambda lambda () env)
                   desc))
-          (core:foldl
+          (core:%foldl
             (:lambda (el acc)
                (:if (core:structp acc)
                   acc

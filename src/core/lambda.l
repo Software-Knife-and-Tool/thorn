@@ -53,7 +53,7 @@
             (:if (core:fixnump desc)
                  (core:%make-lambda lambda () env)
                  desc))
-          (core:foldl
+          (core:%foldl
             (:lambda (el acc)
                (:if (core:lambdap acc)
                   acc
@@ -114,7 +114,7 @@
 ;;;
 (mu:intern core "%symbol-frame-ref"
   (:lambda (symbol env)
-    (core:foldl
+    (core:%foldl
      (:lambda (frame acc)
        (:if acc
             acc

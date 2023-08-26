@@ -67,7 +67,7 @@
            (core:raise-unless core:listp property-values 'core:%make-core-type "not a property list")
            ((:lambda (type-symbol)
                (core:raise-when core:null type-symbol 'core:%make-core-type "type unbound")
-               (core:mapc
+               (core:%mapc
                 (:lambda (property-value)
                    ((:lambda (property-def)
                        (core:raise-when core:null property-def 'core:%make-core-type "undefined property"))
