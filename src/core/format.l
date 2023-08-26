@@ -38,7 +38,7 @@
             ((:lambda (str-stream)
                (mu:fix
                 (:lambda (n)
-                  (:if (core:%orf (core:null n) (core:zerop n))
+                  (:if (core:%orf (core:null n) (mu:eq 0 n))
                        ()
                        (core:%prog2
                            (mu:write (core:schar "0123456789abcdef" (mu:logand n #xf)) () str-stream)
