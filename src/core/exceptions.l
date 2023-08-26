@@ -70,7 +70,7 @@
          (:if printenv
               (core:%prog2
                (core:format stream "env:~%" ())
-               (core:mapc
+               (core:%mapc
                 (:lambda (frame)
                    (core:format stream "  ~A~T(~A ~A)~%"
                                 `(,(core:%fmt-mapped-symbol (mu:car frame))

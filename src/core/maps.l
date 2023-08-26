@@ -4,6 +4,21 @@
 ;;;
 ;;; folds and maps
 ;;;
+(mu:intern core "%foldl"
+  (:lambda (fn init list)
+     (mu:cdr
+      (mu:fix
+       (:lambda (arg)
+          ((:lambda (list acc)
+              (:if list
+                   (mu:cons
+                    (mu:cdr list)
+                    (mu:apply fn `(,(mu:car list) ,acc)))
+                   arg))
+           (mu:car arg)
+           (mu:cdr arg)))
+       (mu:cons list init)))))
+
 (mu:intern core "foldl"
   (:lambda (fn init list)
       (core:raise-unless core:%appliablep fn 'core:foldl "not a function")
@@ -25,11 +40,23 @@
   (:lambda (fn init list)
     (core:raise-unless core:%appliablep fn 'core:foldr "not a function")
     (core:raise-unless core:listp list 'core:foldr "not a list")
-    (core:foldl fn init (core:reverse list))))
+    (core:%foldl fn init (core:reverse list))))
 
 ;;;
 ;;; maps
 ;;;
+(mu:intern core "%mapc"
+   (:lambda (fn list)
+     (mu:fix
+      (:lambda (lst)
+        (:if lst
+             (core:%prog2
+              (mu:apply fn (mu:cons (mu:car lst) ()))
+              (mu:cdr lst))
+             ()))
+      list)
+     list))
+
 (mu:intern core "mapc"
    (:lambda (fn list)
      (core:raise-unless core:%appliablep fn 'core:mapc "not a function")
@@ -48,7 +75,7 @@
    (:lambda (fn list)
      (core:raise-unless core:%appliablep fn 'core:mapcar "not a function")
      (core:raise-unless core:listp list 'core:mapcar "not a list")
-     (core:foldl
+     (core:%foldl
       (:lambda (elt acc)
         `(,@acc ,(core:apply fn `(,elt))))
       ()
@@ -91,13 +118,14 @@
        (mu:fix
         (:lambda (lst)
            (:if lst
-                ((:lambda (entry)
-                    (:if (core:null entry)
-                         (mu:cdr lst)
+                ((:lambda (entry cdr)
+                    (:if entry
                          (:if (mu:eq item (mu:car entry))
                               lst
-                              (mu:cdr lst))))
-                 (mu:car lst))
+                              cdr)
+                         cdr))
+                 (mu:car lst)
+                 (mu:cdr lst))
                 ()))
         alist))))
 

@@ -79,7 +79,7 @@
 ;;;
 (mu:intern core "elf64-write-bytes"
    (:lambda (stream bytes)
-      (core:mapc
+      (core:%mapc
        (:lambda (byte)
           (:if (core:charp byte)
                (core:write-char byte stream)
@@ -223,7 +223,7 @@
 (mu:intern core "elf64-print-header"
   (:lambda (elf64-header)
      (core:raise-unless core:consp elf64-header 'core:elf64-print-header "not an association list")
-     (core:mapc
+     (core:%mapc
       (:lambda (entry)
          (core:format t "    ~A: ~A~%" `(,(mu:car entry) ,(mu:cdr entry))))
       elf64-header)))
