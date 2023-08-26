@@ -53,10 +53,12 @@
           (core:floatp n))))
 
 (mu:intern core "zerop"
-  (:lambda (n)
-     (:if (mu:eq 0 n)
-          :t
-          (mu:eq 0.0 n))))
+   (:lambda (n)
+     (:if (core:numberp n)
+          (:if (mu:eq 0 n)
+               :t
+               (mu:eq 0.0 n))
+          (core:raise n 'core:zerop "not a number"))))
 
 (mu:intern core "minusp"
    (:lambda (n)
