@@ -40,9 +40,9 @@
                 (:lambda (n)
                   (:if (core:%orf (core:null n) (mu:eq 0 n))
                        ()
-                       (core:%prog2
+                       ((:lambda ()
                            (mu:write (core:schar "0123456789abcdef" (mu:logand n #xf)) () str-stream)
-                           (mu:fx-div n 16))))
+                           (mu:fx-div n 16)))))
                 (:if (mu:fx-lt fx 0) (mu:fx-mul -1 fx) fx))
                (:if (mu:fx-lt fx 0)
                     (mu:write #\- () str-stream)
@@ -52,9 +52,9 @@
                    (:lambda (len)
                      (:if (core:zerop len)
                           0
-                          (core:%prog2
+                          ((:lambda ()
                               (mu:write (core:schar hexstr (core:1- len)) () dest)
-                              (core:1- len))))
+                              (core:1- len)))))
                    (mu:sv-len hexstr)))
                   (mu:get-str str-stream)))
             (mu:open :string :output ""))))
@@ -100,12 +100,12 @@
                loop
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
-                       (core:%prog2
+                       ((:lambda ()
                            (core:raise-if (mu:eq (core:1+ nth) (core:length fmt)) nth 'core:format "unexpected end of string")
-                           (mu:cons (mu:fx-add 2 nth) (core:%fmt-op (core:schar fmt (core:1+ nth)) dest argl)))
-                       (core:%prog2
+                           (mu:cons (mu:fx-add 2 nth) (core:%fmt-op (core:schar fmt (core:1+ nth)) dest argl))))
+                       ((:lambda ()
                            (core:write-char ch dest)
-                           (mu:cons (core:1+ nth) argl))))
+                           (mu:cons (core:1+ nth) argl)))))
                 (core:schar fmt nth))))
         (mu:car loop)
         (mu:cdr loop)))

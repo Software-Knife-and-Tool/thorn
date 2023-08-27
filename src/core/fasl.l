@@ -85,7 +85,7 @@
                (core:write-char byte stream)
                (:if (core:fixnump byte)
                     (core:write-byte byte stream)
-                    (core:%prog2
+                    ((:lambda ()
                      (core:raise-unless
                       core:stringp
                       byte
@@ -94,7 +94,7 @@
                      (core:%mapv
                       (:lambda (ch)
                          (core:write-char ch stream))
-                      byte)))))
+                      byte))))))
        bytes)))
 
 (mu:intern core "elf64-read-bytes"
@@ -139,13 +139,13 @@
             (mu:logand n #xff)
             (mu:logand (core:ash n -8) #xff))
            (:if (mu:eq type :word)
-                (core:%prog2
+                ((:lambda ()
                  (core:elf64-write :half n stream)
-                 (core:elf64-write :half (core:ash n -16) stream))
+                 (core:elf64-write :half (core:ash n -16) stream)))
                 (:if (mu:eq type :u64)
-                     (core:%prog2
+                     ((:lambda ()
                       (core:elf64-write :half n stream)
-                      (core:elf64-write :half (core:ash n -32) stream))
+                      (core:elf64-write :half (core:ash n -32) stream)))
                      (:if (mu:eq type :tag)
                           (core:elf64-write :u64 (mu:tag-of n) stream)
                           (t (core:raise size 'el64-write "not a legal type"))))))))

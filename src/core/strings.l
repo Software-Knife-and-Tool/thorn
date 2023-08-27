@@ -103,12 +103,12 @@
        (mu:fix
         (:lambda (list)
           (:if list
-               (core:%prog2
+               ((:lambda ()
                    ((:lambda (str)
                       (core:raise-unless core:stringp str 'core:string-append "is not a string")
                       (mu:write str () stream))
                     (mu:car list))
-                   (mu:cdr list))
+                   (mu:cdr list)))
                ()))
         list)
        (mu:get-str stream))
@@ -126,9 +126,9 @@
                 (:if (mu:eq nth (mu:sv-len str))
                      ()
                      (:if (mu:fx-lt nth (core:1+ end))
-                          (core:%prog2
+                          ((:lambda ()
                               (mu:write (mu:sv-ref str nth) () substr)
-                              (core:1+ nth))
+                              (core:1+ nth)))
                           ()))
                 nth))
          start)

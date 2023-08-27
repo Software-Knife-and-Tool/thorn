@@ -96,14 +96,6 @@
   (:lambda (arg arg1)
     (:if arg arg1 ())))
 
-(mu:intern core "%prog1"
-  (:lambda (arg1 arg2)
-    arg1))
-
-(mu:intern core "%prog2"
-  (:lambda (arg1 arg2)
-    arg2))
-
 ;;;
 ;;; core apply
 ;;;

@@ -22,8 +22,8 @@
        (:if nth
             (:if (mu:eq nth (mu:sv-len vector))
                  ()
-                 (core:%prog2
+                 ((:lambda ()
                      (core:apply fn `(,(mu:sv-ref vector nth)))
-                     (core:1+ nth)))
+                     (core:1+ nth))))
             ()))
      0)))

@@ -113,9 +113,9 @@
      ((:lambda (stream)
         (:if (core:eof stream)
              (:if eof-error
-                  (core:%prog2
+                  ((:lambda ()
                      (core:raise stream 'core:read "unexpected end of file")
-                     eof-value)
+                     eof-value))
                   ())
              ((:lambda (form)
                 (:if (mu:eq form core:%read-list-eol%)

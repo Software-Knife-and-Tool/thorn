@@ -68,15 +68,15 @@
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if printenv
-              (core:%prog2
-               (core:format stream "env:~%" ())
-               (core:%mapc
-                (:lambda (frame)
-                   (core:format stream "  ~A~T(~A ~A)~%"
-                                `(,(core:%fmt-mapped-symbol (mu:car frame))
-                                  ,(mu:car frame)
-                                  ,(mu:cdr frame))))
-                (mu:cdr env)))
+              ((:lambda ()
+                  (core:format stream "env:~%" ())
+                  (core:%mapc
+                   (:lambda (frame)
+                      (core:format stream "  ~A~T(~A ~A)~%"
+                                   `(,(core:%fmt-mapped-symbol (mu:car frame))
+                                     ,(mu:car frame)
+                                     ,(mu:cdr frame))))
+                   (mu:cdr env))))
              ()))
      (core:%exception-property :cond except)
      (core:%exception-property :object except)

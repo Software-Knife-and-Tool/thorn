@@ -50,9 +50,9 @@
      (mu:fix
       (:lambda (lst)
         (:if lst
-             (core:%prog2
-              (mu:apply fn (mu:cons (mu:car lst) ()))
-              (mu:cdr lst))
+             ((:lambda ()
+                 (mu:apply fn (mu:cons (mu:car lst) ()))
+                 (mu:cdr lst)))
              ()))
       list)
      list))
@@ -64,10 +64,10 @@
      (mu:fix
       (:lambda (lst)
         (:if lst
-             (core:%prog2
+             ((:lambda ()
                  (core:apply fn `(,(mu:car lst)))
-                 (mu:cdr lst))
-             ()))
+                 (mu:cdr lst)))
+              ()))
       list)
      list))
 
@@ -88,9 +88,9 @@
       (mu:fix
        (:lambda (list)
          (:if list
-              (core:%prog2
+              ((:lambda ()
                   (core:apply fn `(,list))
-                  (mu:cdr list))
+                  (mu:cdr list)))
               ()))
        list)
       list))
