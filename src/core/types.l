@@ -57,7 +57,7 @@
 (mu:intern core "%core-type-predicate"
    (:lambda (type object)
       ((:lambda (predicate)
-          (core:raise-when core:null type 'core:%core-type-predicate% "predicate not bound")
+          (core:raise-when core:null type 'core:%core-type-predicate "predicate not bound")
           (mu:apply predicate `(,object)))
        (mu:cdr (core:%assoc type core:%core-type-predicate-map%)))))
 
