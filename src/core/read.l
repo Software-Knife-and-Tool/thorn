@@ -69,12 +69,12 @@
                          loop
                          ((:lambda (syntax-type)
                             (:if (mu:eq :const syntax-type)
-                                 (core:%prog2
+                                 ((:lambda ()
                                      (core:write-char ch core:%reader-stream)
-                                     (core:null loop))
-                                 (core:%prog2
+                                     (core:null loop)))
+                                 ((:lambda ()
                                      (core:unread-char ch stream)
-                                     loop)))
+                                     loop))))
                           (core:%read-char-syntax ch))))
                   (core:read-char stream () ())))))
      ())
@@ -118,17 +118,17 @@
                          (:if (mu:eq ch #\#)
                               ((:lambda (ch)
                                  (:if (mu:eq ch #\|)
-                                      (core:%prog2
+                                      ((:lambda ()
                                           (core:%read-sharp-comment ch stream)
-                                          (core:null loop))
-                                      (core:%prog2
+                                          (core:null loop)))
+                                      ((:lambda ()
                                           (core:unread-char ch stream)
-                                          #\#)))
+                                          #\#))))
                                (core:read-char stream () ()))
                               (:if (mu:eq ch #\;)
-                                   (core:%prog2
+                                   ((:lambda ()
                                        (core:%read-line-comment ch stream)
-                                       (core:null loop))
+                                       (core:null loop)))
                                    ch)))))
              (core:read-char stream () ()))))
      ())))

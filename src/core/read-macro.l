@@ -57,10 +57,10 @@
              ((:lambda (ch)
                 ((:lambda (syntax-type)
                    (:if (mu:eq syntax-type :const)
-                        (core:%prog2
+                        ((:lambda ()
                             (core:write-char ch core:%reader-stream)
-                            (core:null loop))
-                        (core:%prog2
+                            (core:null loop)))
+                        ((:lambda ()
                             (:if (core:null ch)
                                  ()
                                  (core:unread-char ch stream))
@@ -68,7 +68,7 @@
                                  (core:parse-integer (mu:get-str core:%reader-stream) 16)
                                  (:if (mu:eq base #\b)
                                       (core:parse-integer (mu:get-str core:%reader-stream) 2)
-                                      (core:parse-integer (mu:get-str core:%reader-stream) 10))))))
+                                      (core:parse-integer (mu:get-str core:%reader-stream) 10)))))))
                  (core:%read-char-syntax ch)))
               (core:read-char stream () ()))))
       ())))
@@ -108,9 +108,9 @@
                                     ((:lambda (dotted)
                                        (core:raise-if (core:null dotted) () 'core:%read-list "early eof in dotted list")
                                        (:if (mu:eq (core:%read stream) core:%read-list-eol%)
-                                            (core:%prog2
+                                            ((:lambda ()
                                                 (mu:un-char #\) stream)
-                                                dotted)
+                                                dotted))
                                             (core:raise () 'core:%read-list "malformed dotted list")))
                                      (core:foldr mu:cons (core:%read stream) loop))
                                     `(,@loop ,el))
@@ -130,9 +130,9 @@
              ((:lambda (ch)
                 (:if (mu:eq ch #\")
                      (core:get-output-stream-string core:%reader-stream)
-                     (core:%prog2
+                     ((:lambda ()
                         (core:write-char ch core:%reader-stream)
-                        (core:null loop))))
+                        (core:null loop)))))
               (core:read-char stream () ()))))
         ())))
 
