@@ -136,8 +136,8 @@
       (:if (mu:eq type :half)
            (core:elf64-write-bytes
             stream
-            (core:logand n #xff)
-            (core:logand (core:ash n -8) #xff))
+            (mu:logand n #xff)
+            (mu:logand (core:ash n -8) #xff))
            (:if (mu:eq type :word)
                 (core:%prog2
                  (core:elf64-write :half n stream)
@@ -180,7 +180,7 @@
       (core:elf64-write :u64 0 out)      ; 110 sh_addralign
       (core:elf64-write :u64 0 out)))    ; 118 sh_entsize
 
-(mu:intern core "core:elf64-read-header"
+(mu:intern core "elf64-read-header"
    (:lambda (stream)
       (mu:with-ex
        (:lambda (ex)

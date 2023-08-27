@@ -60,7 +60,7 @@
 (mu:intern core "defmacro-compiler"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
-          (core:raise-unless core:symbolp symbol 'core:%defmacro-compiler "not a symbol")
+          (core:raise-unless core:symbolp symbol 'core:defmacro-compiler "not a symbol")
           ((:lambda (macrofn)
               (core:intern symbol macrofn))
            (core:%core-macro-env symbol (core:%compile-macro lambda-form env))))
