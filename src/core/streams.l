@@ -19,7 +19,11 @@
          mu:std-out
          (:if (core:streamp designator)
               designator
-              (core:raise-unless core:streamp designator 'core:%write-stream-designator "not a stream")))))
+              (core:raise-unless
+               core:streamp
+               designator
+               'core:%write-stream-designator
+               "not a stream")))))
 
 (mu:intern core "%read-stream-designator"
   (:lambda (designator)
@@ -29,7 +33,11 @@
               mu:std-in
               (:if (core:streamp designator)
                    designator
-                   (core:raise-unless core:streamp designator 'core:%read-stream-designator "not a stream"))))))
+                   (core:raise-unless
+                    core:streamp
+                    designator
+                    'core:%read-stream-designator
+                    "not a stream"))))))
 
 ;;;
 ;;; constructors
@@ -56,7 +64,7 @@
 
 (mu:intern core "close"
   (:lambda (stream)
-    (core:raise-unless core:streamp stream 'core:close "not a string")
+    (core:raise-unless core:streamp stream 'core:close "not a stream")
     (mu:close stream)))
 
 ;;;

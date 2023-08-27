@@ -70,14 +70,21 @@
                (core:%mapc
                 (:lambda (property-value)
                    ((:lambda (property-def)
-                       (core:raise-when core:null property-def 'core:%make-core-type "undefined property"))
+                             (core:raise-when
+                              core:null
+                              property-def
+                              'core:%make-core-type
+                              "undefined property"))
                     (core:findl
                      (:lambda (property-def)
                         (:if (mu:eq (mu:car property-value) (mu:car property-def))
                              ((:lambda (type value)
                                  (:if (core:%core-type-predicate type value)
                                       property-def
-                                      (core:raise property-value 'core:%make-core-type `(,type ,value "property type botch"))))
+                                      (core:raise
+                                       property-value
+                                       'core:%make-core-type
+                                       `(,type ,value "property type botch"))))
                               (mu:cdr property-def)
                               (mu:cdr property-value))
                              ()))

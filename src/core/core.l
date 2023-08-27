@@ -113,10 +113,11 @@
 
 (mu:intern core "apply"
    (:lambda (fn args)
-     (core:raise-unless core:%appliablep fn 'core:apply "not a function designator")
-     (:if (core:closurep fn)
-          (core:%closure-apply fn args)
-          (mu:apply fn args))))
+     (:if (core:%appliablep fn)
+          (:if (core:closurep fn)
+               (core:%closure-apply fn args)
+               (mu:apply fn args))
+          (core:raise fn 'core:apply "not a function designator"))))
 
 ;;;
 ;;; fixpoint loop
