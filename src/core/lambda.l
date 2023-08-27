@@ -46,7 +46,6 @@
 ;;;
 (mu:intern core "%core-lambda"
    (:lambda (lambda env)
-      ;; (core:raise-unless core:listp lambda 'core::core-lambda "not a lambda list")
       (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
          (core:raise lambda 'core:%core-lambda "list syntax")
          ((:lambda (desc)

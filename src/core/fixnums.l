@@ -6,13 +6,15 @@
 ;;;
 (mu:intern core "1+"
    (:lambda (n)
-     (core:raise-unless core:fixnump n 'core:1+ "not a fixnum")
-     (mu:fx-add n 1)))
+     (:if (core:fixnump n)
+          (mu:fx-add n 1)
+          (core:raise n 'core:1+ "not a fixnum"))))
 
 (mu:intern core "1-"
    (:lambda (n)
-     (core:raise-unless core:fixnump n 'core:1- "not a fixnum")
-     (mu:fx-sub n 1)))
+     (:if (core:fixnump n)
+          (mu:fx-sub n 1)
+          (core:raise n 'core:1- "not a fixnum"))))
 
 (mu:intern core "truncate"
    (:lambda (n m)
