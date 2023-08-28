@@ -32,7 +32,7 @@ core       stream         total: 20       passed: 20       failed: 0        abor
 core       string         total: 20       passed: 20       failed: 0        aborted: 0       
 core       symbol         total: 2        passed: 2        failed: 0        aborted: 0       
 core       types          total: 6        passed: 6        failed: 0        aborted: 0       
-core       vector         total: 13       passed: 13       failed: 0        aborted: 0       
+core       vector         total: 0        passed: 0        failed: 0        aborted: 0       
 -----------------------
-core       passed: 312    total: 313      failed: 0        aborted: 1         
+core       passed: 299    total: 300      failed: 0        aborted: 1         
 
