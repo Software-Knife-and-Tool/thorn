@@ -1,4 +1,4 @@
-;;;  SPDX-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
@@ -57,17 +57,19 @@
 
 (mu:intern core "ash"
    (:lambda (n count)
-     (core:raise-unless core:fixnump n 'core:ash "not a fixnum")
-     (core:raise-unless core:fixnump count 'core:ash "not a fixnum")
-     (mu:car
-      (mu:fix
-       (:lambda (loop)
-          ((:lambda (n count)
-              (:if (core:zerop count)
-                   loop
-                   (:if (core:minusp count) 
-                        (mu:cons (mu:fx-div n 2) (core:1+ count))
-                        (mu:cons (mu:fx-mul n 2) (core:1- count)))))
-           (mu:car loop)
-           (mu:cdr loop)))
-       (mu:cons n count)))))
+      (:if (core:fixnump n)
+           (:if (core:fixnump count)
+                (mu:car
+                 (mu:fix
+                  (:lambda (loop)
+                     ((:lambda (n count)
+                         (:if (core:zerop count)
+                              loop
+                              (:if (core:minusp count) 
+                                   (mu:cons (mu:fx-div n 2) (core:1+ count))
+                                   (mu:cons (mu:fx-mul n 2) (core:1- count)))))
+                      (mu:car loop)
+                      (mu:cdr loop)))
+                  (mu:cons n count)))
+                (core:raise count 'core:ash "not a fixnum"))
+           (core:raise n 'core:ash "not a fixnum"))))
