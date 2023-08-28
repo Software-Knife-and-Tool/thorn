@@ -19,11 +19,9 @@
          mu:std-out
          (:if (core:streamp designator)
               designator
-              (core:raise-unless
-               core:streamp
-               designator
-               'core:%write-stream-designator
-               "not a stream")))))
+              (core:raise designator
+                          'core:%write-stream-designator
+                          "not a stream designator")))))
 
 (mu:intern core "%read-stream-designator"
   (:lambda (designator)
@@ -33,39 +31,42 @@
               mu:std-in
               (:if (core:streamp designator)
                    designator
-                   (core:raise-unless
-                    core:streamp
-                    designator
-                    'core:%read-stream-designator
-                    "not a stream"))))))
+                   (core:raise designator
+                               'core:%read-stream-designator
+                               "not a stream designator"))))))
 
 ;;;
 ;;; constructors
 ;;;
 (mu:intern core "make-string-stream"
-  (:lambda (dir init)
-    (core:raise-unless core:keywordp dir 'core:make-string-stream "not a direction keyword")
-    (core:raise-unless core:stringp init 'core:make-string-stream "not a string initializer")
-    (:if (mu:eq dir :input)
-         (mu:open :string :input init)
-         (:if (mu:eq dir :output)
-              (mu:open :string :output init)
-              (core:raise dir 'core:make-string-stream "not a direction keyword")))))
-
+   (:lambda (dir init)
+      (:if (core:keywordp dir)
+           (:if (core:stringp init)           
+                (:if (mu:eq dir :input)
+                     (mu:open :string :input init)
+                     (:if (mu:eq dir :output)
+                          (mu:open :string :output init)
+                          (core:raise dir 'core:make-string-stream "not a direction keyword")))
+                (core:raise dir 'core:make-string-stream "not a direction keyword"))
+           (core:raise init 'core:make-string-stream "not a string initializer"))))
+      
 (mu:intern core "open"
   (:lambda (dir path)
-     (core:raise-unless core:stringp path 'core:open "not a path string")
-     (core:raise-unless core:keywordp dir 'core:open "not a direction keyword")
-     (:if (mu:eq dir :input)
-          (mu:open :file :input path)
-          (:if (mu:eq dir :output)
-               (mu:open :file :output path)
-               (core:raise dir 'core:open "not a direction keyword")))))
+     (:if (core:stringp path)
+          (:if (core:keywordp dir)
+               (:if (mu:eq dir :input)
+                    (mu:open :file :input path)
+                    (:if (mu:eq dir :output)
+                         (mu:open :file :output path)
+                         (core:raise dir 'core:open "not a direction keyword")))
+               (core:raise path 'core:open "not a path string"))
+          (core:raise dir 'core:open "not a direction keyword"))))
 
 (mu:intern core "close"
-  (:lambda (stream)
-    (core:raise-unless core:streamp stream 'core:close "not a stream")
-    (mu:close stream)))
+   (:lambda (stream)
+      (:if (core:streamp stream)
+           (mu:close stream)                 
+           (core:raise stream 'core:close "not a stream"))))
 
 ;;;
 ;;; chars, bytes, and unread
@@ -101,10 +102,11 @@
       (core:%read-stream-designator designator))))
 
 (mu:intern core "unread-char"
-  (:lambda (ch designator)
-    (core:raise-unless core:charp ch 'core:unread-char "not a char")
-    (mu:un-char ch (core:%write-stream-designator designator))))
-
+   (:lambda (ch designator)
+      (:if (core:charp ch)
+           (mu:un-char ch (core:%write-stream-designator designator))
+           (core:raise ch 'core:unread-char "not a char"))))
+   
 ;;;
 ;;; read/write
 ;;;

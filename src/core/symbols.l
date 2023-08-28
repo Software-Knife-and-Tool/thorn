@@ -39,11 +39,12 @@
 
 (mu:intern core "keyword"
    (:lambda (name)
-      (core:raise-unless core:stringp name 'core:keyword "not a keyword name")
-      (:if (mu:fx-lt (mu:sv-len name) 8)
-           (mu:keyword name)
-           (core:%make-core-type "keyword" `(,(mu:cons :name name))))))
-
+      (:if (core:stringp name)
+           (:if (mu:fx-lt (mu:sv-len name) 8)
+                (mu:keyword name)
+                (core:%make-core-type "keyword" `(,(mu:cons :name name))))
+           (core:raise name 'core:keyword "not a keyword name"))))
+   
 (mu:intern core "intern"
    (:lambda (symbol value)
       (:if (core:uninternedp symbol)

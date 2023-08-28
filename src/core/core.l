@@ -62,17 +62,19 @@
 
 (mu:intern core "minusp"
    (:lambda (n)
-      (core:raise-unless core:numberp n 'core:minusp "not a number")                 
-      (:if (core:floatp n)
-           (mu:fl-lt n 0.0)
-           (mu:fx-lt n 0))))
-
+      (:if (core:numberp n)
+           (:if (core:floatp n)
+                (mu:fl-lt n 0.0)
+                (mu:fx-lt n 0))
+           (core:raise n 'core:minusp "not a number"))))
+   
 (mu:intern core "plusp"
    (:lambda (n)
-      (core:raise-unless core:numberp n 'core:plusp "not a number")                 
-      (:if (core:floatp n)
-           (mu:fl-lt 0.0 n)
-           (mu:fx-lt 0 n))))
+      (:if (core:numberp n)
+           (:if (core:floatp n)
+                (mu:fl-lt 0.0 n)
+                (mu:fx-lt 0 n))
+           (core:raise n 'core:plusp "not a number"))))
 
 ;;;
 ;;; system classes
@@ -116,10 +118,12 @@
 ;;;
 (mu:intern core "fix"
    (:lambda (fn list)
-     (core:raise-unless core:%appliablep fn 'core:fix "not a function designator")
-     (core:raise-unless core:listp list 'core:fix "not a list")
-     ((:lambda (fn)
-        (mu:fix fn list))
-      (:if (core:closurep fn)
-          (:lambda (arg) (core:apply fn `(,arg)))
-          fn))))
+      (:if (core:%appliablep fn)
+           (:if (core:listp list)
+                ((:lambda (fn)
+                    (mu:fix fn list))
+                 (:if (core:closurep fn)
+                      (:lambda (arg) (core:apply fn `(,arg)))
+                      fn))
+                (core:raise list 'core:fix "not a list"))
+           (core:raise fn 'core:fix "not a function designator"))))
