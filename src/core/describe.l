@@ -1,4 +1,4 @@
-;;;  Spdx-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
+;;;  Spdx-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
