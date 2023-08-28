@@ -6,10 +6,12 @@
 ;;;
 (mu:intern core "in-namespace"
    (:lambda (ns)
-     (core:raise-unless core:namespacep ns 'core:in-namespace "not a namespace")
-     (mu:make-ns ns)
-     (core:%read-set-ns ns)
-     ns))
+     (:if (core:namespacep ns)
+          ((:lambda ()
+              (mu:make-ns ns)
+              (core:%read-set-ns ns)
+              ns))
+          (core:raise ns 'core:in-namespace "not a namespace"))))
 
 (mu:intern core "%read-get-ns"
    (:lambda ()
