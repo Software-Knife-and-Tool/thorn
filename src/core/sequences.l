@@ -8,15 +8,18 @@
 
 (mu:intern core "length"
    (:lambda (seq)
-      (core:raise-unless core:sequencep seq 'core:length "not a sequence")
-      (:if (core:listp seq)
-           (mu:length seq)
-           (mu:sv-len seq))))
-
+      (:if (core:sequencep seq)
+           (:if (core:listp seq)
+                (mu:length seq)
+                (mu:sv-len seq))
+           (core:raise seq 'core:length "not a sequence"))))
+   
 (mu:intern core "elt"
    (:lambda (seq nth)
-      (core:raise-unless core:sequencep seq 'core:elt "not a sequence")
-      (core:raise-unless core:fixnump nth 'core:elt "not a fixnum")
-      (:if (core:listp seq)
-           (mu:nth nth seq)
-           (mu:sv-ref seq nth))))
+      (:if (core:sequencep seq)
+           (:if (core:fixnump nth)
+                (:if (core:listp seq)
+                     (mu:nth nth seq)
+                     (mu:sv-ref seq nth))
+                (core:raise seq 'core:elt "not a sequence"))
+           (core:raise nth 'core:elt "not a fixnum"))))
