@@ -33,26 +33,27 @@
 ;;; lambda compiles to a closure core-type
 ;;;
 (mu:intern core "lambda-compiler"
-    (:lambda (form env)
-    (core:raise-if (mu:fx-lt (mu:length form) 2) form 'lambda "malformed lambda expression")
-    ((:lambda (lambda body)
-        ((:lambda (lambda-desc)
-            ((:lambda (fn)
-                (:if (core:%orf
-                      (core:%lambda-prop :lexenv lambda-desc)
-                      (core:%lambda-prop :rest lambda-desc))
-                     (core:%make-closure lambda-desc fn ())
-                     fn))
-             (mu:compile
-              `(:lambda
-                ,(core:%lambda-prop :bound lambda-desc)
-                ,@(core:%compile-lambda-body
-                   lambda-desc
-                   body
-                   env)))))
-         (core:%core-lambda lambda env)))
-     (mu:nth 1 form)
-     (mu:nthcdr 2 form))))
+   (:lambda (form env)
+      (:if (mu:eq (mu:length form) 1)
+           (core:raise form 'core:lambda-compiler "malformed lambda expression")           
+           ((:lambda (lambda body)
+               ((:lambda (lambda-desc)
+                   ((:lambda (fn)
+                       (:if (core:%orf
+                             (core:%lambda-prop :lexenv lambda-desc)
+                             (core:%lambda-prop :rest lambda-desc))
+                            (core:%make-closure lambda-desc fn ())
+                            fn))
+                    (mu:compile
+                     `(:lambda
+                       ,(core:%lambda-prop :bound lambda-desc)
+                       ,@(core:%compile-lambda-body
+                          lambda-desc
+                          body
+                          env)))))
+                (core:%core-lambda lambda env)))
+            (mu:nth 1 form)
+            (mu:nthcdr 2 form)))))
 
 ;;;
 ;;; defmacro compiles to a bound macro symbol
@@ -60,11 +61,10 @@
 (mu:intern core "defmacro-compiler"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
-          (core:raise-unless core:symbolp symbol 'core:defmacro-compiler "not a symbol")
-          ((:lambda (macrofn)
-              (core:intern symbol macrofn))
-           (core:%core-macro-env symbol (core:%compile-macro lambda-form env))))
-       (mu:nth 1 form)
+          (:if (core:symbolp symbol)
+               (core:intern symbol (core:%core-macro-env symbol (core:%compile-macro lambda-form env)))
+               (core:raise symbol 'core:defmacro-compiler "not a symbol")))
+        (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
 ;;;
@@ -73,11 +73,12 @@
 (mu:intern core "defun-compiler"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
-          (core:raise-unless core:symbolp symbol 'defun "not a symbol")
-          (core:raise-when core:keywordp symbol 'defun "not a symbol")
-          (core:raise-unless core:listp lambda-form 'defun "not a lambda list")
-          ;;; we get away with this only because core:lambda ignores the initial symbol
-          (core:intern symbol (core:lambda-compiler lambda-form env)))
+          (:if (mu:eq (mu:type-of symbol) :symbol)
+               (:if (core:listp lambda-form)
+                    ;;; we get away with this only because core:lambda ignores the initial symbol
+                    (core:intern symbol (core:lambda-compiler lambda-form env))
+                    (core:raise lambda-form 'core:defun-compiler "not a lambda list"))
+               (core:raise symbol 'core:defun-compiler "not a symbol")))
        (mu:nth 1 form)
        (mu:nthcdr 1 form))))
 
@@ -90,21 +91,18 @@
      `(:lambda () ,form)
      env)))
 
-(mu:intern core "%if-body"
-  (:lambda (term true-fn false-fn)
-    (:if term
-         (core:apply true-fn ())
-         (core:apply false-fn ()))))
-
 (mu:intern core "if-compiler"
    (:lambda (form env)
-      (core:raise-unless core:listp env 'if "not an environment")
-      (core:raise-unless (:lambda (form) (mu:fx-lt 2 (mu:length form))) form 'if "takes two or three arguments")
-      (core:raise-unless (:lambda (form) (mu:fx-lt (mu:length form) 5)) form 'if "takes two or three arguments")
-      (mu:cons 'core:%if-body
-        `(,(mu:cons (core:%thunk (mu:nth 1 form) env) ())
-          ,(core:%thunk (mu:nth 2 form) env)
-          ,(core:%thunk (mu:nth 3 form) env)))))
+      ((:lambda (len)                
+          (:if (core:%orf (mu:eq len 3) (mu:eq len 4))
+              ((:lambda (t-arm f-arm)           
+                  (mu:compile `(:if ,(mu:cons (core:%thunk (mu:nth 1 form) env) ())
+                                    ,t-arm
+                                    ,f-arm)))
+               `(core:apply ,(core:%thunk (mu:nth 2 form) env) ())
+               `(core:apply ,(core:%thunk (mu:nth 3 form) env) ()))
+              (core:raise form 'core:if-compiler "takes two or three arguments")))
+       (mu:length form))))
 
 ;;;
 ;;; quote
@@ -125,7 +123,7 @@
           (quote    . core:quote-compiler))))))
 
 (mu:intern core "%compile"
-   (:lambda (form env)
+   (:lambda (form env)                 
       (:if (core:consp form)
            ((:lambda (fn args)
                (:if (core:%appliablep fn)
