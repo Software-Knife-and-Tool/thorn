@@ -95,7 +95,23 @@
 
 (mu:intern core "positionr"
    (:lambda (fn list)
-     (core:positionl fn (core:reverse list))))                 
+      (:if (core:%appliablep fn)
+           (:if (core:listp list)
+                (:if (core:null list)
+                     ()
+                     (mu:car
+                      (mu:fix
+                       (:lambda (loop)
+                          (:if (core:listp loop)
+                               loop
+                               (:if (mu:fx-lt loop 0)
+                                    ()
+                                    (:if (core:apply fn `(,(mu:nth loop list)))
+                                         `(,loop)
+                                         (core:1- loop)))))
+                       (core:1- (mu:length list)))))
+                (core:raise list 'core:positionr "not a list"))
+           (core:raise fn 'core:positionr "not a function"))))
 
 ;;;
 ;;; fixed argument list functions
@@ -128,7 +144,22 @@
 
 (mu:intern core "dropr"
    (:lambda (list n)
-      (core:dropl (core:reverse list) n)))
+      (:if (core:listp list)
+           (:if (core:fixnump n)
+                (core:foldl
+                 mu:cons
+                 ()
+                 ((:lambda (len)
+                     (core:foldl
+                      (:lambda (el last)
+                         (:if (mu:fx-lt (mu:length last) (mu:fx-sub (mu:length list) n))
+                              (mu:cons el last)
+                              last))
+                      ()
+                      list))
+                  (mu:length list)))
+                (core:raise n 'core:dropr "not a fixnum"))
+           (core:raise list 'core:dropr "not a list"))))
 
 (mu:intern core "last"
    (:lambda (list)
