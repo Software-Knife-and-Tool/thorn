@@ -47,26 +47,26 @@
 ;;;
 (mu:intern core "findl"
    (:lambda (fn list)
-      (core:raise-unless core:%appliablep fn 'core:findl "not a function")
-      (core:raise-unless core:listp list 'core:findl "not a list")
-      (mu:cdr
-       (mu:fix
-        (:lambda (loop)
-           (:if (mu:eq :t (mu:car loop))
-               loop
-               (:if (mu:cdr loop)
-                    ((:lambda (el)
-                        (:if (core:apply fn `(,el))
-                             (mu:cons :t el)
-                             (mu:cons () (mu:cdr (mu:cdr loop)))))
-                     (mu:car (mu:cdr loop)))
-                    loop)))
-        (mu:cons () list)))))
+      (:if (core:%appliablep fn)
+           (:if (core:listp list)
+                (mu:cdr
+                 (mu:fix
+                  (:lambda (loop)
+                     (:if (mu:eq :t (mu:car loop))
+                          loop
+                          (:if (mu:cdr loop)
+                               ((:lambda (el)
+                                   (:if (core:apply fn `(,el))
+                                        (mu:cons :t el)
+                                        (mu:cons () (mu:cdr (mu:cdr loop)))))
+                                (mu:car (mu:cdr loop)))
+                               loop)))
+                  (mu:cons () list)))
+                (core:raise list 'core:findl "not a list"))
+           (core:raise fn 'core:findl "not a function"))))
 
 (mu:intern core "findr"
    (:lambda (fn list)
-     (core:raise-unless core:%appliablep fn 'core:findr "not a function")
-     (core:raise-unless core:sequencep list 'core:findr "not a list")
      (core:findl fn (core:reverse list))))
 
 ;;;
@@ -74,94 +74,73 @@
 ;;;
 (mu:intern core "positionl"
    (:lambda (fn list)
-     (core:raise-unless core:%appliablep fn 'core:positionl "not a function")
-     (core:raise-unless core:listp list 'core:positionl "not a list")
-     (:if (core:null list)
-          ()
-          ((:lambda (len)
-             (mu:car
-              (mu:fix
-               (:lambda (loop)
-                 (:if (core:listp loop)
-                      loop
-                      (:if (mu:fx-lt len loop)
-                           ()
-                           (:if (core:apply fn `(,(mu:nth loop list)))
-                                `(,loop)
-                                (core:1+ loop)))))
-               0)))
-           (mu:length list)))))
+     (:if (core:%appliablep fn)
+          (:if (core:listp list)
+               (:if list
+                    ((:lambda (len)
+                        (mu:car (mu:fix
+                           (:lambda (loop)
+                              (:if (core:listp loop)
+                                   loop
+                                   (:if (mu:fx-lt len loop)
+                                        ()
+                                        (:if (core:apply fn `(,(mu:nth loop list)))
+                                             `(,loop)
+                                             (core:1+ loop)))))
+                           0)))
+                     (mu:length list))
+                    ())
+               (core:raise list 'core:positionl "not a list"))
+          (core:raise fn 'core:positionl "not a function"))))
 
 (mu:intern core "positionr"
    (:lambda (fn list)
-     (core:raise-unless core:%appliablep fn 'core:positionr "not a function")
-     (core:raise-unless core:listp list 'core:positionr "not a list")
-     (:if (core:null list)
-          ()
-          (mu:car
-           (mu:fix
-            (:lambda (loop)
-              (:if (core:listp loop)
-                   loop
-                   (:if (mu:fx-lt loop 0)
-                        ()
-                        (:if (core:apply fn `(,(mu:nth loop list)))
-                             `(,loop)
-                             (core:1- loop)))))
-            (core:1- (mu:length list)))))))
+     (core:positionl fn (core:reverse list))))                 
 
 ;;;
 ;;; fixed argument list functions
 ;;;
 (mu:intern core "append"
    (:lambda (list)
-     (core:raise-unless core:listp list 'core:append "not a list")
-     (core:foldr
-      (:lambda (el acc)
-        (:if (core:listp el)
-          (core:foldr mu:cons acc el)
-          el))
-      ()
-      list)))
-
+      (:if (core:listp list)                 
+           (core:foldr
+            (:lambda (el acc)
+               (:if (core:listp el)
+                    (core:foldr mu:cons acc el)
+                    el))
+            ()
+            list)
+      (core:raise list 'core:append "not a list"))))
+   
 (mu:intern core "reverse"
-  (:lambda (list)
-    (core:raise-unless core:listp list 'core:reverse "not a list")
-    (core:foldl mu:cons () list)))
-
+   (:lambda (list)
+      (:if (core:listp list)
+           (core:foldl mu:cons () list)
+           (core:raise list 'core:reverse "not a list"))))
+   
 (mu:intern core "dropl"
    (:lambda (list n)
-      (core:raise-unless core:listp list 'core:dropl "not a list")
-      (core:raise-unless core:fixnump n 'core:dropl "not a fixnum")
-      (mu:nthcdr n list)))
+      (:if (core:listp list)
+         (:if (core:fixnump n)
+              (mu:nthcdr n list)
+              (core:raise n 'core:dropl "not a fixnum"))
+         (core:raise list 'core:dropl "not a list"))))
 
 (mu:intern core "dropr"
    (:lambda (list n)
-      (core:raise-unless core:listp list 'core:dropr "not a list")
-      (core:raise-unless core:fixnump n 'core:dropr "not a fixnum")
-      (core:foldl
-        mu:cons
-        ()
-        ((:lambda (len)
-            (core:foldl
-              (:lambda (el last)
-                 (:if (mu:fx-lt (mu:length last) (mu:fx-sub (mu:length list) n))
-                      (mu:cons el last)
-                      last))
-                 ()
-              list))
-         (mu:length list)))))
+      (core:dropl (core:reverse list) n)))
 
 (mu:intern core "last"
    (:lambda (list)
-     (core:raise-unless core:listp list 'core:last "not a list")
-     (mu:fix
-      (:lambda (loop)
-        (:if (core:null list)
-             loop
-             ((:lambda (cdr)
-                (:if (core:consp cdr)
-                     cdr
-                     loop))
-              (mu:cdr loop))))
-      list)))
+      (:if (core:listp list)
+           (mu:fix
+            (:lambda (loop)
+               (:if (core:null list)
+                    loop
+                    ((:lambda (cdr)
+                        (:if (core:consp cdr)
+                             cdr
+                             loop))
+                     (mu:cdr loop))))
+            list)
+           (core:raise list 'core:last "not a list"))))
