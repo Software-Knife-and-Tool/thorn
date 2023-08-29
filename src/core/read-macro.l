@@ -36,9 +36,10 @@
 (mu:intern core "%read-sharp-vector"
    (:lambda (ch stream)
       ((:lambda (type)
-          (core:raise-unless core:keywordp type 'core:%read-sharp-vector "not a type keyword")
-          (mu:make-sv type (core:%read-list #\( stream)))
-       (core:%read stream))))
+          (:if (core:keywordp type)
+               (mu:make-sv type (core:%read-list #\( stream))
+               (core:raise type 'core:%read-sharp-vector "not a type keyword")))
+          (core:%read stream))))
 
 (mu:intern core "%read-sharp-symbol"
    (:lambda (ch stream)
@@ -180,16 +181,19 @@
 ;;;
 (mu:intern core "get-macro-character"
    (:lambda (char)
-     (core:raise-unless core:charp char 'core:get-macro-character "not a character")
-     ((:lambda (macro-symbol)
-        (:if macro-symbol
-            (core:symbol-value macro-symbol)
-            ()))
-      (mu:ns-find core:%core-char-macro-ns% (mu:make-sv :char `(,char))))))
+     (:if (core:charp char)
+          ((:lambda (macro-symbol)
+              (:if macro-symbol
+                   (core:symbol-value macro-symbol)
+                   ()))
+           (mu:ns-find core:%core-char-macro-ns% (mu:make-sv :char `(,char))))
+          (core:raise char 'core:get-macro-character "not a character"))))
 
 (mu:intern core "set-macro-character"
    (:lambda (char fn non-terminating)
-     (core:raise-unless core:charp char 'core:set-macro-character "not a character")
-     (core:raise-unless core:functionp fn 'core:set-macro-character "not a function")
-     (mu:intern core:%core-char-macro-ns% (mu:make-sv :char `(,char)) (mu:cons fn non-terminating))
-     :t))
+      (:if (core:charp char)
+         (:if (core:functionp fn)
+              (mu:intern core:%core-char-macro-ns% (mu:make-sv :char `(,char)) (mu:cons fn non-terminating))
+              (core:raise fn 'core:set-macro-character "not a function"))
+         (core:raise char 'core:set-macro-character "not a character"))
+      :t))
