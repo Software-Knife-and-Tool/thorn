@@ -25,40 +25,43 @@
 
 (mu:intern core "%fmt-decimal"
   (:lambda (dest args)
-    (core:raise-unless core:fixnump (mu:car args) 'core:format "argument to ~D not a fixnum")
-    (core:write (mu:car args) () dest)
-    (mu:cdr args)))
+     (:if (core:fixnump (mu:car args))
+          ((:lambda ()           
+              (core:write (mu:car args) () dest)
+              (mu:cdr args)))
+          (core:raise (mu:car args) 'core:format "argument to ~D not a fixnum"))))
 
 (mu:intern core "%fmt-hex"
   (:lambda (dest args)
-    ((:lambda (fx)
-       (core:raise-unless core:fixnump fx 'core:format "argument to ~X not a fixnum")
-       (:if (core:zerop fx)
-            (core:write "0" () dest)
-            ((:lambda (str-stream)
-               (mu:fix
-                (:lambda (n)
-                  (:if (core:%orf (core:null n) (mu:eq 0 n))
-                       ()
-                       ((:lambda ()
-                           (mu:write (core:schar "0123456789abcdef" (mu:logand n #xf)) () str-stream)
-                           (mu:fx-div n 16)))))
-                (:if (mu:fx-lt fx 0) (mu:fx-mul -1 fx) fx))
-               (:if (mu:fx-lt fx 0)
-                    (mu:write #\- () str-stream)
-                    ())
-               ((:lambda (hexstr)
-                  (mu:fix
-                   (:lambda (len)
-                     (:if (core:zerop len)
+     ((:lambda (fx)
+       (:if (core:fixnump fx)
+            (:if (core:zerop fx)
+                 (core:write "0" () dest)
+                 ((:lambda (str-stream)
+                     (mu:fix
+                      (:lambda (n)
+                         (:if (core:%orf (core:null n) (mu:eq 0 n))
+                              ()
+                              ((:lambda ()
+                                  (mu:write (core:schar "0123456789abcdef" (mu:logand n #xf)) () str-stream)
+                                  (mu:fx-div n 16)))))
+                      (:if (mu:fx-lt fx 0) (mu:fx-mul -1 fx) fx))
+                     (:if (mu:fx-lt fx 0)
+                          (mu:write #\- () str-stream)
+                          ())
+                     ((:lambda (hexstr)
+                         (mu:fix
+                          (:lambda (len)
+                             (:if (core:zerop len)
                           0
                           ((:lambda ()
                               (mu:write (core:schar hexstr (core:1- len)) () dest)
                               (core:1- len)))))
                    (mu:sv-len hexstr)))
                   (mu:get-str str-stream)))
-            (mu:open :string :output ""))))
-       (mu:car args))))
+             (mu:open :string :output "")))
+            (core:raise fx 'core:format "argument to ~X not a fixnum")))
+      (mu:car args))))
 
 (mu:intern core "%fmt-aesthetic"
   (:lambda (dest args)
@@ -101,7 +104,7 @@
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
                        ((:lambda ()
-                           (core:raise-if (mu:eq (core:1+ nth) (core:length fmt)) nth 'core:format "unexpected end of string")
+                           (core:raise-if (mu:eq (core:1+ nth) (core:length fmt)) nth 'core:format "unexpected end of format string")
                            (mu:cons (mu:fx-add 2 nth) (core:%fmt-op (core:schar fmt (core:1+ nth)) dest argl))))
                        ((:lambda ()
                            (core:write-char ch dest)
@@ -116,17 +119,19 @@
 
 (mu:intern core "format"
    (:lambda (stream fmt args)
-     (core:raise-unless core:stringp fmt 'core:format "not a string")
-     (core:raise-unless core:listp args 'core:format "not a list")
-     (:if (core:zerop (core:length fmt))
-          (:if stream
-               ""
-               ())
-          ((:lambda (dest) (core:%fmt-loop stream dest fmt args))
-           (:if (core:null stream)
-                (mu:open :string :output "")
-                (:if (mu:eq stream :t)
-                     mu:std-out
-                     (:if (core:streamp stream)
-                          stream
-                          (core:raise stream 'core:format "not a stream designator"))))))))
+      (:if (core:stringp fmt)
+           (:if (core:listp args)
+                (:if (core:zerop (core:length fmt))
+                     (:if stream
+                          ""
+                          ())
+                     ((:lambda (dest) (core:%fmt-loop stream dest fmt args))
+                      (:if (core:null stream)
+                           (mu:open :string :output "")
+                           (:if (mu:eq stream :t)
+                                mu:std-out
+                                (:if (core:streamp stream)
+                                     stream
+                                     (core:raise stream 'core:format "not a stream designator"))))))
+                (core:raise args 'core:format "not a list"))
+           (core:raise fmt 'core:format "not a string"))))
