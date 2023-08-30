@@ -59,13 +59,13 @@
    (:lambda (fn args env)
      (core:%quoted-lambda-arg-list
       fn
-      (core:mapcar (:lambda (elt) (core:%compile elt env)) args))))
+      (core:%mapcar (:lambda (elt) (core:%compile elt env)) args))))
 
 (mu:intern core "%compile-lambda-arg-list"
    (:lambda (fn args env)
      (core:%lambda-arg-list
       fn
-      (core:mapcar (:lambda (elt) (core:%compile elt env)) args))))
+      (core:%mapcar (:lambda (elt) (core:%compile elt env)) args))))
 
 ;;;
 ;;; compile-application
