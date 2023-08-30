@@ -13,6 +13,6 @@
                  ()
                  ((:lambda ()
                      (core:apply fn `(,(mu:sv-ref vector nth)))
-                     (core:1+ nth))))
+                     (mu:fx-add 1 nth))))
             ()))
      0)))

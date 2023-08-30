@@ -117,11 +117,11 @@
                   (:if (mu:eq '&rest el)
                      (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
                           (core:%make-lambda
-                           `(,@(core:dropr lambda 2) ,@(core:dropl lambda (core:1- (mu:length lambda))))
-                           (mu:nth (core:1- (mu:length lambda)) lambda)
+                           `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:fx-sub (mu:length lambda) 1)))
+                           (mu:nth (mu:fx-sub (mu:length lambda) 1) lambda)
                            env)
                           (core:raise lambda 'core:%core-macro "rest botch"))
-                     (core:1+ acc))))
+                     (mu:fx-add 1 acc))))
             0
             lambda)))))
 

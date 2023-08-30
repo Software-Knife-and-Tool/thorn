@@ -33,7 +33,7 @@
                                       (mu:cons offset
                                          (mu:cons
                                           (mu:cons (mu:nth offset pairs)
-                                             (mu:nth (core:1+ offset) pairs))
+                                             (mu:nth (mu:fx-add 1 offset) pairs))
                                           alist)))
                                    (mu:fx-sub nth 2))))
                           (mu:car pair-state)
@@ -86,7 +86,7 @@
                                         ()
                                         (:if (core:apply fn `(,(mu:nth loop list)))
                                              `(,loop)
-                                             (core:1+ loop)))))
+                                             (mu:fx-add 1 loop)))))
                            0)))
                      (mu:length list))
                     ())
@@ -108,8 +108,8 @@
                                     ()
                                     (:if (core:apply fn `(,(mu:nth loop list)))
                                          `(,loop)
-                                         (core:1- loop)))))
-                       (core:1- (mu:length list)))))
+                                         (mu:fx-sub loop 1)))))
+                       (mu:fx-sub (mu:length list) 1))))
                 (core:raise list 'core:positionr "not a list"))
            (core:raise fn 'core:positionr "not a function"))))
 

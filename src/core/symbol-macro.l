@@ -37,7 +37,7 @@
      ((:lambda (colon)
         (:if (core:null colon)
              :extern
-             (:if (mu:eq #\: (core:schar name (core:1+ colon)))
+             (:if (mu:eq #\: (core:schar name (mu:fx-add 1 colon)))
                   :intern
                   :extern)))
         (core:string-position #\: name))))
@@ -47,7 +47,7 @@
     ((:lambda (colon)
        (:if (core:null colon)
             ()
-            (mu:map-ns (core:substr name 0 (core:1- colon)))))
+            (mu:map-ns (core:substr name 0 (mu:fx-sub colon 1)))))
      (core:string-position #\: name))))
 
 (mu:intern core "%read-symbol-name"
@@ -56,12 +56,12 @@
         (:if (core:null colon)
              name
              (core:substr name
-                          (:if (mu:eq #\: (core:schar name (core:1+ colon)))
+                          (:if (mu:eq #\: (core:schar name (mu:fx-add 1 colon)))
                                (mu:fx-add 2 colon)
                                (mu:fx-add 1 colon))
-                          (:if (mu:eq #\: (core:schar name (core:1+ colon)))
+                          (:if (mu:eq #\: (core:schar name (mu:fx-add 1 colon)))
                                (mu:fx-add colon (mu:fx-sub (core:length name) colon))
-                               (mu:fx-add colon (mu:fx-sub (core:length name) (core:1+ colon)))))))
+                               (mu:fx-add colon (mu:fx-sub (core:length name) (mu:fx-add 1 colon)))))))
      (core:string-position #\: name))))
 
 (mu:intern core "%read-symbol"
