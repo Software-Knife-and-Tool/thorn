@@ -113,8 +113,9 @@
                    (:if list
                         ((:lambda ()
                             ((:lambda (str)
-                                (core:raise-unless core:stringp str 'core:string-append "is not a string")
-                                (mu:write str () stream))
+                                (:if (core:stringp str)
+                                     (mu:write str () stream)
+                                     (core:raise str 'core:string-append "is not a string")))
                              (mu:car list))
                             (mu:cdr list)))
                         ()))
