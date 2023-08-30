@@ -107,7 +107,7 @@
                (:if (core:zerop nbytes)
                     loop
                     (mu:cons
-                     (core:1- nbytes)
+                     (mu:fx-sub nbytes 1)
                      `(,@list ,@(core:read-byte stream :t ())))))
             (mu:car loop)
             (mu:cdr loop)))

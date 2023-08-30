@@ -1,6 +1,3 @@
-(mu:type-of core:1+)	:func
-(mu:type-of core:1-)	:func
-(mu:type-of core:ash)	:func
 (mu:type-of core:boundp)	:func
 (mu:type-of core:ceiling)	:func
 (mu:type-of core:closurep)	:func
@@ -9,20 +6,15 @@
 (mu:type-of core:exceptionp)	:func
 (mu:type-of core:fixnump)	:func
 (mu:type-of core:floatp)	:func
-(mu:type-of core:floor)	:func
 (mu:type-of core:functionp)	:func
 (mu:type-of core:listp)	:func
 (mu:type-of core:minusp)	:func
-(mu:type-of core:mod)	:func
 (mu:type-of core:namespacep)	:func
 (mu:type-of core:not)	:func
 (mu:type-of core:null)	:func
 (mu:type-of core:plusp)	:func
-(mu:type-of core:rem)	:func
-(mu:type-of core:round)	:func
 (mu:type-of core:streamp)	:func
 (mu:type-of core:stringp)	:func
 (mu:type-of core:structp)	:func
 (mu:type-of core:symbolp)	:func
-(mu:type-of core:truncate)	:func
 (mu:type-of core:vectorp)	:func

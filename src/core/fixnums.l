@@ -18,42 +18,54 @@
 
 (mu:intern core "truncate"
    (:lambda (n m)
-     (core:raise-unless core:fixnump n 'core:truncate "not a fixnum")
-     (core:raise-unless core:fixnump m 'core:truncate "not a fixnum")
-     `(,(mu:fx-div n m) ,(mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
+     (:if (core:fixnump n)
+          (:if (core:fixnump m)
+               (mu:cons (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))
+               (core:raise m 'core:truncate "not a fixnum"))
+          (core:raise n 'core:truncate "not a fixnum"))))
 
 ;;; round to negative infinity
 (mu:intern core "floor"
    (:lambda (n m)
-     (core:raise-unless core:fixnump n 'core:floor "not a fixnum")
-     (core:raise-unless core:fixnump m 'core:rem "not a fixnum")
-     (mu:cons (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
+     (:if (core:fixnump n)
+          (:if (core:fixnump m)
+               (mu:cons (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))
+               (core:raise m 'core:rem "not a fixnum"))
+          (core:raise n 'core:floor "not a fixnum"))))
 
 ;;; round to positive infinity
 (mu:intern core "ceiling"
    (:lambda (n m)
-     (core:raise-unless core:fixnump n 'core:ceiling "not a fixnum")
-     (core:raise-unless core:fixnump m 'core:ceiling "not a fixnum")
-     (mu:cons (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
+     (:if (core:fixnump n)
+          (:if (core:fixnump m)
+               (mu:cons (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))
+               (core:raise m 'core:ceiling "not a fixnum"))
+          (core:raise n 'core:ceiling "not a fixnum"))))
 
 (mu:intern core "mod"
    (:lambda (n m)
-     (core:raise-unless core:fixnump n 'core:mod "not a fixnum")
-     (core:raise-unless core:fixnump m 'core:mod "not a fixnum")
-     (mu:cdr (core:floor m n))))
+     (:if (core:fixnump n)
+          (:if (core:fixnump m)
+               (mu:cdr (core:floor m n))
+               (core:raise m 'core:mod "not a fixnum"))
+          (core:raise n 'core:mod "not a fixnum"))))
 
 (mu:intern core "rem"
    (:lambda (n m)
-     (core:raise-unless core:fixnump n 'core:rem "not a fixnum")
-     (core:raise-unless core:fixnump m 'core:rem "not a fixnum")
-     (mu:cd (core:truncate m n))))
+     (:if (core:fixnump n)
+          (:if (core:fixnump m)
+               (mu:cdr (core:truncate m n))
+               (core:raise m 'core:rem "not a fixnum"))
+          (core:raise n 'core:rem "not a fixnum"))))
 
 ;;; round to nearest
 (mu:intern core "round"
    (:lambda (n m)
-     (core:raise-unless core:fixnump n 'core:round "not a fixnum")
-     (core:raise-unless core:fixnump m 'core:round "not a fixnum")
-     (mu:fx-sub (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))))
+     (:if (core:fixnump n)
+          (:if (core:fixnump m)
+               (mu:fx-sub (mu:fx-div n m) (mu:fx-sub n (mu:fx-mul m (mu:fx-div n m))))
+               (core:raise m 'core:round "not a fixnum"))
+          (core:raise n 'core:round "not a fixnum"))))
 
 (mu:intern core "ash"
    (:lambda (n count)
@@ -66,8 +78,8 @@
                          (:if (core:zerop count)
                               loop
                               (:if (core:minusp count) 
-                                   (mu:cons (mu:fx-div n 2) (core:1+ count))
-                                   (mu:cons (mu:fx-mul n 2) (core:1- count)))))
+                                   (mu:cons (mu:fx-div n 2) (mu:fx-add 1 count))
+                                   (mu:cons (mu:fx-mul n 2) (mu:fx-sub count 1)))))
                       (mu:car loop)
                       (mu:cdr loop)))
                   (mu:cons n count)))
