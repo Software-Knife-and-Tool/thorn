@@ -47,7 +47,7 @@
        (:if verbose
             (core:format :t ";;; compiling ~A~%" `(,source))
             ())
-       (core:format ofs "(core:%load-fasl ~S #(:t ~%" `(source)) 
+       ;;; (core:format ofs "(core:%load-fasl ~S #(:t ~%" `(source)) 
        (mu:fix
         (:lambda (loop)
           (:if (core:eof ifs)
