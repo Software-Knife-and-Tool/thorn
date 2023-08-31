@@ -12,7 +12,7 @@ pub mod frame;
 pub mod functions;
 pub mod indirect;
 pub mod mu;
-pub mod nsmap;
+pub mod namespace;
 pub mod reader;
 pub mod readtable;
 pub mod types;

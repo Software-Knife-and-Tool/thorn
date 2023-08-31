@@ -7,7 +7,6 @@ pub mod cons;
 pub mod fixnum;
 pub mod float;
 pub mod function;
-pub mod namespace;
 pub mod stream;
 pub mod streambuilder;
 pub mod struct_;

@@ -8,13 +8,13 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         mu::Mu,
+        namespace::{Core as _, Namespace},
         types::{Tag, Type},
     },
     types::{
         cons::{Cons, ConsIter, Core as _},
         fixnum::Fixnum,
         function::Function,
-        namespace::{Core as _, Namespace},
         symbol::{Core as _, Symbol},
     },
 };

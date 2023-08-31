@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! mu namespace type
+//! mu namespace symbols
 use {
     crate::{
         core::{
@@ -9,23 +9,86 @@ use {
             frame::Frame,
             indirect::IndirectTag,
             mu::{Core as _, Mu},
-            nsmap::NSMaps,
             types::{Tag, TagType, Type},
         },
         types::{
-            cons::{Cons, Core as _},
             symbol::{Core as _, Symbol, UNBOUND},
             vecimage::{TypedVec, VecType},
             vector::{Core as _, Vector},
         },
     },
-    std::str,
+    std::{collections::HashMap, str, sync::RwLock},
 };
 
+pub trait NSMaps {
+    type NSCache;
+    type NSMap;
+
+    fn add_ns(_: &Mu, _: Tag) -> exception::Result<Tag>;
+    fn intern(_: &Mu, _: Tag, _: Tag);
+    fn map(_: &Mu, _: Tag, _: &str) -> Option<Tag>;
+    fn map_ns(_: &Mu, _: &str) -> Option<Tag>;
+}
+
+impl NSMaps for Mu {
+    type NSCache = RwLock<HashMap<String, Tag>>;
+    type NSMap = HashMap<u64, (Tag, Self::NSCache)>;
+
+    fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
+        let mut ns_ref = mu.ns_map.write().unwrap();
+
+        if ns_ref.contains_key(&ns.as_u64()) {
+            return Err(Exception::new(Condition::Type, "make-ns", ns));
+        }
+
+        ns_ref.insert(
+            ns.as_u64(),
+            (ns, RwLock::new(HashMap::<String, Tag>::new())),
+        );
+
+        Ok(ns)
+    }
+
+    fn map_ns(mu: &Mu, name: &str) -> Option<Tag> {
+        let ns_ref = mu.ns_map.read().unwrap();
+
+        for (_, ns) in ns_ref.iter() {
+            let (ns_name, _) = ns;
+            let map_name = Vector::as_string(mu, Namespace::name(mu, *ns_name));
+
+            if name == map_name {
+                return Some(*ns_name);
+            }
+        }
+
+        None
+    }
+
+    fn map(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
+        let ns_ref = mu.ns_map.read().unwrap();
+        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+        let hash = ns_cache.read().unwrap();
+
+        if hash.contains_key(name) {
+            Some(hash[name])
+        } else {
+            None
+        }
+    }
+
+    fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
+        let ns_ref = mu.ns_map.read().unwrap();
+        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+        let name = Vector::as_string(mu, Symbol::name(mu, symbol));
+
+        let mut hash = ns_cache.write().unwrap();
+        hash.insert(name, symbol);
+    }
+}
+
 pub struct Namespace {
-    name: Tag,    // string
-    symbols: Tag, // list of symbols
-    import: Tag,  // import namespace
+    name: Tag,   // string
+    import: Tag, // import namespace
 }
 
 impl Namespace {
@@ -33,7 +96,6 @@ impl Namespace {
         match Tag::type_of(mu, import) {
             Type::Null | Type::Namespace => Namespace {
                 name: Vector::from_string(name).evict(mu),
-                symbols: Tag::nil(),
                 import,
             },
             _ => panic!(),
@@ -41,11 +103,7 @@ impl Namespace {
     }
 
     pub fn evict(&self, mu: &Mu) -> Tag {
-        let image: &[[u8; 8]] = &[
-            self.name.as_slice(),
-            self.symbols.as_slice(),
-            self.import.as_slice(),
-        ];
+        let image: &[[u8; 8]] = &[self.name.as_slice(), self.import.as_slice()];
 
         let mut heap_ref = mu.heap.write().unwrap();
         Tag::Indirect(
@@ -65,11 +123,8 @@ impl Namespace {
                         name: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize, 8).unwrap(),
                         ),
-                        symbols: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
-                        ),
                         import: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
+                            heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
                         ),
                     }
                 }
@@ -83,16 +138,6 @@ impl Namespace {
         match Tag::type_of(mu, ns) {
             Type::Namespace => match ns {
                 Tag::Indirect(_) => Self::to_image(mu, ns).name,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
-    }
-
-    pub fn symbols(mu: &Mu, ns: Tag) -> Tag {
-        match Tag::type_of(mu, ns) {
-            Type::Namespace => match ns {
-                Tag::Indirect(_) => Self::to_image(mu, ns).symbols,
                 _ => panic!(),
             },
             _ => panic!(),
@@ -185,14 +230,9 @@ impl Core for Namespace {
 
                         <Mu as NSMaps>::intern(mu, ns, symbol);
 
-                        let mut image = Self::to_image(mu, ns);
-                        image.symbols = Cons::new(symbol, image.symbols).evict(mu);
+                        let image = Self::to_image(mu, ns);
 
-                        let slices: &[[u8; 8]] = &[
-                            image.name.as_slice(),
-                            image.symbols.as_slice(),
-                            image.import.as_slice(),
-                        ];
+                        let slices: &[[u8; 8]] = &[image.name.as_slice(), image.import.as_slice()];
 
                         let offset = match ns {
                             Tag::Indirect(heap) => heap.offset(),
@@ -365,7 +405,7 @@ impl MuFunction for Namespace {
 
         match Tag::type_of(mu, ns) {
             Type::Namespace => {
-                fp.value = Self::symbols(mu, ns);
+                fp.value = Tag::nil();
                 Ok(())
             }
             _ => Err(Exception::new(Condition::Type, "ns-syms", ns)),
