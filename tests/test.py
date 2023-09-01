@@ -27,11 +27,15 @@ def runtest(line, test, expected):
 
     proc.communicate()
 
-    aborted = False if proc.poll() == 0 else True
-    passed = True if obtained == expected else False
+    exception = False if proc.poll() == 0 else True
+
+    if exception:
+        print(f'exception: {ns:}/{test}:{line:<5} {err}', file=sys.stderr)
+    
+    pass_ = True if obtained == expected else False
     result = { 'expect': expected, 'obtain': obtained }
 
-    return { 'line': line, 'abort': aborted, 'pass': passed, 'test': test, 'result': result }
+    return { 'line': line, 'exception': exception, 'pass': pass_, 'test': test, 'result': result }
 
 test_results = []
 line = 0

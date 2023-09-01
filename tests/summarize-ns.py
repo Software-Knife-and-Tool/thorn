@@ -12,30 +12,31 @@ groups = test_results['results']
 
 test_total = 0
 test_fails = 0
-test_aborts = 0
+test_exceptions = 0
+
 for group in groups:
     group_label = group['group']
     results = group['results']
 
     total = 0
     passed = 0
-    aborted = 0
+    exceptions = 0
     for result in results:
         total += 1
         passed += 1 if result['pass'] else 0
-        aborted += 1 if result['abort'] else 0
+        exceptions += 1 if result['exception'] else 0
 
-    failed = total - passed - aborted
-    print(f'{ns:<10} {group_label:<14} total: {total:<8} passed: {passed:<8} failed: {failed:<8} aborted: {aborted:<8}')
+    failed = total - passed - exceptions
+    print(f'{ns:<10} {group_label:<14} total: {total:<8} passed: {passed:<8} failed: {failed:<8} exceptions: {exceptions:<8}')
     test_total += total
     test_fails += failed
-    test_aborts += aborted
+    test_exceptions += exceptions
 
-test_passes = test_total - (test_fails + test_aborts)
+test_passes = test_total - (test_fails + test_exceptions)
 print('-----------------------')
 print(f'{ns:<11}', end='')
 print(f'passed: {test_passes:<7}', end='')
 print(f'total: {test_total:<9}', end='')
 print(f'failed: {test_fails:<9}', end='')
-print(f'aborted: {test_aborts:<10}')
+print(f'exceptions: {test_exceptions:<10}')
 print()

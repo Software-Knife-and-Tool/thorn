@@ -7,11 +7,12 @@ base = sys.argv[2]
 
 with open(base + '/' + ns + '/tests') as f: group_list = f.readlines()
 
-def runtest(line, test, expected):
+def runtest(line, group, test, expected):
     if ns == 'mu':
         proc = subprocess.Popen(['../dist/runtime', '-p', '-e' + test],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
+
     if ns == 'core':
         proc = subprocess.Popen(['../dist/runtime',
                                  '-l../dist/core.l',
@@ -26,11 +27,15 @@ def runtest(line, test, expected):
 
     proc.communicate()
 
-    aborted = False if proc.poll() == 0 else True
-    passed = True if obtained == expected else False
+    exception = False if proc.poll() == 0 else True
+
+    if exception:
+        print(f'exception: {ns:}/{group}:{line:<5} {err}', file=sys.stderr)
+
+    pass_ = True if obtained == expected else False
     result = { 'expect': expected, 'obtain': obtained }
 
-    return { 'line': line, 'abort': aborted, 'pass': passed, 'result': result }
+    return { 'line': line, 'exception': exception, 'pass': pass_, 'result': result }
 
 ns_results = []
 for group in group_list:
@@ -46,7 +51,7 @@ for group in group_list:
             continue
 
         test, expected = fields
-        results.append(runtest(line, test, expected))
+        results.append(runtest(line, group[:-1], test, expected))
 
     ns_results.append({'group': group[:-1], 'results': results})
 
