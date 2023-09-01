@@ -1,6 +1,7 @@
-//
-// symbol
-//
+//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-License-Identifier: MIT
+
+//! mu symbol type
 use {
     crate::{
         core::{
@@ -76,10 +77,7 @@ impl Symbol {
     pub fn namespace(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Keyword => mu.keyword_ns,
-            Type::Symbol => match symbol {
-                Tag::Indirect(_) => Self::to_image(mu, symbol).namespace,
-                _ => panic!(),
-            },
+            Type::Symbol => Self::to_image(mu, symbol).namespace,
             _ => panic!(),
         }
     }
@@ -90,10 +88,7 @@ impl Symbol {
                 Tag::Direct(dir) => Tag::to_direct(dir.data(), dir.length(), DirectType::Byte),
                 _ => panic!(),
             },
-            Type::Symbol => match symbol {
-                Tag::Indirect(_) => Self::to_image(mu, symbol).name,
-                _ => panic!(),
-            },
+            Type::Symbol => Self::to_image(mu, symbol).name,
             _ => panic!(),
         }
     }
@@ -101,10 +96,7 @@ impl Symbol {
     pub fn value(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Keyword => symbol,
-            Type::Symbol => match symbol {
-                Tag::Indirect(_) => Self::to_image(mu, symbol).value,
-                _ => panic!(),
-            },
+            Type::Symbol => Self::to_image(mu, symbol).value,
             _ => panic!(),
         }
     }
@@ -202,13 +194,13 @@ impl Core for Symbol {
                 match Mu::map_ns(mu, &ns) {
                     Some(ns) => Ok(Namespace::intern(mu, ns, name, *UNBOUND)),
                     None => Err(Exception::new(
-                        Condition::Unbound,
+                        Condition::Namespace,
                         "read:sy",
                         Vector::from_string(sym[0]).evict(mu),
                     )),
                 }
             }
-            None => Ok(Namespace::intern(mu, mu.unintern_ns, token, *UNBOUND)),
+            None => Ok(Namespace::intern(mu, mu.null_ns, token, *UNBOUND)),
         }
     }
 
@@ -233,7 +225,7 @@ impl Core for Symbol {
                 if escape {
                     let ns = Self::namespace(mu, symbol);
 
-                    if !ns.null_() {
+                    if !Tag::null_(&ns) && !mu.null_ns.eq_(ns) {
                         match mu.write(Namespace::name(mu, ns), false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
@@ -271,7 +263,7 @@ impl MuFunction for Symbol {
 
         fp.value = match Tag::type_of(mu, symbol) {
             Type::Null | Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
-            _ => return Err(Exception::new(Condition::Type, "sy-name", symbol)),
+            _ => return Err(Exception::new(Condition::Type, "sy:name", symbol)),
         };
 
         Ok(())
@@ -282,7 +274,7 @@ impl MuFunction for Symbol {
 
         fp.value = match Tag::type_of(mu, symbol) {
             Type::Symbol | Type::Keyword => Symbol::namespace(mu, symbol),
-            _ => return Err(Exception::new(Condition::Type, "sy-ns", symbol)),
+            _ => return Err(Exception::new(Condition::Type, "sy:ns", symbol)),
         };
 
         Ok(())

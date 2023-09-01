@@ -83,7 +83,11 @@
 (mu:intern core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
 (mu:intern core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
 (mu:intern core "functionp" (:lambda (t) (mu:eq :func (mu:type-of t))))
-(mu:intern core "namespacep" (:lambda (t) (mu:eq :ns (mu:type-of t))))
+(mu:intern core "namespacep"
+   (:lambda (t)
+      (:if (mu:eq :struct (mu:type-of t))
+           (mu:eq :ns (mu:st-type t))
+           ())))
 (mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
 (mu:intern core "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))
 

@@ -55,7 +55,7 @@ pub struct Mu {
     // namespaces
     pub keyword_ns: Tag,
     pub mu_ns: Tag,
-    pub unintern_ns: Tag,
+    pub null_ns: Tag,
 
     // reader
     pub reader: Reader,
@@ -77,7 +77,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.9";
+    const VERSION: &'static str = "0.0.10";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -110,7 +110,7 @@ impl Core for Mu {
             // namespaces
             keyword_ns: Tag::nil(),
             mu_ns: Tag::nil(),
-            unintern_ns: Tag::nil(),
+            null_ns: Tag::nil(),
             ns_map: RwLock::new(HashMap::new()),
 
             // streams
@@ -136,8 +136,8 @@ impl Core for Mu {
             Err(_) => panic!(),
         };
 
-        mu.unintern_ns = Namespace::new(&mu, "", Tag::nil()).evict(&mu);
-        match <Mu as NSMaps>::add_ns(&mu, mu.unintern_ns) {
+        mu.null_ns = Namespace::new(&mu, "", Tag::nil()).evict(&mu);
+        match <Mu as NSMaps>::add_ns(&mu, mu.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
@@ -246,7 +246,6 @@ impl Core for Mu {
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),
             Type::Float => Float::write(self, tag, escape, stream),
             Type::Function => Function::write(self, tag, escape, stream),
-            Type::Namespace => Namespace::write(self, tag, escape, stream),
             Type::Null | Type::Symbol | Type::Keyword => Symbol::write(self, tag, escape, stream),
             Type::Stream => Stream::write(self, tag, escape, stream),
             Type::Vector => Vector::write(self, tag, escape, stream),

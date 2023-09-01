@@ -378,7 +378,7 @@ impl Core for Reader {
                 if eofp {
                     Ok(eof_value)
                 } else {
-                    Err(Exception::new(Condition::Eof, "read:st", stream))
+                    Err(Exception::new(Condition::Eof, "read:sm", stream))
                 }
             }
             Ok(Some(ch)) => match map_char_syntax(ch) {
