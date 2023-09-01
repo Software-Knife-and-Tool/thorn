@@ -3,11 +3,11 @@
 (mu:boundp (mu:intern (mu:map-ns "mu") "foo" ()))	mu:foo
 (mu:untern (mu:map-ns "mu") "foo")	mu:foo
 (mu:boundp (mu:untern (mu:map-ns "mu") "foo"))	:nil
-(mu:make-ns "core" (mu:map-ns "mu"))	#<namespace: "core">
-(mu:map-ns "mu")	#<namespace: "mu">
+(mu:make-ns "core" (mu:map-ns "mu"))	#s(:ns core #s(:ns mu :nil))
+(mu:map-ns "mu")	#s(:ns mu :nil)
 (mu:map-ns "notfound")	:nil
-(mu:map-ns (mu:ns-name (mu:make-ns "core" (mu:map-ns "mu"))))	#<namespace: "core">
-(mu:ns-imp (mu:make-ns "core" (mu:map-ns "mu")))	#<namespace: "mu">
+(mu:map-ns (mu:ns-name (mu:make-ns "core" (mu:map-ns "mu"))))	#s(:ns core #s(:ns mu :nil))
+(mu:ns-imp (mu:make-ns "core" (mu:map-ns "mu")))	#s(:ns mu :nil)
 (mu:ns-imp (mu:map-ns "mu"))	:nil
 (mu:ns-find (mu:map-ns "mu") "eq")	mu:eq
 (mu:ns-find (mu:map-ns "mu") "foo")	:nil

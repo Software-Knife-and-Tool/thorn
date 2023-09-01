@@ -36,7 +36,6 @@ lazy_static! {
         (Symbol::keyword("cons"), Type::Cons),
         (Symbol::keyword("func"), Type::Function),
         (Symbol::keyword("nil"), Type::Null),
-        (Symbol::keyword("ns"), Type::Namespace),
         (Symbol::keyword("stream"), Type::Stream),
         (Symbol::keyword("symbol"), Type::Symbol),
         (Symbol::keyword("struct"), Type::Struct),
@@ -46,7 +45,6 @@ lazy_static! {
     static ref INFOTYPE: Vec<Tag> = vec![
         Symbol::keyword("cons"),
         Symbol::keyword("func"),
-        Symbol::keyword("ns"),
         Symbol::keyword("stream"),
         Symbol::keyword("struct"),
         Symbol::keyword("symbol"),

@@ -347,7 +347,6 @@ impl MuFunction for Mu {
             Type::Fixnum => Fixnum::view(mu, tag),
             Type::Float => Float::view(mu, tag),
             Type::Function => Function::view(mu, tag),
-            Type::Namespace => Namespace::view(mu, tag),
             Type::Null | Type::Symbol | Type::Keyword => Symbol::view(mu, tag),
             Type::Stream => Stream::view(mu, tag),
             Type::Struct => Struct::view(mu, tag),

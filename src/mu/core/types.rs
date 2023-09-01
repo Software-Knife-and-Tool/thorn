@@ -75,7 +75,6 @@ lazy_static! {
         (Type::Float, Symbol::keyword("float")),
         (Type::Function, Symbol::keyword("func")),
         (Type::Keyword, Symbol::keyword("keyword")),
-        (Type::Namespace, Symbol::keyword("ns")),
         (Type::Null, Symbol::keyword("null")),
         (Type::Stream, Symbol::keyword("stream")),
         (Type::Struct, Symbol::keyword("struct")),
