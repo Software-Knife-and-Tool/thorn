@@ -5,7 +5,7 @@
 ;;; return the elapsed process time in usec
 ;;; from applying fn to args
 ;;;
-(mu:intern mu "%tdelta"
+(mu:intern (mu:map-ns "mu") "%tdelta"
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:fx-sub stop start))
@@ -18,7 +18,7 @@
 ;;; return an vector of storage consumed
 ;;; by applying fn to args
 ;;;
-(mu:intern mu "%sdelta"
+(mu:intern (mu:map-ns "mu") "%sdelta"
   (:lambda (fn args)
     ((:lambda (start-vec stop-vec)
        (mu:fix

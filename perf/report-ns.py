@@ -10,6 +10,9 @@ ns = test_results['ns']
 def storage_bytes(hp_info):
     fields = hp_info[:-1].split()
 
+    if len(fields) < 29:
+        return 0
+    
     total = 0
     for i in range(2, 28, 4):
         total += int(fields[i])
