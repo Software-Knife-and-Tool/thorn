@@ -13,7 +13,6 @@
 'a-symbol
 'symbol
 'mu:eq
-'mu::eq
 's
 (mu:type-of '#:abc)
 :a
