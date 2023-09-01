@@ -2,8 +2,8 @@
 (mu:type-of core:read)	:func
 (mu:sy-name (core:read (core:make-string-stream :input "a") () ()))	"a"
 (mu:sy-name (core:read (core:make-string-stream :input "core:a") () ()))	"a"
-(mu:sy-ns (core:read (core:make-string-stream :input "a") () ()))	:nil
-(mu:sy-ns (core:read (core:make-string-stream :input "core:a") () ()))	#s(:ns core :nil)
+(mu:sy-ns (core:read (core:make-string-stream :input "a") () ()))	#s(:ns  :nil)
+(mu:sy-ns (core:read (core:make-string-stream :input "core:a") () ()))	#s(:ns core #s(:ns mu :nil))
 (core:read (core:make-string-stream :input "a") () ())	a
 (core:read (core:make-string-stream :input "core:a") () ())	core:a
 (core:read (core:make-string-stream :input "abcdefgh") () ())	abcdefgh
