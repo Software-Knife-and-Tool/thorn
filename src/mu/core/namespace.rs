@@ -11,6 +11,7 @@ use {
             types::{Tag, Type},
         },
         types::{
+            cons::{Cons, Core as _},
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol, UNBOUND},
             vector::{Core as _, Vector},
@@ -376,13 +377,23 @@ impl MuFunction for Namespace {
     fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
-        match Self::is_ns(mu, ns) {
+        fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
-                fp.value = Tag::nil();
-                Ok(())
+                let ns_ref = mu.ns_map.read().unwrap();
+                let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+                let hash = ns_cache.read().unwrap();
+                let mut vec = vec![];
+
+                for key in hash.keys() {
+                    vec.push(hash[key])
+                }
+
+                Cons::vlist(mu, &vec)
             }
-            _ => Err(Exception::new(Condition::Type, "ns-syms", ns)),
-        }
+            _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
+        };
+
+        Ok(())
     }
 }
 
