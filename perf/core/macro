@@ -1,4 +1,4 @@
-(core:compile '(defmacro a-macro ()))
+(core:compile '(defmacro core:a-macro ()))
 (mu:eval (core:compile '((lambda () (defmacro core:a-macro () 'a-macro) (core:macroexpand '(core:a-macro) ())))))
-(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function core:a-macro ()))))))
+(mu:type-of (mu:eval (core:compile '((lambda () (defmacro core:a-macro () a-macro) (core:macro-function 'core:a-macro ()))))))
 (core:macro-function core:macro-function ())

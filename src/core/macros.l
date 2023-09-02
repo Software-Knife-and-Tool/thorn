@@ -32,21 +32,21 @@
                  symbol-ns
                  macro-ns-name
                  (mu:make-ns macro-ns-name ())))))
-        (mu:ns-find (core:symbol-ns symbol) macro-ns-name)
+        (mu:ns-find core:%core-macrodefs% macro-ns-name)
         (core:symbol-ns symbol)
         (mu:sy-name symbol)))
-     (core:string-append `(,(mu:ns-name (core:symbol-ns symbol)) ":macrodefs")))))
+     (mu:ns-name (core:symbol-ns symbol)))))
 
 (mu:intern core "%core-find-macro"
    (:lambda (symbol env)
       (:if (mu:eq :symbol (mu:type-of symbol))
            ((:lambda (macro-ns symbol-ns symbol-name)
-                     (:if macro-ns
-                          (mu:ns-find (mu:sy-val macro-ns) symbol-name)
-                          ()))
+               (:if macro-ns
+                    (mu:ns-find (mu:sy-val macro-ns) symbol-name)
+                    ()))
             (mu:ns-find
-             (core:symbol-ns symbol)
-             (core:string-append `(,(mu:ns-name (core:symbol-ns symbol)) ":macrodefs")))
+             core:%core-macrodefs%
+             (mu:ns-name (core:symbol-ns symbol)))
             (core:symbol-ns symbol)
             (mu:sy-name symbol))
            (core:raise symbol 'core:%core-find-macro "is not a symbol"))))

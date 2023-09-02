@@ -63,7 +63,8 @@
       ((:lambda (symbol lambda-form)
           (:if (core:symbolp symbol)
                (core:intern symbol (core:%core-macro-env symbol (core:%compile-macro lambda-form env)))
-               (core:raise symbol 'core:defmacro-compiler "not a symbol")))
+               (core:raise symbol 'core:defmacro-compiler "not a symbol"))
+          `(:quote ,symbol))
         (mu:nth 1 form)
        (mu:nthcdr 2 form))))
 
@@ -77,7 +78,8 @@
                (:if (core:listp lambda-form)
                     (core:intern symbol (core:lambda-compiler lambda-form env))
                     (core:raise lambda-form 'core:defun-compiler "not a lambda list"))
-               (core:raise symbol 'core:defun-compiler "not a symbol")))
+               (core:raise symbol 'core:defun-compiler "not a symbol"))
+          `(:quote ,symbol))
        (mu:nth 1 form)
        (mu:nthcdr 1 form))))
 
