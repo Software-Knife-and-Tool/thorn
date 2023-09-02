@@ -12,4 +12,4 @@
 (mu:ns-find (mu:map-ns "mu") "eq")	mu:eq
 (mu:ns-find (mu:map-ns "mu") "foo")	:nil
 (mu:ns-name (mu:map-ns "mu"))	"mu"
-(mu:type-of (mu:ns-syms (mu:map-ns "mu")))	:null
+(mu:type-of (mu:ns-syms (mu:map-ns "mu")))	:cons

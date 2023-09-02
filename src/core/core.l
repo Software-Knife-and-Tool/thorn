@@ -9,6 +9,7 @@
 
 (mu:intern core "%core-char-macro-ns%" (mu:make-ns "%char-macro-ns%" ()))
 (mu:intern core "%core-symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%" ()))
+(mu:intern core "%core-macrodefs%" (mu:make-ns "%macrodefs-ns%" ()))
 
 ;;;
 ;;; core types
