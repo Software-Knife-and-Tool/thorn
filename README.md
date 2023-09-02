@@ -247,7 +247,6 @@ OPTIONS:
   -h                   print this message
   -?                   print this message
   -v                   print version string and exit
-  -e                   enable debugging
   -p                   pipe mode, no repl
   -l SRCFILE           load SRCFILE in sequence
   -e SEXPR             evaluate SEXPR and print result

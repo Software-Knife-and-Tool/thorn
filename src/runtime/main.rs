@@ -24,7 +24,6 @@ type OptDef = (OptType, String);
 #[derive(Debug, PartialEq)]
 enum OptType {
     Config,
-    Debug,
     Eval,
     Load,
     Pipe,
@@ -57,9 +56,6 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
                     }
                     Opt('p', None) => {
                         optv.push((OptType::Pipe, String::from("")));
-                    }
-                    Opt('d', None) => {
-                        optv.push((OptType::Debug, String::from("")));
                     }
                     Opt('e', Some(expr)) => {
                         optv.push((OptType::Eval, expr));
@@ -94,7 +90,6 @@ fn usage() {
     eprintln!("?: usage message");
     eprintln!("h: usage message");
     eprintln!("c: [name:value,...]");
-    eprintln!("d: debugging on");
     eprintln!("e: eval [form] and print result");
     eprintln!("l: load [path]");
     eprintln!("p: pipe mode");
@@ -197,9 +192,6 @@ pub fn main() {
                             std::process::exit(-1);
                         }
                     },
-                    OptType::Debug => {
-                        _debug = true;
-                    }
                     OptType::Pipe => {
                         pipe = true;
                     }
