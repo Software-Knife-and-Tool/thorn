@@ -38,7 +38,7 @@ core:
 commit:
 	@make summary --no-print-directory > tests.summary
 	@echo "Test Summaries"
-	@echo -n "--------------"
+	@echo "--------------"
 	@grep -v "failed: 0        aborted: 0" tests.summary | grep -v -- "----" | grep -v "Test Summary"
 	@echo "Test Diffs"
 	@echo "-------------"

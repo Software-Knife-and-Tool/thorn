@@ -191,6 +191,14 @@ impl Core for Symbol {
                 let ns = sym[0].to_string();
                 let name = sym[1].to_string();
 
+                if sym.len() != 2 {
+                    return Err(Exception::new(
+                        Condition::Syntax,
+                        "read:sy",
+                        Vector::from_string(&token).evict(mu),
+                    ));
+                }
+
                 match Mu::map_ns(mu, &ns) {
                     Some(ns) => Ok(Namespace::intern(mu, ns, name, *UNBOUND)),
                     None => Err(Exception::new(
