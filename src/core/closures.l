@@ -90,11 +90,8 @@
       (core:%make-lambda
        (core:%lambda-prop :bound fn)
        (core:%lambda-prop :rest fn)
-       (core:%foldl
-        (:lambda (frame))
-        (core:%closure-prop :env closure)
        (mu:frames))
-      (core:%closure-prop :fn fn)))))
+      (core:%closure-prop :fn fn))))
 
 ;;;
 ;;; compile closed lambda => closure

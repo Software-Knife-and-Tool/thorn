@@ -239,6 +239,10 @@ impl MuFunction for Namespace {
 
         fp.value = match Tag::type_of(mu, name) {
             Type::Vector if Vector::type_of(mu, name) == Type::Char => {
+                if Vector::length(mu, name) == 0 {
+                    return Err(Exception::new(Condition::Syntax, "intern", ns));
+                }
+
                 Self::intern(mu, ns, Vector::as_string(mu, name), *UNBOUND)
             }
             _ => return Err(Exception::new(Condition::Type, "untern-", ns)),
@@ -264,6 +268,10 @@ impl MuFunction for Namespace {
         fp.value = match Self::is_ns(mu, ns) {
             Some(ns) => match Tag::type_of(mu, name) {
                 Type::Vector if Vector::type_of(mu, name) == Type::Char => {
+                    if Vector::length(mu, name) == 0 {
+                        return Err(Exception::new(Condition::Syntax, "intern", ns));
+                    }
+
                     Self::intern(mu, ns, Vector::as_string(mu, name), value)
                 }
                 _ => return Err(Exception::new(Condition::Type, "intern", name)),
