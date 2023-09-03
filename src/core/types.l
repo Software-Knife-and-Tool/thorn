@@ -59,7 +59,7 @@
 (mu:intern core "%core-type-predicate"
    (:lambda (type object)
       ((:lambda (predicate)
-          (mu:apply predicate `(,object)))
+          (mu:funcall predicate `(,object)))
        (mu:cdr (core:%assoc type core:%core-type-predicate-map%)))))
 
 (mu:intern core "%make-core-type"

@@ -89,14 +89,14 @@
      (mu:with-ex
       (:lambda (object condition source)
          (:if (mu:eq condition :except)
-              (core:apply handler `(,object))
-              (core:apply handler `(,(core:make-exception
+              (core:funcall handler `(,object))
+              (core:funcall handler `(,(core:make-exception
                                       condition
                                       object
                                       source
                                       "mu:raise"
                                       (core:dropl (mu:frames) 4))))))
-      (:lambda () (core:apply thunk ())))))
+      (:lambda () (core:funcall thunk ())))))
 
 ;;;
 ;;; exception flavors
@@ -115,13 +115,13 @@
 
 (mu:intern core "raise-when"
   (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
+    (:if (mu:funcall fn `(,obj))
          (core:raise obj source reason)
          obj)))
 
 (mu:intern core "raise-unless"
   (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
+    (:if (mu:funcall fn `(,obj))
          obj
          (core:raise obj source reason))))
 
@@ -132,12 +132,12 @@
 
 (mu:intern core "warn-when"
   (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
+    (:if (mu:funcall fn `(,obj))
          (core:warn obj reason)
          obj)))
 
 (mu:intern core "warn-unless"
   (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
+    (:if (mu:funcall fn `(,obj))
          obj
          (core:warn obj reason))))

@@ -16,4 +16,4 @@
 `(,@(:quote (a b c)))	(a b c)
 `(0 ,@(:quote (a b c)) 1)	(0 a b c 1)
 `(,(mu:fx-add 1 2))	(3)
-(mu:apply (mu:eval (mu:intern () "foo" (:lambda (a) `(,a (2) 3)))) (:quote (4)))	(4 (2) 3)
+(mu:funcall (mu:eval (mu:intern () "foo" (:lambda (a) `(,a (2) 3)))) (:quote (4)))	(4 (2) 3)

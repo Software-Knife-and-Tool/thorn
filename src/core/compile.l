@@ -98,8 +98,8 @@
           (:if (core:%orf (mu:eq len 3) (mu:eq len 4))
               ((:lambda (t-arm f-arm)           
                   (mu:compile `(:if ,(mu:cons (core:%thunk (mu:nth 1 form) env) ()) ,t-arm ,f-arm)))
-               `(core:apply ,(core:%thunk (mu:nth 2 form) env) ())
-               `(core:apply ,(core:%thunk (mu:nth 3 form) env) ()))
+               `(core:funcall ,(core:%thunk (mu:nth 2 form) env) ())
+               `(core:funcall ,(core:%thunk (mu:nth 3 form) env) ()))
               (core:raise form 'core:if-compiler "takes two or three arguments")))
        (mu:length form))))
 
@@ -134,7 +134,7 @@
                               (:if (mu:eq :symbol (mu:type-of fn)) ; symbol, function symbol or special form
                                    ((:lambda (special)
                                        (:if special
-                                            (mu:apply (mu:sy-val special) `(,form ,env))
+                                            (mu:funcall (mu:sy-val special) `(,form ,env))
                                             (:if (core:fboundp fn)
                                                  ((:lambda (macro-fn)
                                                      (:if macro-fn
