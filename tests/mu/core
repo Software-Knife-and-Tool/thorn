@@ -4,14 +4,14 @@
 (mu:eval ())	:nil
 (mu:fix (:lambda (l) (:if l ((:lambda () (mu:write (mu:car l) () mu:std-out) (mu:cdr l))) ())) '(1 2 3 4))	1234:nil
 (mu:fix (:lambda (l) (:if l ((:lambda () (mu:write (mu:car (mu:car l)) () mu:std-out) (mu:cdr l))) ())) '((0 . 1) (2 . 3)))	02:nil
-(mu:apply mu:eq '(1 2))	:nil
-(mu:apply mu:fx-add '(1 2))	3
+(mu:funcall mu:eq '(1 2))	:nil
+(mu:funcall mu:fx-add '(1 2))	3
 (mu:type-of (mu:real-tm))	:fixnum
 (mu:type-of (mu:run-us))	:fixnum
 (mu:type-of #\a)	:char
 (mu:type-of '(1 2 3))	:cons
 (mu:type-of '(:lambda ()))	:cons
-(mu:type-of 'mu:apply)	:symbol
+(mu:type-of 'mu:funcall)	:symbol
 (mu:type-of ())	:null
 (mu:type-of 1)	:fixnum
 (mu:type-of :typeof)	:keyword

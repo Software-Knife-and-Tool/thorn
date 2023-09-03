@@ -4,4 +4,4 @@
 (core:compile '(if :t (mu:fx-add 0 1) (mu:fx-add 0 0)))
 (core:compile '(if (core:null ()) (mu:fx-add 0 1) (mu:fx-add 0 0)))
 (core:compile '(if (core:not (core:null :t)) (mu:fx-add 0 1) (mu:fx-add 0 0)))
-(core:compile '((lambda (fn) (core:apply (lambda (fn) (mu:eq :func (mu:type-of fn))) `(,fn))) mu:eq))
+(core:compile '((lambda (fn) (core:funcall (lambda (fn) (mu:eq :func (mu:type-of fn))) `(,fn))) mu:eq))

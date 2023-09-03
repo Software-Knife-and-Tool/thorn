@@ -77,11 +77,11 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.10";
+    const VERSION: &'static str = "0.0.11";
 
     fn new(config: String) -> Self;
-    fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
-    fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
+    fn funcall(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
+    fn funcall_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
     fn write(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn write_string(&self, _: String, _: Tag) -> exception::Result<()>;
@@ -180,13 +180,13 @@ impl Core for Mu {
         mu
     }
 
-    fn apply_(&self, func: Tag, argv: Vec<Tag>) -> exception::Result<Tag> {
+    fn funcall_(&self, func: Tag, argv: Vec<Tag>) -> exception::Result<Tag> {
         let value = Tag::nil();
 
-        Frame { func, argv, value }.apply(self, func)
+        Frame { func, argv, value }.funcall(self, func)
     }
 
-    fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
+    fn funcall(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
         let value = Tag::nil();
         let mut argv = Vec::new();
 
@@ -197,7 +197,7 @@ impl Core for Mu {
             }
         }
 
-        Frame { func, argv, value }.apply(self, func)
+        Frame { func, argv, value }.funcall(self, func)
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
@@ -215,12 +215,12 @@ impl Core for Mu {
                         } else {
                             let fnc = Symbol::value(self, func);
                             match Tag::type_of(self, fnc) {
-                                Type::Function => self.apply(fnc, args),
+                                Type::Function => self.funcall(fnc, args),
                                 _ => Err(Exception::new(Condition::Type, "eval", func)),
                             }
                         }
                     }
-                    Type::Function => self.apply(func, args),
+                    Type::Function => self.funcall(func, args),
                     _ => Err(Exception::new(Condition::Type, "eval", func)),
                 }
             }

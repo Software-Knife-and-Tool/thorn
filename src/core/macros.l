@@ -61,7 +61,7 @@
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
                      (:if macro-fn
-                          (core:apply macro-fn args)
+                          (core:funcall macro-fn args)
                           form))
                    (core:macro-function fn-symbol env))
                   form))

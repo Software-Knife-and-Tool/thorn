@@ -13,7 +13,7 @@
               (:if list
                    (mu:cons
                     (mu:cdr list)
-                    (mu:apply fn `(,(mu:car list) ,acc)))
+                    (mu:funcall fn `(,(mu:car list) ,acc)))
                    arg))
            (mu:car arg)
            (mu:cdr arg)))
@@ -30,7 +30,7 @@
                         (:if list
                              (mu:cons
                               (mu:cdr list)
-                              (core:apply fn `(,(mu:car list) ,acc)))
+                              (core:funcall fn `(,(mu:car list) ,acc)))
                              arg))
                      (mu:car arg)
                      (mu:cdr arg)))
@@ -55,7 +55,7 @@
       (:lambda (lst)
         (:if lst
              ((:lambda ()
-                 (mu:apply fn (mu:cons (mu:car lst) ()))
+                 (mu:funcall fn (mu:cons (mu:car lst) ()))
                  (mu:cdr lst)))
              ()))
       list)
@@ -69,7 +69,7 @@
                 (:lambda (lst)
                    (:if lst
                         ((:lambda ()
-                            (core:apply fn `(,(mu:car lst)))
+                            (core:funcall fn `(,(mu:car lst)))
                             (mu:cdr lst)))
                         ()))
                 list)
@@ -81,7 +81,7 @@
    (:lambda (fn list)
       (core:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(mu:apply fn `(,elt))))
+          `(,@acc ,(mu:funcall fn `(,elt))))
        ()
        list)))
 
@@ -91,7 +91,7 @@
           (:if (core:listp list)
                (core:%foldl
                 (:lambda (elt acc)
-                   `(,@acc ,(core:apply fn `(,elt))))
+                   `(,@acc ,(core:funcall fn `(,elt))))
                 ()
                 list)
                (core:raise list 'core:mapcar "not a list"))
@@ -105,7 +105,7 @@
                  (:lambda (list)
                     (:if list
                          ((:lambda ()
-                             (core:apply fn `(,list))
+                             (core:funcall fn `(,list))
                              (mu:cdr list)))
                          ()))
                  list)
@@ -123,7 +123,7 @@
                      ((:lambda (acc list)
                          (:if list
                               (mu:cons
-                               `(,@acc ,(core:apply fn `(,list)))
+                               `(,@acc ,(core:funcall fn `(,list)))
                                (mu:cdr list))
                               loop))
                       (mu:car loop)
