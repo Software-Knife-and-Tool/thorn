@@ -240,12 +240,12 @@ impl MuFunction for Namespace {
         fp.value = match Tag::type_of(mu, name) {
             Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                 if Vector::length(mu, name) == 0 {
-                    return Err(Exception::new(Condition::Syntax, "intern", ns));
+                    return Err(Exception::new(Condition::Syntax, "untern", ns));
                 }
 
                 Self::intern(mu, ns, Vector::as_string(mu, name), *UNBOUND)
             }
-            _ => return Err(Exception::new(Condition::Type, "untern-", ns)),
+            _ => return Err(Exception::new(Condition::Type, "untern", ns)),
         };
 
         Ok(())

@@ -9,6 +9,7 @@
       ((:lambda (stream)
           (core:mapc
            (:lambda (symbol)
+              (core:warn symbol "symbol:")
               (:if (mu:boundp symbol)
                    (core:format stream "~A~T~A~T~S~%"
                                 `(,(mu:sy-name symbol)

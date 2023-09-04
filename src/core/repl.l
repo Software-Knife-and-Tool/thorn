@@ -1,4 +1,4 @@
-;;;  Spdx-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-FileCopyrightText: Copyright 2023 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
@@ -12,7 +12,7 @@
                loop
                (core:with-exception
                 (:lambda (ex)
-                   (core:exceptf mu:err-out "exception: ~A on ~A by ~S from ~A~%" :t ex)
+                   (core:exceptf mu:err-out "exception: ~A on ~A by ~S, ~A~%" :t ex)
                    (core:null loop))
                 (:lambda ()
                    (core:format :t "core> " ())
