@@ -48,12 +48,15 @@
 ;;; compiled argument lists
 ;;;
 (mu:intern core "%compile-arg-list"
-  (:lambda (args env)
-    (core:foldr
-     (:lambda (elt acc)
-        (mu:cons 'mu:cons (mu:cons (core:%compile elt env) `(,acc))))
-     ()
-     args)))
+   (:lambda (args env)
+      (core:foldr
+       (:lambda (elt acc)
+          (mu:cons 'mu:cons (mu:cons elt `(,acc))))
+       ()
+       (core:mapcar
+        (:lambda (form)
+           (core:%compile form env))
+        args))))
 
 (mu:intern core "%compile-quoted-lambda-arg-list"
    (:lambda (fn args env)

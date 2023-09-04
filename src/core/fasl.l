@@ -54,7 +54,7 @@
                loop
                (core:with-exception
                 (:lambda (ex)
-                   (core:exceptf mu:err-out "compile exception: ~A on ~A by ~S from ~A~%" () ex)
+                   (core:exceptf mu:err-out "compile exception: ~A on ~A by ~S ~A~%" () ex)
                    loop)
                 (:lambda ()
                    ((:lambda (form)

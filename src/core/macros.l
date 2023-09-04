@@ -47,7 +47,7 @@
             (mu:ns-find
              core:%core-macrodefs%
              (mu:ns-name (core:symbol-ns symbol)))
-            (core:symbol-ns symbol)
+            (mu:sy-ns symbol)
             (mu:sy-name symbol))
            (core:raise symbol 'core:%core-find-macro "is not a symbol"))))
 
