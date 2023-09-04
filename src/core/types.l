@@ -18,7 +18,7 @@
           (:if (mu:eq type :struct)
                (:if (mu:eq :<ctype> (mu:st-type object))
                     (mu:untern () (mu:sv-ref (mu:st-vec object) 0))
-                    (mu:untern () (mu:st-type object)))
+                    (mu:st-type object))
                (:if (core:stringp object)
                     'string
                     (mu:untern () (mu:sy-name type)))))
