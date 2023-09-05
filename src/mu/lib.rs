@@ -100,9 +100,9 @@ impl Mu {
         Mu(core::mu::Mu::new(config))
     }
 
-    /// funcall a function to a list of arguments
-    pub fn funcall(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
-        self.0.funcall(func, args)
+    /// apply a function to a list of arguments
+    pub fn apply(&self, func: Tag, args: Tag) -> exception::Result<Tag> {
+        self.0.apply(func, args)
     }
 
     /// test tagged s-expressions for strict equality

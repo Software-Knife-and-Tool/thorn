@@ -110,13 +110,13 @@
    (:lambda (fn)
       (core:%orf (core:closurep fn) (core:functionp fn))))
 
-(mu:intern core "funcall"
+(mu:intern core "apply"
    (:lambda (fn args)
      (:if (core:%appliablep fn)
           (:if (core:closurep fn)
                (core:%closure-apply fn args)
-               (mu:funcall fn args))
-          (core:raise fn 'core:funcall "not a function designator"))))
+               (mu:apply fn args))
+          (core:raise fn 'core:apply "not a function designator"))))
 
 ;;;
 ;;; fixpoint loop
@@ -128,7 +128,7 @@
                 ((:lambda (fn)
                     (mu:fix fn list))
                  (:if (core:closurep fn)
-                      (:lambda (arg) (core:funcall fn `(,arg)))
+                      (:lambda (arg) (core:apply fn `(,arg)))
                       fn))
                 (core:raise list 'core:fix "not a list"))
            (core:raise fn 'core:fix "not a function designator"))))

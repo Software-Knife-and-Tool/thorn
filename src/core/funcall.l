@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; compile funcalls
+;;; compile applys
 ;;;
 
 ;;;
@@ -81,15 +81,15 @@
   (:lambda (form args env)
      ((:lambda (fn)
         (:if (core:closurep fn)
-             `(,mu:funcall ,(core:%closure-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
-             `(,mu:funcall ,fn ,(core:%compile-arg-list args env))))
+             `(,mu:apply ,(core:%closure-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
+             `(,mu:apply ,fn ,(core:%compile-arg-list args env))))
      (core:%compile form env))))
 
 (mu:intern core "%compile-fn-call"
    (:lambda (fn args env)
       (:if (core:closurep fn)
-           `(,core:funcall ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
-           `(,mu:funcall ,fn ,(core:%compile-arg-list args env)))))
+           `(,core:apply ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
+           `(,mu:apply ,fn ,(core:%compile-arg-list args env)))))
 
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol args env)
@@ -103,6 +103,6 @@
         ((:lambda (fn)
             (:if (core:closurep fn)
                  `(,core:%closure-apply ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
-                 `(,mu:funcall ,fn ,(core:%compile-arg-list args env))))
+                 `(,mu:apply ,fn ,(core:%compile-arg-list args env))))
          (core:symbol-value symbol))
-        `(,core:funcall ,symbol ,(core:%compile-arg-list args env)))))
+        `(,core:apply ,symbol ,(core:%compile-arg-list args env)))))

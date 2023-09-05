@@ -47,7 +47,7 @@ impl MuFunction for Async {
                             // sync::Mutex::lock(&start);
                             let _value = Tag::nil();
                             // let _argv = args;
-                            // Frame { func, argv, value }.funcall(mu, func)
+                            // Frame { func, argv, value }.apply(mu, func)
                             Ok(Tag::nil())
                         })
                         .unwrap();

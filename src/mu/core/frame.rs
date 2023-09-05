@@ -3,7 +3,7 @@
 
 //! function call frame
 //!    Frame
-//!    funcall
+//!    apply
 //!    frame_push
 //!    frame_pop
 //!    frame_ref
@@ -146,14 +146,14 @@ impl Frame {
         Some(vec_ref[vec_ref.len() - 1].argv[offset])
     }
 
-    // funcall
-    pub fn funcall(mut self, mu: &Mu, func: Tag) -> exception::Result<Tag> {
+    // apply
+    pub fn apply(mut self, mu: &Mu, func: Tag) -> exception::Result<Tag> {
         match Tag::type_of(mu, func) {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, func) {
-                    Err(Exception::new(Condition::Unbound, "funcall", func))
+                    Err(Exception::new(Condition::Unbound, "apply", func))
                 } else {
-                    self.funcall(mu, Symbol::value(mu, func))
+                    self.apply(mu, Symbol::value(mu, func))
                 }
             }
             Type::Function => match Tag::type_of(mu, Function::form(mu, func)) {
@@ -163,7 +163,7 @@ impl Frame {
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
-                        return Err(Exception::new(Condition::Arity, "funcall", func));
+                        return Err(Exception::new(Condition::Arity, "apply", func));
                     }
 
                     let fn_off = Fixnum::as_i64(mu, Function::form(mu, func)) as usize;
@@ -179,7 +179,7 @@ impl Frame {
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
-                        return Err(Exception::new(Condition::Arity, "funcall", func));
+                        return Err(Exception::new(Condition::Arity, "apply", func));
                     }
 
                     let mut value = Tag::nil();
@@ -201,9 +201,9 @@ impl Frame {
 
                     Ok(value)
                 }
-                _ => Err(Exception::new(Condition::Type, "funcall", func)),
+                _ => Err(Exception::new(Condition::Type, "apply", func)),
             },
-            _ => Err(Exception::new(Condition::Type, "funcall", func)),
+            _ => Err(Exception::new(Condition::Type, "apply", func)),
         }
     }
 }
