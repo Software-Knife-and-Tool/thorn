@@ -12,7 +12,7 @@
             (:if (mu:eq nth (mu:sv-len vector))
                  ()
                  ((:lambda ()
-                     (core:funcall fn `(,(mu:sv-ref vector nth)))
+                     (core:apply fn `(,(mu:sv-ref vector nth)))
                      (mu:fx-add 1 nth))))
             ()))
      0)))

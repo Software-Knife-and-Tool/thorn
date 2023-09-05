@@ -56,7 +56,7 @@
                           loop
                           (:if (mu:cdr loop)
                                ((:lambda (el)
-                                   (:if (core:funcall fn `(,el))
+                                   (:if (core:apply fn `(,el))
                                         (mu:cons :t el)
                                         (mu:cons () (mu:cdr (mu:cdr loop)))))
                                 (mu:car (mu:cdr loop)))
@@ -84,7 +84,7 @@
                                    loop
                                    (:if (mu:fx-lt len loop)
                                         ()
-                                        (:if (core:funcall fn `(,(mu:nth loop list)))
+                                        (:if (core:apply fn `(,(mu:nth loop list)))
                                              `(,loop)
                                              (mu:fx-add 1 loop)))))
                            0)))
@@ -106,7 +106,7 @@
                                loop
                                (:if (mu:fx-lt loop 0)
                                     ()
-                                    (:if (core:funcall fn `(,(mu:nth loop list)))
+                                    (:if (core:apply fn `(,(mu:nth loop list)))
                                          `(,loop)
                                          (mu:fx-sub loop 1)))))
                        (mu:fx-sub (mu:length list) 1))))

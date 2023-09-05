@@ -11,7 +11,7 @@
        (mu:fx-sub stop start))
        (mu:run-us)
        ((:lambda ()
-          (mu:funcall fn args)
+          (mu:apply fn args)
           (mu:run-us))))))
 
 ;;;
@@ -43,5 +43,5 @@
          (mu:cons () 1)))
      (mu:hp-info)
      ((:lambda ()
-         (mu:funcall fn args)
+         (mu:apply fn args)
          (mu:hp-info))))))

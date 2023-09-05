@@ -49,7 +49,7 @@ lazy_static! {
         ("async", 2, Async::mu_async),
         ("await", 2, Async::mu_await),
         // mu
-        ("funcall", 2, Mu::mu_funcall),
+        ("apply", 2, Mu::mu_apply),
         ("arity", 1, Mu::mu_arity),
         ("compile", 1, Mu::mu_compile),
         ("eval", 1, Mu::mu_eval),
@@ -159,7 +159,7 @@ impl Core for Mu {
 }
 
 pub trait MuFunction {
-    fn mu_funcall(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_arity(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -224,7 +224,7 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_funcall(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_apply(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
@@ -238,14 +238,14 @@ impl MuFunction for Mu {
                         argv.push(Cons::car(mu, cons))
                     }
 
-                    match (Frame { func, argv, value }).funcall(mu, func) {
+                    match (Frame { func, argv, value }).apply(mu, func) {
                         Ok(value) => value,
                         Err(e) => return Err(e),
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "funcall", args)),
+                _ => return Err(Exception::new(Condition::Type, "apply", args)),
             },
-            _ => return Err(Exception::new(Condition::Type, "funcall", func)),
+            _ => return Err(Exception::new(Condition::Type, "apply", func)),
         };
 
         Ok(())
@@ -275,7 +275,7 @@ impl MuFunction for Mu {
         fp.value = match Tag::type_of(mu, true_fn) {
             Type::Function => match Tag::type_of(mu, false_fn) {
                 Type::Function => {
-                    match mu.funcall(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
+                    match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
                         Ok(tag) => tag,
                         Err(e) => return Err(e),
                     }
@@ -367,7 +367,7 @@ impl MuFunction for Mu {
                 loop {
                     let value = Tag::nil();
                     let argv = vec![fp.value];
-                    let result = Frame { func, argv, value }.funcall(mu, func);
+                    let result = Frame { func, argv, value }.apply(mu, func);
 
                     fp.value = match result {
                         Ok(value) => {

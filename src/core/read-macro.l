@@ -77,7 +77,7 @@
 (mu:intern core "%read-sharp"
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
-       (mu:funcall
+       (mu:apply
         (mu:sy-val (mu:cdr (core:%assoc ch sharp-table)))
         `(,ch ,stream)))
      (core:read-char stream () ())
@@ -166,7 +166,7 @@
 (mu:intern core "%read-macro"
   (:lambda (ch stream)
     ((:lambda (macro-table)
-       (mu:funcall
+       (mu:apply
             (mu:sy-val (mu:cdr (core:%assoc ch macro-table)))
             `(,ch ,stream)))
        '((#\" . core:%read-string)

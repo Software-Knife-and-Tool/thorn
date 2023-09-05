@@ -118,6 +118,6 @@
            (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
            value)
          ((:lambda (mu-fn)
-            (mu:funcall mu-fn (mu:eval (core:%lambda-arg-list fn args))))
+            (mu:apply mu-fn (mu:eval (core:%lambda-arg-list fn args))))
             (core:%closure-prop :fn fn))))
         (core:%closure-prop :env fn))))

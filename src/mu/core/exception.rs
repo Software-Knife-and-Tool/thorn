@@ -148,12 +148,12 @@ impl MuFunction for Exception {
                         unwind_ref.push(dynamic_ref.len())
                     }
 
-                    match mu.funcall(thunk, Tag::nil()) {
+                    match mu.apply(thunk, Tag::nil()) {
                         Ok(value) => value,
                         Err(e) => {
                             let args =
                                 vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
-                            match mu.funcall_(handler, args) {
+                            match mu.apply_(handler, args) {
                                 Ok(value) => {
                                     let mut dynamic_ref = mu.dynamic.write().unwrap();
                                     let mut unwind_ref = mu.unwind.write().unwrap();
