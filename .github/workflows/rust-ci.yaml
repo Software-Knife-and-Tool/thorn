@@ -1,64 +1,45 @@
-on: [push, pull_request]
+name: CI
 
-name: Continuous integration
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+  schedule: [cron: "40 1 * * *"]
+
+permissions:
+  contents: read
 
 jobs:
-  check:
-    name: Check
-    runs-on: ubuntu-latest
+  install:
+    name: Rust ${{matrix.rust}} on ${{matrix.os == 'ubuntu' && 'Linux' || matrix.os == 'macos' && 'macOS' || matrix.os == 'windows' && 'Windows' || '???'}}
+    runs-on: ${{matrix.os}}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos, windows]
+        rust: [nightly, beta, stable, 1.62.0, stable 18 months ago, stable minus 8 releases]
+        include:
+          - os: ubuntu
+            rust: 1.0.0
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: ./
+        name: Run dtolnay/rust-toolchain${{contains(matrix.rust, ' ') && ' for ' || '@'}}${{matrix.rust}}
+        id: toolchain
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-
-  test:
-    name: Test Suite
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-
-  fmt:
-    name: Rustfmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+          toolchain: ${{matrix.rust}}
+      - name: echo ${{'${{steps.toolchain.outputs.cachekey}}'}}
+        run: echo '${{steps.toolchain.outputs.cachekey}}'
+      - name: check ${{'${{steps.toolchain.outputs.cachekey}}'}}
+        if: matrix.rust == '1.62.0'
+        run: cmp -s <(echo ${{steps.toolchain.outputs.cachekey}}) <(echo 20220627a831)
+        shell: bash
+      - run: rustc --version
+      - run: cargo init . --bin --name CI
+        if: matrix.rust == 'nightly' || matrix.rust == 'beta' || matrix.rust == 'stable'
+      - run: cargo add syn@1
+        if: matrix.rust == 'nightly' || matrix.rust == 'beta' || matrix.rust == 'stable'
+      - run: cargo check
+        if: matrix.rust == 'nightly' || matrix.rust == 'beta' || matrix.rust == 'stable'
