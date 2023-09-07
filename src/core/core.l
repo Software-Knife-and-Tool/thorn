@@ -20,7 +20,7 @@
       (core:define-core-type "keyword"
         '((:name . :vector)))
 
-      ;;; closure
+      ;;; core function
       (core:define-core-type "funct"
         '((:lambda  . :struct)
           (:nargs   . :fixnum)
