@@ -51,6 +51,12 @@
             (mu:sy-name symbol))
            (core:raise symbol 'core:%core-find-macro "is not a symbol"))))
 
+(mu:intern core "%compile-macro-call"
+   (:lambda (macro-symbol args env)
+      (core:%compile
+       (core:macroexpand `(macro-symbol ,@args) env)
+       env)))
+
 ;;;
 ;;; macroexpand-1 expands a macro call once.
 ;;;

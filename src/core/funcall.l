@@ -78,31 +78,36 @@
 ;;; compile function applications
 ;;;
 (mu:intern core "%compile-lambda-call"
-  (:lambda (form args env)
+   (:lambda (form args env)
      ((:lambda (fn)
         (:if (core:closurep fn)
-             `(,mu:apply ,(core:%closure-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
-             `(,mu:apply ,fn ,(core:%compile-arg-list args env))))
+             `(mu:apply ,(core:%closure-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
+             `(mu:apply ,fn ,(core:%compile-arg-list args env))))
      (core:%compile form env))))
 
 (mu:intern core "%compile-fn-call"
    (:lambda (fn args env)
       (:if (core:closurep fn)
-           `(,core:apply ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
-           `(,mu:apply ,fn ,(core:%compile-arg-list args env)))))
-
-(mu:intern core "%compile-macro-call"
-   (:lambda (macro-symbol args env)
-      (core:%compile
-       (core:macroexpand `(macro-symbol ,@args) env)
-       env)))
+           `(core:apply ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
+           `(mu:apply ,fn ,(core:%compile-arg-list args env)))))
 
 (mu:intern core "%compile-symbol-call"
-  (:lambda (symbol args env)
+   (:lambda (symbol args env)
      (:if (core:boundp symbol)
-        ((:lambda (fn)
-            (:if (core:closurep fn)
-                 `(,core:%closure-apply ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
-                 `(,mu:apply ,fn ,(core:%compile-arg-list args env))))
-         (core:symbol-value symbol))
-        `(,core:apply ,symbol ,(core:%compile-arg-list args env)))))
+          ((:lambda (fn)
+              (:if (core:%appliablep fn)
+                   (:if (core:closurep fn)
+                        `(core:%closure-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
+                        `(mu:apply ,fn ,(core:%compile-arg-list args env)))
+                   (core:raise fn 'core:%compile-symbol-call "not appliable")))
+           (core:symbol-value symbol))
+          `(,core:apply ,symbol ,(core:%compile-arg-list args env)))))
+
+(mu:intern core "%compile-funcall"
+   (:lambda (operator args env)
+      (core:%compile-fn-call operator args env)
+      (:if (core:consp operator)
+           (core:%compile-lambda-call operator args env)
+           (:if (mu:eq :symbol (mu:type-of operator))
+                (core:%compile-symbol-call operator args env)
+                (core:raise form 'core:%compile "illegal function call")))))
