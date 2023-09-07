@@ -21,7 +21,7 @@
         '((:name . :vector)))
 
       ;;; closure
-      (core:define-core-type "closure"
+      (core:define-core-type "funct"
         '((:lambda  . :struct)
           (:nargs   . :fixnum)
           (:fn      . :func)
@@ -83,12 +83,21 @@
 (mu:intern core "charp" (:lambda (t) (mu:eq :char (mu:type-of t))))
 (mu:intern core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
 (mu:intern core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
-(mu:intern core "functionp" (:lambda (t) (mu:eq :func (mu:type-of t))))
+(mu:intern core "core-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
+(mu:intern core "mu-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
+
+(mu:intern core "functionp"
+   (:lambda (t)
+      (:if (mu:eq :func (mu:type-of t))
+           :t
+           (mu:eq (core:type-of t) 'funct))))
+
 (mu:intern core "namespacep"
    (:lambda (t)
       (:if (mu:eq :struct (mu:type-of t))
            (mu:eq :ns (mu:st-type t))
            ())))
+
 (mu:intern core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
 (mu:intern core "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))
 
@@ -103,32 +112,10 @@
   (:lambda (arg arg1)
     (:if arg arg1 ())))
 
-;;;
-;;; core apply
-;;;
-(mu:intern core "%appliablep"
-   (:lambda (fn)
-      (core:%orf (core:closurep fn) (core:functionp fn))))
-
 (mu:intern core "apply"
    (:lambda (fn args)
-     (:if (core:%appliablep fn)
-          (:if (core:closurep fn)
-               (core:%closure-apply fn args)
+     (:if (core:functionp fn)
+          (:if (core:core-function-p fn)
+               (core:%function-apply fn args)
                (mu:apply fn args))
           (core:raise fn 'core:apply "not a function designator"))))
-
-;;;
-;;; fixpoint loop
-;;;
-(mu:intern core "fix"
-   (:lambda (fn list)
-      (:if (core:%appliablep fn)
-           (:if (core:listp list)
-                ((:lambda (fn)
-                    (mu:fix fn list))
-                 (:if (core:closurep fn)
-                      (:lambda (arg) (core:apply fn `(,arg)))
-                      fn))
-                (core:raise list 'core:fix "not a list"))
-           (core:raise fn 'core:fix "not a function designator"))))

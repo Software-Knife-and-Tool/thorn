@@ -23,7 +23,6 @@ SOURCES=""
 # core.l needs to be first
 CORE=(\
         core.l	     	       \
-	closures.l             \
 	compile.l    	       \
 	describe.l             \
 	exceptions.l 	       \
@@ -31,6 +30,7 @@ CORE=(\
         fasl.l                 \
 	format.l     	       \
 	funcall.l              \
+        functions.l            \
 	lambda.l     	       \
 	lists.l      	       \
 	load.l       	       \

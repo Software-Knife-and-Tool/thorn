@@ -21,7 +21,7 @@
 
 (mu:intern core "foldl"
   (:lambda (fn init list)
-     (:if (core:%appliablep fn)
+     (:if (core:functionp fn)
           (:if (core:listp list)
                (mu:cdr
                 (mu:fix
@@ -40,7 +40,7 @@
 
 (mu:intern core "foldr"
    (:lambda (fn init list)
-    (:if (core:%appliablep fn)
+    (:if (core:functionp fn)
          (:if (core:listp list)
               (core:foldl fn init (core:reverse list))
               (core:raise list 'core:foldr "not a list"))
@@ -63,7 +63,7 @@
 
 (mu:intern core "mapc"
    (:lambda (fn list)
-     (:if (core:%appliablep fn)
+     (:if (core:functionp fn)
           (:if (core:listp list)
                (mu:fix
                 (:lambda (lst)
@@ -87,7 +87,7 @@
 
 (mu:intern core "mapcar"
    (:lambda (fn list)
-     (:if (core:%appliablep fn)
+     (:if (core:functionp fn)
           (:if (core:listp list)
                (core:%foldl
                 (:lambda (elt acc)
@@ -99,7 +99,7 @@
 
 (mu:intern core "mapl"
    (:lambda (fn list)
-      (:if (core:%appliablep fn)
+      (:if (core:functionp fn)
            (:if (core:listp list)
                 (mu:fix
                  (:lambda (list)
@@ -115,7 +115,7 @@
 
 (mu:intern core "maplist"
    (:lambda (fn list)
-      (:if (core:%appliablep fn)
+      (:if (core:functionp fn)
            (:if (core:listp list)
                 (mu:car
                  (mu:fix

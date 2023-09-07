@@ -4,7 +4,6 @@
 (mu:type-of core:dropr)	:func
 (mu:type-of core:findl)	:func
 (mu:type-of core:findr)	:func
-(mu:type-of core:fix)	:func
 (mu:type-of core:foldl)	:func
 (mu:type-of core:foldr)	:func
 (mu:type-of core:last)	:func

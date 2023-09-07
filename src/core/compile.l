@@ -22,7 +22,7 @@
 ;;;   form : special/macro form
 ;;;   env  : lexical environment list
 ;;;
-;;; returns: mu form or closure
+;;; returns: mu form or function ctype
 ;;;
 
 ;;;
@@ -39,7 +39,7 @@
           (quote    . core:quote-compiler))))))
 
 ;;;
-;;; lambda compiles to a closure core-type
+;;; lambda compiles to a function core-type
 ;;;
 (mu:intern core "lambda-compiler"
    (:lambda (form env)
@@ -51,7 +51,7 @@
                        (:if (core:%orf
                              (core:%lambda-prop :lexenv lambda-desc)
                              (core:%lambda-prop :rest lambda-desc))
-                            (core:%make-closure lambda-desc fn ())
+                            (core:%make-function lambda-desc fn ())
                             fn))
                     (mu:compile
                      `(:lambda
