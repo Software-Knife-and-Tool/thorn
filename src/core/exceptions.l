@@ -107,37 +107,7 @@
        (core:make-exception :error object source reason (core:dropl (mu:frames) 2))
        :except)))
 
-(mu:intern core "raise-if"
-  (:lambda (test obj source reason)
-    (:if test
-         (core:raise obj source reason)
-         obj)))
-
-(mu:intern core "raise-when"
-  (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
-         (core:raise obj source reason)
-         obj)))
-
-(mu:intern core "raise-unless"
-  (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
-         obj
-         (core:raise obj source reason))))
-
 (mu:intern core "warn"
   (:lambda (obj msg)
      (core:format mu:err-out ";;; warning: ~S ~A~%" `(,obj ,msg))
     obj))
-
-(mu:intern core "warn-when"
-  (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
-         (core:warn obj reason)
-         obj)))
-
-(mu:intern core "warn-unless"
-  (:lambda (fn obj source reason)
-    (:if (mu:apply fn `(,obj))
-         obj
-         (core:warn obj reason))))
