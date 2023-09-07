@@ -21,7 +21,7 @@ Namespace Test Summary:
 core       closure        total: 7        passed: 6        failed: 0        exceptions: 1       
 core       compile        total: 22       passed: 22       failed: 0        exceptions: 0       
 core       core           total: 21       passed: 21       failed: 0        exceptions: 0       
-core       exception      total: 11       passed: 11       failed: 0        exceptions: 0       
+core       exception      total: 7        passed: 7        failed: 0        exceptions: 0       
 core       fixnum         total: 18       passed: 18       failed: 0        exceptions: 0       
 core       format         total: 15       passed: 15       failed: 0        exceptions: 0       
 core       lambda         total: 23       passed: 23       failed: 0        exceptions: 0       
@@ -35,5 +35,5 @@ core       symbol         total: 2        passed: 2        failed: 0        exce
 core       types          total: 6        passed: 6        failed: 0        exceptions: 0       
 core       vector         total: 1        passed: 1        failed: 0        exceptions: 0       
 -----------------------
-core       passed: 310    total: 311      failed: 0        exceptions: 1         
+core       passed: 306    total: 307      failed: 0        exceptions: 1         
 

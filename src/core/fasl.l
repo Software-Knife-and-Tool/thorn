@@ -10,9 +10,9 @@
 ;;;
 (mu:intern core "load"
   (:lambda (source verbose)
-    (core:raise-unless core:stringp source 'core:load "not a file designator")
+    ;;; (core:raise core:stringp source 'core:load "not a file designator")
     ((:lambda (ifs)
-       (core:raise-unless core:streamp ifs 'core:load "cannot open input file")
+       ;;; (core:raise core:streamp ifs 'core:load "cannot open input file")
        (:if verbose
             (core:format :t ";;; loading ~A~%" `(,source))
             ())
@@ -40,10 +40,10 @@
 ;;;
 (mu:intern core "compile-file"
   (:lambda (source dest verbose)
-    (core:raise-unless core:stringp source 'core:compile-file "not a file designator")
+    ;;; (core:raise-unless core:stringp source 'core:compile-file "not a file designator")
     ((:lambda (ifs ofs)
-       (core:raise-unless core:streamp ifs 'core:compile-file "cannot open input file")
-       (core:raise-unless core:streamp ofs 'core:compile-file "cannot open output file")
+       ;;; (core:raise-unless core:streamp ifs 'core:compile-file "cannot open input file")
+       ;;; (core:raise-unless core:streamp ofs 'core:compile-file "cannot open output file")
        (:if verbose
             (core:format :t ";;; compiling ~A~%" `(,source))
             ())
@@ -86,11 +86,7 @@
                (:if (core:fixnump byte)
                     (core:write-byte byte stream)
                     ((:lambda ()
-                     (core:raise-unless
-                      core:stringp
-                      byte
-                      'core:elf64-write-bytes
-                      "untranslated type")
+                     ;;; (core:raise core:stringp byte 'core:elf64-write-bytes "untranslated type")
                      (core:%mapv
                       (:lambda (ch)
                          (core:write-char ch stream))
@@ -152,7 +148,7 @@
 
 (mu:intern core "elf64-write-header"
    (:lambda (out size)
-      (core:raise-unless core:streamp out 'elf64-write-header "not a stream designator")
+      ;;; (core:raise core:streamp out 'elf64-write-header "not a stream designator")
       ;;; header 64 bit little endian current version
       (core:elf64-write-bytes `(,out #x7f "ELF" 2 1 1 0 0 0 0 0 0 0 0 0))
                                          ; 0 e_ident
@@ -222,7 +218,7 @@
 
 (mu:intern core "elf64-print-header"
   (:lambda (elf64-header)
-     (core:raise-unless core:consp elf64-header 'core:elf64-print-header "not an association list")
+     ;;; (core:raise core:consp elf64-header 'core:elf64-print-header "not an association list")
      (core:%mapc
       (:lambda (entry)
          (core:format t "    ~A: ~A~%" `(,(mu:car entry) ,(mu:cdr entry))))
@@ -230,11 +226,11 @@
 
 (mu:intern core "elf64-dump"
    (:lambda (path)
-      (core:raise-unless core:stringp path 'core:elf64-dump "not a pathname")
+      ;;; (core:raise core:stringp path 'core:elf64-dump "not a pathname")
       ((:lambda (elf64)
           ((:lambda (magic)
-              (core:raise-when core:null magic 'core:elf64-dump "error reading magic")
-              (core:raise-unless (:lambda (magic) (mu:eq #x7f magic)) magic 'core:elf64-dump "wrong magic")
+              ;;; (core:raise core:null magic 'core:elf64-dump "error reading magic")
+              ;;; (core:raise (:lambda (magic) (mu:eq #x7f magic)) magic 'core:elf64-dump "wrong magic")
               (core:format :t "~A: elf64 file (magic #x~X ~A~A~A)~%"
                            `(path
                              magic

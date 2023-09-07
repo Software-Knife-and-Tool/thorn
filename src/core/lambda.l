@@ -31,7 +31,7 @@
    (:lambda (prop lambda)
       (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :rest :lexenv))
            ((:lambda (ref)
-               (core:raise-when core:null prop 'lambda-prop "property not bound")
+               ;;; (core:raise-when core:null prop 'lambda-prop "property not bound")
                (mu:cdr ref))
             (core:%core-type-ref prop lambda))
            (core:raise prop 'lambda-prop "not a lambda property"))))

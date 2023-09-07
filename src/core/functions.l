@@ -32,7 +32,7 @@
    (:lambda (prop fn)
       (:if (core:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :nargs :fn :env))
            ((:lambda (ref)
-               (core:raise-when core:null prop 'core:%function-prop "property not bound")
+               ;;; (core:raise-when core:null prop 'core:%function-prop "property not bound")
                (mu:cdr ref))
             (core:%core-type-ref prop fn))
            (core:%lambda-prop prop (core:%function-prop :lambda fn)))))

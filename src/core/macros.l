@@ -111,7 +111,7 @@
 (mu:intern core "%core-macro"
    (:lambda (lambda env)
      (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-         (core:raise-if lambda 'core:%core-macro "lambda syntax")
+         (core:raise lambda 'core:%core-macro "lambda syntax")
          ((:lambda (desc)
              (:if (core:fixnump desc)
                   (core:%make-lambda lambda () env)

@@ -107,7 +107,7 @@
                           (:if (mu:eq :symbol (mu:type-of el))
                                (:if (mu:eq (mu:sy-name el) ".")
                                     ((:lambda (dotted)
-                                       (core:raise-if (core:null dotted) () 'core:%read-list "early eof in dotted list")
+                                       ;;; (core:raise-if (core:null dotted) () 'core:%read-list "early eof in dotted list")
                                        (:if (mu:eq (core:%read stream) core:%read-list-eol%)
                                             ((:lambda ()
                                                 (mu:un-char #\) stream)
