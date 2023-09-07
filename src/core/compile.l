@@ -28,6 +28,15 @@
 ;;;
 ;;; special forms
 ;;;
+(mu:intern core "%core-special-table"
+   (:lambda (symbol)
+      (mu:cdr (core:%assoc
+        symbol
+        '((defun    . core:defun-compiler)
+          (defmacro . core:defmacro-compiler)
+          (if       . core:if-compiler)
+          (lambda   . core:lambda-compiler)
+          (quote    . core:quote-compiler))))))
 
 ;;;
 ;;; lambda compiles to a closure core-type
@@ -111,42 +120,26 @@
 ;;;
 ;;; compiler
 ;;;
-(mu:intern core "%core-special-table"
-   (:lambda (symbol)
-      (mu:cdr (core:%assoc
-        symbol
-        '((defun    . core:defun-compiler)
-          (defmacro . core:defmacro-compiler)
-          (if       . core:if-compiler)
-          (lambda   . core:lambda-compiler)
-          (quote    . core:quote-compiler))))))
-
 (mu:intern core "%compile"
    (:lambda (form env)                 
       (:if (core:consp form)
            ((:lambda (fn args)
-               (:if (core:%appliablep fn)
-                    (core:%compile-fn-call fn args env)
-                    (:if (core:keywordp fn)
-                         (mu:compile form)     ; mu special form (:key ...)
-                         (:if (core:consp fn)  ; application ((...) ...), native or core
-                              (core:%compile-lambda-call fn args env)
-                              (:if (mu:eq :symbol (mu:type-of fn)) ; symbol, function symbol or special form
-                                   ((:lambda (special)
-                                       (:if special
-                                            (mu:apply (mu:sy-val special) `(,form ,env))
-                                            (:if (core:fboundp fn)
-                                                 ((:lambda (macro-fn)
-                                                     (:if macro-fn
-                                                          (core:%compile-macro-call fn args env)
-                                                          (core:%compile-symbol-call fn args env)))
-                                                  (core:macro-function fn env))
-                                                 (core:%compile-symbol-call fn args env))))
-                                    (core:%core-special-table fn))
-                                   (core:raise form 'core:%compile "not a function designator"))))))
-            (mu:car form)
-            (mu:cdr form))
-           form)))
+               (:if (core:keywordp fn)
+                    (mu:compile form)                    ; mu special form (:key ...)
+                    (:if (mu:eq :symbol (mu:type-of fn)) ; special form or macro
+                         ((:lambda (special)
+                             (:if special
+                                  (mu:apply (mu:sy-val special) `(,form ,env))
+                                  ((:lambda (macro-fn)
+                                      (:if macro-fn
+                                           (core:%compile-macro-call fn args env)
+                                           (core:%compile-funcall fn args env)))
+                                   (core:macro-function fn env))))
+                             (core:%core-special-table fn))
+                         (core:%compile-funcall fn args env))))
+               (mu:car form)
+               (mu:cdr form))
+            form)))
 
 (mu:intern core "compile"
    (:lambda (form)
