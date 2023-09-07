@@ -26,19 +26,19 @@
 (mu:intern core "%describe-struct"
    (:lambda (struct)
       (core:format :t
-       "closure: :struct ~A~%    type:  ~A~%    props: ~A~%"       
+       "funct: :struct ~A~%    type:  ~A~%    props: ~A~%"       
        `(,(core:type-of struct)
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
 
-(mu:intern core "%describe-closure"
-   (:lambda (closure)
+(mu:intern core "%describe-function"
+   (:lambda (fn)
       (core:format :t
-       "closure: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"       
-       `(,(core:type-of closure)
-         ,(core:%closure-prop :nargs closure)
-         ,(core:%closure-prop :fn closure)
-         ,(core:%closure-prop :env closure)))))
+       "function: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"       
+       `(,(core:type-of gn)
+         ,(core:%function-prop :nargs fn)
+         ,(core:%function-prop :fn fn)
+         ,(core:%function-prop :env fn)))))
 
 (mu:intern core "%describe-symbol"
    (:lambda (symbol)
@@ -114,7 +114,6 @@
                (mu:car (mu:car list))
                (mu:cdr (mu:car list)))))
        `(,(mu:cons core:functionp core:%describe-function)
-         ,(mu:cons core:closurep core:%describe-closure)
          ,(mu:cons core:core-type-p core:%describe-core-type)
          ,(mu:cons core:structp core:%describe-struct)
          ,(mu:cons core:symbolp core:%describe-symbol)

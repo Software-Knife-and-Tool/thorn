@@ -18,7 +18,7 @@
 
 (mu:intern core "%lambda-arg-list"
    (:lambda (fn args)
-      (:if (core:closurep fn)
+      (:if (core:functionp fn)
            ((:lambda (rest nreqs)
                (:if (core:%andf rest (core:zerop nreqs))
                     `(mu:cons ,(core:%arg-list args) ())
@@ -26,8 +26,8 @@
                         (core:%arg-list `(,@reqs ,(core:%arg-list rest))))
                      (core:dropr args (mu:fx-sub (mu:length args) nreqs))
                      (core:dropl args nreqs))))
-            (core:%closure-prop :rest fn)
-            (core:%closure-prop :nargs fn))
+            (core:%function-prop :rest fn)
+            (core:%function-prop :nargs fn))
            (core:%arg-list args))))
 
 (mu:intern core "%quoted-lambda-arg-list"
@@ -41,8 +41,8 @@
                        `(,@(core:dropr args (mu:fx-sub (mu:length args) nreqs))
                          ,@(core:dropl args nreqs)))
                   args))
-            (core:%closure-prop :rest fn)
-            (core:%closure-prop :nargs fn)))))
+            (core:%function-prop :rest fn)
+            (core:%function-prop :nargs fn)))))
 
 ;;;
 ;;; compiled argument lists
@@ -80,14 +80,14 @@
 (mu:intern core "%compile-lambda-call"
    (:lambda (form args env)
      ((:lambda (fn)
-        (:if (core:closurep fn)
-             `(mu:apply ,(core:%closure-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
+        (:if (core:core-function-p fn)
+             `(mu:apply ,(core:%function-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
              `(mu:apply ,fn ,(core:%compile-arg-list args env))))
      (core:%compile form env))))
 
 (mu:intern core "%compile-fn-call"
    (:lambda (fn args env)
-      (:if (core:closurep fn)
+      (:if (core:core-function-p fn)
            `(core:apply ,fn ,(core:%compile-quoted-lambda-arg-list fn args env))
            `(mu:apply ,fn ,(core:%compile-arg-list args env)))))
 
@@ -95,9 +95,9 @@
    (:lambda (symbol args env)
      (:if (core:boundp symbol)
           ((:lambda (fn)
-              (:if (core:%appliablep fn)
-                   (:if (core:closurep fn)
-                        `(core:%closure-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
+              (:if (core:functionp fn)
+                   (:if (core:core-function-p fn)
+                        `(core:%function-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
                         `(mu:apply ,fn ,(core:%compile-arg-list args env)))
                    (core:raise fn 'core:%compile-symbol-call "not appliable")))
            (core:symbol-value symbol))

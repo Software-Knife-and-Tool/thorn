@@ -7,7 +7,6 @@ SRC = ../src
 # core.l needs to be first
 CORE = \
 	core.l			\
-	closures.l		\
 	compile.l		\
 	describe.l		\
 	exceptions.l		\
@@ -15,6 +14,7 @@ CORE = \
 	fixnums.l		\
 	format.l		\
 	funcall.l		\
+	functions.l		\
 	lambda.l		\
 	lists.l			\
 	macros.l		\

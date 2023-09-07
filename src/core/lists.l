@@ -47,7 +47,7 @@
 ;;;
 (mu:intern core "findl"
    (:lambda (fn list)
-      (:if (core:%appliablep fn)
+      (:if (core:functionp fn)
            (:if (core:listp list)
                 (mu:cdr
                  (mu:fix
@@ -74,7 +74,7 @@
 ;;;
 (mu:intern core "positionl"
    (:lambda (fn list)
-     (:if (core:%appliablep fn)
+     (:if (core:functionp fn)
           (:if (core:listp list)
                (:if list
                     ((:lambda (len)
@@ -95,7 +95,7 @@
 
 (mu:intern core "positionr"
    (:lambda (fn list)
-      (:if (core:%appliablep fn)
+      (:if (core:functionp fn)
            (:if (core:listp list)
                 (:if (core:null list)
                      ()

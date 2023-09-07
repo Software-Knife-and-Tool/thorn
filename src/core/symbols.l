@@ -8,7 +8,7 @@
 (mu:intern core "fboundp"
   (:lambda (symbol)
     (:if (core:boundp symbol)
-         (core:%appliablep (mu:sy-val symbol))
+         (core:functionp (mu:sy-val symbol))
          ())))
 
 (mu:intern core "uninternedp"

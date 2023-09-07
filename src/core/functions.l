@@ -13,16 +13,12 @@
 ;;; fn:     implementation
 ;;; env:    dynamic environment, list of frames
 ;;;
-;;; closure
+;;; function
 ;;;
-(mu:intern core "closurep"
-  (:lambda (fn)
-     (mu:eq (core:type-of fn) 'closure)))
-
-(mu:intern core "%make-closure"
+(mu:intern core "%make-function"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
-          (core:%make-core-type "closure"
+          (core:%make-core-type "funct"
             (core:%pair-list
              `(:lambda ,lambda
                :nargs  ,nargs
@@ -32,14 +28,14 @@
         (mu:length (core:%lambda-prop :bound lambda))
         (:if (core:%lambda-prop :rest lambda) 1 0)))))
 
-(mu:intern core "%closure-prop"
-   (:lambda (prop closure)
-      (:if (core:findl (:lambda (closure-prop) (mu:eq prop closure-prop)) '(:lambda :nargs :fn :env))
+(mu:intern core "%function-prop"
+   (:lambda (prop fn)
+      (:if (core:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :nargs :fn :env))
            ((:lambda (ref)
-               (core:raise-when core:null prop 'closure-prop "property not bound")
+               (core:raise-when core:null prop 'core:%function-prop "property not bound")
                (mu:cdr ref))
-            (core:%core-type-ref prop closure))
-           (core:%lambda-prop prop (core:%closure-prop :lambda closure)))))
+            (core:%core-type-ref prop fn))
+           (core:%lambda-prop prop (core:%function-prop :lambda fn)))))
 
 ;;;
 ;;; create closed environment => env
@@ -91,16 +87,16 @@
        (core:%lambda-prop :bound fn)
        (core:%lambda-prop :rest fn)
        (mu:frames))
-      (core:%closure-prop :fn fn))))
+      (core:%function-prop :fn fn))))
 
 ;;;
-;;; compile closed lambda => closure
+;;; compile closed lambda => function
 ;;;
-(mu:intern core "%compile-closure"
+(mu:intern core "%compile-function"
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)
-              (core:%make-closure lambda fn ()))
+              (core:%make-function lambda fn ()))
            (mu:compile
             `(:lambda
               ,(core:%lambda-prop :bound lambda)
@@ -110,7 +106,7 @@
 ;;;
 ;;; apply closure to list of args => obj
 ;;;
-(mu:intern core "%closure-apply"
+(mu:intern core "%function-apply"
    (:lambda (fn args)
       ((:lambda (env)
         (core:%mapc mu:fr-push env)
@@ -119,5 +115,5 @@
            value)
          ((:lambda (mu-fn)
              (mu:apply mu-fn (mu:eval (core:%lambda-arg-list fn args))))
-          (core:%closure-prop :fn fn))))
-        (core:%closure-prop :env fn))))
+          (core:%function-prop :fn fn))))
+        (core:%function-prop :env fn))))
