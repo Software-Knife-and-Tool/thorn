@@ -107,7 +107,7 @@
 ;;; apply closure to list of args => obj
 ;;;
 (mu:intern core "%function-apply"
-   (:lambda (fn args)
+   (:lambda (fn args)                 
       ((:lambda (env)
         (core:%mapc mu:fr-push env)
         ((:lambda (value)

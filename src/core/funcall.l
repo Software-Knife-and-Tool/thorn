@@ -73,15 +73,16 @@
 ;;;
 ;;; compile-funcall
 ;;;
-;;; convert core lambdas to mu forms
-;;; compile function applications
+;;; compile function applications to mu-appliable forms
 ;;;
 (mu:intern core "%compile-lambda-call"
    (:lambda (form args env)
-     ((:lambda (fn)
-        (:if (core:core-function-p fn)
-             `(core:%%function-apply ,(core:%function-prop :fn fn) ,(core:%compile-lambda-arg-list fn args env))
-             `(mu:apply ,fn ,(core:%compile-arg-list args env))))
+      ((:lambda (fn)
+        (:if (core:functionp fn)                
+             (:if (core:core-function-p fn)
+                  `(core:%%function-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
+                  `(mu:apply ,fn ,(core:%compile-arg-list args env)))
+             (core:raise fn 'core:%compile-lambda-call "illegal function call")))
      (core:%compile form env))))
 
 (mu:intern core "%compile-symbol-call"
