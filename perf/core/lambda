@@ -14,5 +14,3 @@
 (core:apply (core:compile '(lambda (a b c d &rest e) e)) '(1 2 3 4 5))
 (core:apply (core:compile '(lambda (a b c d e &rest f) f)) '(1 2 3 4 5))
 (mu:type-of (core:apply (core:compile '(lambda (a) (a))) (mu:cons (:lambda () 1) ())))
-(mu:eval (core:compile '((lambda (a &rest b) (a b)) mu:car 1 2 3)))
-(mu:eval (core:compile '((lambda (a &rest b) (a b)) mu:car (mu:fx-add 2 1) 2 1)))

@@ -15,7 +15,7 @@
 ;;; rest:   rest symbol or nil
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
-(mu:intern core "lambdap"
+(mu:intern core "%lambdap"
    (:lambda (fn)
       (mu:eq (core:type-of fn) 'lambda)))
 
@@ -54,7 +54,7 @@
                  desc))
           (core:%foldl
             (:lambda (el acc)
-               (:if (core:lambdap acc)
+               (:if (core:%lambdap acc)
                   acc
                   (:if (mu:eq '&rest el)
                      (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
