@@ -91,13 +91,13 @@
 (mu:intern core "%get-symbol-macro"
    (:lambda (symbol)
       (:if (mu:eq :symbol (mu:type-of symbol))
-           (mu:ns-find core:%core-symbol-macro-ns% (core:symbol-name symbol))
+           (mu:ns-find core:%symbol-macro-ns% (core:symbol-name symbol))
            (core:raise symbol 'get-symbol-macro-form "not a symbol"))))
 
 (mu:intern core "define-symbol-macro"
    (:lambda (symbol form)
       (:if (mu:eq :symbol (mu:type-of symbol))
-           (mu:intern core:%core-symbol-macro-ns% (mu:sy-name symbol) form)
+           (mu:intern core:%symbol-macro-ns% (mu:sy-name symbol) form)
            (core:raise symbol 'core:define-symbol-macro "not a symbol"))))
 
 ;;; (core:define-symbol-macro 't :t)

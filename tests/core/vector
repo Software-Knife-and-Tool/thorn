@@ -1,1 +1,1 @@
-(mu:type-of core:%mapv)	:func
+(mu:type-of core:%map-vector)	:func

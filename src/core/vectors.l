@@ -4,7 +4,7 @@
 ;;;
 ;;;  core vectors
 ;;;
-(mu:intern core "%mapv"
+(mu:intern core "%map-vector"
   (:lambda (fn vector)
     (mu:fix
      (:lambda (nth)

@@ -7,19 +7,15 @@
 (mu:intern () "mu" (mu:map-ns "mu"))
 (mu:intern () "core" (mu:make-ns "core" (mu:map-ns "mu")))
 
-(mu:intern core "%core-char-macro-ns%" (mu:make-ns "%char-macro-ns%" ()))
-(mu:intern core "%core-macro-ns%" (mu:make-ns "%macro-ns%" ()))
-(mu:intern core "%core-symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%" ()))
+(mu:intern core "%char-macro-ns%" (mu:make-ns "%char-macro-ns%" ()))
+(mu:intern core "%macro-ns%" (mu:make-ns "%macro-ns%" ()))
+(mu:intern core "%symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%" ()))
 
 ;;;
 ;;; core types
 ;;;
 (mu:intern core "%init-core-ns"
    (:lambda ()
-      ;;; keyword
-      (core:define-core-type "keyword"
-        '((:name . :vector)))
-
       ;;; core function
       (core:define-core-type "funct"
         '((:lambda  . :struct)
@@ -31,21 +27,13 @@
       (core:define-core-type "lambda"
         '((:bound  . :listp)
           (:rest   . :symbolp)
-          (:lexenv . :listp)))
-
-      ;;; sequence
-      (core:define-core-type "seq"
-        '((:type   . :symbol)
-          (:vector . :vector)
-          (:cons   . :cons)))))
+          (:lexenv . :listp)))))
 
 ;;;
 ;;; predicates
 ;;;
 (mu:intern core "not" (:lambda (t) (core:null t)))
-(mu:intern core "atom"
-  (:lambda (obj)
-    (core:not (core:consp obj))))
+(mu:intern core "atom" (:lambda (obj) (core:not (core:consp obj))))
 
 (mu:intern core "numberp"
   (:lambda (n)

@@ -26,7 +26,7 @@
     (mu:make-st :except
       `(,cond ,object ,source ,reason ,env))))
 
-(mu:intern core "%exception-property"
+(mu:intern core "%exception-prop"
   (:lambda (key exception)
     (mu:sv-ref
      (mu:st-vec exception)
@@ -78,11 +78,11 @@
                                      ,(mu:cdr frame))))
                    (mu:cdr env))))
              ()))
-     (core:%exception-property :cond except)
-     (core:%exception-property :object except)
-     (core:%exception-property :source except)
-     (core:%exception-property :reason except)
-     (core:%exception-property :env except))))
+     (core:%exception-prop :cond except)
+     (core:%exception-prop :object except)
+     (core:%exception-prop :source except)
+     (core:%exception-prop :reason except)
+     (core:%exception-prop :env except))))
 
 (mu:intern core "with-exception"
   (:lambda (handler thunk)

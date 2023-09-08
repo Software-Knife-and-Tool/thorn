@@ -40,14 +40,10 @@
 ;;;
 (mu:intern core "compile-file"
   (:lambda (source dest verbose)
-    ;;; (core:raise-unless core:stringp source 'core:compile-file "not a file designator")
     ((:lambda (ifs ofs)
-       ;;; (core:raise-unless core:streamp ifs 'core:compile-file "cannot open input file")
-       ;;; (core:raise-unless core:streamp ofs 'core:compile-file "cannot open output file")
        (:if verbose
             (core:format :t ";;; compiling ~A~%" `(,source))
             ())
-       ;;; (core:format ofs "(core:%load-fasl ~S #(:t ~%" `(source))
        (mu:fix
         (:lambda (loop)
           (:if (core:eof ifs)
@@ -87,7 +83,7 @@
                     (core:write-byte byte stream)
                     ((:lambda ()
                      ;;; (core:raise core:stringp byte 'core:elf64-write-bytes "untranslated type")
-                     (core:%mapv
+                     (core:%map-vector
                       (:lambda (ch)
                          (core:write-char ch stream))
                       byte))))))
