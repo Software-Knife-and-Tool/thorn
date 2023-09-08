@@ -106,7 +106,7 @@
 
 (mu:intern core "string-append"
    (:lambda (list)
-      (:if (core:listp list) 
+      (:if (core:listp list)
            ((:lambda (stream)
                (mu:fix
                 (:lambda (list)

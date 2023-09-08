@@ -32,7 +32,7 @@
                  symbol-ns
                  macro-ns-name
                  (mu:make-ns macro-ns-name ())))))
-        (mu:ns-find core:%core-macrodefs% macro-ns-name)
+        (mu:ns-find core:%core-macro-ns% macro-ns-name)
         (core:symbol-ns symbol)
         (mu:sy-name symbol)))
      (mu:ns-name (core:symbol-ns symbol)))))
@@ -45,7 +45,7 @@
                     (mu:ns-find (mu:sy-val macro-ns) symbol-name)
                     ()))
             (mu:ns-find
-             core:%core-macrodefs%
+             core:%core-macro-ns%
              (mu:ns-name (core:symbol-ns symbol)))
             (mu:sy-ns symbol)
             (mu:sy-name symbol))

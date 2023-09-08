@@ -77,7 +77,7 @@
                      ((:lambda (n count)
                          (:if (core:zerop count)
                               loop
-                              (:if (core:minusp count) 
+                              (:if (core:minusp count)
                                    (mu:cons (mu:fx-div n 2) (mu:fx-add 1 count))
                                    (mu:cons (mu:fx-mul n 2) (mu:fx-sub count 1)))))
                       (mu:car loop)

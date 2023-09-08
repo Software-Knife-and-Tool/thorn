@@ -118,7 +118,7 @@
 ;;;
 (mu:intern core "append"
    (:lambda (list)
-      (:if (core:listp list)                 
+      (:if (core:listp list)
            (core:foldr
             (:lambda (el acc)
                (:if (core:listp el)
@@ -127,13 +127,13 @@
             ()
             list)
       (core:raise list 'core:append "not a list"))))
-   
+
 (mu:intern core "reverse"
    (:lambda (list)
       (:if (core:listp list)
            (core:foldl mu:cons () list)
            (core:raise list 'core:reverse "not a list"))))
-   
+
 (mu:intern core "dropl"
    (:lambda (list n)
       (:if (core:listp list)

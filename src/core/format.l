@@ -26,7 +26,7 @@
 (mu:intern core "%fmt-decimal"
   (:lambda (dest args)
      (:if (core:fixnump (mu:car args))
-          ((:lambda ()           
+          ((:lambda ()
               (core:write (mu:car args) () dest)
               (mu:cdr args)))
           (core:raise (mu:car args) 'core:format "argument to ~D not a fixnum"))))

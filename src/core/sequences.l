@@ -13,7 +13,7 @@
                 (mu:length seq)
                 (mu:sv-len seq))
            (core:raise seq 'core:length "not a sequence"))))
-   
+
 (mu:intern core "elt"
    (:lambda (seq nth)
       (:if (core:sequencep seq)
