@@ -6,7 +6,7 @@
 ;;;
 
 ;;;
-;;; [*closure descriptor*] #s(:<ctype> :closure (lambda nargs fn env))
+;;; [*function descriptor*] #s(:<ctype> :funct (lambda nargs fn env))
 ;;;
 ;;; lambda: lambda struct
 ;;; nargs:  number of reqs plus rest
@@ -82,7 +82,7 @@
 (mu:intern core "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
-         (core:%make-closure lambda fn env))
+         (core:%make-function lambda fn env))
       (core:%make-lambda
        (core:%lambda-prop :bound fn)
        (core:%lambda-prop :rest fn)

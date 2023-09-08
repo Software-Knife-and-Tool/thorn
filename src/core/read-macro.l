@@ -186,14 +186,14 @@
               (:if macro-symbol
                    (core:symbol-value macro-symbol)
                    ()))
-           (mu:ns-find core:%core-char-macro-ns% (mu:make-sv :char `(,char))))
+           (mu:ns-find core:%char-macro-ns% (mu:make-sv :char `(,char))))
           (core:raise char 'core:get-macro-character "not a character"))))
 
 (mu:intern core "set-macro-character"
    (:lambda (char fn non-terminating)
       (:if (core:charp char)
          (:if (core:functionp fn)
-              (mu:intern core:%core-char-macro-ns% (mu:make-sv :char `(,char)) (mu:cons fn non-terminating))
+              (mu:intern core:%char-macro-ns% (mu:make-sv :char `(,char)) (mu:cons fn non-terminating))
               (core:raise fn 'core:set-macro-character "not a function"))
          (core:raise char 'core:set-macro-character "not a character"))
       :t))
