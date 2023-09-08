@@ -8,15 +8,15 @@
 (mu:intern () "core" (mu:make-ns "core" (mu:map-ns "mu")))
 
 (mu:intern core "%core-char-macro-ns%" (mu:make-ns "%char-macro-ns%" ()))
+(mu:intern core "%core-macro-ns%" (mu:make-ns "%macro-ns%" ()))
 (mu:intern core "%core-symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%" ()))
-(mu:intern core "%core-macrodefs%" (mu:make-ns "%macrodefs-ns%" ()))
 
 ;;;
 ;;; core types
 ;;;
 (mu:intern core "%init-core-ns"
    (:lambda ()
-      ;;; keyword                 
+      ;;; keyword
       (core:define-core-type "keyword"
         '((:name . :vector)))
 
@@ -68,7 +68,7 @@
                 (mu:fl-lt n 0.0)
                 (mu:fx-lt n 0))
            (core:raise n 'core:minusp "not a number"))))
-   
+
 (mu:intern core "plusp"
    (:lambda (n)
       (:if (core:numberp n)

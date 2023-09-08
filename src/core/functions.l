@@ -58,7 +58,7 @@
                                       acc
                                       ((:lambda (binding-lambda)
                                           (:if binding-lambda
-                                                (mu:cons (mu:cons form binding-lambda) acc)  
+                                                (mu:cons (mu:cons form binding-lambda) acc)
                                                 acc))
                                        (core:findl
                                         (:lambda (lambda)
@@ -107,7 +107,7 @@
 ;;; apply closure to list of args => obj
 ;;;
 (mu:intern core "%function-apply"
-   (:lambda (fn args)                 
+   (:lambda (fn args)
       ((:lambda (env)
         (core:%mapc mu:fr-push env)
         ((:lambda (value)

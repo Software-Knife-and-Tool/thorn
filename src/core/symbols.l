@@ -32,7 +32,7 @@
 (mu:intern core "symbol-ns"
    (:lambda (sym)
       (:if (core:null sym)
-           (mu:map-ns "mu")     
+           (mu:map-ns "mu")
            (mu:sy-ns sym))))
 
 (mu:intern core "symbol-value" mu:sy-val)
@@ -44,7 +44,7 @@
                 (mu:keyword name)
                 (core:%make-core-type "keyword" `(,(mu:cons :name name))))
            (core:raise name 'core:keyword "not a keyword name"))))
-   
+
 (mu:intern core "intern"
    (:lambda (symbol value)
       (:if (core:uninternedp symbol)

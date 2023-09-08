@@ -9,7 +9,7 @@
       ((:lambda (view)
           (core:format :t
             "function: :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
-            `(,(core:type-of fn) 
+            `(,(core:type-of fn)
               ,(mu:sv-ref view 2)
               ,(mu:sv-ref view 0)
               ,(mu:sv-ref view 1))))
@@ -18,7 +18,7 @@
 (mu:intern core "%describe-core-type"
    (:lambda (core-type)
       (core:format :t
-       "core-type: :<ctype> ~A~%    type:  ~A~%    props: ~A~%"       
+       "core-type: :<ctype> ~A~%    type:  ~A~%    props: ~A~%"
        `(,(core:type-of core-type)
          ,(mu:sv-ref (mu:st-vec core-type) 0)
          ,(mu:sv-ref (mu:st-vec core-type) 0)))))
@@ -26,7 +26,7 @@
 (mu:intern core "%describe-struct"
    (:lambda (struct)
       (core:format :t
-       "funct: :struct ~A~%    type:  ~A~%    props: ~A~%"       
+       "funct: :struct ~A~%    type:  ~A~%    props: ~A~%"
        `(,(core:type-of struct)
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
@@ -34,7 +34,7 @@
 (mu:intern core "%describe-function"
    (:lambda (fn)
       (core:format :t
-       "function: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"       
+       "function: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"
        `(,(core:type-of gn)
          ,(core:%function-prop :nargs fn)
          ,(core:%function-prop :fn fn)
@@ -42,7 +42,7 @@
 
 (mu:intern core "%describe-symbol"
    (:lambda (symbol)
-      (:if (core:null symbol) 
+      (:if (core:null symbol)
            (core:format :t
             "symbol: :null null~%    ns:    ()~%    name:  :nil~%    value: ()~%"
             ())

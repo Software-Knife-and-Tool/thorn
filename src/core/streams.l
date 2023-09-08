@@ -41,7 +41,7 @@
 (mu:intern core "make-string-stream"
    (:lambda (dir init)
       (:if (core:keywordp dir)
-           (:if (core:stringp init)           
+           (:if (core:stringp init)
                 (:if (mu:eq dir :input)
                      (mu:open :string :input init)
                      (:if (mu:eq dir :output)
@@ -49,7 +49,7 @@
                           (core:raise dir 'core:make-string-stream "not a direction keyword")))
                 (core:raise dir 'core:make-string-stream "not a direction keyword"))
            (core:raise init 'core:make-string-stream "not a string initializer"))))
-      
+
 (mu:intern core "open"
   (:lambda (dir path)
      (:if (core:stringp path)
@@ -65,7 +65,7 @@
 (mu:intern core "close"
    (:lambda (stream)
       (:if (core:streamp stream)
-           (mu:close stream)                 
+           (mu:close stream)
            (core:raise stream 'core:close "not a stream"))))
 
 ;;;
@@ -106,7 +106,7 @@
       (:if (core:charp ch)
            (mu:un-char ch (core:%write-stream-designator designator))
            (core:raise ch 'core:unread-char "not a char"))))
-   
+
 ;;;
 ;;; read/write
 ;;;

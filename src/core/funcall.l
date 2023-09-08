@@ -78,7 +78,7 @@
 (mu:intern core "%compile-lambda-call"
    (:lambda (form args env)
       ((:lambda (fn)
-        (:if (core:functionp fn)                
+        (:if (core:functionp fn)
              (:if (core:core-function-p fn)
                   `(core:%%function-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
                   `(mu:apply ,fn ,(core:%compile-arg-list args env)))

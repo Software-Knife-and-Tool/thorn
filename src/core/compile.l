@@ -44,7 +44,7 @@
 (mu:intern core "lambda-compiler"
    (:lambda (form env)
       (:if (mu:eq (mu:length form) 1)
-           (core:raise form 'core:lambda-compiler "malformed lambda expression")           
+           (core:raise form 'core:lambda-compiler "malformed lambda expression")
            ((:lambda (lambda body)
                ((:lambda (lambda-desc)
                    ((:lambda (fn)
@@ -103,9 +103,9 @@
 
 (mu:intern core "if-compiler"
    (:lambda (form env)
-      ((:lambda (len)                
+      ((:lambda (len)
           (:if (core:%orf (mu:eq len 3) (mu:eq len 4))
-              ((:lambda (t-arm f-arm)           
+              ((:lambda (t-arm f-arm)
                   (mu:compile `(:if ,(mu:cons (core:%thunk (mu:nth 1 form) env) ()) ,t-arm ,f-arm)))
                `(core:apply ,(core:%thunk (mu:nth 2 form) env) ())
                `(core:apply ,(core:%thunk (mu:nth 3 form) env) ()))
@@ -121,7 +121,7 @@
 ;;; compiler
 ;;;
 (mu:intern core "%compile"
-   (:lambda (form env)                 
+   (:lambda (form env)
       (:if (core:consp form)
            ((:lambda (fn args)
                (:if (core:keywordp fn)

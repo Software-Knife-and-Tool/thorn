@@ -47,7 +47,7 @@
        (:if verbose
             (core:format :t ";;; compiling ~A~%" `(,source))
             ())
-       ;;; (core:format ofs "(core:%load-fasl ~S #(:t ~%" `(source)) 
+       ;;; (core:format ofs "(core:%load-fasl ~S #(:t ~%" `(source))
        (mu:fix
         (:lambda (loop)
           (:if (core:eof ifs)
@@ -108,7 +108,7 @@
             (mu:car loop)
             (mu:cdr loop)))
         (mu:cons nbytes ())))))
-         
+
 (mu:intern core "elf64-read"
    (:lambda (type stream)
       (:if (mu:eq type :half)
