@@ -54,7 +54,7 @@
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol args env)
       (core:%compile
-       (core:macroexpand `(macro-symbol ,@args) env)
+       (core:macroexpand `(macro-symbol ,@args env))
        env)))
 
 ;;;
@@ -67,7 +67,7 @@
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
                      (:if macro-fn
-                          (core:apply macro-fn args)
+                          (core:warn (core:apply macro-fn (core:%compile-quoted-lambda-arg-list macro-fn args env)) "macroexpand-1")
                           form))
                    (core:macro-function fn-symbol env))
                   form))

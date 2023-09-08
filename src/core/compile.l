@@ -32,11 +32,11 @@
    (:lambda (symbol)
       (mu:cdr (core:%assoc
         symbol
-        '((defun    . core:defun-compiler)
-          (defmacro . core:defmacro-compiler)
-          (if       . core:if-compiler)
-          (lambda   . core:lambda-compiler)
-          (quote    . core:quote-compiler))))))
+        '((define-core-function  . core:defun-compiler)
+          (define-core-macro     . core:defmacro-compiler)
+          (define-core-if        . core:if-compiler)
+          (define-core-lambda    . core:lambda-compiler)
+          (quote                 . core:quote-compiler))))))
 
 ;;;
 ;;; lambda compiles to a function core-type
