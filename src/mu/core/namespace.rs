@@ -88,24 +88,12 @@ impl NSMaps for Mu {
 
 pub struct Namespace {
     name: String,
-    import: Tag,
 }
 
 impl Namespace {
-    pub fn new(mu: &Mu, name: &str, import: Tag) -> Self {
-        match Tag::type_of(mu, import) {
-            Type::Null => Namespace {
-                name: name.to_string(),
-                import,
-            },
-            Type::Struct => match Self::is_ns(mu, import) {
-                Some(_) => Namespace {
-                    name: name.to_string(),
-                    import,
-                },
-                _ => panic!(),
-            },
-            _ => panic!(),
+    pub fn new(name: &str) -> Self {
+        Namespace {
+            name: name.to_string(),
         }
     }
 
@@ -127,7 +115,7 @@ impl Namespace {
         Struct::new(
             mu,
             "ns".to_string(),
-            vec![Vector::from_string(&self.name).evict(mu), self.import],
+            vec![Vector::from_string(&self.name).evict(mu)],
         )
         .evict(mu)
     }
@@ -138,7 +126,6 @@ impl Namespace {
                 let struct_ = Struct::to_image(mu, ns);
                 Namespace {
                     name: Vector::as_string(mu, Vector::ref_(mu, struct_.vector, 0).unwrap()),
-                    import: Vector::ref_(mu, struct_.vector, 1).unwrap(),
                 }
             }
             _ => panic!(),
@@ -150,16 +137,6 @@ impl Namespace {
             Some(ns) => {
                 let struct_ = Struct::to_image(mu, ns);
                 Vector::ref_(mu, struct_.vector, 0).unwrap()
-            }
-            _ => panic!(),
-        }
-    }
-
-    pub fn import(mu: &Mu, ns: Tag) -> Tag {
-        match Self::is_ns(mu, ns) {
-            Some(ns) => {
-                let struct_ = Struct::to_image(mu, ns);
-                Vector::ref_(mu, struct_.vector, 1).unwrap()
             }
             _ => panic!(),
         }
@@ -218,7 +195,6 @@ pub trait MuFunction {
     fn mu_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_ns_import(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
@@ -283,28 +259,17 @@ impl MuFunction for Namespace {
     }
 
     fn mu_make_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let name = fp.argv[0];
-        let import = fp.argv[1];
+        let ns_name = fp.argv[0];
 
-        match Tag::type_of(mu, name) {
-            Type::Vector => match Tag::type_of(mu, import) {
-                Type::Null => {
-                    fp.value = Self::new(mu, &Vector::as_string(mu, name), import).evict(mu);
-                    <Mu as NSMaps>::add_ns(mu, fp.value).unwrap();
-                    Ok(())
-                }
-                Type::Struct => match Self::is_ns(mu, import) {
-                    Some(_) => {
-                        fp.value = Self::new(mu, &Vector::as_string(mu, name), import).evict(mu);
-                        <Mu as NSMaps>::add_ns(mu, fp.value).unwrap();
-                        Ok(())
-                    }
-                    _ => Err(Exception::new(Condition::Type, "make-ns", import)),
-                },
-                _ => Err(Exception::new(Condition::Type, "make-ns", import)),
-            },
-            _ => Err(Exception::new(Condition::Type, "make-ns", name)),
+        match Tag::type_of(mu, ns_name) {
+            Type::Vector if Vector::type_of(mu, ns_name) == Type::Char => {
+                fp.value = Self::new(&Vector::as_string(mu, ns_name)).evict(mu);
+                <Mu as NSMaps>::add_ns(mu, fp.value).unwrap();
+            }
+            _ => return Err(Exception::new(Condition::Type, "make-ns", ns_name)),
         }
+
+        Ok(())
     }
 
     fn mu_map_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
@@ -355,18 +320,6 @@ impl MuFunction for Namespace {
                 _ => Err(Exception::new(Condition::Type, "ns-find", ns)),
             },
             _ => Err(Exception::new(Condition::Type, "ns-find", name)),
-        }
-    }
-
-    fn mu_ns_import(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let ns = fp.argv[0];
-
-        match Self::is_ns(mu, ns) {
-            Some(_) => {
-                fp.value = Self::import(mu, ns);
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "ns-imp", ns)),
         }
     }
 
