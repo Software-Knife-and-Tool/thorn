@@ -27,7 +27,15 @@
       (core:define-core-type "lambda"
         '((:bound  . :listp)
           (:rest   . :symbolp)
-          (:lexenv . :listp)))))
+          (:lexenv . :listp)))
+
+      ;;; core exception
+      (core:define-core-type "except"
+        '((:cond   . :symbolp)
+          (:object . :t)
+          (:source . :symbolp)
+          (:reason . :string)
+          (:env    . :listp)))))
 
 ;;;
 ;;; predicates
