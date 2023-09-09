@@ -6,12 +6,6 @@
 ;;;
 (mu:untern core "%debug-core-symbols%")
 
-(mu:intern core "exceptionp"
-   (:lambda (t)
-      (:if (core:structp t)
-           (mu:eq :except (mu:st-type t))
-           ())))
-
 ;;;
 ;;; [*exception descriptor*] #s(:except cond obj source reason env)
 ;;;
@@ -21,23 +15,25 @@
 ;;; reason:  extended condition, usually a string
 ;;; env:     dynamic environment, list of frames
 ;;;
-(mu:intern core "make-exception"
-  (:lambda (cond object source reason env)
-    (mu:make-st :except
-      `(,cond ,object ,source ,reason ,env))))
+(mu:intern core "exceptionp"
+   (:lambda (ex)
+      (mu:eq (core:type-of ex) 'except)))
 
+(mu:intern core "make-exception"
+   (:lambda (cond object source reason env)
+      (core:%make-core-type "except"
+        (core:%pair-list
+         `(:cond   ,cond
+           :object ,object
+           :source ,source
+           :reason ,reason
+           :env    ,env)))))
+ 
 (mu:intern core "%exception-prop"
-  (:lambda (key exception)
-    (mu:sv-ref
-     (mu:st-vec exception)
-      (mu:cdr
-       (core:%assoc
-        key
-        '((:cond    . 0)
-          (:object  . 1)
-          (:source  . 2)
-          (:reason  . 3)
-          (:env     . 4)))))))
+   (:lambda (prop except)
+      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :object :source :reason :env))
+           (core:%core-type-ref prop except)
+           (core:raise prop 'except-prop "not an except property"))))
 
 (mu:intern core "%debug-map-symbol"
    (:lambda (obj)
