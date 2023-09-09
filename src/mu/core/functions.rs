@@ -86,10 +86,9 @@ lazy_static! {
         // namespaces
         ("untern", 2, Namespace::mu_untern),
         ("intern", 3, Namespace::mu_intern),
-        ("make-ns", 2, Namespace::mu_make_ns),
+        ("make-ns", 1, Namespace::mu_make_ns),
         ("map-ns", 1, Namespace::mu_map_ns),
         ("ns-syms", 1, Namespace::mu_ns_symbols),
-        ("ns-imp", 1, Namespace::mu_ns_import),
         ("ns-find", 2, Namespace::mu_ns_find),
         ("ns-name", 1, Namespace::mu_ns_name),
         // read/write

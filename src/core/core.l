@@ -5,11 +5,11 @@
 ;;;  core namespace
 ;;;
 (mu:intern () "mu" (mu:map-ns "mu"))
-(mu:intern () "core" (mu:make-ns "core" (mu:map-ns "mu")))
+(mu:intern () "core" (mu:make-ns "core"))
 
-(mu:intern core "%char-macro-ns%" (mu:make-ns "%char-macro-ns%" ()))
-(mu:intern core "%macro-ns%" (mu:make-ns "%macro-ns%" ()))
-(mu:intern core "%symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%" ()))
+(mu:intern core "%char-macro-ns%" (mu:make-ns "%char-macro-ns%"))
+(mu:intern core "%macro-ns%" (mu:make-ns "%macro-ns%"))
+(mu:intern core "%symbol-macro-ns%" (mu:make-ns "%symbol-macro-ns%"))
 
 ;;;
 ;;; core types

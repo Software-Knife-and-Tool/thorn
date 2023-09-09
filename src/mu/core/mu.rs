@@ -77,7 +77,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.11";
+    const VERSION: &'static str = "0.0.12";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -130,19 +130,19 @@ impl Core for Mu {
         };
 
         // establish the namespaces first
-        mu.mu_ns = Namespace::new(&mu, "mu", Tag::nil()).evict(&mu);
+        mu.mu_ns = Namespace::new("mu").evict(&mu);
         match <Mu as NSMaps>::add_ns(&mu, mu.mu_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
-        mu.null_ns = Namespace::new(&mu, "", Tag::nil()).evict(&mu);
+        mu.null_ns = Namespace::new("").evict(&mu);
         match <Mu as NSMaps>::add_ns(&mu, mu.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
-        mu.keyword_ns = Namespace::new(&mu, "keyword", Tag::nil()).evict(&mu);
+        mu.keyword_ns = Namespace::new("keyword").evict(&mu);
         match <Mu as NSMaps>::add_ns(&mu, mu.keyword_ns) {
             Ok(_) => (),
             Err(_) => panic!(),

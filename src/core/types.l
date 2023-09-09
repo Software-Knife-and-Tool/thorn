@@ -4,7 +4,7 @@
 ;;;
 ;;; types
 ;;;
-(mu:intern core "%core-types" (mu:make-ns "core-types" core))
+(mu:intern core "%core-types" (mu:make-ns "core-types"))
 
 (mu:intern core "core-type-p"
    (:lambda (object)

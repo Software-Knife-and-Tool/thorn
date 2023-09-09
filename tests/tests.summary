@@ -5,7 +5,7 @@ mu         compile        total: 8        passed: 8        failed: 0        exce
 mu         core           total: 34       passed: 34       failed: 0        exceptions: 0       
 mu         exception      total: 4        passed: 4        failed: 0        exceptions: 0       
 mu         list           total: 22       passed: 22       failed: 0        exceptions: 0       
-mu         namespace      total: 15       passed: 15       failed: 0        exceptions: 0       
+mu         namespace      total: 13       passed: 13       failed: 0        exceptions: 0       
 mu         number         total: 34       passed: 34       failed: 0        exceptions: 0       
 mu         reader         total: 41       passed: 41       failed: 0        exceptions: 0       
 mu         special-form   total: 11       passed: 11       failed: 0        exceptions: 0       
@@ -14,7 +14,7 @@ mu         struct         total: 7        passed: 7        failed: 0        exce
 mu         symbol         total: 8        passed: 8        failed: 0        exceptions: 0       
 mu         vector         total: 23       passed: 23       failed: 0        exceptions: 0       
 -----------------------
-mu         passed: 236    total: 236      failed: 0        exceptions: 0         
+mu         passed: 234    total: 234      failed: 0        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
