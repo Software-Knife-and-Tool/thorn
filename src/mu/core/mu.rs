@@ -6,7 +6,7 @@
 use {
     crate::{
         core::{
-            async_, exception,
+            exception,
             exception::{Condition, Exception},
             frame::Frame,
             functions::{Core as _, LibMuFunction},
@@ -73,7 +73,7 @@ pub struct Mu {
     pub system: system::System,
 
     // async map
-    pub async_map: RwLock<HashMap<u64, async_::Async>>,
+    pub async_map: RwLock<HashMap<u64, Tag>>,
 }
 
 pub trait Core {
