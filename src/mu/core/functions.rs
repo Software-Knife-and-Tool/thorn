@@ -4,7 +4,7 @@
 //! mu functions
 use crate::{
     core::{
-        async_::{Async, MuFunction as _},
+        async_::MuFunction as _,
         backquote::MuFunction as _,
         compile::Compiler,
         exception::{self, Condition, Exception, MuFunction as _},
@@ -46,8 +46,8 @@ lazy_static! {
         ("nth", 2, Cons::mu_nth),
         ("nthcdr", 2, Cons::mu_nthcdr),
         // async
-        ("async", 2, Async::mu_async),
-        ("await", 2, Async::mu_await),
+        ("async", 2, Mu::mu_async),
+        ("await", 1, Mu::mu_await),
         // mu
         ("apply", 2, Mu::mu_apply),
         ("arity", 1, Mu::mu_arity),
