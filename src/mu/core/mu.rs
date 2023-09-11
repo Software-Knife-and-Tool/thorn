@@ -71,9 +71,6 @@ pub struct Mu {
     // system
     pub start_time: ProcessTime,
     pub system: system::System,
-
-    // async map
-    pub async_map: RwLock<HashMap<u64, Tag>>,
 }
 
 pub trait Core {
@@ -124,9 +121,6 @@ impl Core for Mu {
             // system
             start_time: ProcessTime::now(),
             system: system::System::new(),
-
-            // async
-            async_map: RwLock::new(HashMap::new()),
         };
 
         // establish the namespaces first

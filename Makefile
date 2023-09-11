@@ -54,7 +54,10 @@ doc:
 	@make -C ./doc --no-print-directory
 
 install:
-	@make -C ./dist -f install.mk install
+	@make -C ./dist -f install.mk install --no-print-directory
+
+uninstall:
+	@make -C ./dist -f install.mk uninstall --no-print-directory
 
 tests/commit:
 	@make -C tests commit --no-print-directory

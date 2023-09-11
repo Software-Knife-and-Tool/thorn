@@ -17,9 +17,26 @@ While *thorn* has much in common with Scheme, it is meant to be familiar to trad
 
 *thorn* is a 2-Lisp, which gives it flexibility in implementation and subsequent customization. A small, native code runtime kernel supports system classes, function application, heap/system image management, and the FFI framework.
 
+#### Rationale
+
+------
+
+Functional languages bring us closer to a time where we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that their various components are reliable. Modern programming concepts do much to underpin reliability and transparency.
+
+*thorn* attempts to express modern programming concepts with a simple, familiar syntax. The venerable Common Lisp macro system helps the system designer create domain specific languages.
+
+*LISPs* are intentionally dynamic which has selected against them for use in production environments, yet statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few of the dynamic languages in use today have adequate meta programming facilities. We need systems that can we reason about and can supplement themselves.
+
+Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. An evolving system can have a runtime measured in months or years.
+
+Evolutionary response to change is the only defense a system has against obsolescence.
+
+Most of our core computational frameworks are built on static systems and are fragile with respect to change. Such systems tend to be disposable. Lightweight dynamic systems designed for persistence are the next step.
+
 
 
 #### Project Goals
+
 ------
 
 - *thorn*, a functional forward system language
@@ -129,7 +146,11 @@ If you want to repackage *thorn* after a change to the library sources:
 
 and then install.
 
+Note: the installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will tend to accrete. The make uninstall target will remove that if desired.
 
+```
+% sudo make uninstall
+```
 
 #### Testing
 
@@ -282,18 +303,3 @@ to your `~/.inputrc` may help.
 
 
 
-#### Rationale
-
-------
-
-Functional languages bring us closer to a time where we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that their various components are reliable. Modern programming concepts do much to underpin reliability and transparency.
-
-*thorn* attempts to express modern programming concepts with a simple, familiar syntax. The venerable Common Lisp macro system helps the system designer create domain specific languages.
-
-*LISPs* are intentionally dynamic which has selected against them for use in production environments, yet statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few of the dynamic languages in use today have adequate meta programming facilities. We need systems that can we reason about and can supplement themselves.
-
-Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. An evolving system can have a runtime measured in months or years.
-
-Evolutionary response to change is the only defense a system has against obsolescence.
-
-Most of our core computational frameworks are built on static systems and are fragile with respect to change. Such systems tend to be disposable. Dynamic systems designed for persistence are the next step.

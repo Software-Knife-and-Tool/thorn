@@ -1,4 +1,4 @@
-;;;  Spdx-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
+;;;  SPDX-FileCopyrightText: Copyright 2017-2022 James M. Putnam (putnamjm.design@gmail.com)
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
@@ -8,6 +8,7 @@
 ;;;
 ;;; utilities
 ;;;
+#|
 (mu:intern core::ns :extern "make-exception"
   (:lambda (obj condition source)
     (mu:struct :except
@@ -143,3 +144,4 @@
                       (core:write "break> " () ())
                       (core:read :t () ())))))))
      ())))
+|#
