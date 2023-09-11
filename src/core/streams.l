@@ -68,6 +68,24 @@
            (mu:close stream)
            (core:raise stream 'core:close "not a stream"))))
 
+(mu:intern core "with-open-stream"
+   (:lambda (type dir specifier fn)
+     (:if (core:functionp fn)                 
+          (:if (core:stringp specifier)
+               (:if (core:%orf (mu:eq :file type)
+                               (mu:eq :string type))
+                    (:if (core:%orf (mu:eq :input dir)
+                                    (mu:eq :output dir))
+                         ((:lambda (stream)
+                             (mu:with-ex
+                              (:lambda (ex) (mu:close stream) ex)
+                              (:lambda () (core:apply fn `(,stream)))))
+                          (mu:open type dir specifier))
+                         (core:raise dir 'core:with-open-stream "not a direction keyword"))
+                    (core:raise type 'core:with-open-stream "not a type keyword"))
+               (core:raise path 'core:with-open-stream "not a stream specifier"))
+          (core:raise dir 'core:with-open-stream "not a function"))))
+
 ;;;
 ;;; chars, bytes, and unread
 ;;;

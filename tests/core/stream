@@ -3,6 +3,7 @@
 (mu:type-of core:get-output-stream-string)	:func
 (mu:type-of core:make-string-stream)	:func
 (mu:type-of core:open)	:func
+(mu:type-of core:with-open-stream)	:func
 (mu:type-of core:read)	:func
 (mu:type-of core:read-byte)	:func
 (mu:type-of core:read-char)	:func
@@ -18,3 +19,4 @@
 (mu:write (core:string= "123" "1") () mu:std-out)	:nil:nil
 (mu:write (core:string= "" "ci") () mu:std-out)	:nil:nil
 (mu:write (core:string= "ci" "") () mu:std-out)	:nil:nil
+(mu:write (core:with-open-stream :string :input "foo" (:lambda (stream) (core:read-char stream () ()))) () mu:std-out)	f#\f

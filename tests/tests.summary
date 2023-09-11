@@ -29,11 +29,11 @@ core       list           total: 77       passed: 77       failed: 0        exce
 core       macro          total: 7        passed: 7        failed: 0        exceptions: 0       
 core       reader         total: 59       passed: 59       failed: 0        exceptions: 0       
 core       sequence       total: 2        passed: 2        failed: 0        exceptions: 0       
-core       stream         total: 20       passed: 20       failed: 0        exceptions: 0       
+core       stream         total: 22       passed: 22       failed: 0        exceptions: 0       
 core       string         total: 20       passed: 20       failed: 0        exceptions: 0       
 core       symbol         total: 2        passed: 2        failed: 0        exceptions: 0       
 core       types          total: 6        passed: 6        failed: 0        exceptions: 0       
 core       vector         total: 1        passed: 1        failed: 0        exceptions: 0       
 -----------------------
-core       passed: 306    total: 307      failed: 0        exceptions: 1         
+core       passed: 308    total: 309      failed: 0        exceptions: 1         
 
