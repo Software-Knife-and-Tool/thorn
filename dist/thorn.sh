@@ -27,19 +27,15 @@ CORE=(\
 	describe.l             \
 	exceptions.l 	       \
 	fixnums.l              \
-        fasl.l                 \
 	format.l     	       \
 	funcall.l              \
-        functions.l            \
 	lambda.l     	       \
 	lists.l      	       \
-	load.l       	       \
 	macros.l      	       \
 	maps.l		       \
 	parse.l      	       \
 	read-macro.l           \
 	read.l       	       \
-        repl.l                 \
 	sequences.l  	       \
 	streams.l    	       \
 	strings.l    	       \
@@ -47,6 +43,9 @@ CORE=(\
 	symbols.l    	       \
 	types.l	               \
 	vectors.l              \
+        fasl.l                 \
+        functions.l            \
+        repl.l                 \
     )
 
 for src in ${CORE[@]}; do
