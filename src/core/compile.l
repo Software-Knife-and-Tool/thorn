@@ -12,10 +12,10 @@
 ;;;
 ;;; lambda compiles to a function core-type
 ;;;
-(mu:intern core "%lambda-compiler"
+(mu:intern core "%compile-lambda"
    (:lambda (form env)
       (:if (mu:eq (mu:length form) 1)
-           (core:raise form 'core:%lambda-compiler "malformed lambda expression")
+           (core:raise form 'core:%compile-defmacro "malformed lambda expression")
            ((:lambda (lambda body)
                ((:lambda (lambda-desc)
                    ((:lambda (fn)
@@ -38,12 +38,12 @@
 ;;;
 ;;; defmacro compiles to a bound macro symbol
 ;;;
-(mu:intern core "%defmacro-compiler"
+(mu:intern core "%compile-defmacro"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (:if (core:symbolp symbol)
                (core:intern symbol (core:%core-macro-env symbol (core:%compile-macro lambda-form env)))
-               (core:raise symbol 'core:%defmacro-compiler "not a symbol"))
+               (core:raise symbol 'core:%compile-defmacro "not a symbol"))
           `(:quote ,symbol))
         (mu:nth 1 form)
        (mu:nthcdr 2 form))))
@@ -51,14 +51,14 @@
 ;;;
 ;;; defun compiles to a bound function symbol
 ;;;
-(mu:intern core "%defun-compiler"
+(mu:intern core "%compile-defun"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (:if (mu:eq (mu:type-of symbol) :symbol)
                (:if (core:listp lambda-form)
-                    (core:intern symbol (core:%lambda-compiler lambda-form env))
-                    (core:raise lambda-form 'core:%defun-compiler "not a lambda list"))
-               (core:raise symbol 'core:%defun-compiler "not a symbol"))
+                    (core:intern symbol (core:%compile-lambda lambda-form env))
+                    (core:raise lambda-form 'core:%compile-defun "not a lambda list"))
+               (core:raise symbol 'core:%compile-defun "not a symbol"))
           `(:quote ,symbol))
        (mu:nth 1 form)
        (mu:nthcdr 1 form))))
@@ -72,14 +72,19 @@
      `(:lambda () ,form)
      env)))
 
-(mu:intern core "%if-compiler"
+(mu:intern core "%compile-if"
    (:lambda (form env)
       ((:lambda (len)
           (:if (core:%orf (mu:eq len 3) (mu:eq len 4))
-              ((:lambda (t-arm f-arm)
-                  (mu:compile `(:if ,(mu:cons (core:%thunk (mu:nth 1 form) env) ()) ,t-arm ,f-arm)))
-               `(core:apply ,(core:%thunk (mu:nth 2 form) env) ())
-               `(core:apply ,(core:%thunk (mu:nth 3 form) env) ()))
+               ((:lambda (t-arm f-arm)
+                  (mu:compile `(:if ,(mu:nth 1 form) ,t-arm ,f-arm)))
+                  ;;; (mu:compile `(:if ,(mu:cons (core:%thunk (mu:nth 1 form) env) ()) ,t-arm ,f-arm)))
+               (:if (core:constantp (mu:nth 2 form))
+                    (mu:nth 2 form)
+                    `(core:apply ,(core:%thunk (mu:nth 2 form) env) ()))
+               (:if (core:constantp (mu:nth 3 form))
+                    (mu:nth 3 form)
+                    `(core:apply ,(core:%thunk (mu:nth 3 form) env) ())))
               (core:raise form 'core:%if-compiler "takes two or three arguments")))
        (mu:length form))))
 
@@ -119,11 +124,11 @@
                                    (core:macro-function fn env))))
                           (mu:cdr (core:%assoc
                                    fn
-                                   '((define-core-function . core:%defun-compiler)
-                                     (define-core-macro    . core:%defmacro-compiler)
-                                     (define-core-if       . core:%if-compiler)
-                                     (define-core-lambda   . core:%lambda-compiler)
-                                     (quote                . core:%quote-compiler)))))
+                                   '((define-core-function . core:%compile-defun)
+                                     (define-core-macro    . core:%compile-defmacro)
+                                     (define-core-if       . core:%compile-if)
+                                     (define-core-lambda   . core:%compile-lambda)
+                                     (quote                . core:%compile-quote)))))
                     (core:%compile-funcall fn args env))))
             (mu:car form)
             (mu:cdr form))
