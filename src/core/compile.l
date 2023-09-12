@@ -85,13 +85,8 @@
                (:if (core:constantp (mu:nth 3 form))
                     (mu:nth 3 form)
                     `(core:apply ,(core:%thunk (mu:nth 3 form) env) ())))
-              (core:raise form 'core:%if-compiler "takes two or three arguments")))
+              (core:raise form 'core:%compile-if "takes two or three arguments")))
        (mu:length form))))
-
-;;;
-;;; quote
-;;;
-(mu:intern core "%quote-compiler" (:lambda (form env) form))
 
 ;;;
 ;;; compiler
@@ -127,8 +122,7 @@
                                    '((define-core-function . core:%compile-defun)
                                      (define-core-macro    . core:%compile-defmacro)
                                      (define-core-if       . core:%compile-if)
-                                     (define-core-lambda   . core:%compile-lambda)
-                                     (quote                . core:%compile-quote)))))
+                                     (define-core-lambda   . core:%compile-lambda)))))
                     (core:%compile-funcall fn args env))))
             (mu:car form)
             (mu:cdr form))
