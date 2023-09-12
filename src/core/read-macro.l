@@ -93,31 +93,34 @@
 ;;; list reader
 ;;;
 (mu:intern core "%read-list-eol%" (mu:make-sy "eol"))
+
+(mu:intern core "%read-list-eol"
+   (:lambda (ch stream)
+      core:%read-list-eol%))
+
 (mu:intern core "%read-list"
-  (:lambda (ch stream)
-    (:if (mu:eq ch #\))
-         core:%read-list-eol%
-         (mu:fix
-           (:lambda (loop)
-             (:if (core:eof stream)
-                  stream
-                  ((:lambda (el)
-                      (:if (core:%orf (core:eof stream) (mu:eq el core:%read-list-eol%))
-                          loop
-                          (:if (mu:eq :symbol (mu:type-of el))
-                               (:if (mu:eq (mu:sy-name el) ".")
-                                    ((:lambda (dotted)
-                                       ;;; (core:raise-if (core:null dotted) () 'core:%read-list "early eof in dotted list")
-                                       (:if (mu:eq (core:%read stream) core:%read-list-eol%)
-                                            ((:lambda ()
-                                                (mu:un-char #\) stream)
-                                                dotted))
-                                            (core:raise () 'core:%read-list "malformed dotted list")))
-                                     (core:foldr mu:cons (core:%read stream) loop))
-                                    `(,@loop ,el))
-                               `(,@loop ,el))))
-                   (core:%read stream))))
-          ()))))
+   (:lambda (ch stream)
+      (mu:fix
+       (:lambda (loop)
+          (:if (core:eof stream)
+               stream
+               ((:lambda (el)
+                   (:if (core:%orf (core:eof stream) (mu:eq el core:%read-list-eol%))
+                        loop
+                        (:if (mu:eq :symbol (mu:type-of el))
+                             (:if (mu:eq (mu:sy-name el) ".")
+                                  ((:lambda (dotted)
+                                      ;;; (core:raise-if (core:null dotted) () 'core:%read-list "early eof in dotted list")
+                                      (:if (mu:eq (core:%read stream) core:%read-list-eol%)
+                                           ((:lambda ()
+                                               (mu:un-char #\) stream)
+                                               dotted))
+                                           (core:raise () 'core:%read-list "malformed dotted list")))
+                                   (core:foldr mu:cons (core:%read stream) loop))
+                                  `(,@loop ,el))
+                             `(,@loop ,el))))
+                (core:%read stream))))
+            ())))
 
 ;;;
 ;;; string reader
@@ -173,7 +176,7 @@
          (#\# . core:%read-sharp)
          (#\' . core:%read-quote)
          (#\( . core:%read-list)
-         (#\) . core:%read-list)
+         (#\) . core:%read-list-eol)
          (#\; . core:%read-line-comment)))))
 
 ;;;
