@@ -42,7 +42,14 @@
 ;;;
 (mu:intern core "not" (:lambda (t) (core:null t)))
 (mu:intern core "atom" (:lambda (obj) (core:not (core:consp obj))))
-
+(mu:intern core "constantp"
+   (:lambda (form)
+      (:if (core:%orf (core:null form) (core:keywordp form))
+           :t
+           (:if (core:consp form)
+                (mu:eq :quote (mu:car form))
+                (core:not (core:symbolp form))))))
+           
 (mu:intern core "numberp"
   (:lambda (n)
      (:if (core:fixnump n)
