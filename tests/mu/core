@@ -17,8 +17,6 @@
 (mu:type-of :typeof)	:keyword
 (mu:type-of mu:std-in)	:stream
 (mu:type-of mu:hp-info)	:func
-(mu:type-of mu:async)	:func
-(mu:type-of mu:await)	:func
 (mu:type-of "type-of")	:vector
 (mu:view #\a)	#(:t a)
 (mu:view '(1 2))	#(:t 1 (2))

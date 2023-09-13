@@ -6,6 +6,7 @@
 //!     special forms
 use crate::{
     core::{
+        async_::Compiler as _,
         exception::{self, Condition, Exception},
         mu::Mu,
         namespace::{Core as _, Namespace},
@@ -27,6 +28,7 @@ lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
         (Symbol::keyword("if"), Mu::compile_if),
         (Symbol::keyword("lambda"), Mu::compile_lambda),
+        (Symbol::keyword("alambda"), Mu::compile_alambda),
         (Symbol::keyword("quote"), Mu::compile_quoted_list),
     ];
 }
