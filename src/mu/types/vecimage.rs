@@ -4,7 +4,7 @@
 //! mu image vector type
 use crate::{
     core::{
-        direct::DirectType,
+        direct::{DirectInfo, DirectType},
         indirect::IndirectTag,
         mu::Mu,
         types::{Tag, TagType, Type},
@@ -269,7 +269,7 @@ impl VecType for String {
 
             Vector::Direct(Tag::to_direct(
                 u64::from_le_bytes(data),
-                len as u8,
+                DirectInfo::Length(len),
                 DirectType::Byte,
             ))
         }

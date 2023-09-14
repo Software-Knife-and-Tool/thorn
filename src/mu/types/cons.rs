@@ -5,7 +5,7 @@
 use crate::{
     core::{
         cdirect::ConsDirect,
-        direct::DirectType,
+        direct::{DirectInfo, DirectType},
         exception::{self, Condition, Exception},
         frame::Frame,
         indirect::IndirectTag,
@@ -137,7 +137,7 @@ impl Core for Cons {
     }
 
     fn read(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
-        let dot = Tag::to_direct('.' as u64, 1, DirectType::Byte);
+        let dot = Tag::to_direct('.' as u64, DirectInfo::Length(1), DirectType::Byte);
 
         match Reader::read(mu, stream, false, Tag::nil(), true) {
             Ok(car) => {

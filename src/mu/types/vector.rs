@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            direct::DirectType,
+            direct::{DirectInfo, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
             mu::{Core as _, Mu},
@@ -91,7 +91,7 @@ impl Vector {
 
     pub fn length(mu: &Mu, vector: Tag) -> usize {
         match vector {
-            Tag::Direct(direct) => direct.length() as usize,
+            Tag::Direct(direct) => direct.info() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(mu, vector);
                 Fixnum::as_i64(mu, image.length) as usize
@@ -146,7 +146,7 @@ impl<'a> Core<'a> for Vector {
 
             Vector::Direct(Tag::to_direct(
                 u64::from_le_bytes(data),
-                len as u8,
+                DirectInfo::Length(len),
                 DirectType::Byte,
             ))
         }
@@ -157,7 +157,7 @@ impl<'a> Core<'a> for Vector {
             Type::Vector => match tag {
                 Tag::Direct(dir) => match dir.dtype() {
                     DirectType::Byte => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
-                        [..dir.length() as usize]
+                        [..dir.info() as usize]
                         .to_string(),
                     _ => panic!(),
                 },
@@ -191,7 +191,7 @@ impl<'a> Core<'a> for Vector {
                     }
 
                     for nth in 0..vector.length() {
-                        match Stream::write_char(mu, stream, s.as_bytes()[nth as usize] as char) {
+                        match Stream::write_char(mu, stream, s.as_bytes()[nth] as char) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
