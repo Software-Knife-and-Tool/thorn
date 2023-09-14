@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            direct::DirectType,
+            direct::{DirectInfo, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
             indirect::IndirectTag,
@@ -36,7 +36,7 @@ pub struct SymbolImage {
 }
 
 lazy_static! {
-    pub static ref UNBOUND: Tag = Tag::to_direct(0, 0, DirectType::Keyword);
+    pub static ref UNBOUND: Tag = Tag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword);
 }
 
 impl Symbol {
@@ -85,7 +85,11 @@ impl Symbol {
     pub fn name(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Null | Type::Keyword => match symbol {
-                Tag::Direct(dir) => Tag::to_direct(dir.data(), dir.length(), DirectType::Byte),
+                Tag::Direct(dir) => Tag::to_direct(
+                    dir.data(),
+                    DirectInfo::Length(dir.info() as usize),
+                    DirectType::Byte,
+                ),
                 _ => panic!(),
             },
             Type::Symbol => Self::to_image(mu, symbol).name,
@@ -160,7 +164,11 @@ impl Core for Symbol {
         for (src, dst) in str.as_bytes().iter().zip(data.iter_mut()) {
             *dst = *src
         }
-        Tag::to_direct(u64::from_le_bytes(data), len as u8, DirectType::Keyword)
+        Tag::to_direct(
+            u64::from_le_bytes(data),
+            DirectInfo::Length(len),
+            DirectType::Keyword,
+        )
     }
 
     fn parse(mu: &Mu, token: String) -> exception::Result<Tag> {
@@ -218,7 +226,7 @@ impl Core for Symbol {
                 Ok(s) => {
                     Stream::write_char(mu, stream, ':').unwrap();
                     for nth in 0..symbol.length() {
-                        match Stream::write_char(mu, stream, s.as_bytes()[nth as usize] as char) {
+                        match Stream::write_char(mu, stream, s.as_bytes()[nth] as char) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }

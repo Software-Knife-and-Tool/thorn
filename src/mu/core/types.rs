@@ -8,7 +8,7 @@ use {
     crate::{
         core::{
             cdirect::ConsDirectTag,
-            direct::{DirectTag, DirectType},
+            direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception,
             frame::Frame,
             indirect::IndirectTag,
@@ -64,7 +64,7 @@ pub enum TagType {
 lazy_static! {
     static ref NIL: Tag = Tag::to_direct(
         (('l' as u64) << 16) | (('i' as u64) << 8) | ('n' as u64),
-        3,
+        DirectInfo::Length(3),
         DirectType::Keyword
     );
     pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
@@ -172,7 +172,10 @@ impl Tag {
                     DirectType::Char => Type::Char,
                     DirectType::Byte => Type::Vector,
                     DirectType::Keyword => Type::Keyword,
-                    DirectType::Float => Type::Float,
+                    DirectType::Ext => match ExtType::try_from(direct.info()) {
+                        Ok(ExtType::Float) => Type::Float,
+                        _ => panic!(),
+                    },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
                     TagType::Symbol => Type::Symbol,
