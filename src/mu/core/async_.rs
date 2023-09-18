@@ -41,11 +41,8 @@ impl MuFunction for Mu {
             Type::Function => match Tag::type_of(mu, args) {
                 Type::Cons | Type::Null => {
                     let mut _map_ref = mu.async_map.write();
-                    let tag = Tag::to_direct(
-                        0 as u64,
-                        DirectInfo::ExtType(ExtType::Async),
-                        DirectType::Ext,
-                    );
+                    let tag =
+                        Tag::to_direct(0_u64, DirectInfo::ExtType(ExtType::Async), DirectType::Ext);
 
                     let _future: BoxFuture<'static, Tag> = Box::pin(async { Tag::nil() });
 
