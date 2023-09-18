@@ -160,9 +160,8 @@ impl Core for Symbol {
             panic!("{} {:?}", std::str::from_utf8(str).unwrap(), str)
         }
 
-        let str = name.to_string();
         let mut data: [u8; 8] = 0u64.to_le_bytes();
-        for (src, dst) in str.as_bytes().iter().zip(data.iter_mut()) {
+        for (src, dst) in str.iter().zip(data.iter_mut()) {
             *dst = *src
         }
         Tag::to_direct(

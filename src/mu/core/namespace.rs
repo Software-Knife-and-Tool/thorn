@@ -221,7 +221,23 @@ impl MuFunction for Namespace {
                     return Err(Exception::new(Condition::Syntax, "untern", ns));
                 }
 
-                Self::intern(mu, ns, Vector::as_string(mu, name), *UNBOUND)
+                let name_str = Vector::as_string(mu, name);
+                let str = name_str.as_bytes();
+                let len = str.len();
+
+                if len == 0 {
+                    return Err(Exception::new(Condition::Syntax, "untern", name));
+                }
+
+                if ns.eq_(mu.keyword_ns) {
+                    if len > Tag::DIRECT_STR_MAX {
+                        return Err(Exception::new(Condition::Syntax, "untern", name));
+                    }
+
+                    Symbol::keyword(&name_str)
+                } else {
+                    Self::intern(mu, ns, name_str, *UNBOUND)
+                }
             }
             _ => return Err(Exception::new(Condition::Type, "untern", ns)),
         };
@@ -250,7 +266,23 @@ impl MuFunction for Namespace {
                         return Err(Exception::new(Condition::Syntax, "intern", ns));
                     }
 
-                    Self::intern(mu, ns, Vector::as_string(mu, name), value)
+                    let name_str = Vector::as_string(mu, name);
+                    let str = name_str.as_bytes();
+                    let len = str.len();
+
+                    if len == 0 {
+                        return Err(Exception::new(Condition::Syntax, "intern", name));
+                    }
+
+                    if ns.eq_(mu.keyword_ns) {
+                        if len > Tag::DIRECT_STR_MAX {
+                            return Err(Exception::new(Condition::Syntax, "intern", name));
+                        }
+
+                        Symbol::keyword(&name_str)
+                    } else {
+                        Self::intern(mu, ns, name_str, value)
+                    }
                 }
                 _ => return Err(Exception::new(Condition::Type, "intern", name)),
             },
