@@ -7,24 +7,27 @@
 #![allow(unused_variables)]
 #![allow(clippy::identity_op)]
 
-use crate::{
-    core::{
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        indirect::IndirectTag,
-        mu::{Core as _, Mu},
-        reader::{Core as _, Reader},
-        types::{Tag, TagType, Type},
+use {
+    crate::{
+        core::{
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            indirect::IndirectTag,
+            mu::{Core as _, Mu},
+            reader::{Core as _, Reader},
+            types::{Tag, TagType, Type},
+        },
+        system::{stream::Core as _, sys::System},
+        types::{
+            char::Char,
+            fixnum::Fixnum,
+            streambuilder::StreamBuilder,
+            symbol::{Core as _, Symbol},
+            vecimage::{TypedVec, VecType},
+            vector::{Core as _, Vector},
+        },
     },
-    system::{stream::Core as _, sys::System},
-    types::{
-        char::Char,
-        fixnum::Fixnum,
-        streambuilder::StreamBuilder,
-        symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType},
-        vector::{Core as _, Vector},
-    },
+    futures::executor::block_on,
 };
 
 // stream struct
@@ -44,7 +47,7 @@ impl Stream {
             self.unch.as_slice(),
         ];
 
-        let mut heap_ref = mu.heap.write().unwrap();
+        let mut heap_ref = block_on(mu.heap.write());
         Tag::Indirect(
             IndirectTag::new()
                 .with_offset(heap_ref.alloc(slices, Type::Stream as u8) as u64)
@@ -57,7 +60,7 @@ impl Stream {
         match Tag::type_of(mu, tag) {
             Type::Stream => match tag {
                 Tag::Indirect(main) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
 
                     let image = Stream {
                         stream_id: Tag::from_slice(
@@ -95,7 +98,7 @@ impl Stream {
             _ => panic!(),
         } as usize;
 
-        let mut heap_ref = mu.heap.write().unwrap();
+        let mut heap_ref = block_on(mu.heap.write());
         heap_ref.write_image(slices, offset);
     }
 }

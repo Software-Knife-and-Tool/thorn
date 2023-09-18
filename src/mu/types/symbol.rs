@@ -21,6 +21,7 @@ use {
             vector::{Core as _, Vector},
         },
     },
+    futures::executor::block_on,
     std::str,
 };
 
@@ -54,7 +55,7 @@ impl Symbol {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> SymbolImage {
-        let heap_ref = mu.heap.read().unwrap();
+        let heap_ref = block_on(mu.heap.read());
         match Tag::type_of(mu, tag) {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
@@ -140,7 +141,7 @@ impl Core for Symbol {
                     image.value.as_slice(),
                 ];
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 Tag::Indirect(
                     IndirectTag::new()
                         .with_offset(heap_ref.alloc(slices, Type::Symbol as u8) as u64)

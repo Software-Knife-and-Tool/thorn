@@ -3,12 +3,13 @@
 
 //! mu heap
 use {
+    futures::executor::block_on,
+    futures_locks::RwLock,
     memmap,
     modular_bitfield::specifiers::{B11, B4},
     std::{
         fs::{remove_file, OpenOptions},
         io::{Seek, SeekFrom, Write},
-        sync::RwLock,
     },
 };
 
@@ -68,7 +69,7 @@ impl Heap {
         };
 
         {
-            let mut alloc_ref = heap.alloc_map.write().unwrap();
+            let mut alloc_ref = block_on(heap.alloc_map.write());
 
             for id in 0..256 {
                 alloc_ref.push((id as u8, 0, 0, 0))
@@ -80,14 +81,14 @@ impl Heap {
 
     // allocation statistics
     pub fn alloc_id(&self, id: u8) -> (usize, usize, usize) {
-        let alloc_ref = self.alloc_map.read().unwrap();
+        let alloc_ref = block_on(self.alloc_map.read());
 
         let (_, total_size, alloc, in_use) = alloc_ref[id as usize];
         (total_size, alloc, in_use)
     }
 
     fn alloc_map(&self, id: u8, size: usize) {
-        let mut alloc_ref = self.alloc_map.write().unwrap();
+        let mut alloc_ref = block_on(self.alloc_map.write());
 
         let (_, total_size, alloc, in_use) = alloc_ref[id as usize];
         alloc_ref[id as usize] = (id, total_size + size, alloc + 1, in_use + 1);

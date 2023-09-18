@@ -14,6 +14,7 @@ use {
         },
         types::symbol::{Core as _, Symbol},
     },
+    futures::executor::block_on,
     std::fmt,
 };
 
@@ -142,8 +143,8 @@ impl MuFunction for Exception {
             Type::Function => match Tag::type_of(mu, handler) {
                 Type::Function => {
                     {
-                        let dynamic_ref = mu.dynamic.read().unwrap();
-                        let mut unwind_ref = mu.unwind.write().unwrap();
+                        let dynamic_ref = block_on(mu.dynamic.read());
+                        let mut unwind_ref = block_on(mu.unwind.write());
 
                         unwind_ref.push(dynamic_ref.len())
                     }
@@ -155,8 +156,8 @@ impl MuFunction for Exception {
                                 vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
                             match mu.apply_(handler, args) {
                                 Ok(value) => {
-                                    let mut dynamic_ref = mu.dynamic.write().unwrap();
-                                    let mut unwind_ref = mu.unwind.write().unwrap();
+                                    let mut dynamic_ref = block_on(mu.dynamic.write());
+                                    let mut unwind_ref = block_on(mu.unwind.write());
 
                                     match unwind_ref.pop() {
                                         Some(len) => {

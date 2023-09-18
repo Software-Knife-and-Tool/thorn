@@ -4,20 +4,23 @@
 //! mu indirect
 #![allow(unused_braces)]
 #![allow(clippy::identity_op)]
-use crate::{
-    core::{
-        exception,
-        frame::Frame,
-        mu::Mu,
-        types::{Tag, TagType, Type},
+use {
+    crate::{
+        core::{
+            exception,
+            frame::Frame,
+            mu::Mu,
+            types::{Tag, TagType, Type},
+        },
+        modular_bitfield::specifiers::{B1, B60},
+        types::{
+            fixnum::Fixnum,
+            symbol::{Core as _, Symbol},
+            vecimage::{TypedVec, VecType},
+            vector::Core as _,
+        },
     },
-    modular_bitfield::specifiers::{B1, B60},
-    types::{
-        fixnum::Fixnum,
-        symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType},
-        vector::Core as _,
-    },
+    futures::executor::block_on,
 };
 
 // little-endian tag format
@@ -68,16 +71,16 @@ impl Core for Mu {
     }
 
     fn hp_info(mu: &Mu) -> (usize, usize) {
-        let heap_ref = mu.heap.read().unwrap();
+        let heap_ref = block_on(mu.heap.read());
 
         (heap_ref.page_size, heap_ref.npages)
     }
 
     fn hp_type(mu: &Mu, htype: Type) -> (u8, usize, usize, usize) {
-        let heap_ref = mu.heap.read().unwrap();
+        let heap_ref = block_on(mu.heap.read());
 
         #[allow(clippy::type_complexity)]
-        let alloc_ref = heap_ref.alloc_map.read().unwrap();
+        let alloc_ref = block_on(heap_ref.alloc_map.read());
 
         alloc_ref[htype as usize]
     }

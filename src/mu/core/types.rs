@@ -16,6 +16,7 @@ use {
         },
         types::symbol::{Core as _, Symbol},
     },
+    futures::executor::block_on,
     num_enum::TryFromPrimitive,
     std::fmt,
 };
@@ -98,7 +99,7 @@ impl fmt::Display for Tag {
 
 impl Tag {
     pub fn data(&self, mu: &Mu) -> u64 {
-        let heap_ref = mu.heap.read().unwrap();
+        let heap_ref = block_on(mu.heap.read());
         match self {
             Tag::Fixnum(fx) => (*fx >> 3) as u64,
             Tag::Direct(tag) => tag.data(),
@@ -160,7 +161,7 @@ impl Tag {
     }
 
     pub fn type_of(mu: &Mu, tag: Tag) -> Type {
-        let heap_ref = mu.heap.read().unwrap();
+        let heap_ref = block_on(mu.heap.read());
 
         if tag.null_() {
             Type::Null
