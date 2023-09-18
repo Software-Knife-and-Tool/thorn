@@ -17,7 +17,9 @@ use {
             vector::{Core as _, Vector},
         },
     },
-    std::{collections::HashMap, str, sync::RwLock},
+    futures::executor::block_on,
+    futures_locks::RwLock,
+    std::{collections::HashMap, str},
 };
 
 pub trait NSMaps {
@@ -35,7 +37,7 @@ impl NSMaps for Mu {
     type NSMap = HashMap<u64, (Tag, Self::NSCache)>;
 
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
-        let mut ns_ref = mu.ns_map.write().unwrap();
+        let mut ns_ref = block_on(mu.ns_map.write());
 
         if ns_ref.contains_key(&ns.as_u64()) {
             return Err(Exception::new(Condition::Type, "make-ns", ns));
@@ -50,7 +52,7 @@ impl NSMaps for Mu {
     }
 
     fn map_ns(mu: &Mu, name: &str) -> Option<Tag> {
-        let ns_ref = mu.ns_map.read().unwrap();
+        let ns_ref = block_on(mu.ns_map.read());
 
         for (_, ns) in ns_ref.iter() {
             let (ns_name, _) = ns;
@@ -65,9 +67,9 @@ impl NSMaps for Mu {
     }
 
     fn map(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
-        let ns_ref = mu.ns_map.read().unwrap();
+        let ns_ref = block_on(mu.ns_map.read());
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
-        let hash = ns_cache.read().unwrap();
+        let hash = block_on(ns_cache.read());
 
         if hash.contains_key(name) {
             Some(hash[name])
@@ -77,11 +79,11 @@ impl NSMaps for Mu {
     }
 
     fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
-        let ns_ref = mu.ns_map.read().unwrap();
+        let ns_ref = block_on(mu.ns_map.read());
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(mu, Symbol::name(mu, symbol));
 
-        let mut hash = ns_cache.write().unwrap();
+        let mut hash = block_on(ns_cache.write());
         hash.insert(name, symbol);
     }
 }
@@ -170,7 +172,7 @@ impl Core for Namespace {
                             _ => panic!(),
                         } as usize;
 
-                        let mut heap_ref = mu.heap.write().unwrap();
+                        let mut heap_ref = block_on(mu.heap.write());
                         heap_ref.write_image(slices, offset);
                     }
 
@@ -340,9 +342,9 @@ impl MuFunction for Namespace {
 
         fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
-                let ns_ref = mu.ns_map.read().unwrap();
+                let ns_ref = block_on(mu.ns_map.read());
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
-                let hash = ns_cache.read().unwrap();
+                let hash = block_on(ns_cache.read());
                 let mut vec = vec![];
 
                 for key in hash.keys() {

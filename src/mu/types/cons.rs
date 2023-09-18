@@ -2,23 +2,26 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu cons class
-use crate::{
-    core::{
-        cdirect::ConsDirect,
-        direct::{DirectInfo, DirectType},
-        exception::{self, Condition, Exception},
-        frame::Frame,
-        indirect::IndirectTag,
-        mu::{Core as _, Mu},
-        reader::{Core as _, Reader},
-        types::{Tag, TagType, Type},
+use {
+    crate::{
+        core::{
+            cdirect::ConsDirect,
+            direct::{DirectInfo, DirectType},
+            exception::{self, Condition, Exception},
+            frame::Frame,
+            indirect::IndirectTag,
+            mu::{Core as _, Mu},
+            reader::{Core as _, Reader},
+            types::{Tag, TagType, Type},
+        },
+        types::{
+            fixnum::Fixnum,
+            symbol::Symbol,
+            vecimage::{TypedVec, VecType},
+            vector::Core as _,
+        },
     },
-    types::{
-        fixnum::Fixnum,
-        symbol::Symbol,
-        vecimage::{TypedVec, VecType},
-        vector::Core as _,
-    },
+    futures::executor::block_on,
 };
 
 #[derive(Copy, Clone)]
@@ -36,7 +39,7 @@ impl Cons {
         match Tag::type_of(mu, tag) {
             Type::Cons => match tag {
                 Tag::Indirect(main) => {
-                    let heap_ref = mu.heap.write().unwrap();
+                    let heap_ref = block_on(mu.heap.write());
                     Cons {
                         car: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize, 8).unwrap(),
@@ -125,7 +128,7 @@ impl Core for Cons {
             None => {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 let ind = IndirectTag::new()
                     .with_offset(heap_ref.alloc(image, Type::Cons as u8) as u64)
                     .with_heap_id(1)

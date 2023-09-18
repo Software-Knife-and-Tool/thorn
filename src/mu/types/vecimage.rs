@@ -2,20 +2,23 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu image vector type
-use crate::{
-    core::{
-        direct::{DirectInfo, DirectType},
-        indirect::IndirectTag,
-        mu::Mu,
-        types::{Tag, TagType, Type},
+use {
+    crate::{
+        core::{
+            direct::{DirectInfo, DirectType},
+            indirect::IndirectTag,
+            mu::Mu,
+            types::{Tag, TagType, Type},
+        },
+        types::{
+            char::Char,
+            fixnum::Fixnum,
+            float::Float,
+            symbol::{Core as _, Symbol},
+            vector::{Core, Vector},
+        },
     },
-    types::{
-        char::Char,
-        fixnum::Fixnum,
-        float::Float,
-        symbol::{Core as _, Symbol},
-        vector::{Core, Vector},
-    },
+    futures::executor::block_on,
 };
 
 pub struct VectorImage {
@@ -65,7 +68,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 };
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 Tag::Indirect(
                     IndirectTag::new()
                         .with_offset(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
@@ -81,7 +84,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 };
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 Tag::Indirect(
                     IndirectTag::new()
                         .with_offset(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
@@ -101,7 +104,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 }
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 Tag::Indirect(
                     IndirectTag::new()
                         .with_offset(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
@@ -121,7 +124,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 }
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 Tag::Indirect(
                     IndirectTag::new()
                         .with_offset(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
@@ -145,7 +148,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 };
 
-                let mut heap_ref = mu.heap.write().unwrap();
+                let mut heap_ref = block_on(mu.heap.write());
                 Tag::Indirect(
                     IndirectTag::new()
                         .with_offset(
@@ -169,7 +172,7 @@ impl<'a> IVector for IndirectVector<'a> {
         match Vector::to_type(image.vtype).unwrap() {
             Type::Byte => match vector {
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
                         .of_length(image.offset() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
@@ -180,7 +183,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::Char => match vector {
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
                         .of_length(image.offset() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
@@ -191,7 +194,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::T => match vector {
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     Some(Tag::from_slice(
                         heap_ref
                             .of_length(
@@ -205,7 +208,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::Fixnum => match vector {
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
                         .of_length(
                             image.offset() as usize + Self::IMAGE_NBYTES + (index * 8),
@@ -221,7 +224,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::Float => match vector {
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
                         .of_length(
                             image.offset() as usize + Self::IMAGE_NBYTES + (index * 4),

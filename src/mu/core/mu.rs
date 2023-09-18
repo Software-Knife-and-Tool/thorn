@@ -30,7 +30,9 @@ use {
         },
     },
     cpu_time::ProcessTime,
-    std::{collections::HashMap, sync::RwLock},
+    futures::future::BoxFuture,
+    futures_locks::RwLock,
+    std::collections::HashMap,
 };
 
 // mu environment
@@ -45,6 +47,9 @@ pub struct Mu {
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
     pub dynamic: RwLock<Vec<(u64, usize)>>,
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
+
+    // async
+    pub async_map: RwLock<HashMap<u64, BoxFuture<'static, Result<Tag, ()>>>>,
 
     // exception dynamic unwind stack
     pub unwind: RwLock<Vec<usize>>,
@@ -92,6 +97,9 @@ impl Core for Mu {
 
             // heap
             heap: RwLock::new(Heap::new(1024)),
+
+            // async
+            async_map: RwLock::new(HashMap::new()),
 
             // environments
             compile: RwLock::new(Vec::new()),

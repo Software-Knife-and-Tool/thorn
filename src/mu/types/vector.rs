@@ -23,6 +23,7 @@ use {
             vecimage::{TypedVec, VecType, VectorIter},
         },
     },
+    futures::executor::block_on,
     std::str,
 };
 
@@ -54,7 +55,7 @@ impl Vector {
         match Tag::type_of(mu, tag) {
             Type::Vector => match tag {
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     VectorImage {
                         vtype: Tag::from_slice(
                             heap_ref.of_length(image.offset() as usize, 8).unwrap(),
@@ -162,7 +163,7 @@ impl<'a> Core<'a> for Vector {
                     _ => panic!(),
                 },
                 Tag::Indirect(image) => {
-                    let heap_ref = mu.heap.read().unwrap();
+                    let heap_ref = block_on(mu.heap.read());
                     let vec: VectorImage = Self::to_image(mu, tag);
 
                     str::from_utf8(
