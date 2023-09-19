@@ -2,12 +2,13 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu reader
+#[allow(unused_imports)]
 use crate::{
     core::{
         compile::Compiler,
         exception::{self, Condition, Exception},
         frame::Frame,
-        mu::{Core, Mu},
+        mu::{Core as _, Mu},
         reader::{Core as _, Reader},
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},

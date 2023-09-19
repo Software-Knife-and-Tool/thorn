@@ -4,7 +4,7 @@
 //! mu functions
 use crate::{
     core::{
-        async_::MuFunction as _,
+        async_context::MuFunction as _,
         backquote::MuFunction as _,
         compile::Compiler,
         exception::{self, Condition, Exception, MuFunction as _},

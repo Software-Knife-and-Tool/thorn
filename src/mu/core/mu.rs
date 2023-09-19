@@ -6,6 +6,7 @@
 use {
     crate::{
         core::{
+            async_context::{AsyncContext, Core as _},
             exception,
             exception::{Condition, Exception},
             frame::Frame,
@@ -30,7 +31,6 @@ use {
         },
     },
     cpu_time::ProcessTime,
-    futures::future::BoxFuture,
     futures_locks::RwLock,
     std::collections::HashMap,
 };
@@ -49,7 +49,7 @@ pub struct Mu {
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
     // async
-    pub async_map: RwLock<HashMap<u64, BoxFuture<'static, Result<Tag, ()>>>>,
+    pub async_map: RwLock<HashMap<u64, AsyncContext>>,
 
     // exception dynamic unwind stack
     pub unwind: RwLock<Vec<usize>>,
@@ -98,7 +98,7 @@ impl Core for Mu {
             // heap
             heap: RwLock::new(Heap::new(1024)),
 
-            // async
+            // async contexts
             async_map: RwLock::new(HashMap::new()),
 
             // environments
@@ -243,6 +243,7 @@ impl Core for Mu {
         }
 
         match Tag::type_of(self, tag) {
+            Type::AsyncId => AsyncContext::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),

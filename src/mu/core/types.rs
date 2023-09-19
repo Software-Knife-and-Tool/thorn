@@ -34,6 +34,7 @@ pub enum Tag {
 #[derive(PartialEq, Copy, Clone, Debug, TryFromPrimitive)]
 #[repr(u8)]
 pub enum Type {
+    AsyncId,
     Byte,
     Char,
     Cons,
@@ -69,6 +70,7 @@ lazy_static! {
         DirectType::Keyword
     );
     pub static ref TYPEKEYMAP: Vec::<(Type, Tag)> = vec![
+        (Type::AsyncId, Symbol::keyword("asyncid")),
         (Type::Byte, Symbol::keyword("byte")),
         (Type::Char, Symbol::keyword("char")),
         (Type::Cons, Symbol::keyword("cons")),
@@ -170,11 +172,12 @@ impl Tag {
                 Tag::Fixnum(_) => Type::Fixnum,
                 Tag::ConsDirect(_) => Type::Cons,
                 Tag::Direct(direct) => match direct.dtype() {
-                    DirectType::Char => Type::Char,
                     DirectType::Byte => Type::Vector,
+                    DirectType::Char => Type::Char,
                     DirectType::Keyword => Type::Keyword,
                     DirectType::Ext => match ExtType::try_from(direct.info()) {
                         Ok(ExtType::Float) => Type::Float,
+                        Ok(ExtType::AsyncId) => Type::AsyncId,
                         _ => panic!(),
                     },
                 },
