@@ -23,9 +23,11 @@ use {
             vecimage::{TypedVec, VecType, VectorIter},
         },
     },
-    futures::executor::block_on,
     std::str,
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 pub enum Vector {
     Direct(Tag),
@@ -55,7 +57,11 @@ impl Vector {
         match Tag::type_of(mu, tag) {
             Type::Vector => match tag {
                 Tag::Indirect(image) => {
+                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
+                    #[cfg(feature = "no-async")]
+                    let heap_ref = mu.heap.borrow();
+
                     VectorImage {
                         vtype: Tag::from_slice(
                             heap_ref.of_length(image.offset() as usize, 8).unwrap(),
@@ -163,7 +169,11 @@ impl<'a> Core<'a> for Vector {
                     _ => panic!(),
                 },
                 Tag::Indirect(image) => {
+                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
+                    #[cfg(feature = "no-async")]
+                    let heap_ref = mu.heap.borrow();
+
                     let vec: VectorImage = Self::to_image(mu, tag);
 
                     str::from_utf8(

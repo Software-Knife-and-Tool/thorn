@@ -2,25 +2,25 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu struct type
-use {
-    crate::{
-        core::{
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            indirect::IndirectTag,
-            mu::{Core as _, Mu},
-            types::{Tag, TagType, Type},
-        },
-        types::{
-            cons::{Cons, ConsIter, Core as _},
-            stream::{Core as _, Stream},
-            symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType, VectorIter},
-            vector::Core as _,
-        },
+use crate::{
+    core::{
+        exception::{self, Condition, Exception},
+        frame::Frame,
+        indirect::IndirectTag,
+        mu::{Core as _, Mu},
+        types::{Tag, TagType, Type},
     },
-    futures::executor::block_on,
+    types::{
+        cons::{Cons, ConsIter, Core as _},
+        stream::{Core as _, Stream},
+        symbol::{Core as _, Symbol},
+        vecimage::{TypedVec, VecType, VectorIter},
+        vector::Core as _,
+    },
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 // a struct is a vector with an arbitrary type
 pub struct Struct {
@@ -55,7 +55,11 @@ impl Struct {
         match Tag::type_of(mu, tag) {
             Type::Struct => match tag {
                 Tag::Indirect(image) => {
+                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
+                    #[cfg(feature = "no-async")]
+                    let heap_ref = mu.heap.borrow();
+
                     Struct {
                         stype: Tag::from_slice(
                             heap_ref.of_length(image.offset() as usize, 8).unwrap(),
@@ -176,7 +180,11 @@ impl<'a> Core<'a> for Struct {
     fn evict(&self, mu: &Mu) -> Tag {
         let image: &[[u8; 8]] = &[self.stype.as_slice(), self.vector.as_slice()];
 
+        #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
+        #[cfg(feature = "no-async")]
+        let mut heap_ref = mu.heap.borrow_mut();
+
         Tag::Indirect(
             IndirectTag::new()
                 .with_offset(heap_ref.alloc(image, Type::Struct as u8) as u64)

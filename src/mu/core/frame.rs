@@ -7,26 +7,28 @@
 //!    frame_push
 //!    frame_pop
 //!    frame_ref
-use {
-    crate::{
-        core::{
-            exception::{self, Condition, Exception},
-            mu::{Core as _, Mu},
-            types::{Tag, Type},
-        },
-        types::{
-            cons::{Cons, ConsIter, Core as _},
-            fixnum::Fixnum,
-            function::Function,
-            struct_::{Core as _, Struct},
-            symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType, VectorIter},
-            vector::{Core as _, Vector},
-        },
+use crate::{
+    core::{
+        exception::{self, Condition, Exception},
+        mu::{Core as _, Mu},
+        types::{Tag, Type},
     },
-    futures::executor::block_on,
-    futures_locks::RwLock,
+    types::{
+        cons::{Cons, ConsIter, Core as _},
+        fixnum::Fixnum,
+        function::Function,
+        struct_::{Core as _, Struct},
+        symbol::{Core as _, Symbol},
+        vecimage::{TypedVec, VecType, VectorIter},
+        vector::{Core as _, Vector},
+    },
 };
+
+#[cfg(feature = "async")]
+use {futures::executor::block_on, futures_locks::RwLock};
+
+#[cfg(feature = "no-async")]
+use std::cell::RefCell;
 
 pub struct Frame {
     pub func: Tag,
@@ -80,38 +82,67 @@ impl Frame {
 
     // dynamic environment
     fn env_push(mu: &Mu, func: Tag, offset: usize) {
+        #[cfg(feature = "async")]
         let mut dynamic_ref = block_on(mu.dynamic.write());
+        #[cfg(feature = "no-async")]
+        let mut dynamic_ref = mu.dynamic.borrow_mut();
 
         dynamic_ref.push((func.as_u64(), offset));
     }
 
     fn env_pop(mu: &Mu) {
+        #[cfg(feature = "async")]
         let mut dynamic_ref = block_on(mu.dynamic.write());
+        #[cfg(feature = "no-async")]
+        let mut dynamic_ref = mu.dynamic.borrow_mut();
 
         dynamic_ref.pop();
     }
 
     #[allow(dead_code)]
     fn dynamic_ref(mu: &Mu, index: usize) -> (Tag, usize) {
+        #[cfg(feature = "async")]
         let dynamic_ref = block_on(mu.dynamic.read());
+        #[cfg(feature = "no-async")]
+        let dynamic_ref = mu.dynamic.borrow();
+
         let (func, offset) = dynamic_ref[index];
 
         (Tag::from_u64(func), offset)
     }
 
     // frame stacks
+    #[cfg(feature = "async")]
     fn frame_stack_push(self, mu: &Mu) {
         let id = Function::id(mu, self.func).as_u64();
+
         let mut stack_ref = block_on(mu.lexical.write());
 
         if let std::collections::hash_map::Entry::Vacant(e) = stack_ref.entry(id) {
             e.insert(RwLock::new(vec![self]));
         } else {
             let mut vec_ref = block_on(stack_ref[&id].write());
+
             vec_ref.push(self);
         }
     }
 
+    #[cfg(feature = "no-async")]
+    fn frame_stack_push(self, mu: &Mu) {
+        let id = Function::id(mu, self.func).as_u64();
+
+        let mut stack_ref = mu.lexical.borrow_mut();
+
+        if let std::collections::hash_map::Entry::Vacant(e) = stack_ref.entry(id) {
+            e.insert(RefCell::new(vec![self]));
+        } else {
+            let mut vec_ref = stack_ref[&id].borrow_mut();
+
+            vec_ref.push(self);
+        }
+    }
+
+    #[cfg(feature = "async")]
     fn frame_stack_pop(mu: &Mu, id: Tag) {
         let stack_ref = block_on(mu.lexical.read());
         let mut vec_ref = block_on(stack_ref[&id.as_u64()].write());
@@ -119,6 +150,33 @@ impl Frame {
         vec_ref.pop();
     }
 
+    #[cfg(feature = "no-async")]
+    fn frame_stack_pop(mu: &Mu, id: Tag) {
+        let stack_ref = mu.lexical.borrow();
+        let mut vec_ref = stack_ref[&id.as_u64()].borrow_mut();
+
+        vec_ref.pop();
+    }
+
+    fn frame_stack_len(mu: &Mu, id: Tag) -> Option<usize> {
+        #[cfg(feature = "async")]
+        let stack_ref = block_on(mu.lexical.read());
+        #[cfg(feature = "no-async")]
+        let stack_ref = mu.lexical.borrow();
+
+        if stack_ref.contains_key(&id.as_u64()) {
+            #[cfg(feature = "async")]
+            let vec_ref = block_on(stack_ref[&id.as_u64()].read());
+            #[cfg(feature = "no-async")]
+            let vec_ref = stack_ref[&id.as_u64()].borrow();
+
+            Some(vec_ref.len())
+        } else {
+            None
+        }
+    }
+
+    #[cfg(feature = "async")]
     fn frame_stack_ref(mu: &Mu, id: Tag, offset: usize, argv: &mut Vec<u64>) {
         let stack_ref = block_on(mu.lexical.read());
         let vec_ref = block_on(stack_ref[&id.as_u64()].read());
@@ -128,21 +186,29 @@ impl Frame {
         }
     }
 
-    fn frame_stack_len(mu: &Mu, id: Tag) -> Option<usize> {
-        let stack_ref = block_on(mu.lexical.read());
+    #[cfg(feature = "no-async")]
+    fn frame_stack_ref(mu: &Mu, id: Tag, offset: usize, argv: &mut Vec<u64>) {
+        let stack_ref = mu.lexical.borrow();
+        let vec_ref = stack_ref[&id.as_u64()].borrow();
 
-        if stack_ref.contains_key(&id.as_u64()) {
-            let vec_ref = block_on(stack_ref[&id.as_u64()].read());
-            Some(vec_ref.len())
-        } else {
-            None
+        for value in &vec_ref[offset].argv {
+            argv.push(value.as_u64())
         }
     }
 
     // frame reference
+    #[cfg(feature = "async")]
     fn frame_ref(mu: &Mu, id: u64, offset: usize) -> Option<Tag> {
         let stack_ref = block_on(mu.lexical.read());
         let vec_ref = block_on(stack_ref[&id].read());
+
+        Some(vec_ref[vec_ref.len() - 1].argv[offset])
+    }
+
+    #[cfg(feature = "no-async")]
+    fn frame_ref(mu: &Mu, id: u64, offset: usize) -> Option<Tag> {
+        let stack_ref = mu.lexical.borrow();
+        let vec_ref = stack_ref[&id].borrow();
 
         Some(vec_ref[vec_ref.len() - 1].argv[offset])
     }
@@ -218,7 +284,11 @@ pub trait MuFunction {
 
 impl MuFunction for Frame {
     fn mu_frames(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        #[cfg(feature = "async")]
         let env_ref = block_on(mu.dynamic.read());
+        #[cfg(feature = "no-async")]
+        let env_ref = mu.dynamic.borrow();
+
         let mut frames = Vec::new();
 
         for (func, offset) in env_ref.iter() {

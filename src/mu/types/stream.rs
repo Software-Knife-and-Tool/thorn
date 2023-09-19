@@ -7,28 +7,28 @@
 #![allow(unused_variables)]
 #![allow(clippy::identity_op)]
 
-use {
-    crate::{
-        core::{
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            indirect::IndirectTag,
-            mu::{Core as _, Mu},
-            reader::{Core as _, Reader},
-            types::{Tag, TagType, Type},
-        },
-        system::{stream::Core as _, sys::System},
-        types::{
-            char::Char,
-            fixnum::Fixnum,
-            streambuilder::StreamBuilder,
-            symbol::{Core as _, Symbol},
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
-        },
+use crate::{
+    core::{
+        exception::{self, Condition, Exception},
+        frame::Frame,
+        indirect::IndirectTag,
+        mu::{Core as _, Mu},
+        reader::{Core as _, Reader},
+        types::{Tag, TagType, Type},
     },
-    futures::executor::block_on,
+    system::{stream::Core as _, sys::System},
+    types::{
+        char::Char,
+        fixnum::Fixnum,
+        streambuilder::StreamBuilder,
+        symbol::{Core as _, Symbol},
+        vecimage::{TypedVec, VecType},
+        vector::{Core as _, Vector},
+    },
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 // stream struct
 pub struct Stream {
@@ -47,7 +47,11 @@ impl Stream {
             self.unch.as_slice(),
         ];
 
+        #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
+        #[cfg(feature = "no-async")]
+        let mut heap_ref = mu.heap.borrow_mut();
+
         Tag::Indirect(
             IndirectTag::new()
                 .with_offset(heap_ref.alloc(slices, Type::Stream as u8) as u64)
@@ -60,7 +64,10 @@ impl Stream {
         match Tag::type_of(mu, tag) {
             Type::Stream => match tag {
                 Tag::Indirect(main) => {
+                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
+                    #[cfg(feature = "no-async")]
+                    let heap_ref = mu.heap.borrow();
 
                     let image = Stream {
                         stream_id: Tag::from_slice(
@@ -98,7 +105,11 @@ impl Stream {
             _ => panic!(),
         } as usize;
 
+        #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
+        #[cfg(feature = "no-async")]
+        let mut heap_ref = mu.heap.borrow_mut();
+
         heap_ref.write_image(slices, offset);
     }
 }

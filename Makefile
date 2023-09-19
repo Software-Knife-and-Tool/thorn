@@ -37,7 +37,11 @@ tags:
 	@etags `find src/mu -name '*.rs' -print`
 
 release:
-	@cargo build --release
+	@cargo build --release --features async
+	@cp target/release/runtime dist
+
+no-async:
+	@cargo build --release --features no-async
 	@cp target/release/runtime dist
 
 debug:
@@ -80,9 +84,11 @@ perf/commit:
 commit:
 	@cargo fmt
 	@echo ";;; rust tests"
-	@cargo -q test | sed -e '/^$$/d'
+	@cargo -q test --features async | sed -e '/^$$/d'
+	@cargo -q test --features no-async | sed -e '/^$$/d'
 	@echo ";;; clippy tests"
-	@cargo clippy
+	@cargo clippy --features async
+	@cargo clippy --features no-async
 	@make -C tests commit --no-print-directory
 	@make -C perf commit --no-print-directory
 

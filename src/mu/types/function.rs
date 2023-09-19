@@ -2,23 +2,23 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu function type
-use {
-    crate::{
-        core::{
-            exception,
-            indirect::IndirectTag,
-            mu::{Core as _, Mu},
-            types::{Tag, TagType, Type},
-        },
-        types::{
-            fixnum::Fixnum,
-            symbol::Symbol,
-            vecimage::{TypedVec, VecType},
-            vector::{Core as _, Vector},
-        },
+use crate::{
+    core::{
+        exception,
+        indirect::IndirectTag,
+        mu::{Core as _, Mu},
+        types::{Tag, TagType, Type},
     },
-    futures::executor::block_on,
+    types::{
+        fixnum::Fixnum,
+        symbol::Symbol,
+        vecimage::{TypedVec, VecType},
+        vector::{Core as _, Vector},
+    },
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Function {
@@ -39,7 +39,11 @@ impl Function {
             self.id.as_slice(),
         ];
 
+        #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
+        #[cfg(feature = "no-async")]
+        let mut heap_ref = mu.heap.borrow_mut();
+
         let ind = IndirectTag::new()
             .with_offset(heap_ref.alloc(image, Type::Function as u8) as u64)
             .with_heap_id(1)
@@ -52,7 +56,11 @@ impl Function {
         match Tag::type_of(mu, tag) {
             Type::Function => match tag {
                 Tag::Indirect(main) => {
-                    let heap_ref = block_on(mu.heap.write());
+                    #[cfg(feature = "async")]
+                    let heap_ref = block_on(mu.heap.read());
+                    #[cfg(feature = "no-async")]
+                    let heap_ref = mu.heap.borrow();
+
                     Function {
                         nreq: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize, 8).unwrap(),

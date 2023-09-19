@@ -2,6 +2,7 @@
 //  SPDX-License-Identifier: MIT
 
 //! core module
+#[cfg(feature = "async")]
 pub mod async_context;
 pub mod backquote;
 pub mod cdirect;

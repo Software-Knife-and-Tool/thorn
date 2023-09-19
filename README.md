@@ -48,6 +48,7 @@ Most of our core computational frameworks are built on static systems and are fr
 - mostly Common Lisp semantics
 - resource overhead equivalent to a UNIX shell
 - minimal external crate dependencies
+- futures multi-threading and non-blocking I/O
 
 
 
@@ -116,6 +117,8 @@ Once built, the *html* for the *reference* material will be in  *doc/reference/h
 
 The *thorn* runtime *libmu* is a native code program that must be built for the target CPU architecture. The *thorn* build system requires only a `rust` compiler,`rust-fmt`,`clippy` and some form of the `make` utility. Other tools like  `valgrind` are optional.
 
+As of 0.0.15, thorn can now be built in a single-threaded or multi-threaded async form. The `world` target builds  the `async` runtime, which enables `async/await` at a speed penalty relative to the `no-async` target (a factor of 3 or more in most tests) due to increased locking overhead. Systems that don't need `async/awaut` to implement `futures can build the `no-async` version and benefit from the speed increase, at the cost of blocking I/O. `no-async`  builds disable all async features.
+
 Tests and performance measurement requires some version of `python 3`.
 
 ```
@@ -151,6 +154,8 @@ Note: the installation mechanism does not remove the installation directory befo
 ```
 % sudo make uninstall
 ```
+
+
 
 #### Testing
 

@@ -4,7 +4,6 @@
 //! mu functions
 use crate::{
     core::{
-        async_context::MuFunction as _,
         backquote::MuFunction as _,
         compile::Compiler,
         exception::{self, Condition, Exception, MuFunction as _},
@@ -29,6 +28,9 @@ use crate::{
     },
 };
 
+#[cfg(feature = "async")]
+use crate::core::async_context::MuFunction as _;
+
 // native functions
 pub type LibMuFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
 
@@ -46,8 +48,11 @@ lazy_static! {
         ("nth", 2, Cons::mu_nth),
         ("nthcdr", 2, Cons::mu_nthcdr),
         // async
+        #[cfg(feature="async")]
         ("async", 2, Mu::mu_async),
+        #[cfg(feature="async")]
         ("await", 1, Mu::mu_await),
+        #[cfg(feature="async")]
         ("abort", 1, Mu::mu_abort),
         // mu
         ("apply", 2, Mu::mu_apply),
