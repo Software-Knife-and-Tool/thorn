@@ -35,7 +35,7 @@ pub enum DirectType {
 #[repr(u8)]
 pub enum ExtType {
     Float = 0,
-    Async = 1,
+    AsyncId = 1,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -65,12 +65,6 @@ impl Tag {
         let info: u8 = match info {
             DirectInfo::Length(usize_) => usize_ as u8,
             DirectInfo::ExtType(type_) => type_ as u8,
-            /*
-                        DirectInfo::ExtType(type_) => match ExtType::try_from(type_) {
-                            Ok(etype) => etype as u8,
-                            Err(_) => panic!(),
-                        },
-            */
         };
 
         let dir = DirectTag::new()
