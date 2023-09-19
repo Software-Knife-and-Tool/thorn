@@ -4,23 +4,23 @@
 //! compile:
 //!     function calls
 //!     special forms
-use {
-    crate::{
-        core::{
-            exception::{self, Condition, Exception},
-            mu::Mu,
-            namespace::{Core as _, Namespace},
-            types::{Tag, Type},
-        },
-        types::{
-            cons::{Cons, ConsIter, Core as _},
-            fixnum::Fixnum,
-            function::Function,
-            symbol::{Core as _, Symbol},
-        },
+use crate::{
+    core::{
+        exception::{self, Condition, Exception},
+        mu::Mu,
+        namespace::{Core as _, Namespace},
+        types::{Tag, Type},
     },
-    futures::executor::block_on,
+    types::{
+        cons::{Cons, ConsIter, Core as _},
+        fixnum::Fixnum,
+        function::Function,
+        symbol::{Core as _, Symbol},
+    },
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 // special forms
 type SpecFn = fn(&Mu, Tag) -> exception::Result<Tag>;
@@ -136,7 +136,10 @@ impl Compiler for Mu {
     }
 
     fn compile_lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
+        #[cfg(feature = "async")]
         let lexenv_ref = block_on(mu.compile.read());
+        #[cfg(feature = "no-async")]
+        let lexenv_ref = mu.compile.borrow();
 
         for frame in lexenv_ref.iter().rev() {
             let (tag, symbols) = frame;
@@ -175,7 +178,11 @@ impl Compiler for Mu {
 
         match Self::compile_frame_symbols(mu, lambda) {
             Ok(lexicals) => {
+                #[cfg(feature = "async")]
                 let mut lexenv_ref = block_on(mu.compile.write());
+                #[cfg(feature = "no-async")]
+                let mut lexenv_ref = mu.compile.borrow_mut();
+
                 lexenv_ref.push((id, lexicals));
             }
             Err(e) => return Err(e),
@@ -189,7 +196,11 @@ impl Compiler for Mu {
             Err(e) => Err(e),
         };
 
+        #[cfg(feature = "async")]
         let mut lexenv_ref = block_on(mu.compile.write());
+        #[cfg(feature = "no-async")]
+        let mut lexenv_ref = mu.compile.borrow_mut();
+
         lexenv_ref.pop();
 
         form

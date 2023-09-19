@@ -16,10 +16,12 @@ use {
         },
         types::symbol::{Core as _, Symbol},
     },
-    futures::executor::block_on,
     num_enum::TryFromPrimitive,
     std::fmt,
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 // tag storage classes
 #[derive(Copy, Clone)]
@@ -101,7 +103,11 @@ impl fmt::Display for Tag {
 
 impl Tag {
     pub fn data(&self, mu: &Mu) -> u64 {
+        #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
+        #[cfg(feature = "no-async")]
+        let heap_ref = mu.heap.borrow();
+
         match self {
             Tag::Fixnum(fx) => (*fx >> 3) as u64,
             Tag::Direct(tag) => tag.data(),
@@ -163,7 +169,10 @@ impl Tag {
     }
 
     pub fn type_of(mu: &Mu, tag: Tag) -> Type {
+        #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
+        #[cfg(feature = "no-async")]
+        let heap_ref = mu.heap.borrow();
 
         if tag.null_() {
             Type::Null

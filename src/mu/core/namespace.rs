@@ -17,12 +17,15 @@ use {
             vector::{Core as _, Vector},
         },
     },
-    futures::executor::block_on,
-    futures_locks::RwLock,
     std::{collections::HashMap, str},
 };
 
-pub trait NSMaps {
+#[cfg(feature = "no-async")]
+use std::cell::RefCell;
+#[cfg(feature = "async")]
+use {futures::executor::block_on, futures_locks::RwLock};
+
+pub trait Map {
     type NSCache;
     type NSMap;
 
@@ -32,10 +35,14 @@ pub trait NSMaps {
     fn map_ns(_: &Mu, _: &str) -> Option<Tag>;
 }
 
-impl NSMaps for Mu {
+impl Map for Mu {
+    #[cfg(feature = "async")]
     type NSCache = RwLock<HashMap<String, Tag>>;
+    #[cfg(feature = "no-async")]
+    type NSCache = RefCell<HashMap<String, Tag>>;
     type NSMap = HashMap<u64, (Tag, Self::NSCache)>;
 
+    #[cfg(feature = "async")]
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
         let mut ns_ref = block_on(mu.ns_map.write());
 
@@ -51,8 +58,27 @@ impl NSMaps for Mu {
         Ok(ns)
     }
 
+    #[cfg(feature = "no-async")]
+    fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
+        let mut ns_ref = mu.ns_map.borrow_mut();
+
+        if ns_ref.contains_key(&ns.as_u64()) {
+            return Err(Exception::new(Condition::Type, "make-ns", ns));
+        }
+
+        ns_ref.insert(
+            ns.as_u64(),
+            (ns, RefCell::new(HashMap::<String, Tag>::new())),
+        );
+
+        Ok(ns)
+    }
+
     fn map_ns(mu: &Mu, name: &str) -> Option<Tag> {
+        #[cfg(feature = "async")]
         let ns_ref = block_on(mu.ns_map.read());
+        #[cfg(feature = "no-async")]
+        let ns_ref = mu.ns_map.borrow();
 
         for (_, ns) in ns_ref.iter() {
             let (ns_name, _) = ns;
@@ -66,6 +92,7 @@ impl NSMaps for Mu {
         None
     }
 
+    #[cfg(feature = "async")]
     fn map(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
         let ns_ref = block_on(mu.ns_map.read());
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
@@ -78,12 +105,36 @@ impl NSMaps for Mu {
         }
     }
 
+    #[cfg(feature = "no-async")]
+    fn map(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
+        let ns_ref = mu.ns_map.borrow();
+        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+        let hash = ns_cache.borrow();
+
+        if hash.contains_key(name) {
+            Some(hash[name])
+        } else {
+            None
+        }
+    }
+
+    #[cfg(feature = "async")]
     fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
         let ns_ref = block_on(mu.ns_map.read());
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(mu, Symbol::name(mu, symbol));
 
         let mut hash = block_on(ns_cache.write());
+        hash.insert(name, symbol);
+    }
+
+    #[cfg(feature = "no-async")]
+    fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
+        let ns_ref = mu.ns_map.borrow();
+        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+        let name = Vector::as_string(mu, Symbol::name(mu, symbol));
+
+        let mut hash = ns_cache.borrow_mut();
         hash.insert(name, symbol);
     }
 }
@@ -152,7 +203,7 @@ pub trait Core {
 impl Core for Namespace {
     fn intern(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
         match Self::is_ns(mu, ns) {
-            Some(ns) => match <Mu as NSMaps>::map(mu, ns, &name) {
+            Some(ns) => match <Mu as Map>::map(mu, ns, &name) {
                 Some(symbol) => {
                     // if the symbol is unbound, bind it.
                     // otherwise, we ignore the new binding.
@@ -172,7 +223,11 @@ impl Core for Namespace {
                             _ => panic!(),
                         } as usize;
 
+                        #[cfg(feature = "async")]
                         let mut heap_ref = block_on(mu.heap.write());
+                        #[cfg(feature = "no-async")]
+                        let mut heap_ref = mu.heap.borrow_mut();
+
                         heap_ref.write_image(slices, offset);
                     }
 
@@ -181,7 +236,7 @@ impl Core for Namespace {
                 None => {
                     let symbol = Symbol::new(mu, ns, &name, value).evict(mu);
 
-                    <Mu as NSMaps>::intern(mu, ns, symbol);
+                    <Mu as Map>::intern(mu, ns, symbol);
 
                     symbol
                 }
@@ -298,7 +353,7 @@ impl MuFunction for Namespace {
         match Tag::type_of(mu, ns_name) {
             Type::Vector if Vector::type_of(mu, ns_name) == Type::Char => {
                 fp.value = Self::new(&Vector::as_string(mu, ns_name)).evict(mu);
-                <Mu as NSMaps>::add_ns(mu, fp.value).unwrap();
+                <Mu as Map>::add_ns(mu, fp.value).unwrap();
             }
             _ => return Err(Exception::new(Condition::Type, "make-ns", ns_name)),
         }
@@ -311,7 +366,7 @@ impl MuFunction for Namespace {
 
         fp.value = match Tag::type_of(mu, ns_name) {
             Type::Vector if Vector::type_of(mu, ns_name) == Type::Char => {
-                match <Mu as NSMaps>::map_ns(mu, &Vector::as_string(mu, ns_name)) {
+                match <Mu as Map>::map_ns(mu, &Vector::as_string(mu, ns_name)) {
                     Some(ns) => ns,
                     None => Tag::nil(),
                 }
@@ -341,8 +396,8 @@ impl MuFunction for Namespace {
                     let ns_name = Vector::as_string(mu, Namespace::name(mu, ns));
                     let sy_name = Vector::as_string(mu, name);
 
-                    fp.value = match <Mu as NSMaps>::map_ns(mu, &ns_name) {
-                        Some(ns) => match <Mu as NSMaps>::map(mu, ns, &sy_name) {
+                    fp.value = match <Mu as Map>::map_ns(mu, &ns_name) {
+                        Some(ns) => match <Mu as Map>::map(mu, ns, &sy_name) {
                             Some(sym) => sym,
                             None => Tag::nil(),
                         },
@@ -369,6 +424,7 @@ impl MuFunction for Namespace {
         }
     }
 
+    #[cfg(feature = "async")]
     fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
@@ -377,6 +433,29 @@ impl MuFunction for Namespace {
                 let ns_ref = block_on(mu.ns_map.read());
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
                 let hash = block_on(ns_cache.read());
+                let mut vec = vec![];
+
+                for key in hash.keys() {
+                    vec.push(hash[key])
+                }
+
+                Cons::vlist(mu, &vec)
+            }
+            _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
+        };
+
+        Ok(())
+    }
+
+    #[cfg(feature = "no-async")]
+    fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let ns = fp.argv[0];
+
+        fp.value = match Self::is_ns(mu, ns) {
+            Some(_) => {
+                let ns_ref = mu.ns_map.borrow();
+                let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+                let hash = ns_cache.borrow();
                 let mut vec = vec![];
 
                 for key in hash.keys() {

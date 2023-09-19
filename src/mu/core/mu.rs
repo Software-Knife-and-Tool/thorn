@@ -6,12 +6,11 @@
 use {
     crate::{
         core::{
-            async_context::{AsyncContext, Core as _},
             exception,
             exception::{Condition, Exception},
             frame::Frame,
             functions::{Core as _, LibMuFunction},
-            namespace::{Core as _, NSMaps, Namespace},
+            namespace::{Core as _, Map, Namespace},
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
@@ -31,8 +30,16 @@ use {
         },
     },
     cpu_time::ProcessTime,
-    futures_locks::RwLock,
     std::collections::HashMap,
+};
+
+// locking protocols
+#[cfg(feature = "no-async")]
+use std::cell::RefCell;
+#[cfg(feature = "async")]
+use {
+    crate::core::async_context::{AsyncContext, Core as _},
+    futures_locks::RwLock,
 };
 
 // mu environment
@@ -41,18 +48,42 @@ pub struct Mu {
     pub version: Tag,
 
     // heap
+    #[cfg(feature = "async")]
     pub heap: RwLock<Heap>,
+    #[cfg(feature = "no-async")]
+    pub heap: RefCell<Heap>,
 
-    // environments
+    // async environments
+    #[cfg(feature = "async")]
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
+    #[cfg(feature = "async")]
     pub dynamic: RwLock<Vec<(u64, usize)>>,
+    #[cfg(feature = "async")]
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
-    // async
+    // no-async environments
+    #[cfg(feature = "no-async")]
+    pub compile: RefCell<Vec<(Tag, Vec<Tag>)>>,
+    #[cfg(feature = "no-async")]
+    pub dynamic: RefCell<Vec<(u64, usize)>>,
+    #[cfg(feature = "no-async")]
+    pub lexical: RefCell<HashMap<u64, RefCell<Vec<Frame>>>>,
+
+    // async context map
+    #[cfg(feature = "async")]
     pub async_map: RwLock<HashMap<u64, AsyncContext>>,
 
     // exception dynamic unwind stack
+    #[cfg(feature = "async")]
     pub unwind: RwLock<Vec<usize>>,
+    #[cfg(feature = "no-async")]
+    pub unwind: RefCell<Vec<usize>>,
+
+    // namespace map/symbol caches
+    #[cfg(feature = "async")]
+    pub ns_map: RwLock<<Mu as Map>::NSMap>,
+    #[cfg(feature = "no-async")]
+    pub ns_map: RefCell<<Mu as Map>::NSMap>,
 
     // functions
     pub functions: Vec<LibMuFunction>,
@@ -70,16 +101,13 @@ pub struct Mu {
     pub stdout: Tag,
     pub errout: Tag,
 
-    // namespace map/symbol caches
-    pub ns_map: RwLock<<Mu as NSMaps>::NSMap>,
-
     // system
     pub start_time: ProcessTime,
     pub system: system::System,
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.14";
+    const VERSION: &'static str = "0.0.15";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -96,18 +124,42 @@ impl Core for Mu {
             version: Tag::nil(),
 
             // heap
+            #[cfg(feature = "async")]
             heap: RwLock::new(Heap::new(1024)),
+            #[cfg(feature = "no-async")]
+            heap: RefCell::new(Heap::new(1024)),
 
             // async contexts
+            #[cfg(feature = "async")]
             async_map: RwLock::new(HashMap::new()),
 
-            // environments
+            // async environments
+            #[cfg(feature = "async")]
             compile: RwLock::new(Vec::new()),
+            #[cfg(feature = "async")]
             dynamic: RwLock::new(Vec::new()),
+            #[cfg(feature = "async")]
             lexical: RwLock::new(HashMap::new()),
 
+            // no-async environments
+            #[cfg(feature = "no-async")]
+            compile: RefCell::new(Vec::new()),
+            #[cfg(feature = "no-async")]
+            dynamic: RefCell::new(Vec::new()),
+            #[cfg(feature = "no-async")]
+            lexical: RefCell::new(HashMap::new()),
+
             // exception unwind stack
+            #[cfg(feature = "async")]
             unwind: RwLock::new(Vec::new()),
+            #[cfg(feature = "no-async")]
+            unwind: RefCell::new(Vec::new()),
+
+            // namespace maps
+            #[cfg(feature = "async")]
+            ns_map: RwLock::new(HashMap::new()),
+            #[cfg(feature = "no-async")]
+            ns_map: RefCell::new(HashMap::new()),
 
             // functions
             functions: Vec::new(),
@@ -116,7 +168,6 @@ impl Core for Mu {
             keyword_ns: Tag::nil(),
             mu_ns: Tag::nil(),
             null_ns: Tag::nil(),
-            ns_map: RwLock::new(HashMap::new()),
 
             // streams
             stdin: Tag::nil(),
@@ -133,19 +184,19 @@ impl Core for Mu {
 
         // establish the namespaces first
         mu.mu_ns = Namespace::new("mu").evict(&mu);
-        match <Mu as NSMaps>::add_ns(&mu, mu.mu_ns) {
+        match <Mu as Map>::add_ns(&mu, mu.mu_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         mu.null_ns = Namespace::new("").evict(&mu);
-        match <Mu as NSMaps>::add_ns(&mu, mu.null_ns) {
+        match <Mu as Map>::add_ns(&mu, mu.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         mu.keyword_ns = Namespace::new("keyword").evict(&mu);
-        match <Mu as NSMaps>::add_ns(&mu, mu.keyword_ns) {
+        match <Mu as Map>::add_ns(&mu, mu.keyword_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
@@ -243,6 +294,7 @@ impl Core for Mu {
         }
 
         match Tag::type_of(self, tag) {
+            #[cfg(feature = "async")]
             Type::AsyncId => AsyncContext::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),

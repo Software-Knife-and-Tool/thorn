@@ -2,27 +2,27 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu cons class
-use {
-    crate::{
-        core::{
-            cdirect::ConsDirect,
-            direct::{DirectInfo, DirectType},
-            exception::{self, Condition, Exception},
-            frame::Frame,
-            indirect::IndirectTag,
-            mu::{Core as _, Mu},
-            reader::{Core as _, Reader},
-            types::{Tag, TagType, Type},
-        },
-        types::{
-            fixnum::Fixnum,
-            symbol::Symbol,
-            vecimage::{TypedVec, VecType},
-            vector::Core as _,
-        },
+use crate::{
+    core::{
+        cdirect::ConsDirect,
+        direct::{DirectInfo, DirectType},
+        exception::{self, Condition, Exception},
+        frame::Frame,
+        indirect::IndirectTag,
+        mu::{Core as _, Mu},
+        reader::{Core as _, Reader},
+        types::{Tag, TagType, Type},
     },
-    futures::executor::block_on,
+    types::{
+        fixnum::Fixnum,
+        symbol::Symbol,
+        vecimage::{TypedVec, VecType},
+        vector::Core as _,
+    },
 };
+
+#[cfg(feature = "async")]
+use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Cons {
@@ -39,7 +39,11 @@ impl Cons {
         match Tag::type_of(mu, tag) {
             Type::Cons => match tag {
                 Tag::Indirect(main) => {
-                    let heap_ref = block_on(mu.heap.write());
+                    #[cfg(feature = "async")]
+                    let heap_ref = block_on(mu.heap.read());
+                    #[cfg(feature = "no-async")]
+                    let heap_ref = mu.heap.borrow();
+
                     Cons {
                         car: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize, 8).unwrap(),
@@ -128,7 +132,11 @@ impl Core for Cons {
             None => {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
 
+                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
+                #[cfg(feature = "no-async")]
+                let mut heap_ref = mu.heap.borrow_mut();
+
                 let ind = IndirectTag::new()
                     .with_offset(heap_ref.alloc(image, Type::Cons as u8) as u64)
                     .with_heap_id(1)
