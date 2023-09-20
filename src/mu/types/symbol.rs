@@ -59,7 +59,7 @@ impl Symbol {
     pub fn to_image(mu: &Mu, tag: Tag) -> SymbolImage {
         #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let heap_ref = mu.heap.borrow();
 
         match Tag::type_of(mu, tag) {
@@ -149,7 +149,7 @@ impl Core for Symbol {
 
                 #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(

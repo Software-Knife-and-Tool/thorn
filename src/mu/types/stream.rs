@@ -49,7 +49,7 @@ impl Stream {
 
         #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let mut heap_ref = mu.heap.borrow_mut();
 
         Tag::Indirect(
@@ -66,7 +66,7 @@ impl Stream {
                 Tag::Indirect(main) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     let image = Stream {
@@ -107,7 +107,7 @@ impl Stream {
 
         #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let mut heap_ref = mu.heap.borrow_mut();
 
         heap_ref.write_image(slices, offset);

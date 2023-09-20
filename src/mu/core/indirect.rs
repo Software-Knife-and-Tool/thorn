@@ -73,27 +73,23 @@ impl Core for Mu {
     fn hp_info(mu: &Mu) -> (usize, usize) {
         #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let heap_ref = mu.heap.borrow();
 
         (heap_ref.page_size, heap_ref.npages)
     }
 
-    #[cfg(feature = "async")]
     fn hp_type(mu: &Mu, htype: Type) -> (u8, usize, usize, usize) {
+        #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
-
         #[allow(clippy::type_complexity)]
+        #[cfg(feature = "async")]
         let alloc_ref = block_on(heap_ref.alloc_map.read());
 
-        alloc_ref[htype as usize]
-    }
-
-    #[cfg(feature = "no-async")]
-    fn hp_type(mu: &Mu, htype: Type) -> (u8, usize, usize, usize) {
+        #[cfg(not(feature = "async"))]
         let heap_ref = mu.heap.borrow();
-
         #[allow(clippy::type_complexity)]
+        #[cfg(not(feature = "async"))]
         let alloc_ref = heap_ref.alloc_map.borrow();
 
         alloc_ref[htype as usize]

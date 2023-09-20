@@ -41,7 +41,7 @@ impl Function {
 
         #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let mut heap_ref = mu.heap.borrow_mut();
 
         let ind = IndirectTag::new()
@@ -58,7 +58,7 @@ impl Function {
                 Tag::Indirect(main) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     Function {

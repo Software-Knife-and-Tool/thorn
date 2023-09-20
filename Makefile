@@ -9,8 +9,10 @@ help:
 	@echo
 	@echo "--- build options"
 	@echo "    world - build release and package dist"
+	@echo "    world-no-async - build release and package dist"
 	@echo "    debug - build runtime for debug"
-	@echo "    release - build runtime for release"
+	@echo "    release - build runtime for release with async feature"
+	@echo "    no-async - build runtime for release without async feature"
 	@echo "--- distribution options"
 	@echo "    doc - generate documentation"
 	@echo "    dist - build distribution image"
@@ -32,6 +34,7 @@ help:
 	@echo "    perf/commit - condensed report"
 
 world: release dist
+world-no-async: no-async dist
 
 tags:
 	@etags `find src/mu -name '*.rs' -print`
@@ -41,7 +44,7 @@ release:
 	@cp target/release/runtime dist
 
 no-async:
-	@cargo build --release --features no-async
+	@cargo build --release
 	@cp target/release/runtime dist
 
 debug:

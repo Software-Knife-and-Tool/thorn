@@ -57,7 +57,7 @@ impl Struct {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     Struct {
@@ -182,7 +182,7 @@ impl<'a> Core<'a> for Struct {
 
         #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let mut heap_ref = mu.heap.borrow_mut();
 
         Tag::Indirect(

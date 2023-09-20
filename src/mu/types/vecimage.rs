@@ -70,7 +70,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
@@ -90,7 +90,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
@@ -114,7 +114,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
@@ -138,7 +138,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
@@ -166,7 +166,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
@@ -194,7 +194,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     let slice = heap_ref
@@ -209,7 +209,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     let slice = heap_ref
@@ -224,7 +224,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     Some(Tag::from_slice(
@@ -242,7 +242,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     let slice = heap_ref
@@ -262,7 +262,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     let slice = heap_ref

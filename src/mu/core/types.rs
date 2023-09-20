@@ -105,7 +105,7 @@ impl Tag {
     pub fn data(&self, mu: &Mu) -> u64 {
         #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let heap_ref = mu.heap.borrow();
 
         match self {
@@ -171,7 +171,7 @@ impl Tag {
     pub fn type_of(mu: &Mu, tag: Tag) -> Type {
         #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let heap_ref = mu.heap.borrow();
 
         if tag.null_() {

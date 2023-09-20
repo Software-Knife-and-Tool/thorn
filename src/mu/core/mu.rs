@@ -34,7 +34,7 @@ use {
 };
 
 // locking protocols
-#[cfg(feature = "no-async")]
+#[cfg(not(feature = "async"))]
 use std::cell::RefCell;
 #[cfg(feature = "async")]
 use {
@@ -50,7 +50,7 @@ pub struct Mu {
     // heap
     #[cfg(feature = "async")]
     pub heap: RwLock<Heap>,
-    #[cfg(feature = "no-async")]
+    #[cfg(not(feature = "async"))]
     pub heap: RefCell<Heap>,
 
     // async environments
@@ -62,11 +62,11 @@ pub struct Mu {
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
     // no-async environments
-    #[cfg(feature = "no-async")]
+    #[cfg(not(feature = "async"))]
     pub compile: RefCell<Vec<(Tag, Vec<Tag>)>>,
-    #[cfg(feature = "no-async")]
+    #[cfg(not(feature = "async"))]
     pub dynamic: RefCell<Vec<(u64, usize)>>,
-    #[cfg(feature = "no-async")]
+    #[cfg(not(feature = "async"))]
     pub lexical: RefCell<HashMap<u64, RefCell<Vec<Frame>>>>,
 
     // async context map
@@ -76,13 +76,13 @@ pub struct Mu {
     // exception dynamic unwind stack
     #[cfg(feature = "async")]
     pub unwind: RwLock<Vec<usize>>,
-    #[cfg(feature = "no-async")]
+    #[cfg(not(feature = "async"))]
     pub unwind: RefCell<Vec<usize>>,
 
     // namespace map/symbol caches
     #[cfg(feature = "async")]
     pub ns_map: RwLock<<Mu as Map>::NSMap>,
-    #[cfg(feature = "no-async")]
+    #[cfg(not(feature = "async"))]
     pub ns_map: RefCell<<Mu as Map>::NSMap>,
 
     // functions
@@ -126,7 +126,7 @@ impl Core for Mu {
             // heap
             #[cfg(feature = "async")]
             heap: RwLock::new(Heap::new(1024)),
-            #[cfg(feature = "no-async")]
+            #[cfg(not(feature = "async"))]
             heap: RefCell::new(Heap::new(1024)),
 
             // async contexts
@@ -142,23 +142,23 @@ impl Core for Mu {
             lexical: RwLock::new(HashMap::new()),
 
             // no-async environments
-            #[cfg(feature = "no-async")]
+            #[cfg(not(feature = "async"))]
             compile: RefCell::new(Vec::new()),
-            #[cfg(feature = "no-async")]
+            #[cfg(not(feature = "async"))]
             dynamic: RefCell::new(Vec::new()),
-            #[cfg(feature = "no-async")]
+            #[cfg(not(feature = "async"))]
             lexical: RefCell::new(HashMap::new()),
 
             // exception unwind stack
             #[cfg(feature = "async")]
             unwind: RwLock::new(Vec::new()),
-            #[cfg(feature = "no-async")]
+            #[cfg(not(feature = "async"))]
             unwind: RefCell::new(Vec::new()),
 
             // namespace maps
             #[cfg(feature = "async")]
             ns_map: RwLock::new(HashMap::new()),
-            #[cfg(feature = "no-async")]
+            #[cfg(not(feature = "async"))]
             ns_map: RefCell::new(HashMap::new()),
 
             // functions
