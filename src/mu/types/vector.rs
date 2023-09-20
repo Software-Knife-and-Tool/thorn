@@ -59,7 +59,7 @@ impl Vector {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     VectorImage {
@@ -171,7 +171,7 @@ impl<'a> Core<'a> for Vector {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(feature = "no-async")]
+                    #[cfg(not(feature = "async"))]
                     let heap_ref = mu.heap.borrow();
 
                     let vec: VectorImage = Self::to_image(mu, tag);

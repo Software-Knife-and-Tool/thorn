@@ -147,12 +147,12 @@ impl MuFunction for Exception {
                     {
                         #[cfg(feature = "async")]
                         let dynamic_ref = block_on(mu.dynamic.read());
-                        #[cfg(feature = "no-async")]
+                        #[cfg(not(feature = "async"))]
                         let dynamic_ref = mu.dynamic.borrow();
 
                         #[cfg(feature = "async")]
                         let mut unwind_ref = block_on(mu.unwind.write());
-                        #[cfg(feature = "no-async")]
+                        #[cfg(not(feature = "async"))]
                         let mut unwind_ref = mu.unwind.borrow_mut();
 
                         unwind_ref.push(dynamic_ref.len())
@@ -167,12 +167,12 @@ impl MuFunction for Exception {
                                 Ok(value) => {
                                     #[cfg(feature = "async")]
                                     let mut dynamic_ref = block_on(mu.dynamic.write());
-                                    #[cfg(feature = "no-async")]
+                                    #[cfg(not(feature = "async"))]
                                     let mut dynamic_ref = mu.dynamic.borrow_mut();
 
                                     #[cfg(feature = "async")]
                                     let mut unwind_ref = block_on(mu.unwind.write());
-                                    #[cfg(feature = "no-async")]
+                                    #[cfg(not(feature = "async"))]
                                     let mut unwind_ref = mu.unwind.borrow_mut();
 
                                     match unwind_ref.pop() {

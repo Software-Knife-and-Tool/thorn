@@ -138,7 +138,7 @@ impl Compiler for Mu {
     fn compile_lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
         #[cfg(feature = "async")]
         let lexenv_ref = block_on(mu.compile.read());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let lexenv_ref = mu.compile.borrow();
 
         for frame in lexenv_ref.iter().rev() {
@@ -180,7 +180,7 @@ impl Compiler for Mu {
             Ok(lexicals) => {
                 #[cfg(feature = "async")]
                 let mut lexenv_ref = block_on(mu.compile.write());
-                #[cfg(feature = "no-async")]
+                #[cfg(not(feature = "async"))]
                 let mut lexenv_ref = mu.compile.borrow_mut();
 
                 lexenv_ref.push((id, lexicals));
@@ -198,7 +198,7 @@ impl Compiler for Mu {
 
         #[cfg(feature = "async")]
         let mut lexenv_ref = block_on(mu.compile.write());
-        #[cfg(feature = "no-async")]
+        #[cfg(not(feature = "async"))]
         let mut lexenv_ref = mu.compile.borrow_mut();
 
         lexenv_ref.pop();
