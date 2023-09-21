@@ -12,6 +12,7 @@ use {
         },
         types::{
             cons::{Cons, Core as _},
+            fixnum::Fixnum,
             struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol, UNBOUND},
             vector::{Core as _, Vector},
@@ -232,6 +233,7 @@ pub trait MuFunction {
     fn mu_untern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_ns_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_name(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -405,38 +407,48 @@ impl MuFunction for Namespace {
         }
     }
 
-    #[cfg(feature = "async")]
-    fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_ns_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
         fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
+                #[cfg(feature = "async")]
                 let ns_ref = block_on(mu.ns_map.read());
+                #[cfg(not(feature = "async"))]
+                let ns_ref = mu.ns_map.borrow();
+
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+
+                #[cfg(feature = "async")]
                 let hash = block_on(ns_cache.read());
-                let mut vec = vec![];
+                #[cfg(not(feature = "async"))]
+                let hash = ns_cache.borrow();
 
-                for key in hash.keys() {
-                    vec.push(hash[key])
-                }
-
-                Cons::vlist(mu, &vec)
+                Fixnum::as_tag(hash.len() as i64)
             }
-            _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
+            _ => return Err(Exception::new(Condition::Type, "ns-size", ns)),
         };
 
         Ok(())
     }
 
-    #[cfg(not(feature = "async"))]
     fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
 
         fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
+                #[cfg(feature = "async")]
+                let ns_ref = block_on(mu.ns_map.read());
+                #[cfg(not(feature = "async"))]
                 let ns_ref = mu.ns_map.borrow();
+
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+
+                #[cfg(feature = "async")]
+                let hash = block_on(ns_cache.read());
+                #[cfg(not(feature = "async"))]
                 let hash = ns_cache.borrow();
+
                 let mut vec = vec![];
 
                 for key in hash.keys() {

@@ -93,6 +93,7 @@ lazy_static! {
         ("intern", 3, Namespace::mu_intern),
         ("make-ns", 1, Namespace::mu_make_ns),
         ("map-ns", 1, Namespace::mu_map_ns),
+        ("ns-size", 1, Namespace::mu_ns_size),
         ("ns-syms", 1, Namespace::mu_ns_symbols),
         ("ns-find", 2, Namespace::mu_ns_find),
         ("ns-name", 1, Namespace::mu_ns_name),
