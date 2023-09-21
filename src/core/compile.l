@@ -42,7 +42,7 @@
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (:if (core:symbolp symbol)
-               (core:intern symbol (core:%core-macro-env symbol (core:%compile-macro lambda-form env)))
+               (core:%core-macro-env symbol (core:%compile-macro lambda-form env))
                (core:raise symbol 'core:%compile-defmacro "not a symbol"))
           `(:quote ,symbol))
         (mu:nth 1 form)
