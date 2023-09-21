@@ -11,31 +11,33 @@
 ;;;
 ;;; Macro calls are expanded at compile time.
 ;;;
-;;; Common Lisp adds an environment argument here for lexial macro expanders.
-;;;
-;;; an environment is a closure that evaluates its
-;;; arguments, as soon as we get closures working
+;;; Common Lisp adds an environment argument here for lexical macro expanders.
 ;;;
 
 ;;;
 ;;; macro environment
 ;;;
+(mu:intern core "%map-macro-symbol-ns"
+   (:lambda (symbol)
+      ((:lambda (ns-name)
+          (mu:ns-find core:%macro-ns% ns-name))
+       (mu:ns-name (mu:sy-ns symbol)))))
+
+(mu:intern core "%make-macro-ns"
+   (:lambda (ns)
+      ((:lambda (macro-ns)                 
+          (mu:intern core:%macro-ns% (mu:ns-name ns) macro-ns)
+          macro-ns)      
+       (mu:make-ns (core:format () "%%~A%%" `(,(mu:ns-name ns)))))))                 
+
 (mu:intern core "%core-macro-env"
-  (:lambda (symbol macro-fn)
-    ((:lambda (macro-ns-name)
-       ((:lambda (macro-ns symbol-ns symbol-name)
+   (:lambda (symbol macro-fn)
+      ((:lambda (macro-ns symbol-ns)
           (:if macro-ns
-               (mu:intern (mu:sy-val macro-ns) symbol-name macro-fn)
-               ((:lambda (ns-sym)
-                  (mu:intern (mu:sy-val ns-sym) symbol-name macro-fn))
-                (mu:intern
-                 symbol-ns
-                 macro-ns-name
-                 (mu:make-ns macro-ns-name)))))
-        (mu:ns-find core:%macro-ns% macro-ns-name)
-        (core:symbol-ns symbol)
-        (mu:sy-name symbol)))
-     (mu:ns-name (core:symbol-ns symbol)))))
+               (mu:intern macro-ns (mu:ns-name symbol-ns) macro-fn)
+               (mu:intern (core:%make-macro-ns symbol-ns) (mu:sy-name symbol) macro-fn)))
+       (core:%map-macro-symbol-ns symbol)
+       (mu:sy-ns symbol))))
 
 (mu:intern core "%core-find-macro"
    (:lambda (symbol env)
@@ -67,7 +69,7 @@
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
                      (:if macro-fn
-                          (core:warn (core:apply macro-fn (core:%compile-quoted-lambda-arg-list macro-fn args env)) "macroexpand-1")
+                          (core:apply macro-fn (core:%compile-quoted-lambda-arg-list macro-fn args env))
                           form))
                    (core:macro-function fn-symbol env))
                   form))
