@@ -69,7 +69,7 @@
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
                      (:if macro-fn
-                          (core:apply macro-fn (core:%compile-quoted-lambda-arg-list macro-fn args env))
+                          (core:apply macro-fn (core:%quoted-lambda-arg-list macro-fn args))
                           form))
                    (core:macro-function fn-symbol env))
                   form))
@@ -104,40 +104,14 @@
                        ()))
                 (core:%core-find-macro symbol env)))
           ())))
-
 ;;;
-;;; %compile-macro lambda env => function
+;;; compile-macro: compile a macro expander
 ;;;
-;;; %compile-macro compiles a macro expander function.
-;;;
-(mu:intern core "%core-macro"
-   (:lambda (lambda env)
-     (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-         (core:raise lambda 'core:%core-macro "lambda syntax")
-         ((:lambda (desc)
-             (:if (core:fixnump desc)
-                  (core:%make-lambda lambda () env)
-                  desc))
-          (core:%foldl
-            (:lambda (el acc)
-               (:if (core:structp acc)
-                  acc
-                  (:if (mu:eq '&rest el)
-                     (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
-                          (core:%make-lambda
-                           `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:fx-sub (mu:length lambda) 1)))
-                           (mu:nth (mu:fx-sub (mu:length lambda) 1) lambda)
-                           env)
-                          (core:raise lambda 'core:%core-macro "rest botch"))
-                     (mu:fx-add 1 acc))))
-            0
-            lambda)))))
-
 (mu:intern core "%compile-macro"
   (:lambda (form env)
     ((:lambda (lambda-desc body)
        (mu:compile
         `(:lambda ,(core:%lambda-prop :bound lambda-desc)
                   ,@(core:%compile-lambda-body lambda-desc body env))))
-     (core:%core-macro (mu:car form) env)
+     (core:%core-lambda (mu:car form) env)
      (mu:nthcdr 1 form))))

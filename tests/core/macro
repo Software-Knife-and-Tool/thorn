@@ -4,4 +4,6 @@
 (core:compile '(define-core-macro core:a-macro ()))	(:quote core:a-macro)
 ((:lambda () (core:compile '(define-core-macro core:a-macro () 'core:a-macro)) (core:macroexpand '(core:a-macro) ())))	core:a-macro
 (mu:type-of ((:lambda () (core:compile '(define-core-macro core:a-macro () core:a-macro)) (core:macro-function 'core:a-macro ()))))	:func
+((:lambda () (core:compile '(define-core-macro core:a-macro (arg) arg)) (core:macroexpand '(core:a-macro (mu:fx-add 1 2)) ())))	(mu:fx-add 1 2)
+((:lambda () (core:compile '(define-core-macro core:a-macro (&rest arg) arg)) (core:macroexpand '(core:a-macro (mu:fx-add 1 2)) ())))	((mu:fx-add 1 2))
 (core:macro-function core:macro-function ())	:nil
