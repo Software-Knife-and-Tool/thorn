@@ -36,6 +36,7 @@ pub enum DirectType {
 pub enum ExtType {
     Float = 0,
     AsyncId = 1,
+    Cons = 2,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -44,19 +45,15 @@ pub enum DirectInfo {
     ExtType(ExtType),
 }
 
-impl Tag {
+impl DirectTag {
     pub const DIRECT_STR_MAX: usize = 7;
 
-    pub fn length(&self) -> usize {
-        match self {
-            Tag::Direct(tag) => tag.info() as usize,
-            _ => panic!(),
-        }
-    }
-
-    pub fn ext(&self) -> u64 {
-        match self {
-            Tag::Direct(tag) => tag.info() as u64,
+    pub fn length(tag: Tag) -> usize {
+        match tag {
+            Tag::Direct(dtag) => match dtag.dtype() {
+                DirectType::Char | DirectType::Byte | DirectType::Keyword => dtag.info() as usize,
+                _ => panic!(),
+            },
             _ => panic!(),
         }
     }
@@ -74,6 +71,84 @@ impl Tag {
             .with_tag(TagType::Direct);
 
         Tag::Direct(dir)
+    }
+
+    // can tag be sign extended to 64 from 28 bits?
+    pub fn sext_from_tag(tag: Tag) -> Option<u32> {
+        let u64_ = tag.as_u64();
+
+        let mask_28: u64 = 0xfffffff;
+        let mask_32: u64 = 0xffffffff;
+        let up_32: u64 = u64_ >> 28;
+        let bot_28: u32 = (u64_ & mask_28).try_into().unwrap();
+        let msb: u64 = u64_ >> 27 & 1;
+
+        match msb {
+            0 if up_32 == 0 && msb == 0 => Some(bot_28),
+            1 if up_32 == mask_32 && msb == 1 => Some(bot_28),
+            _ => None,
+        }
+    }
+
+    pub fn cons(car: Tag, cdr: Tag) -> Option<Tag> {
+        match Self::sext_from_tag(car) {
+            Some(car_) => Self::sext_from_tag(cdr).map(|cdr_| {
+                Self::to_direct(
+                    (car_ as u64) << 28 | cdr_ as u64,
+                    DirectInfo::ExtType(ExtType::Cons),
+                    DirectType::Ext,
+                )
+            }),
+            None => None,
+        }
+    }
+
+    pub fn car(cons: Tag) -> Tag {
+        match cons {
+            Tag::Direct(dtag) => match dtag.dtype() {
+                DirectType::Ext => match dtag.info() {
+                    2 => {
+                        let mask_32: u64 = 0xffffffff;
+                        let mut u64_: u64 = dtag.data() >> 28;
+                        let sign = (u64_ >> 27) & 1;
+
+                        if sign != 0 {
+                            u64_ |= mask_32 << 28;
+                        }
+
+                        Tag::from_u64(u64_)
+                    }
+                    _ => panic!(),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
+    }
+
+    pub fn cdr(cons: Tag) -> Tag {
+        match cons {
+            Tag::Direct(dtag) => match dtag.dtype() {
+                DirectType::Ext => match dtag.info() {
+                    2 => {
+                        let mask_28: u64 = 0xfffffff;
+                        let mask_32: u64 = 0xffffffff;
+
+                        let mut u64_: u64 = dtag.data() & mask_28;
+                        let sign = (u64_ >> 27) & 1;
+
+                        if sign != 0 {
+                            u64_ |= mask_32 << 28;
+                        }
+
+                        Tag::from_u64(u64_)
+                    }
+                    _ => panic!(),
+                },
+                _ => panic!(),
+            },
+            _ => panic!(),
+        }
     }
 }
 

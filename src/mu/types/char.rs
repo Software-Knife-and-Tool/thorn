@@ -4,7 +4,7 @@
 //! mu character class
 use crate::{
     core::{
-        direct::{DirectInfo, DirectType},
+        direct::{DirectInfo, DirectTag, DirectType},
         exception,
         mu::{Core as _, Mu},
         types::Tag,
@@ -28,7 +28,7 @@ impl Char {
     }
 
     pub fn as_tag(ch: char) -> Tag {
-        Tag::to_direct(ch as u64, DirectInfo::Length(1), DirectType::Char)
+        DirectTag::to_direct(ch as u64, DirectInfo::Length(1), DirectType::Char)
     }
 }
 

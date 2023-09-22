@@ -4,7 +4,7 @@
 //! mu float type
 use crate::{
     core::{
-        direct::{DirectInfo, DirectType, ExtType},
+        direct::{DirectInfo, DirectTag, DirectType, ExtType},
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::{Core as _, Mu},
@@ -26,7 +26,7 @@ pub enum Float {
 impl Float {
     pub fn as_tag(fl: f32) -> Tag {
         let bytes = fl.to_le_bytes();
-        Tag::to_direct(
+        DirectTag::to_direct(
             u32::from_le_bytes(bytes) as u64,
             DirectInfo::ExtType(ExtType::Float),
             DirectType::Ext,
