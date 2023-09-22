@@ -122,7 +122,7 @@ impl Compiler for Mu {
 
         for cons in ConsIter::new(mu, lambda) {
             let symbol = Cons::car(mu, cons);
-            if Tag::type_of(mu, symbol) == Type::Symbol {
+            if Tag::type_of(symbol) == Type::Symbol {
                 match symv.iter().rev().position(|lex| symbol.eq_(*lex)) {
                     Some(_) => return Err(Exception::new(Condition::Syntax, "lexical", symbol)),
                     _ => symv.push(symbol),
@@ -162,11 +162,11 @@ impl Compiler for Mu {
     }
 
     fn compile_lambda(mu: &Mu, args: Tag) -> exception::Result<Tag> {
-        let (lambda, body) = match Tag::type_of(mu, args) {
+        let (lambda, body) = match Tag::type_of(args) {
             Type::Cons => {
                 let lambda = Cons::car(mu, args);
 
-                match Tag::type_of(mu, lambda) {
+                match Tag::type_of(lambda) {
                     Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
                     _ => return Err(Exception::new(Condition::Type, "lambda", args)),
                 }
@@ -207,12 +207,12 @@ impl Compiler for Mu {
     }
 
     fn compile(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
-        match Tag::type_of(mu, expr) {
+        match Tag::type_of(expr) {
             Type::Symbol => Self::compile_lexical(mu, expr),
             Type::Cons => {
                 let func = Cons::car(mu, expr);
                 let args = Cons::cdr(mu, expr);
-                match Tag::type_of(mu, func) {
+                match Tag::type_of(func) {
                     Type::Keyword => match Self::compile_special_form(mu, func, args) {
                         Ok(form) => Ok(form),
                         Err(e) => Err(e),
@@ -223,7 +223,7 @@ impl Compiler for Mu {
                     },
                     Type::Cons => match Self::compile_list(mu, args) {
                         Ok(arglist) => match Self::compile(mu, func) {
-                            Ok(fnc) => match Tag::type_of(mu, fnc) {
+                            Ok(fnc) => match Tag::type_of(fnc) {
                                 Type::Function => Ok(Cons::new(fnc, arglist).evict(mu)),
                                 _ => Err(Exception::new(Condition::Type, "compile", func)),
                             },
@@ -252,14 +252,14 @@ mod tests {
         let mu: &Mu = &Core::new("".to_string());
 
         match <Mu as Compiler>::compile(mu, Tag::nil()) {
-            Ok(form) => match Tag::type_of(mu, form) {
+            Ok(form) => match Tag::type_of(form) {
                 Type::Null => assert!(true),
                 _ => assert!(false),
             },
             _ => assert!(false),
         }
         match <Mu as Compiler>::compile_list(mu, Tag::nil()) {
-            Ok(form) => match Tag::type_of(mu, form) {
+            Ok(form) => match Tag::type_of(form) {
                 Type::Null => assert!(true),
                 _ => assert!(false),
             },

@@ -218,8 +218,8 @@ impl MuFunction for Mu {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match Tag::type_of(mu, func) {
-            Type::Function => match Tag::type_of(mu, args) {
+        fp.value = match Tag::type_of(func) {
+            Type::Function => match Tag::type_of(args) {
                 Type::Null | Type::Cons => {
                     let value = Tag::nil();
                     let mut argv = Vec::new();
@@ -248,7 +248,7 @@ impl MuFunction for Mu {
 
         fp.value = form;
 
-        match Tag::type_of(mu, stream) {
+        match Tag::type_of(stream) {
             Type::Stream => match mu.write(form, !escape.null_(), stream) {
                 Ok(_) => Ok(()),
                 Err(e) => Err(e),
@@ -262,8 +262,8 @@ impl MuFunction for Mu {
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
 
-        fp.value = match Tag::type_of(mu, true_fn) {
-            Type::Function => match Tag::type_of(mu, false_fn) {
+        fp.value = match Tag::type_of(true_fn) {
+            Type::Function => match Tag::type_of(false_fn) {
                 Type::Function => {
                     match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
                         Ok(tag) => tag,
@@ -281,7 +281,7 @@ impl MuFunction for Mu {
     fn mu_exit(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
-        match Tag::type_of(mu, rc) {
+        match Tag::type_of(rc) {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(mu, rc) as i32),
             _ => Err(Exception::new(Condition::Type, "exit", rc)),
         }
@@ -305,7 +305,7 @@ impl MuFunction for Mu {
                 .to_vector()
                 .evict(mu)
             }
-            false => match Tag::type_of(mu, arg) {
+            false => match Tag::type_of(arg) {
                 Type::Vector
                     if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 =>
                 {
@@ -331,7 +331,7 @@ impl MuFunction for Mu {
     fn mu_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, tag) {
+        fp.value = match Tag::type_of(tag) {
             Type::Char => Char::view(mu, tag),
             Type::Cons => Cons::view(mu, tag),
             Type::Fixnum => Fixnum::view(mu, tag),
@@ -352,7 +352,7 @@ impl MuFunction for Mu {
 
         fp.value = fp.argv[1];
 
-        match Tag::type_of(mu, func) {
+        match Tag::type_of(func) {
             Type::Function => {
                 loop {
                     let value = Tag::nil();

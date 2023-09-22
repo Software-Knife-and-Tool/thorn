@@ -53,7 +53,7 @@ impl Function {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Function => match tag {
                 Tag::Indirect(main) => {
                     #[cfg(feature = "async")]
@@ -80,7 +80,7 @@ impl Function {
     }
 
     pub fn nreq(mu: &Mu, func: Tag) -> Tag {
-        match Tag::type_of(mu, func) {
+        match Tag::type_of(func) {
             Type::Function => match func {
                 Tag::Indirect(_) => Self::to_image(mu, func).nreq,
                 _ => panic!(),
@@ -90,7 +90,7 @@ impl Function {
     }
 
     pub fn form(mu: &Mu, func: Tag) -> Tag {
-        match Tag::type_of(mu, func) {
+        match Tag::type_of(func) {
             Type::Function => match func {
                 Tag::Indirect(_) => Self::to_image(mu, func).form,
                 _ => panic!(),
@@ -100,7 +100,7 @@ impl Function {
     }
 
     pub fn id(mu: &Mu, func: Tag) -> Tag {
-        match Tag::type_of(mu, func) {
+        match Tag::type_of(func) {
             Type::Function => match func {
                 Tag::Indirect(_) => Self::to_image(mu, func).id,
                 _ => panic!(),
@@ -127,12 +127,12 @@ impl Core for Function {
     }
 
     fn write(mu: &Mu, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        match Tag::type_of(mu, func) {
+        match Tag::type_of(func) {
             Type::Function => {
                 let nreq = Fixnum::as_i64(mu, Function::nreq(mu, func));
                 let form = Function::form(mu, func);
 
-                let desc = match Tag::type_of(mu, form) {
+                let desc = match Tag::type_of(form) {
                     Type::Cons | Type::Null => {
                         (":lambda".to_string(), format!("{:x}", form.as_u64()))
                     }

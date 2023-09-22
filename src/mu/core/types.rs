@@ -54,11 +54,11 @@ pub enum Type {
 #[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TagType {
     Fixnum = 0,   // 61 bit signed integer
-    Stream = 1,   // stream heap tag
-    Direct = 2,   // chars, short strings, keywords
-    Indirect = 3, // heap tags
-    Cons = 4,     // cons heap tag
-    Function = 5, // function heap tag
+    Direct = 1,   // chars, short strings, keywords, direct conses
+    Cons = 2,     // cons heap tag
+    Function = 3, // function heap tag
+    Stream = 4,   // stream heap tag
+    Struct = 5,   // struct heap tags
     Symbol = 6,   // symbol heap tag
     Vector = 7,   // vector heap tag
 }
@@ -162,12 +162,7 @@ impl Tag {
         }
     }
 
-    pub fn type_of(mu: &Mu, tag: Tag) -> Type {
-        #[cfg(feature = "async")]
-        let heap_ref = block_on(mu.heap.read());
-        #[cfg(not(feature = "async"))]
-        let heap_ref = mu.heap.borrow();
-
+    pub fn type_of(tag: Tag) -> Type {
         if tag.null_() {
             Type::Null
         } else {
@@ -185,17 +180,12 @@ impl Tag {
                     },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
-                    TagType::Symbol => Type::Symbol,
-                    TagType::Function => Type::Function,
                     TagType::Cons => Type::Cons,
+                    TagType::Function => Type::Function,
+                    TagType::Stream => Type::Stream,
+                    TagType::Struct => Type::Struct,
+                    TagType::Symbol => Type::Symbol,
                     TagType::Vector => Type::Vector,
-                    TagType::Indirect => match heap_ref.info(indirect.offset() as usize) {
-                        Some(info) => match Type::try_from(info.tag_type()) {
-                            Ok(etype) => etype,
-                            Err(_) => panic!(),
-                        },
-                        None => panic!(),
-                    },
                     _ => panic!("indirect type-of botch {:x}", tag.as_u64()),
                 },
             }
@@ -235,8 +225,8 @@ impl MuFunction for Tag {
         Ok(())
     }
 
-    fn mu_typeof(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match Self::type_key(Self::type_of(mu, fp.argv[0])) {
+    fn mu_typeof(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match Self::type_key(Self::type_of(fp.argv[0])) {
             Some(type_key) => type_key,
             None => panic!(),
         };

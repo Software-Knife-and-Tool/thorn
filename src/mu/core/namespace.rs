@@ -134,7 +134,7 @@ impl Namespace {
     }
 
     pub fn is_ns(mu: &Mu, tag: Tag) -> Option<Tag> {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => {
                 let type_ = Struct::stype(mu, tag);
                 if type_.eq_(Symbol::keyword("ns")) {
@@ -245,7 +245,7 @@ impl MuFunction for Namespace {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
-        let ns = match Tag::type_of(mu, ns) {
+        let ns = match Tag::type_of(ns) {
             Type::Null => mu.null_ns,
             Type::Struct => match Self::is_ns(mu, ns) {
                 Some(ns) => ns,
@@ -254,7 +254,7 @@ impl MuFunction for Namespace {
             _ => return Err(Exception::new(Condition::Type, "untern", ns)),
         };
 
-        fp.value = match Tag::type_of(mu, name) {
+        fp.value = match Tag::type_of(name) {
             Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                 if Vector::length(mu, name) == 0 {
                     return Err(Exception::new(Condition::Syntax, "untern", ns));
@@ -289,7 +289,7 @@ impl MuFunction for Namespace {
         let name = fp.argv[1];
         let value = fp.argv[2];
 
-        let ns = match Tag::type_of(mu, ns) {
+        let ns = match Tag::type_of(ns) {
             Type::Null => mu.null_ns,
             Type::Struct => match Self::is_ns(mu, ns) {
                 Some(ns) => ns,
@@ -299,7 +299,7 @@ impl MuFunction for Namespace {
         };
 
         fp.value = match Self::is_ns(mu, ns) {
-            Some(ns) => match Tag::type_of(mu, name) {
+            Some(ns) => match Tag::type_of(name) {
                 Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                     if Vector::length(mu, name) == 0 {
                         return Err(Exception::new(Condition::Syntax, "intern", ns));
@@ -334,7 +334,7 @@ impl MuFunction for Namespace {
     fn mu_make_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_name = fp.argv[0];
 
-        match Tag::type_of(mu, ns_name) {
+        match Tag::type_of(ns_name) {
             Type::Vector if Vector::type_of(mu, ns_name) == Type::Char => {
                 fp.value = Self::new(&Vector::as_string(mu, ns_name)).evict(mu);
                 <Mu as Map>::add_ns(mu, fp.value).unwrap();
@@ -348,7 +348,7 @@ impl MuFunction for Namespace {
     fn mu_map_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_name = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, ns_name) {
+        fp.value = match Tag::type_of(ns_name) {
             Type::Vector if Vector::type_of(mu, ns_name) == Type::Char => {
                 match <Mu as Map>::map_ns(mu, &Vector::as_string(mu, ns_name)) {
                     Some(ns) => ns,
@@ -365,7 +365,7 @@ impl MuFunction for Namespace {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
-        let ns = match Tag::type_of(mu, ns) {
+        let ns = match Tag::type_of(ns) {
             Type::Null => mu.null_ns,
             Type::Struct => match Self::is_ns(mu, ns) {
                 Some(_) => ns,
@@ -374,7 +374,7 @@ impl MuFunction for Namespace {
             _ => return Err(Exception::new(Condition::Type, "intern", ns)),
         };
 
-        match Tag::type_of(mu, name) {
+        match Tag::type_of(name) {
             Type::Vector => match Self::is_ns(mu, ns) {
                 Some(_) => {
                     let ns_name = Vector::as_string(mu, Namespace::name(mu, ns));

@@ -48,14 +48,14 @@ impl Frame {
     }
 
     fn from_tag(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => {
                 let stype = Struct::stype(mu, tag);
                 let frame = Struct::vector(mu, tag);
 
                 let func = Vector::ref_(mu, frame, 0).unwrap();
 
-                match Tag::type_of(mu, func) {
+                match Tag::type_of(func) {
                     Type::Function => {
                         if !stype.eq_(Symbol::keyword("frame")) {
                             panic!()
@@ -200,7 +200,7 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, mu: &Mu, func: Tag) -> exception::Result<Tag> {
-        match Tag::type_of(mu, func) {
+        match Tag::type_of(func) {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, func) {
                     Err(Exception::new(Condition::Unbound, "apply", func))
@@ -208,7 +208,7 @@ impl Frame {
                     self.apply(mu, Symbol::value(mu, func))
                 }
             }
-            Type::Function => match Tag::type_of(mu, Function::form(mu, func)) {
+            Type::Function => match Tag::type_of(Function::form(mu, func)) {
                 Type::Null => Ok(Tag::nil()),
                 Type::Fixnum => {
                     let nreqs = Fixnum::as_i64(mu, Function::nreq(mu, func)) as usize;
@@ -298,7 +298,7 @@ impl MuFunction for Frame {
     fn mu_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = fp.argv[0];
 
-        match Tag::type_of(mu, fp.value) {
+        match Tag::type_of(fp.value) {
             Type::Function => Self::frame_stack_pop(mu, fp.value),
             _ => return Err(Exception::new(Condition::Type, "fr-pop", fp.value)),
         }
@@ -309,7 +309,7 @@ impl MuFunction for Frame {
     fn mu_fr_push(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = fp.argv[0];
 
-        match Tag::type_of(mu, fp.value) {
+        match Tag::type_of(fp.value) {
             Type::Vector => Self::from_tag(mu, fp.value).frame_stack_push(mu),
             _ => return Err(Exception::new(Condition::Type, "fr-push", fp.value)),
         }
@@ -321,8 +321,8 @@ impl MuFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        match Tag::type_of(mu, frame) {
-            Type::Fixnum => match Tag::type_of(mu, offset) {
+        match Tag::type_of(frame) {
+            Type::Fixnum => match Tag::type_of(offset) {
                 Type::Fixnum => match Frame::frame_ref(
                     mu,
                     Fixnum::as_i64(mu, frame) as u64,

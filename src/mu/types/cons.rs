@@ -35,7 +35,7 @@ impl Cons {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Cons => match tag {
                 Tag::Indirect(main) => {
                     #[cfg(feature = "async")]
@@ -59,7 +59,7 @@ impl Cons {
     }
 
     pub fn car(mu: &Mu, cons: Tag) -> Tag {
-        match Tag::type_of(mu, cons) {
+        match Tag::type_of(cons) {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::car(cons),
@@ -71,7 +71,7 @@ impl Cons {
     }
 
     pub fn cdr(mu: &Mu, cons: Tag) -> Tag {
-        match Tag::type_of(mu, cons) {
+        match Tag::type_of(cons) {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(mu, cons).cdr,
@@ -83,14 +83,14 @@ impl Cons {
     }
 
     pub fn length(mu: &Mu, cons: Tag) -> Option<usize> {
-        match Tag::type_of(mu, cons) {
+        match Tag::type_of(cons) {
             Type::Null => Some(0),
             Type::Cons => {
                 let mut cp = cons;
                 let mut n = 0;
 
                 loop {
-                    match Tag::type_of(mu, cp) {
+                    match Tag::type_of(cp) {
                         Type::Cons => {
                             n += 1;
                             cp = Self::cdr(mu, cp)
@@ -154,7 +154,7 @@ impl Core for Cons {
                 if mu.reader.eol.eq_(car) {
                     Ok(Tag::nil())
                 } else {
-                    match Tag::type_of(mu, car) {
+                    match Tag::type_of(car) {
                         Type::Symbol if dot.eq_(Symbol::name(mu, car)) => {
                             match Reader::read(mu, stream, false, Tag::nil(), true) {
                                 Ok(cdr) if mu.reader.eol.eq_(cdr) => Ok(Tag::nil()),
@@ -189,7 +189,7 @@ impl Core for Cons {
 
         // this is ugly, but it might be worse with a for loop
         loop {
-            match Tag::type_of(mu, tail) {
+            match Tag::type_of(tail) {
                 Type::Cons => {
                     mu.write_string(" ".to_string(), stream).unwrap();
                     mu.write(Self::car(mu, tail), escape, stream).unwrap();
@@ -221,10 +221,10 @@ impl Core for Cons {
         let mut nth = n;
         let mut tail = cons;
 
-        match Tag::type_of(mu, cons) {
+        match Tag::type_of(cons) {
             Type::Null => Some(Tag::nil()),
             Type::Cons => loop {
-                match Tag::type_of(mu, tail) {
+                match Tag::type_of(tail) {
                     _ if tail.null_() => return Some(Tag::nil()),
                     Type::Cons => {
                         if nth == 0 {
@@ -246,10 +246,10 @@ impl Core for Cons {
         let mut nth = n;
         let mut tail = cons;
 
-        match Tag::type_of(mu, cons) {
+        match Tag::type_of(cons) {
             Type::Null => Some(Tag::nil()),
             Type::Cons => loop {
-                match Tag::type_of(mu, tail) {
+                match Tag::type_of(tail) {
                     _ if tail.null_() => return Some(Tag::nil()),
                     Type::Cons => {
                         if nth == 0 {
@@ -282,7 +282,7 @@ impl MuFunction for Cons {
     fn mu_car(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, list) {
+        fp.value = match Tag::type_of(list) {
             Type::Null => list,
             Type::Cons => Self::car(mu, list),
             _ => return Err(Exception::new(Condition::Type, "car", list)),
@@ -294,7 +294,7 @@ impl MuFunction for Cons {
     fn mu_cdr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, list) {
+        fp.value = match Tag::type_of(list) {
             Type::Null => list,
             Type::Cons => Self::cdr(mu, list),
             _ => return Err(Exception::new(Condition::Type, "cdr", list)),
@@ -311,7 +311,7 @@ impl MuFunction for Cons {
     fn mu_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, list) {
+        fp.value = match Tag::type_of(list) {
             Type::Null => Fixnum::as_tag(0),
             Type::Cons => match Cons::length(mu, list) {
                 Some(len) => Fixnum::as_tag(len as i64),
@@ -327,11 +327,11 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        if Tag::type_of(mu, nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
+        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
             return Err(Exception::new(Condition::Type, "nth", nth));
         }
 
-        match Tag::type_of(mu, list) {
+        match Tag::type_of(list) {
             Type::Null => {
                 fp.value = Tag::nil();
                 Ok(())
@@ -352,11 +352,11 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        if Tag::type_of(mu, nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
+        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
             return Err(Exception::new(Condition::Type, "nthcdr", nth));
         }
 
-        match Tag::type_of(mu, list) {
+        match Tag::type_of(list) {
             Type::Null => {
                 fp.value = Tag::nil();
                 Ok(())
@@ -391,7 +391,7 @@ impl<'a> Iterator for ConsIter<'a> {
     type Item = Tag;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match Tag::type_of(self.mu, self.cons) {
+        match Tag::type_of(self.cons) {
             Type::Cons => {
                 let cons = self.cons;
                 self.cons = Cons::cdr(self.mu, self.cons);

@@ -56,8 +56,8 @@ impl MuFunction for Mu {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match Tag::type_of(mu, func) {
-            Type::Function => match Tag::type_of(mu, args) {
+        fp.value = match Tag::type_of(func) {
+            Type::Function => match Tag::type_of(args) {
                 Type::Cons | Type::Null => {
                     let mut map_ref = block_on(mu.async_map.write());
                     let mut async_id: u64 = map_ref.len() as u64;
@@ -111,7 +111,7 @@ impl MuFunction for Mu {
     fn mu_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, async_id) {
+        fp.value = match Tag::type_of(async_id) {
             Type::AsyncId => {
                 let map_ref = block_on(mu.async_map.write());
 
