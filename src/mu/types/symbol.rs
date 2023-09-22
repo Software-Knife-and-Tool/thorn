@@ -63,7 +63,7 @@ impl Symbol {
         #[cfg(not(feature = "async"))]
         let heap_ref = mu.heap.borrow();
 
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
                     namespace: Tag::from_slice(
@@ -83,7 +83,7 @@ impl Symbol {
     }
 
     pub fn namespace(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(mu, symbol) {
+        match Tag::type_of(symbol) {
             Type::Keyword => mu.keyword_ns,
             Type::Symbol => Self::to_image(mu, symbol).namespace,
             _ => panic!(),
@@ -91,7 +91,7 @@ impl Symbol {
     }
 
     pub fn name(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(mu, symbol) {
+        match Tag::type_of(symbol) {
             Type::Null | Type::Keyword => match symbol {
                 Tag::Direct(dir) => DirectTag::to_direct(
                     dir.data(),
@@ -106,7 +106,7 @@ impl Symbol {
     }
 
     pub fn value(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(mu, symbol) {
+        match Tag::type_of(symbol) {
             Type::Keyword => symbol,
             Type::Symbol => Self::to_image(mu, symbol).value,
             _ => panic!(),
@@ -232,7 +232,7 @@ impl Core for Symbol {
     }
 
     fn write(mu: &Mu, symbol: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        match Tag::type_of(mu, symbol) {
+        match Tag::type_of(symbol) {
             Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(mu).to_le_bytes()) {
                 Ok(s) => {
                     Stream::write_char(mu, stream, ':').unwrap();
@@ -288,7 +288,7 @@ impl MuFunction for Symbol {
     fn mu_name(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, symbol) {
+        fp.value = match Tag::type_of(symbol) {
             Type::Null | Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "sy:name", symbol)),
         };
@@ -299,7 +299,7 @@ impl MuFunction for Symbol {
     fn mu_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, symbol) {
+        fp.value = match Tag::type_of(symbol) {
             Type::Symbol | Type::Keyword => Symbol::namespace(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "sy:ns", symbol)),
         };
@@ -310,7 +310,7 @@ impl MuFunction for Symbol {
     fn mu_value(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, symbol) {
+        fp.value = match Tag::type_of(symbol) {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, symbol) {
                     return Err(Exception::new(Condition::Type, "sy-val", symbol));
@@ -328,7 +328,7 @@ impl MuFunction for Symbol {
     fn mu_boundp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(mu, symbol) {
+        fp.value = match Tag::type_of(symbol) {
             Type::Keyword => symbol,
             Type::Symbol => {
                 if Self::is_unbound(mu, symbol) {
@@ -346,7 +346,7 @@ impl MuFunction for Symbol {
     fn mu_keyword(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        match Tag::type_of(mu, symbol) {
+        match Tag::type_of(symbol) {
             Type::Keyword => {
                 fp.value = symbol;
                 Ok(())
@@ -363,7 +363,7 @@ impl MuFunction for Symbol {
     fn mu_symbol(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        match Tag::type_of(mu, symbol) {
+        match Tag::type_of(symbol) {
             Type::Vector => {
                 let str = Vector::as_string(mu, symbol);
                 fp.value = Self::new(mu, Tag::nil(), &str, *UNBOUND).evict(mu);

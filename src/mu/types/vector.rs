@@ -54,7 +54,7 @@ impl Vector {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> VectorImage {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Vector => match tag {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
@@ -160,7 +160,7 @@ impl<'a> Core<'a> for Vector {
     }
 
     fn as_string(mu: &Mu, tag: Tag) -> String {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Vector => match tag {
                 Tag::Direct(dir) => match dir.dtype() {
                     DirectType::Byte => str::from_utf8(&dir.data().to_le_bytes()).unwrap()
@@ -327,7 +327,7 @@ impl<'a> Core<'a> for Vector {
                             let mut vec = String::new();
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {
                                 let el = Cons::car(mu, cons);
-                                match Tag::type_of(mu, el) {
+                                match Tag::type_of(el) {
                                     Type::Char => {
                                         let ch = Char::as_char(mu, el);
                                         vec.push(ch)
@@ -344,7 +344,7 @@ impl<'a> Core<'a> for Vector {
                             let mut vec = Vec::<u8>::new();
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {
                                 let el = Cons::car(mu, cons);
-                                match Tag::type_of(mu, el) {
+                                match Tag::type_of(el) {
                                     Type::Fixnum => {
                                         let byte = Fixnum::as_i64(mu, el);
                                         if !(0..255).contains(&byte) {
@@ -369,7 +369,7 @@ impl<'a> Core<'a> for Vector {
 
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {
                                 let el = Cons::car(mu, cons);
-                                match Tag::type_of(mu, el) {
+                                match Tag::type_of(el) {
                                     Type::Fixnum => vec.push(Fixnum::as_i64(mu, el)),
                                     _ => {
                                         return Err(Exception::new(Condition::Type, "read:sv", el))
@@ -384,7 +384,7 @@ impl<'a> Core<'a> for Vector {
 
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {
                                 let el = Cons::car(mu, cons);
-                                match Tag::type_of(mu, el) {
+                                match Tag::type_of(el) {
                                     Type::Float => vec.push(Float::as_f32(mu, el)),
                                     _ => {
                                         return Err(Exception::new(Condition::Type, "read:sv", el))
@@ -420,7 +420,7 @@ impl<'a> Core<'a> for Vector {
     }
 
     fn ref_(mu: &Mu, vector: Tag, index: usize) -> Option<Tag> {
-        match Tag::type_of(mu, vector) {
+        match Tag::type_of(vector) {
             Type::Vector => match vector {
                 Tag::Direct(_direct) => {
                     Some(Char::as_tag(vector.data(mu).to_le_bytes()[index] as char))
@@ -463,7 +463,7 @@ impl MuFunction for Vector {
                     for cons in ConsIter::new(mu, list) {
                         let el = Cons::car(mu, cons);
 
-                        match Tag::type_of(mu, el) {
+                        match Tag::type_of(el) {
                             Type::Char => {
                                 vec.push(Char::as_char(mu, el));
                             }
@@ -479,7 +479,7 @@ impl MuFunction for Vector {
                     for cons in ConsIter::new(mu, list) {
                         let el = Cons::car(mu, cons);
 
-                        match Tag::type_of(mu, el) {
+                        match Tag::type_of(el) {
                             Type::Fixnum => {
                                 let byte = Fixnum::as_i64(mu, el);
 
@@ -500,7 +500,7 @@ impl MuFunction for Vector {
                     for cons in ConsIter::new(mu, list) {
                         let el = Cons::car(mu, cons);
 
-                        match Tag::type_of(mu, el) {
+                        match Tag::type_of(el) {
                             Type::Fixnum => {
                                 vec.push(Fixnum::as_i64(mu, el));
                             }
@@ -515,7 +515,7 @@ impl MuFunction for Vector {
                     for cons in ConsIter::new(mu, list) {
                         let el = Cons::car(mu, cons);
 
-                        match Tag::type_of(mu, el) {
+                        match Tag::type_of(el) {
                             Type::Float => {
                                 vec.push(Float::as_f32(mu, el));
                             }
@@ -541,7 +541,7 @@ impl MuFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        match Tag::type_of(mu, index) {
+        match Tag::type_of(index) {
             Type::Fixnum => {
                 let nth = Fixnum::as_i64(mu, index);
 
@@ -549,7 +549,7 @@ impl MuFunction for Vector {
                     return Err(Exception::new(Condition::Range, "sv-ref", index));
                 }
 
-                match Tag::type_of(mu, vector) {
+                match Tag::type_of(vector) {
                     Type::Vector => {
                         fp.value = match Self::ref_(mu, vector, nth as usize) {
                             Some(ch) => ch,
@@ -567,7 +567,7 @@ impl MuFunction for Vector {
     fn mu_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        match Tag::type_of(mu, vector) {
+        match Tag::type_of(vector) {
             Type::Vector => {
                 fp.value = match Tag::type_key(Vector::type_of(mu, vector)) {
                     Some(key) => key,
@@ -583,7 +583,7 @@ impl MuFunction for Vector {
     fn mu_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        match Tag::type_of(mu, vector) {
+        match Tag::type_of(vector) {
             Type::Vector => {
                 fp.value = Fixnum::as_tag(Self::length(mu, vector) as i64);
                 Ok(())

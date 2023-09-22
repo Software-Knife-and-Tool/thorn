@@ -30,7 +30,7 @@ pub struct Struct {
 
 impl Struct {
     pub fn stype(mu: &Mu, tag: Tag) -> Tag {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => {
                 let struct_ = Self::to_image(mu, tag);
 
@@ -41,7 +41,7 @@ impl Struct {
     }
 
     pub fn vector(mu: &Mu, tag: Tag) -> Tag {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => {
                 let struct_ = Self::to_image(mu, tag);
 
@@ -52,7 +52,7 @@ impl Struct {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => match tag {
                 Tag::Indirect(image) => {
                     #[cfg(feature = "async")]
@@ -76,7 +76,7 @@ impl Struct {
     }
 
     pub fn to_tag(mu: &Mu, stype: Tag, vec: Vec<Tag>) -> Tag {
-        match Tag::type_of(mu, stype) {
+        match Tag::type_of(stype) {
             Type::Keyword => {
                 let vector = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
                 Struct { stype, vector }.evict(mu)
@@ -158,7 +158,7 @@ impl<'a> Core<'a> for Struct {
                     };
 
                     let stype = Cons::car(mu, vec_list);
-                    match Tag::type_of(mu, stype) {
+                    match Tag::type_of(stype) {
                         Type::Keyword => {
                             let mut vec = Vec::new();
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {
@@ -189,7 +189,7 @@ impl<'a> Core<'a> for Struct {
             IndirectTag::new()
                 .with_offset(heap_ref.alloc(image, Type::Struct as u8) as u64)
                 .with_heap_id(1)
-                .with_tag(TagType::Indirect),
+                .with_tag(TagType::Struct),
         )
     }
 }
@@ -205,7 +205,7 @@ impl MuFunction for Struct {
     fn mu_struct_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => {
                 let image = Self::to_image(mu, tag);
 
@@ -219,7 +219,7 @@ impl MuFunction for Struct {
     fn mu_struct_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Struct => {
                 let image = Self::to_image(mu, tag);
 
@@ -234,7 +234,7 @@ impl MuFunction for Struct {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match Tag::type_of(mu, stype) {
+        fp.value = match Tag::type_of(stype) {
             Type::Keyword => {
                 let mut vec = Vec::new();
                 for cons in ConsIter::new(mu, list) {

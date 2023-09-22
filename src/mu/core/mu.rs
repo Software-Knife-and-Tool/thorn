@@ -254,11 +254,11 @@ impl Core for Mu {
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        match Tag::type_of(self, expr) {
+        match Tag::type_of(expr) {
             Type::Cons => {
                 let func = Cons::car(self, expr);
                 let args = Cons::cdr(self, expr);
-                match Tag::type_of(self, func) {
+                match Tag::type_of(func) {
                     Type::Keyword if func.eq_(Symbol::keyword("quote")) => {
                         Ok(Cons::car(self, args))
                     }
@@ -267,7 +267,7 @@ impl Core for Mu {
                             Err(Exception::new(Condition::Unbound, "eval", func))
                         } else {
                             let fnc = Symbol::value(self, func);
-                            match Tag::type_of(self, fnc) {
+                            match Tag::type_of(fnc) {
                                 Type::Function => self.apply(fnc, args),
                                 _ => Err(Exception::new(Condition::Type, "eval", func)),
                             }
@@ -289,11 +289,11 @@ impl Core for Mu {
     }
 
     fn write(&self, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        if Tag::type_of(self, stream) != Type::Stream {
-            panic!("{:?}", Tag::type_of(self, stream))
+        if Tag::type_of(stream) != Type::Stream {
+            panic!("{:?}", Tag::type_of(stream))
         }
 
-        match Tag::type_of(self, tag) {
+        match Tag::type_of(tag) {
             #[cfg(feature = "async")]
             Type::AsyncId => AsyncContext::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
@@ -310,8 +310,8 @@ impl Core for Mu {
     }
 
     fn write_string(&self, str: String, stream: Tag) -> exception::Result<()> {
-        if Tag::type_of(self, stream) != Type::Stream {
-            panic!("{:?}", Tag::type_of(self, stream))
+        if Tag::type_of(stream) != Type::Stream {
+            panic!("{:?}", Tag::type_of(stream))
         }
         for ch in str.chars() {
             match Stream::write_char(self, stream, ch) {

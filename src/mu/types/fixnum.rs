@@ -30,7 +30,7 @@ impl Fixnum {
 
     // tag as i64
     pub fn as_i64(mu: &Mu, tag: Tag) -> i64 {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Fixnum => Tag::data(&tag, mu) as i64,
             _ => panic!(),
         }
@@ -69,8 +69,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) + Fixnum::as_i64(mu, fx1));
                     Ok(())
@@ -85,8 +85,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) - Fixnum::as_i64(mu, fx1));
                     Ok(())
@@ -101,8 +101,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) * Fixnum::as_i64(mu, fx1));
                     Ok(())
@@ -117,8 +117,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     fp.value = if Fixnum::as_i64(mu, fx0) < Fixnum::as_i64(mu, fx1) {
                         Symbol::keyword("t")
@@ -138,8 +138,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     let dividend = Fixnum::as_i64(mu, fx0);
                     let divisor = Fixnum::as_i64(mu, fx1);
@@ -161,8 +161,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) & Fixnum::as_i64(mu, fx1));
                     Ok(())
@@ -177,8 +177,8 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(mu, fx0) {
-            Type::Fixnum => match Tag::type_of(mu, fx1) {
+        match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
                 Type::Fixnum => {
                     fp.value = Self::as_tag(Fixnum::as_i64(mu, fx0) | Fixnum::as_i64(mu, fx1));
                     Ok(())

@@ -77,7 +77,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     IndirectTag::new()
                         .with_offset(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
                         .with_heap_id(1)
-                        .with_tag(TagType::Indirect),
+                        .with_tag(TagType::Vector),
                 )
             }
             IndirectVector::Char((image, ivec)) => {
@@ -97,7 +97,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     IndirectTag::new()
                         .with_offset(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
                         .with_heap_id(1)
-                        .with_tag(TagType::Indirect),
+                        .with_tag(TagType::Vector),
                 )
             }
             IndirectVector::T((image, vec)) => {
@@ -121,7 +121,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     IndirectTag::new()
                         .with_offset(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
                         .with_heap_id(1)
-                        .with_tag(TagType::Indirect),
+                        .with_tag(TagType::Vector),
                 )
             }
             IndirectVector::Fixnum((image, vec)) => {
@@ -145,7 +145,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     IndirectTag::new()
                         .with_offset(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
                         .with_heap_id(1)
-                        .with_tag(TagType::Indirect),
+                        .with_tag(TagType::Vector),
                 )
             }
             IndirectVector::Float((image, vec)) => {
@@ -175,7 +175,7 @@ impl<'a> IVector for IndirectVector<'a> {
                             heap_ref.valloc(&Self::image(image), &data, Type::Vector as u8) as u64,
                         )
                         .with_heap_id(1)
-                        .with_tag(TagType::Indirect),
+                        .with_tag(TagType::Vector),
                 )
             }
         }

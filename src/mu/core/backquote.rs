@@ -84,7 +84,7 @@ impl Backquote for Mu {
         match Stream::get_string(mu, mu.reader.bq_str) {
             Ok(string) => match StreamBuilder::new().string(string).input().build(mu) {
                 Ok(stream) => match Self::bq_read(mu, false, stream.evict(mu), false) {
-                    Ok(expr) => match Tag::type_of(mu, expr) {
+                    Ok(expr) => match Tag::type_of(expr) {
                         Type::Cons | Type::Symbol => {
                             Ok(Cons::vlist(mu, &[mu.reader.cons, expr, Tag::nil()]))
                         }
@@ -148,7 +148,7 @@ impl Backquote for Mu {
                             if in_list {
                                 Self::bq_list_element(mu, expr)
                             } else {
-                                match Tag::type_of(mu, expr) {
+                                match Tag::type_of(expr) {
                                     Type::Symbol => Mu::compile_quoted_list(
                                         mu,
                                         Cons::new(expr, Tag::nil()).evict(mu),
@@ -251,7 +251,7 @@ impl MuFunction for Mu {
 
         let mut append = Vec::new();
 
-        match Tag::type_of(mu, list1) {
+        match Tag::type_of(list1) {
             Type::Null | Type::Cons => {
                 for elt in ConsIter::new(mu, list1) {
                     append.push(Cons::car(mu, elt))
@@ -263,7 +263,7 @@ impl MuFunction for Mu {
             }
         };
 
-        fp.value = match Tag::type_of(mu, list2) {
+        fp.value = match Tag::type_of(list2) {
             Type::Null | Type::Cons => {
                 for elt in ConsIter::new(mu, list2) {
                     append.push(Cons::car(mu, elt))

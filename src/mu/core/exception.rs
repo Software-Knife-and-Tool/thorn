@@ -124,11 +124,11 @@ pub trait MuFunction {
 }
 
 impl MuFunction for Exception {
-    fn mu_raise(mu: &Mu, fp: &mut Frame) -> Result<()> {
+    fn mu_raise(_: &Mu, fp: &mut Frame) -> Result<()> {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        match Tag::type_of(mu, condition) {
+        match Tag::type_of(condition) {
             Type::Keyword => match Self::map_condition(condition) {
                 Ok(cond) => Err(Self::new(cond, "raise", src)),
                 Err(_) => Err(Self::new(Condition::Type, "raise", condition)),
@@ -141,8 +141,8 @@ impl MuFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        fp.value = match Tag::type_of(mu, thunk) {
-            Type::Function => match Tag::type_of(mu, handler) {
+        fp.value = match Tag::type_of(thunk) {
+            Type::Function => match Tag::type_of(handler) {
                 Type::Function => {
                     {
                         #[cfg(feature = "async")]

@@ -34,7 +34,7 @@ impl Float {
     }
 
     pub fn as_f32(mu: &Mu, tag: Tag) -> f32 {
-        match Tag::type_of(mu, tag) {
+        match Tag::type_of(tag) {
             Type::Float => {
                 let data = tag.data(mu).to_le_bytes();
                 let mut fl = 0.0f32.to_le_bytes();
@@ -79,8 +79,8 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        match Tag::type_of(mu, fl0) {
-            Type::Float => match Tag::type_of(mu, fl1) {
+        match Tag::type_of(fl0) {
+            Type::Float => match Tag::type_of(fl1) {
                 Type::Float => {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) + Self::as_f32(mu, fl1));
                     Ok(())
@@ -95,8 +95,8 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        match Tag::type_of(mu, fl0) {
-            Type::Float => match Tag::type_of(mu, fl1) {
+        match Tag::type_of(fl0) {
+            Type::Float => match Tag::type_of(fl1) {
                 Type::Float => {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) - Self::as_f32(mu, fl1));
                     Ok(())
@@ -111,8 +111,8 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        match Tag::type_of(mu, fl0) {
-            Type::Float => match Tag::type_of(mu, fl1) {
+        match Tag::type_of(fl0) {
+            Type::Float => match Tag::type_of(fl1) {
                 Type::Float => {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) * Self::as_f32(mu, fl1));
                     Ok(())
@@ -127,8 +127,8 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        match Tag::type_of(mu, fl0) {
-            Type::Float => match Tag::type_of(mu, fl1) {
+        match Tag::type_of(fl0) {
+            Type::Float => match Tag::type_of(fl1) {
                 Type::Float => {
                     fp.value = if Self::as_f32(mu, fl0) < Self::as_f32(mu, fl1) {
                         Symbol::keyword("t")
@@ -148,8 +148,8 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        match Tag::type_of(mu, fl0) {
-            Type::Float => match Tag::type_of(mu, fl1) {
+        match Tag::type_of(fl0) {
+            Type::Float => match Tag::type_of(fl1) {
                 Type::Float => {
                     fp.value = Self::as_tag(Self::as_f32(mu, fl0) / Self::as_f32(mu, fl1));
                     Ok(())
