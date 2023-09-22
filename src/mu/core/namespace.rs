@@ -5,6 +5,7 @@
 use {
     crate::{
         core::{
+            direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
             mu::Mu,
@@ -268,7 +269,7 @@ impl MuFunction for Namespace {
                 }
 
                 if ns.eq_(mu.keyword_ns) {
-                    if len > Tag::DIRECT_STR_MAX {
+                    if len > DirectTag::DIRECT_STR_MAX {
                         return Err(Exception::new(Condition::Syntax, "untern", name));
                     }
 
@@ -313,7 +314,7 @@ impl MuFunction for Namespace {
                     }
 
                     if ns.eq_(mu.keyword_ns) {
-                        if len > Tag::DIRECT_STR_MAX {
+                        if len > DirectTag::DIRECT_STR_MAX {
                             return Err(Exception::new(Condition::Syntax, "intern", name));
                         }
 

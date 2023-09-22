@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            direct::{DirectInfo, DirectType},
+            direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
             mu::{Core as _, Mu},
@@ -138,7 +138,7 @@ impl<'a> Core<'a> for Vector {
     fn from_string(str: &str) -> Vector {
         let len = str.len();
 
-        if len > Tag::DIRECT_STR_MAX {
+        if len > DirectTag::DIRECT_STR_MAX {
             TypedVec::<String> {
                 vec: str.to_string(),
             }
@@ -151,7 +151,7 @@ impl<'a> Core<'a> for Vector {
                 *dst = *src
             }
 
-            Vector::Direct(Tag::to_direct(
+            Vector::Direct(DirectTag::to_direct(
                 u64::from_le_bytes(data),
                 DirectInfo::Length(len),
                 DirectType::Byte,
@@ -201,7 +201,7 @@ impl<'a> Core<'a> for Vector {
                         mu.write_string("\"".to_string(), stream).unwrap()
                     }
 
-                    for nth in 0..vector.length() {
+                    for nth in 0..DirectTag::length(vector) {
                         match Stream::write_char(mu, stream, s.as_bytes()[nth] as char) {
                             Ok(_) => (),
                             Err(e) => return Err(e),

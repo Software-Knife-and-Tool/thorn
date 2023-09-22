@@ -4,7 +4,7 @@
 //! mu image vector type
 use crate::{
     core::{
-        direct::{DirectInfo, DirectType},
+        direct::{DirectInfo, DirectTag, DirectType},
         indirect::IndirectTag,
         mu::Mu,
         types::{Tag, TagType, Type},
@@ -296,7 +296,7 @@ impl VecType for String {
     fn to_vector(&self) -> Vector {
         let len = self.len();
 
-        if len > Tag::DIRECT_STR_MAX {
+        if len > DirectTag::DIRECT_STR_MAX {
             let image = VectorImage {
                 vtype: Symbol::keyword("char"),
                 length: Fixnum::as_tag(self.len() as i64),
@@ -310,7 +310,7 @@ impl VecType for String {
                 *dst = *src
             }
 
-            Vector::Direct(Tag::to_direct(
+            Vector::Direct(DirectTag::to_direct(
                 u64::from_le_bytes(data),
                 DirectInfo::Length(len),
                 DirectType::Byte,

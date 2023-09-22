@@ -5,7 +5,7 @@
 use crate::{
     core::{
         backquote::Backquote,
-        direct::{DirectInfo, DirectType},
+        direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         mu::Mu,
         namespace::{Core as _, Namespace},
@@ -57,7 +57,7 @@ impl Core for Reader {
     fn new() -> Self {
         Reader {
             cons: Tag::nil(),
-            eol: Tag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
+            eol: DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword),
             bq_str: Tag::nil(),
             bq_append: Tag::nil(),
         }

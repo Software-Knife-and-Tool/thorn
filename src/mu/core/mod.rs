@@ -5,7 +5,6 @@
 #[cfg(feature = "async")]
 pub mod async_context;
 pub mod backquote;
-pub mod cdirect;
 pub mod compile;
 pub mod direct;
 pub mod exception;

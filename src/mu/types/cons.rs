@@ -4,8 +4,7 @@
 //! mu cons class
 use crate::{
     core::{
-        cdirect::ConsDirect,
-        direct::{DirectInfo, DirectType},
+        direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         frame::Frame,
         indirect::IndirectTag,
@@ -63,7 +62,7 @@ impl Cons {
         match Tag::type_of(mu, cons) {
             Type::Null => cons,
             Type::Cons => match cons {
-                Tag::ConsDirect(_) => ConsDirect::car(cons),
+                Tag::Direct(_) => DirectTag::car(cons),
                 Tag::Indirect(_) => Self::to_image(mu, cons).car,
                 _ => panic!(),
             },
@@ -76,7 +75,7 @@ impl Cons {
             Type::Null => cons,
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(mu, cons).cdr,
-                Tag::ConsDirect(_) => ConsDirect::cdr(cons),
+                Tag::Direct(_) => DirectTag::cdr(cons),
                 _ => panic!(),
             },
             _ => panic!(),
@@ -127,7 +126,7 @@ impl Core for Cons {
     }
 
     fn evict(&self, mu: &Mu) -> Tag {
-        match ConsDirect::cons(self.car, self.cdr) {
+        match DirectTag::cons(self.car, self.cdr) {
             Some(tag) => tag,
             None => {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
@@ -148,7 +147,7 @@ impl Core for Cons {
     }
 
     fn read(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
-        let dot = Tag::to_direct('.' as u64, DirectInfo::Length(1), DirectType::Byte);
+        let dot = DirectTag::to_direct('.' as u64, DirectInfo::Length(1), DirectType::Byte);
 
         match Reader::read(mu, stream, false, Tag::nil(), true) {
             Ok(car) => {

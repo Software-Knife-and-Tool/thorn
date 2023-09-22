@@ -5,7 +5,7 @@
 use {
     crate::{
         core::{
-            direct::{DirectInfo, DirectType},
+            direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
             indirect::IndirectTag,
@@ -39,7 +39,8 @@ pub struct SymbolImage {
 }
 
 lazy_static! {
-    pub static ref UNBOUND: Tag = Tag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword);
+    pub static ref UNBOUND: Tag =
+        DirectTag::to_direct(0, DirectInfo::Length(0), DirectType::Keyword);
 }
 
 impl Symbol {
@@ -92,7 +93,7 @@ impl Symbol {
     pub fn name(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(mu, symbol) {
             Type::Null | Type::Keyword => match symbol {
-                Tag::Direct(dir) => Tag::to_direct(
+                Tag::Direct(dir) => DirectTag::to_direct(
                     dir.data(),
                     DirectInfo::Length(dir.info() as usize),
                     DirectType::Byte,
@@ -166,7 +167,7 @@ impl Core for Symbol {
         let str = name.as_bytes();
         let len = str.len();
 
-        if len > Tag::DIRECT_STR_MAX || len == 0 {
+        if len > DirectTag::DIRECT_STR_MAX || len == 0 {
             panic!("{} {:?}", std::str::from_utf8(str).unwrap(), str)
         }
 
@@ -174,7 +175,7 @@ impl Core for Symbol {
         for (src, dst) in str.iter().zip(data.iter_mut()) {
             *dst = *src
         }
-        Tag::to_direct(
+        DirectTag::to_direct(
             u64::from_le_bytes(data),
             DirectInfo::Length(len),
             DirectType::Keyword,
@@ -194,7 +195,7 @@ impl Core for Symbol {
         match token.find(':') {
             Some(0) => {
                 if token.starts_with(':')
-                    && (token.len() > Tag::DIRECT_STR_MAX + 1 || token.len() == 1)
+                    && (token.len() > DirectTag::DIRECT_STR_MAX + 1 || token.len() == 1)
                 {
                     return Err(Exception::new(
                         Condition::Syntax,
@@ -235,7 +236,7 @@ impl Core for Symbol {
             Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(mu).to_le_bytes()) {
                 Ok(s) => {
                     Stream::write_char(mu, stream, ':').unwrap();
-                    for nth in 0..symbol.length() {
+                    for nth in 0..DirectTag::length(symbol) {
                         match Stream::write_char(mu, stream, s.as_bytes()[nth] as char) {
                             Ok(_) => (),
                             Err(e) => return Err(e),

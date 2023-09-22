@@ -62,7 +62,7 @@ impl MuFunction for Mu {
                     let mut map_ref = block_on(mu.async_map.write());
                     let mut async_id: u64 = map_ref.len() as u64;
 
-                    let mut tag = Tag::to_direct(
+                    let mut tag = DirectTag::to_direct(
                         async_id,
                         DirectInfo::ExtType(ExtType::AsyncId),
                         DirectType::Ext,
@@ -77,7 +77,7 @@ impl MuFunction for Mu {
                         match map_ref.get(&tag.as_u64()) {
                             Some(_) => {
                                 async_id += 1;
-                                tag = Tag::to_direct(
+                                tag = DirectTag::to_direct(
                                     async_id,
                                     DirectInfo::ExtType(ExtType::AsyncId),
                                     DirectType::Ext,
