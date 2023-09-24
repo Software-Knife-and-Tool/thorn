@@ -31,9 +31,6 @@ def report(info_list):
         if then_bytes == 0:
             return
 
-        delta_bytes += bytes - then_bytes
-        delta_times += time - then_time
-        
         bytes_ratio = float(bytes) / float(then_bytes)
         time_ratio = time / then_time
 
@@ -54,7 +51,11 @@ def report(info_list):
             test_in = test_name
 
         if b == '*' or t == '*':
-            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes-then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time-then_time:.2f}, {time_ratio:.2f})')
+            time_diff = time - then_time 
+            delta_bytes += bytes - then_bytes
+            delta_times += time_diff
+
+            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes} / {bytes}, {bytes - then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
 
 print(f'Perf Report {date:<10}')
 print('-------------------------')
@@ -64,5 +65,5 @@ for test in test_results[1:]:
     report(test[:-1].split())
 
 print('-------------------------')
-print(f'ntests: {ntests:<4} size: {nsize:<6}  times: {ntimes:<5}')
-print(f'deltas:      bytes: {delta_bytes:<6} times: {delta_times:<5.2f}')
+print(f'ntests: {ntests:<4} size: {nsize:>6}  times: {ntimes:>5}')
+print(f'deltas:      bytes: {delta_bytes:>5}  times: {delta_times:5.2f}')
