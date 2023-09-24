@@ -42,11 +42,11 @@
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (:if (core:symbolp symbol)
-               (core:%core-macro-env symbol (core:%compile-macro lambda-form env))
+               (core:%core-macro-env symbol (core:%compile-lambda lambda-form env))
                (core:raise symbol 'core:%compile-defmacro "not a symbol"))
           `(:quote ,symbol))
-        (mu:nth 1 form)
-       (mu:nthcdr 2 form))))
+       (mu:nth 1 form)
+       (mu:nthcdr 1 form))))
 
 ;;;
 ;;; defun compiles to a bound function symbol

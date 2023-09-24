@@ -115,6 +115,9 @@
   (:lambda (arg arg1)
     (:if arg arg1 ())))
 
+;;;
+;;; apply
+;;;
 (mu:intern core "apply"
    (:lambda (fn args)
      (:if (core:functionp fn)
@@ -122,3 +125,29 @@
                (core:%function-apply fn args)
                (mu:apply fn args))
           (core:raise fn 'core:apply "not a function designator"))))
+;;;
+;;; apply closure to list of args => obj
+;;;
+(mu:intern core "%function-apply"
+   (:lambda (fn args)
+      ((:lambda (env)
+        (core:%mapc mu:fr-push env)
+        ((:lambda (value)
+           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
+           value)
+         ((:lambda (mu-fn)
+             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list fn args))))
+          (core:%function-prop :fn fn))))
+        (core:%function-prop :env fn))))
+
+(mu:intern core "%%function-apply"
+   (:lambda (fn args)
+      ((:lambda (env)
+        (core:%mapc mu:fr-push env)
+        ((:lambda (value)
+           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
+           value)
+         ((:lambda (mu-fn)
+             (mu:apply mu-fn args))
+          (core:%function-prop :fn fn))))
+        (core:%function-prop :env fn))))

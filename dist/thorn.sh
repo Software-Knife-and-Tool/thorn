@@ -23,12 +23,13 @@ SOURCES=""
 # core.l needs to be first
 CORE=(\
         core.l	     	       \
+	compile-funcall.l      \
+	compile-function.l     \
 	compile.l    	       \
 	describe.l             \
 	exceptions.l 	       \
 	fixnums.l              \
 	format.l     	       \
-	funcall.l              \
 	lambda.l     	       \
 	lists.l      	       \
 	macros.l      	       \
@@ -44,7 +45,6 @@ CORE=(\
 	types.l	               \
 	vectors.l              \
         fasl.l                 \
-        functions.l            \
         repl.l                 \
     )
 

@@ -10,13 +10,17 @@ ntests = 0
 nth_test = 0
 ntimes = 0
 test_in = ""
+delta_bytes = 0
+delta_times = 0.0
 
 def report(info_list):
     global nsize
     global nth_test
     global ntimes
     global test_in
-    
+    global delta_bytes
+    global delta_times
+
     if len(info_list) == 5:
         test_name = info_list[0]
         then_bytes = int(info_list[1])
@@ -26,6 +30,9 @@ def report(info_list):
 
         if then_bytes == 0:
             return
+
+        delta_bytes += bytes - then_bytes
+        delta_times += time - then_time
         
         bytes_ratio = float(bytes) / float(then_bytes)
         time_ratio = time / then_time
@@ -57,4 +64,5 @@ for test in test_results[1:]:
     report(test[:-1].split())
 
 print('-------------------------')
-print(f'ntests: {ntests:<4} size: {nsize:<5} times: {ntimes:<5}')
+print(f'ntests: {ntests:<4} size: {nsize:<6}  times: {ntimes:<5}')
+print(f'deltas:      bytes: {delta_bytes:<6} times: {delta_times:<5.2f}')

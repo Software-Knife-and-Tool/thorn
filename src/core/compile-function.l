@@ -102,30 +102,3 @@
               ,(core:%lambda-prop :bound lambda)
               ,(core:%compile-lambda-body lambda (mu:nthcdr 2 form) env)))))
        (core:%core-lambda (mu:nth 1 form) env))))
-
-;;;
-;;; apply closure to list of args => obj
-;;;
-(mu:intern core "%function-apply"
-   (:lambda (fn args)
-      ((:lambda (env)
-        (core:%mapc mu:fr-push env)
-        ((:lambda (value)
-           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
-           value)
-         ((:lambda (mu-fn)
-             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list fn args))))
-          (core:%function-prop :fn fn))))
-        (core:%function-prop :env fn))))
-
-(mu:intern core "%%function-apply"
-   (:lambda (fn args)
-      ((:lambda (env)
-        (core:%mapc mu:fr-push env)
-        ((:lambda (value)
-           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
-           value)
-         ((:lambda (mu-fn)
-             (mu:apply mu-fn args))
-          (core:%function-prop :fn fn))))
-        (core:%function-prop :env fn))))

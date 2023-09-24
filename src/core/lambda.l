@@ -99,10 +99,11 @@
                 body))
           (mu:cons lambda-desc env)))))
 
+#|
 ;;;
 ;;; resolving body symbols
 ;;;
-;;; *%symbol-frame-ref* looks up *symbol* in the lexical environment.
+;;; *%frame-ref* looks up *symbol* in the lexical environment.
 ;;;
 ;;; if found return a compiled frame reference, otherwise *nil*.
 ;;;
@@ -111,7 +112,7 @@
 ;;;
 ;;; `returns:` *frame-ref* or *nil*
 ;;;
-(mu:intern core "%symbol-frame-ref"
+(mu:intern core "%frame-ref"
   (:lambda (symbol env)
     (core:%foldl
      (:lambda (frame acc)
@@ -129,3 +130,4 @@
              (mu:cdr (core:%core-type-ref :bound frame))))))
      ()
      env)))
+|#
