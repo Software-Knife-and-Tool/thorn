@@ -16,7 +16,7 @@ def report(info_list):
     global nth_test
     global ntimes
     global test_in
-
+    
     if len(info_list) == 5:
         test_name = info_list[0]
         then_bytes = int(info_list[1])

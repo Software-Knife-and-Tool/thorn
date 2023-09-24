@@ -56,7 +56,7 @@
 (mu:intern core "%compile-macro-call"
    (:lambda (macro-symbol args env)
       (core:%compile
-       (core:macroexpand `(macro-symbol ,@args env))
+       (core:macroexpand `(,macro-symbol ,@args) env)
        env)))
 
 ;;;
@@ -68,9 +68,9 @@
           ((:lambda (fn-symbol args)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
-                     (:if macro-fn
-                          (core:apply macro-fn (core:%quoted-lambda-arg-list macro-fn args))
-                          form))
+                      (:if macro-fn
+                           (core:apply macro-fn (mu:eval (core:%arg-list args)))
+                           form))
                    (core:macro-function fn-symbol env))
                   form))
            (mu:car form)
@@ -104,14 +104,3 @@
                        ()))
                 (core:%core-find-macro symbol env)))
           ())))
-;;;
-;;; compile-macro: compile a macro expander
-;;;
-(mu:intern core "%compile-macro"
-  (:lambda (form env)
-    ((:lambda (lambda-desc body)
-       (mu:compile
-        `(:lambda ,(core:%lambda-prop :bound lambda-desc)
-                  ,@(core:%compile-lambda-body lambda-desc body env))))
-     (core:%core-lambda (mu:car form) env)
-     (mu:nthcdr 1 form))))

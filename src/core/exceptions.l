@@ -91,7 +91,7 @@
                                       object
                                       source
                                       "mu:raise"
-                                      (core:dropl (mu:frames) 4))))))
+                                      (core:dropl (mu:frames) 10))))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;
@@ -100,7 +100,7 @@
 (mu:intern core "raise"
    (:lambda (object source reason)
       (mu:raise
-       (core:make-exception :error object source reason (core:dropl (mu:frames) 2))
+       (core:make-exception :error object source reason (core:dropl (mu:frames) 5))
        :except)))
 
 (mu:intern core "warn"
