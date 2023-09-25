@@ -63,9 +63,9 @@
          (:if (core:null fmt)
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
-         (:if printenv
-              ((:lambda ()
-                  (core:format stream "env:~%" ())
+         (:if (core:%andf printenv env)
+              ((:lambda ()           
+                  (core:format stream "" ())
                   (core:%mapc
                    (:lambda (frame)
                       (core:format stream "  ~A~T(~A ~A)~%"
@@ -73,12 +73,12 @@
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
                    (mu:cdr env))))
-             ()))
-     (core:%exception-prop :cond except)
-     (core:%exception-prop :object except)
-     (core:%exception-prop :source except)
-     (core:%exception-prop :reason except)
-     (core:%exception-prop :env except))))
+              ()))
+      (core:%exception-prop :cond except)
+      (core:%exception-prop :object except)
+      (core:%exception-prop :source except)
+      (core:%exception-prop :reason except)
+      (core:%exception-prop :env except))))
 
 (mu:intern core "with-exception"
   (:lambda (handler thunk)
@@ -97,6 +97,13 @@
 ;;;
 ;;; exception flavors
 ;;;
+(mu:intern core "error"
+   (:lambda (fmt object)
+      (core:format mu:err-out fmt `(,object))                
+      (mu:raise
+       (core:make-exception :error object :error "" (core:dropl (mu:frames) 5))
+       :except)))
+
 (mu:intern core "raise"
    (:lambda (object source reason)
       (mu:raise
