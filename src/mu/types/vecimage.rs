@@ -37,11 +37,11 @@ pub enum IVec {
 // vector types
 #[allow(dead_code)]
 pub enum IndirectVector<'a> {
-    Char(&'a (VectorImage, IVec)),
     Byte(&'a (VectorImage, IVec)),
-    T(&'a (VectorImage, IVec)),
+    Char(&'a (VectorImage, IVec)),
     Fixnum(&'a (VectorImage, IVec)),
     Float(&'a (VectorImage, IVec)),
+    T(&'a (VectorImage, IVec)),
 }
 
 pub trait IVector {

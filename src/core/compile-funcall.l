@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; compile applys
+;;; compile applications
 ;;;
 
 ;;;
@@ -30,20 +30,6 @@
             (core:%function-prop :nargs fn))
            (core:%arg-list args))))
 
-(mu:intern core "%quoted-lambda-arg-list"
-  (:lambda (fn args)
-     (:if (core:functionp fn)
-         args
-         ((:lambda (rest nreqs)
-             (:if rest
-                  (:if (core:%andf rest (core:zerop nreqs))
-                       `(,args)
-                       `(,@(core:dropr args (mu:fx-sub (mu:length args) nreqs))
-                         ,@(core:dropl args nreqs)))
-                  args))
-            (core:%function-prop :rest fn)
-            (core:%function-prop :nargs fn)))))
-
 ;;;
 ;;; compiled argument lists
 ;;;
@@ -57,12 +43,6 @@
         (:lambda (form)
            (core:%compile form env))
         args))))
-
-(mu:intern core "%compile-quoted-lambda-arg-list"
-   (:lambda (fn args env)
-     (core:%quoted-lambda-arg-list
-      fn
-      (core:%mapcar (:lambda (elt) (core:%compile elt env)) args))))
 
 (mu:intern core "%compile-lambda-arg-list"
    (:lambda (fn args env)
@@ -80,7 +60,7 @@
       ((:lambda (fn)
         (:if (core:functionp fn)
              (:if (core:core-function-p fn)
-                  `(core:%%function-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
+                  `(core:%function-apply-quoted ,fn ,(core:%compile-lambda-arg-list fn args env))
                   `(mu:apply ,fn ,(core:%compile-arg-list args env)))
              (core:raise fn 'core:%compile-lambda-call "illegal function call")))
      (core:%compile form env))))
@@ -91,7 +71,7 @@
            ((:lambda (fn)
                (:if (core:functionp fn)
                     (:if (core:core-function-p fn)
-                         `(core:%%function-apply ,fn ,(core:%compile-lambda-arg-list fn args env))
+                         `(core:%function-apply-quoted ,fn ,(core:%compile-lambda-arg-list fn args env))
                          `(mu:apply ,fn ,(core:%compile-arg-list args env)))
                     (core:raise fn 'core:%compile-symbol-call "illegal function call")))
             (core:symbol-value symbol))
