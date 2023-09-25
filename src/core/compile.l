@@ -49,21 +49,6 @@
        (mu:nthcdr 1 form))))
 
 ;;;
-;;; defun compiles to a bound function symbol
-;;;
-(mu:intern core "%compile-defun"
-   (:lambda (form env)
-      ((:lambda (symbol lambda-form)
-          (:if (mu:eq (mu:type-of symbol) :symbol)
-               (:if (core:listp lambda-form)
-                    (core:intern symbol (core:%compile-lambda lambda-form env))
-                    (core:raise lambda-form 'core:%compile-defun "not a lambda list"))
-               (core:raise symbol 'core:%compile-defun "not a symbol"))
-          `(:quote ,symbol))
-       (mu:nth 1 form)
-       (mu:nthcdr 1 form))))
-
-;;;
 ;;; this if form can take two or three arguments
 ;;;
 (mu:intern core "%thunk"
@@ -119,8 +104,7 @@
                                    (core:macro-function fn env))))
                           (mu:cdr (core:%assoc
                                    fn
-                                   '((define-core-function . core:%compile-defun)
-                                     (define-core-macro    . core:%compile-defmacro)
+                                   '((define-core-macro    . core:%compile-defmacro)
                                      (define-core-if       . core:%compile-if)
                                      (define-core-lambda   . core:%compile-lambda)))))
                     (core:%compile-funcall fn args env))))

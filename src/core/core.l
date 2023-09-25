@@ -140,7 +140,7 @@
           (core:%function-prop :fn fn))))
         (core:%function-prop :env fn))))
 
-(mu:intern core "%%function-apply"
+(mu:intern core "%function-apply-quoted"
    (:lambda (fn args)
       ((:lambda (env)
         (core:%mapc mu:fr-push env)
