@@ -7,14 +7,14 @@ SRC = ../src
 # core.l needs to be first
 CORE = \
 	core.l			\
-	compile-funcall.l	\
-	compile-function.l	\
 	compile.l		\
 	describe.l		\
 	exceptions.l		\
 	fasl.l			\
 	fixnums.l		\
 	format.l		\
+	funcall.l		\
+	function.l		\
 	lambda.l		\
 	lists.l			\
 	macros.l		\
