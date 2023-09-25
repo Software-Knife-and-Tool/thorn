@@ -104,9 +104,9 @@
                                    (core:macro-function fn env))))
                           (mu:cdr (core:%assoc
                                    fn
-                                   '((define-core-macro    . core:%compile-defmacro)
-                                     (define-core-if       . core:%compile-if)
-                                     (define-core-lambda   . core:%compile-lambda)))))
+                                   '((define-macro . core:%compile-defmacro)
+                                     (if           . core:%compile-if)
+                                     (lambda       . core:%compile-lambda)))))
                     (core:%compile-funcall fn args env))))
             (mu:car form)
             (mu:cdr form))
