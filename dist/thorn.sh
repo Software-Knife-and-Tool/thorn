@@ -23,28 +23,29 @@ SOURCES=""
 # core.l needs to be first
 CORE=(\
         core.l	     	       \
+	backquote.l            \    
 	compile.l    	       \
 	describe.l             \
-	exceptions.l 	       \
-	fixnums.l              \
+	exception.l 	       \
+	fasl.l                 \
+	fixnum.l               \
 	format.l     	       \
 	funcall.l              \
 	function.l             \
 	lambda.l     	       \
-	lists.l      	       \
-	macros.l      	       \
-	maps.l		       \
+	list.l      	       \
+	macro.l      	       \
+	map.l		       \
 	parse.l      	       \
 	read-macro.l           \
 	read.l       	       \
-	sequences.l  	       \
-	streams.l    	       \
-	strings.l    	       \
+	sequence.l  	       \
+	stream.l    	       \
+	string.l    	       \
 	symbol-macro.l	       \
-	symbols.l    	       \
-	types.l	               \
-	vectors.l              \
-        fasl.l                 \
+	symbol.l    	       \
+	type.l	               \
+	vector.l               \
         repl.l                 \
     )
 

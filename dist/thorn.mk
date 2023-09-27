@@ -6,30 +6,31 @@ SRC = ../src
 
 # core.l needs to be first
 CORE = \
-	core.l			\
-	compile.l		\
-	describe.l		\
-	exceptions.l		\
-	fasl.l			\
-	fixnums.l		\
-	format.l		\
-	funcall.l		\
-	function.l		\
-	lambda.l		\
-	lists.l			\
-	macros.l		\
-	maps.l			\
-	parse.l			\
-	read-macro.l		\
-	read.l			\
-	repl.l			\
-	sequences.l		\
-	streams.l		\
-	strings.l		\
-	symbol-macro.l		\
-	symbols.l		\
-	types.l         	\
-	vectors.l
+	core.l		\
+	backquote.l	\
+	compile.l	\
+	describe.l	\
+	exception.l	\
+	fasl.l		\
+	fixnum.l	\
+	format.l	\
+	funcall.l	\
+	function.l	\
+	lambda.l	\
+	list.l		\
+	macro.l		\
+	map.l		\
+	parse.l		\
+	read-macro.l	\
+	read.l		\
+	repl.l		\
+	sequence.l	\
+	stream.l	\
+	string.l	\
+	symbol-macro.l	\
+	symbol.l	\
+	type.l		\
+	vector.l
 
 PREFACE = \
 	preface.l   	\
