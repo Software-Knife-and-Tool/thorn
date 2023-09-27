@@ -63,7 +63,7 @@ lazy_static! {
         ("hp-info", 0, Mu::mu_hp_info),
         ("view", 1, Mu::mu_view),
         ("repr", 2, Mu::mu_repr),
-        ("append", 2, Mu::append_),
+        ("%append", 2, Mu::append_),
         // time
         ("real-tm", 0, Mu::mu_real_time),
         ("run-us", 0, Mu::mu_run_time),

@@ -51,10 +51,10 @@
 (mu:intern core "%bq-list"
    (:lambda (stream in-bq-list)
       ((:lambda (form)
-          (:if (mu:eq form core:%read-list-eol%)
+          (:if (core:%read-list-eol form)
                ()
                ((:lambda (append-tail)
-                   `(mu:append ,form ,append-tail))
+                   `(mu:%append ,form ,append-tail))
                  `(mu:cons ,(core:%bq-list stream :t) ()))))
        (core:%bq-read stream :t :t))))
 
