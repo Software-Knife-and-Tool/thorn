@@ -91,7 +91,7 @@
                                       object
                                       source
                                       "mu:raise"
-                                      (core:dropl (mu:frames) 10))))))
+                                      (core:dropl (mu:frames) 6))))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;

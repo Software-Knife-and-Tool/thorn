@@ -168,13 +168,14 @@
 ;;;
 (mu:intern core "%read-macro"
   (:lambda (ch stream)
-    ((:lambda (macro-table)
+     ((:lambda (macro-table)
        (mu:apply
             (mu:sy-val (mu:cdr (core:%assoc ch macro-table)))
             `(,ch ,stream)))
        '((#\" . core:%read-string)
          (#\# . core:%read-sharp)
          (#\' . core:%read-quote)
+         (#\` . core:%bq-reader)
          (#\( . core:%read-list)
          (#\) . core:%read-list-eol)
          (#\; . core:%read-line-comment)))))
