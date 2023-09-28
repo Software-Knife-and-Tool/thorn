@@ -4,14 +4,12 @@
 ;;;
 ;;;  backquote
 ;;;
-(mu:intern core "bq-str" (mu:open :string :output ""))
 
 ;;;
 ;;; backquote comma:
 ;;;
 (mu:intern core "%bq-comma"
    (:lambda (stream in-bq-list)
-      (core:warn stream "entering bq-comma")                 
       ((:lambda (ch)
           (:if (mu:eq ch #\@)
                (:if in-bq-list
@@ -22,7 +20,8 @@
                     ((:lambda ()
                         (core:unread-char ch stream)
                         (:if in-bq-list
-                             `(mu:cons ,(core:read stream () ()) ())
+                             ((:lambda (form) form)
+                              (core:read stream () ()))
                              (core:read stream () ())))))))
                 (core:read-char stream () ()))))
 
@@ -32,30 +31,34 @@
 ;;;     return compilable backquote function call
 ;;;
 (mu:intern core "%bq-list-element"
-   (:lambda (expr)
-      ((:lambda (string)
-          ((:lambda (obj)
-              (:if (core:symbolp obj)
-                   `(mu:cons ,obj ())
-                   `(,obj)))
-           (core:%bq-read (mu:open :string :input string) () ())))
-       (core:get-string core:%bq-str))))
+   (:lambda (obj)
+      ;;; (core:warn `(,obj ,(mu:type-of obj)) "bq-list-element") 
+      (:if (core:symbolp obj)
+           ((:lambda (list)
+               `(:quote ,list))
+            (mu:cons obj ()))
+           ((:lambda (list)
+               `(:quote ,list))
+            (mu:cons obj ())))))
 
 ;;;
 ;;; backquote list:
 ;;;
 ;;;    return compilable backquote function call
 ;;;
-
-;;; `(core:append (mu:cons ,expr (mu:cons ,(core:%bq-list stream) ())))
 (mu:intern core "%bq-list"
    (:lambda (stream in-bq-list)
       ((:lambda (form)
-          (:if (core:%read-list-eol form)
+          (:if (mu:eq form core:%read-list-eol%)
                ()
-               ((:lambda (append-tail)
-                   `(mu:%append ,form ,append-tail))
-                 `(mu:cons ,(core:%bq-list stream :t) ()))))
+               ((:lambda (quoted-list append-tail)
+                   `(mu:%append ,quoted-list ,append-tail))
+                (core:%bq-list-element form)
+                ((:lambda (el)
+                    (:if (core:null el)
+                         ()
+                         el))
+                 (core:%bq-list stream in-bq-list)))))
        (core:%bq-read stream :t :t))))
 
 ;;;
@@ -70,15 +73,16 @@
                         ((:lambda (syntax-pair)
                             (:if (core:null syntax-pair)
                                  (core:%read-macro ch stream)
-                                 (core:warn (mu:apply
+                                 (mu:apply
                                   (mu:sy-val (mu:cdr syntax-pair))
-                                  `(,stream ,in-bq-list))
-                                  "bq-list")          ))
+                                  `(,stream ,in-bq-list))))
                          (core:%assoc ch macro-table)))
                      '((#\` . core:%bq-reader)
                        (#\, . core:%bq-comma)
                        (#\( . core:%bq-list)))
-                    (core:%read-macro ch stream))
+                    (:if (mu:eq ch #\,)
+                         (core:%bq-comma stream in-bq-list) 
+                         (core:%read-macro ch stream)))
                ((:lambda ()
                     (mu:apply
                      (mu:sy-val (mu:cdr (core:%assoc type dispatch-table)))
