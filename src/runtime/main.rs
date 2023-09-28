@@ -41,7 +41,6 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
                 if let Err(error) = opt {
                     eprintln!("runtime: option {error:?}")
                 };
-                usage();
                 std::process::exit(-1);
             }
             Ok(None) => {
@@ -69,9 +68,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
                     Opt('c', Some(config)) => {
                         optv.push((OptType::Config, config));
                     }
-                    _ => {
-                        usage();
-                    }
+                    _ => panic!(),
                 },
                 None => panic!(),
             },
@@ -86,15 +83,15 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
 }
 
 fn usage() {
-    eprintln!("runtime: {}: [-h?pvcelq] [file...]", Mu::VERSION);
-    eprintln!("?: usage message");
-    eprintln!("h: usage message");
-    eprintln!("c: [name:value,...]");
-    eprintln!("e: eval [form] and print result");
-    eprintln!("l: load [path]");
-    eprintln!("p: pipe mode");
-    eprintln!("q: eval [form] quietly");
-    eprintln!("v: print version and exit");
+    println!("runtime: {}: [-h?pvcelq] [file...]", Mu::VERSION);
+    println!("?: usage message");
+    println!("h: usage message");
+    println!("c: [name:value,...]");
+    println!("e: eval [form] and print result");
+    println!("l: load [path]");
+    println!("p: pipe mode");
+    println!("q: eval [form] quietly");
+    println!("v: print version and exit");
 
     std::process::exit(0);
 }
