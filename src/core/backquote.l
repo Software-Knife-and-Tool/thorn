@@ -20,7 +20,9 @@
                     ((:lambda ()
                         (core:unread-char ch stream)
                         (:if in-bq-list
-                             ((:lambda (form) form)
+                             ((:lambda (form)
+                                       form)
+                                 ;;; `(mu:cons ,form ()))
                               (core:read stream () ()))
                              (core:read stream () ())))))))
                 (core:read-char stream () ()))))

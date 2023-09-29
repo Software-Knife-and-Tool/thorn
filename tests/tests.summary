@@ -1,6 +1,6 @@
 Namespace Test Summary:
 -----------------------
-mu         backquote      total: 20       passed: 19       failed: 0        exceptions: 1       
+mu         backquote      total: 20       passed: 20       failed: 0        exceptions: 0       
 mu         compile        total: 8        passed: 8        failed: 0        exceptions: 0       
 mu         core           total: 32       passed: 32       failed: 0        exceptions: 0       
 mu         exception      total: 4        passed: 4        failed: 0        exceptions: 0       
@@ -14,7 +14,7 @@ mu         struct         total: 7        passed: 7        failed: 0        exce
 mu         symbol         total: 8        passed: 8        failed: 0        exceptions: 0       
 mu         vector         total: 23       passed: 23       failed: 0        exceptions: 0       
 -----------------------
-mu         passed: 232    total: 233      failed: 0        exceptions: 1         
+mu         passed: 233    total: 233      failed: 0        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
