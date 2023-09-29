@@ -111,6 +111,7 @@ impl Cons {
 pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
     fn vlist(_: &Mu, _: &[Tag]) -> Tag;
+    fn vappend(_: &Mu, _: &[Tag], _: Tag) -> Tag;
     fn nth(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn read(_: &Mu, _: Tag) -> exception::Result<Tag>;
@@ -209,6 +210,16 @@ impl Core for Cons {
 
     fn vlist(mu: &Mu, vec: &[Tag]) -> Tag {
         let mut list = Tag::nil();
+
+        vec.iter()
+            .rev()
+            .for_each(|tag| list = Self::new(*tag, list).evict(mu));
+
+        list
+    }
+
+    fn vappend(mu: &Mu, vec: &[Tag], cdr: Tag) -> Tag {
+        let mut list = cdr;
 
         vec.iter()
             .rev()

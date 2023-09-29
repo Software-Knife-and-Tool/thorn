@@ -263,16 +263,7 @@ impl MuFunction for Mu {
             }
         };
 
-        fp.value = match Tag::type_of(list2) {
-            Type::Null | Type::Cons => {
-                for elt in ConsIter::new(mu, list2) {
-                    append.push(Cons::car(mu, elt))
-                }
-
-                Cons::vlist(mu, &append)
-            }
-            _ => return Err(Exception::new(Condition::Type, ":append", list2)),
-        };
+        fp.value = Cons::vappend(mu, &append, list2);
 
         Ok(())
     }
