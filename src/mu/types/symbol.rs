@@ -10,7 +10,7 @@ use {
             frame::Frame,
             indirect::IndirectTag,
             mu::{Core as _, Mu},
-            namespace::{Core as _, Map, Namespace},
+            namespace::{Cache, Core as NSCore},
             readtable::{map_char_syntax, SyntaxType},
             types::{Tag, TagType, Type},
         },
@@ -84,6 +84,7 @@ impl Symbol {
 
     pub fn namespace(mu: &Mu, symbol: Tag) -> Tag {
         match Tag::type_of(symbol) {
+            Type::Null => mu.null_ns,
             Type::Keyword => mu.keyword_ns,
             Type::Symbol => Self::to_image(mu, symbol).namespace,
             _ => panic!(),
@@ -218,8 +219,8 @@ impl Core for Symbol {
                     ));
                 }
 
-                match Mu::map_ns(mu, &ns) {
-                    Some(ns) => Ok(Namespace::intern(mu, ns, name, *UNBOUND)),
+                match <Mu as Cache>::is_ns(mu, Symbol::keyword(&ns)) {
+                    Some(ns) => Ok(<Mu as NSCore>::intern_symbol(mu, ns, name, *UNBOUND)),
                     None => Err(Exception::new(
                         Condition::Namespace,
                         "read:sy",
@@ -227,7 +228,9 @@ impl Core for Symbol {
                     )),
                 }
             }
-            None => Ok(Namespace::intern(mu, mu.null_ns, token, *UNBOUND)),
+            None => Ok(<Mu as NSCore>::intern_symbol(
+                mu, mu.null_ns, token, *UNBOUND,
+            )),
         }
     }
 
@@ -253,7 +256,7 @@ impl Core for Symbol {
                     let ns = Self::namespace(mu, symbol);
 
                     if !Tag::null_(&ns) && !mu.null_ns.eq_(ns) {
-                        match mu.write(Namespace::name(mu, ns), false, stream) {
+                        match mu.write(Symbol::name(mu, ns), false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }

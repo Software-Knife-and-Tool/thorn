@@ -12,7 +12,7 @@
 ;;;
 ;;; lambda compiles to a function core-type
 ;;;
-(mu:intern core "%compile-lambda"
+(mu:intern :core "%compile-lambda"
    (:lambda (form env)
       (:if (mu:eq (mu:length form) 1)
            (core:raise form 'core:%compile-defmacro "malformed lambda expression")
@@ -38,7 +38,7 @@
 ;;;
 ;;; defmacro compiles to a bound macro symbol
 ;;;
-(mu:intern core "%compile-defmacro"
+(mu:intern :core "%compile-defmacro"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
           (:if (core:symbolp symbol)
@@ -51,13 +51,13 @@
 ;;;
 ;;; this if form can take two or three arguments
 ;;;
-(mu:intern core "%thunk"
+(mu:intern :core "%thunk"
   (:lambda (form env)
     (core:%compile
      `(:lambda () ,form)
      env)))
 
-(mu:intern core "%compile-if"
+(mu:intern :core "%compile-if"
    (:lambda (form env)
       ((:lambda (len)
           (:if (core:%orf (mu:eq len 3) (mu:eq len 4))
@@ -87,7 +87,7 @@
 ;;;
 ;;; returns: mu form or funct ctype (in the case of a define-core-lambda)
 ;;;
-(mu:intern core "%compile"
+(mu:intern :core "%compile"
    (:lambda (form env)
       (:if (core:consp form)
            ((:lambda (fn args)
@@ -112,6 +112,6 @@
             (mu:cdr form))
            form)))
 
-(mu:intern core "compile"
+(mu:intern :core "compile"
    (:lambda (form)
      (core:%compile form ())))

@@ -8,7 +8,7 @@
 ;;;
 ;;; loader
 ;;;
-(mu:intern core "load"
+(mu:intern :core "load"
   (:lambda (source verbose)
     ;;; (core:raise core:stringp source 'core:load "not a file designator")
     ((:lambda (ifs)
@@ -38,7 +38,7 @@
 ;;;
 ;;; file compiler
 ;;;
-(mu:intern core "compile-file"
+(mu:intern :core "compile-file"
   (:lambda (source dest verbose)
     ((:lambda (ifs ofs)
        (:if verbose
@@ -73,7 +73,7 @@
 ;;;
 ;;; elf64 utilities
 ;;;
-(mu:intern core "elf64-write-bytes"
+(mu:intern :core "elf64-write-bytes"
    (:lambda (stream bytes)
       (core:%mapc
        (:lambda (byte)
@@ -89,7 +89,7 @@
                       byte))))))
        bytes)))
 
-(mu:intern core "elf64-read-bytes"
+(mu:intern :core "elf64-read-bytes"
    (:lambda (nbytes stream)
       ((:lambda (list)
           (mu:sv-list :byte (mu:cdr list)))
@@ -105,7 +105,7 @@
             (mu:cdr loop)))
         (mu:cons nbytes ())))))
 
-(mu:intern core "elf64-read"
+(mu:intern :core "elf64-read"
    (:lambda (type stream)
       (:if (mu:eq type :half)
            (mu:fx-add
@@ -123,7 +123,7 @@
                           (mu:%repr :t (core:elf64-read-bytes 8 stream))
                           (core:raise size 'core:elf64-read "not a legal type")))))))
 
-(mu:intern core "elf64-write"
+(mu:intern :core "elf64-write"
    (:lambda (type n stream)
       (:if (mu:eq type :half)
            (core:elf64-write-bytes
@@ -142,7 +142,7 @@
                           (core:elf64-write :u64 (mu:tag-of n) stream)
                           (t (core:raise size 'el64-write "not a legal type"))))))))
 
-(mu:intern core "elf64-write-header"
+(mu:intern :core "elf64-write-header"
    (:lambda (out size)
       ;;; (core:raise core:streamp out 'elf64-write-header "not a stream designator")
       ;;; header 64 bit little endian current version
@@ -172,7 +172,7 @@
       (core:elf64-write :u64 0 out)      ; 110 sh_addralign
       (core:elf64-write :u64 0 out)))    ; 118 sh_entsize
 
-(mu:intern core "elf64-read-header"
+(mu:intern :core "elf64-read-header"
    (:lambda (stream)
       (mu:with-ex
        (:lambda (ex)
@@ -212,7 +212,7 @@
             ,(mu:cons "sh_addralign" (core:elf64-read :u64 elf64))
             ,(mu:cons "sh_entsize" (core:elf64-read :u64 elf64)))))))
 
-(mu:intern core "elf64-print-header"
+(mu:intern :core "elf64-print-header"
   (:lambda (elf64-header)
      ;;; (core:raise core:consp elf64-header 'core:elf64-print-header "not an association list")
      (core:%mapc
@@ -220,7 +220,7 @@
          (core:format t "    ~A: ~A~%" `(,(mu:car entry) ,(mu:cdr entry))))
       elf64-header)))
 
-(mu:intern core "elf64-dump"
+(mu:intern :core "elf64-dump"
    (:lambda (path)
       ;;; (core:raise core:stringp path 'core:elf64-dump "not a pathname")
       ((:lambda (elf64)

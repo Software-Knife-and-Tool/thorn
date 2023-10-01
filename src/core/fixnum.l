@@ -4,19 +4,19 @@
 ;;;
 ;;; fixnums
 ;;;
-(mu:intern core "1+"
+(mu:intern :core "1+"
    (:lambda (n)
      (:if (core:fixnump n)
           (mu:fx-add n 1)
           (core:raise n 'core:1+ "not a fixnum"))))
 
-(mu:intern core "1-"
+(mu:intern :core "1-"
    (:lambda (n)
      (:if (core:fixnump n)
           (mu:fx-sub n 1)
           (core:raise n 'core:1- "not a fixnum"))))
 
-(mu:intern core "truncate"
+(mu:intern :core "truncate"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
@@ -25,7 +25,7 @@
           (core:raise n 'core:truncate "not a fixnum"))))
 
 ;;; round to negative infinity
-(mu:intern core "floor"
+(mu:intern :core "floor"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
@@ -34,7 +34,7 @@
           (core:raise n 'core:floor "not a fixnum"))))
 
 ;;; round to positive infinity
-(mu:intern core "ceiling"
+(mu:intern :core "ceiling"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
@@ -42,7 +42,7 @@
                (core:raise m 'core:ceiling "not a fixnum"))
           (core:raise n 'core:ceiling "not a fixnum"))))
 
-(mu:intern core "mod"
+(mu:intern :core "mod"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
@@ -50,7 +50,7 @@
                (core:raise m 'core:mod "not a fixnum"))
           (core:raise n 'core:mod "not a fixnum"))))
 
-(mu:intern core "rem"
+(mu:intern :core "rem"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
@@ -59,7 +59,7 @@
           (core:raise n 'core:rem "not a fixnum"))))
 
 ;;; round to nearest
-(mu:intern core "round"
+(mu:intern :core "round"
    (:lambda (n m)
      (:if (core:fixnump n)
           (:if (core:fixnump m)
@@ -67,7 +67,7 @@
                (core:raise m 'core:round "not a fixnum"))
           (core:raise n 'core:round "not a fixnum"))))
 
-(mu:intern core "ash"
+(mu:intern :core "ash"
    (:lambda (n count)
       (:if (core:fixnump n)
            (:if (core:fixnump count)

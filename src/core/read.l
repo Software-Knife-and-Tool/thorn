@@ -4,13 +4,13 @@
 ;;;
 ;;; core reader
 ;;;
-(mu:intern core "%reader-stream" (mu:open :string :output ""))
-(mu:intern core "%reader-ns-stream" (mu:open :string :output "core"))
+(mu:intern :core "%reader-stream" (mu:open :string :output ""))
+(mu:intern :core "%reader-ns-stream" (mu:open :string :output "core"))
 
 ;;;
 ;;; readtable
 ;;;
-(mu:intern core "%read-char-syntax"
+(mu:intern :core "%read-char-syntax"
    (:lambda (ch)
      ((:lambda (read-table) (mu:cdr (core:%assoc ch read-table)))
       '((#\return . :wspace) (#\linefeed . :wspace) (#\page . :wspace)
@@ -40,7 +40,7 @@
         (#\v . :const)  (#\w . :const)  (#\x . :const)  (#\y . :const)
         (#\z . :const)))))
 
-(mu:intern core "%read-number"
+(mu:intern :core "%read-number"
   (:lambda (atom)
     ((:lambda (fx)
         (:if fx
@@ -55,7 +55,7 @@
 ;;;
 ;;; atom reader
 ;;;
-(mu:intern core "%read-atom"
+(mu:intern :core "%read-atom"
   (:lambda (ch stream)
     (core:write-char ch core:%reader-stream)
     (mu:fix
@@ -89,7 +89,7 @@
 ;;;
 ;;; parser
 ;;;
-(mu:intern core "%read-dispatch"
+(mu:intern :core "%read-dispatch"
   (:lambda (ch stream)
     ((:lambda (dispatch-table)
        (mu:apply
@@ -104,7 +104,7 @@
 ;;;
 ;;; consume whitespace and comments
 ;;;
-(mu:intern core "%read-consume-ws"
+(mu:intern :core "%read-consume-ws"
   (:lambda (stream)
     (mu:fix
      (:lambda (loop)
@@ -136,7 +136,7 @@
 ;;;
 ;;; recursive reader
 ;;;
-(mu:intern core "%read"
+(mu:intern :core "%read"
   (:lambda (stream)
     ((:lambda (ch)
        (:if (core:eof stream)

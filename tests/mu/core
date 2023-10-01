@@ -24,9 +24,8 @@
 (mu:view 1.0)	#(:t 1.0000)
 (mu:view #(:t 1 2))	#(:t 2 :t)
 (mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
-(mu:view 'a)	#(:t #s(:ns ) a :UNBOUND)
-(mu:view 'mu:eq)	#(:t #s(:ns mu) eq #<:function mu:eq [req:2, tag:0]>)
-(mu:map-ns "mu")	#s(:ns mu)
+(mu:view 'a)	#(:t :nil a :UNBOUND)
+(mu:view 'mu:eq)	#(:t :mu eq #<:function mu:eq [req:2, tag:0]>)
 (mu:view mu:std-in)	#(:t 2147483648 :input :nil :nil)
 (mu:with-ex (:lambda (cond obj) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 1)))	1
 (mu:repr :t (mu:repr () :t))	:t

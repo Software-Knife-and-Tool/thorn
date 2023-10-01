@@ -4,7 +4,7 @@
 ;;;
 ;;; describe
 ;;;
-(mu:intern core "%describe-function"
+(mu:intern :core "%describe-function"
    (:lambda (fn)
       ((:lambda (view)
           (core:format :t
@@ -15,7 +15,7 @@
               ,(mu:sv-ref view 1))))
        (mu:view fn))))
 
-(mu:intern core "%describe-core-type"
+(mu:intern :core "%describe-core-type"
    (:lambda (core-type)
       (core:format :t
        "core-type: :<ctype> ~A~%    type:  ~A~%    props: ~A~%"
@@ -23,7 +23,7 @@
          ,(mu:sv-ref (mu:st-vec core-type) 0)
          ,(mu:sv-ref (mu:st-vec core-type) 0)))))
 
-(mu:intern core "%describe-struct"
+(mu:intern :core "%describe-struct"
    (:lambda (struct)
       (core:format :t
        "funct: :struct ~A~%    type:  ~A~%    props: ~A~%"
@@ -31,7 +31,7 @@
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
 
-(mu:intern core "%describe-function"
+(mu:intern :core "%describe-function"
    (:lambda (fn)
       (core:format :t
        "function: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"
@@ -40,7 +40,7 @@
          ,(core:%function-prop :fn fn)
          ,(core:%function-prop :env fn)))))
 
-(mu:intern core "%describe-symbol"
+(mu:intern :core "%describe-symbol"
    (:lambda (symbol)
       (:if (core:null symbol)
            (core:format :t
@@ -66,30 +66,30 @@
                             ,(mu:sv-ref view 2))))
                       (mu:view symbol)))))))
 
-(mu:intern core "%describe-fixnum"
+(mu:intern :core "%describe-fixnum"
    (:lambda (fx)
       (core:format :t "fixnum: :fixnum ~A~%    format: 61b signed integer~%    value:  ~A~%"
         `(,(core:type-of fx) ,fx))))
 
-(mu:intern core "%describe-float"
+(mu:intern :core "%describe-float"
    (:lambda (fl)
       (core:format :t
        "float: :float ~A~%    format: 32b IEEE single float~%    value:  ~A~%"
        `(,(core:type-of fl) ,fl))))
 
-(mu:intern core "%describe-string"
+(mu:intern :core "%describe-string"
    (:lambda (str)
       (core:format :t
        "string: :vector string~%    format: unsigned 8bit character vector~%    length: ~A~%    value:  ~A~%"
        `(,(mu:sv-len str) ,str))))
 
-(mu:intern core "%describe-vector"
+(mu:intern :core "%describe-vector"
    (:lambda (vec)
       (core:format :t
        "string: :vector ~A~%    format: ~A~%    length: ~A~%    value:  ~A~%"
        `(,(core:type-of vec) ,(mu:sv-type vec) ,(mu:sv-type vec) ,vec))))
 
-(mu:intern core "%describe-cons"
+(mu:intern :core "%describe-cons"
    (:lambda (cons)
       (:if (core:dotted-pair-p cons)
            (core:format :t
@@ -99,7 +99,7 @@
             "cons: :cons ~A~%    length: ~A~%    value:  ~A~%"
             `(,(core:type-of cons) ,(mu:length cons) ,cons)))))
 
-(mu:intern core "describe"
+(mu:intern :core "describe"
    (:lambda (obj)
       (mu:fix
        (:lambda (list)

@@ -4,11 +4,11 @@
 ;;;
 ;;; lists
 ;;;
-(mu:intern core "consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
-(mu:intern core "null" (:lambda (t) (mu:eq () t)))
-(mu:intern core "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
+(mu:intern :core "consp" (:lambda (t) (mu:eq :cons (mu:type-of t))))
+(mu:intern :core "null" (:lambda (t) (mu:eq () t)))
+(mu:intern :core "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
 
-(mu:intern core "dotted-pair-p"
+(mu:intern :core "dotted-pair-p"
   (:lambda (obj)
     (:if (core:consp obj)
          (core:atom (mu:cdr obj))
@@ -17,7 +17,7 @@
 ;;;
 ;;; utilities
 ;;;
-(mu:intern core "%pair-list"
+(mu:intern :core "%pair-list"
    (:lambda (pairs)
       ((:lambda (len)
           (:if (core:zerop len)
@@ -45,7 +45,7 @@
 ;;;
 ;;; finds
 ;;;
-(mu:intern core "findl"
+(mu:intern :core "findl"
    (:lambda (fn list)
       (:if (core:functionp fn)
            (:if (core:listp list)
@@ -65,14 +65,14 @@
                 (core:raise list 'core:findl "not a list"))
            (core:raise fn 'core:findl "not a function"))))
 
-(mu:intern core "findr"
+(mu:intern :core "findr"
    (:lambda (fn list)
      (core:findl fn (core:reverse list))))
 
 ;;;
 ;;; position
 ;;;
-(mu:intern core "positionl"
+(mu:intern :core "positionl"
    (:lambda (fn list)
      (:if (core:functionp fn)
           (:if (core:listp list)
@@ -93,7 +93,7 @@
                (core:raise list 'core:positionl "not a list"))
           (core:raise fn 'core:positionl "not a function"))))
 
-(mu:intern core "positionr"
+(mu:intern :core "positionr"
    (:lambda (fn list)
       (:if (core:functionp fn)
            (:if (core:listp list)
@@ -116,7 +116,7 @@
 ;;;
 ;;; fixed argument list functions
 ;;;
-(mu:intern core "append"
+(mu:intern :core "append"
    (:lambda (list)
       (:if (core:listp list)
            (core:foldr
@@ -128,13 +128,13 @@
             list)
       (core:raise list 'core:append "not a list"))))
 
-(mu:intern core "reverse"
+(mu:intern :core "reverse"
    (:lambda (list)
       (:if (core:listp list)
            (core:foldl mu:cons () list)
            (core:raise list 'core:reverse "not a list"))))
 
-(mu:intern core "dropl"
+(mu:intern :core "dropl"
    (:lambda (list n)
       (:if (core:listp list)
          (:if (core:fixnump n)
@@ -142,7 +142,7 @@
               (core:raise n 'core:dropl "not a fixnum"))
          (core:raise list 'core:dropl "not a list"))))
 
-(mu:intern core "dropr"
+(mu:intern :core "dropr"
    (:lambda (list n)
       (:if (core:listp list)
            (:if (core:fixnump n)
@@ -161,7 +161,7 @@
                 (core:raise n 'core:dropr "not a fixnum"))
            (core:raise list 'core:dropr "not a list"))))
 
-(mu:intern core "last"
+(mu:intern :core "last"
    (:lambda (list)
       (:if (core:listp list)
            (mu:fix

@@ -15,11 +15,11 @@
 ;;; rest:   rest symbol or nil
 ;;; lexenv: lexical environment, list of lambdas
 ;;;
-(mu:intern core "%lambdap"
+(mu:intern :core "%lambdap"
    (:lambda (fn)
       (mu:eq (core:type-of fn) 'lambda)))
 
-(mu:intern core "%make-lambda"
+(mu:intern :core "%make-lambda"
    (:lambda (lambda-list rest-sym env)
       (core:%make-core-type "lambda"
         (core:%pair-list
@@ -27,7 +27,7 @@
            :rest   ,rest-sym
            :lexenv ,env)))))
 
-(mu:intern core "%lambda-prop"
+(mu:intern :core "%lambda-prop"
    (:lambda (prop lambda)
       (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:bound :rest :lexenv))
            ((:lambda (ref)
@@ -44,7 +44,7 @@
 ;;;
 ;;; `returns:` lambda descriptor
 ;;;
-(mu:intern core "%core-lambda"
+(mu:intern :core "%core-lambda"
    (:lambda (lambda env)
       (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
          (core:raise lambda 'core:%core-lambda "list syntax")
@@ -80,7 +80,7 @@
 ;;;
 ;;; `returns:` compiled body/closure
 ;;;
-(mu:intern core "%compile-lambda-body"
+(mu:intern :core "%compile-lambda-body"
    (:lambda (lambda-desc body env)
       (:if (core:null body)
            ()
@@ -112,7 +112,7 @@
 ;;;
 ;;; `returns:` *frame-ref* or *nil*
 ;;;
-(mu:intern core "%frame-ref"
+(mu:intern :core "%frame-ref"
   (:lambda (symbol env)
     (core:%foldl
      (:lambda (frame acc)

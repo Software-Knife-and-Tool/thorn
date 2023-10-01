@@ -15,7 +15,7 @@
 ;;;
 ;;; function
 ;;;
-(mu:intern core "%make-function"
+(mu:intern :core "%make-function"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
           (core:%make-core-type "funct"
@@ -28,7 +28,7 @@
         (mu:length (core:%lambda-prop :bound lambda))
         (:if (core:%lambda-prop :rest lambda) 1 0)))))
 
-(mu:intern core "%function-prop"
+(mu:intern :core "%function-prop"
    (:lambda (prop fn)
       (:if (core:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :nargs :fn :env))
            ((:lambda (ref)
@@ -40,7 +40,7 @@
 ;;;
 ;;; create closed environment => env
 ;;;
-(mu:intern core "%closure-env"
+(mu:intern :core "%closure-env"
    (:lambda (lambda forms env)
       ((:lambda (bound-symbols)
           (core:%foldl
@@ -79,7 +79,7 @@
 ;;; mu:frames => list of [*frame descriptor*] (function . vector)
 ;;; env => list of (symbol . lambda)
 ;;;
-(mu:intern core "%close-env"
+(mu:intern :core "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
          (core:%make-function lambda fn env))
@@ -92,7 +92,7 @@
 ;;;
 ;;; compile closed lambda => function
 ;;;
-(mu:intern core "%compile-function"
+(mu:intern :core "%compile-function"
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)

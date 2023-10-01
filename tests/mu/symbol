@@ -2,7 +2,9 @@
 (mu:boundp 'mu:foo)	:nil
 (mu:boundp 'mu:std-in)	mu:std-in
 (mu:sy-name 'mu:std-in)	"std-in"
-(mu:sy-ns 'mu:std-in)	#s(:ns mu)
+(mu:sy-ns 'mu:std-in)	:mu
+(mu:sy-ns 'std-in)	:nil
+(mu:sy-ns :std-in)	:keyword
 (mu:sy-val 'mu:std-in)	#<stream: id: 2147483648>
 (mu:keyword "abcde")	:abcde
 (mu:make-sy "abcde")	abcde

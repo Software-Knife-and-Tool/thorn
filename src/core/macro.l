@@ -17,29 +17,29 @@
 ;;;
 ;;; macro environment
 ;;;
-(mu:intern core "%map-macro-symbol-ns"
+(mu:intern :core "%map-macro-symbol-ns"
    (:lambda (symbol)
       ((:lambda (ns-name)
           (mu:ns-find core:%macro-ns% ns-name))
        (mu:ns-name (mu:sy-ns symbol)))))
 
-(mu:intern core "%make-macro-ns"
+(mu:intern :core "%make-macro-ns"
    (:lambda (ns)
       ((:lambda (macro-ns)                 
-          (mu:intern core:%macro-ns% (mu:ns-name ns) macro-ns)
+          (mu:intern core:%macro-ns% ns macro-ns)
           macro-ns)      
-       (mu:make-ns (core:format () "%%~A%%" `(,(mu:ns-name ns)))))))                 
+       (mu:make-ns (core:format () "%%~A%%" `(,ns))))))                 
 
-(mu:intern core "%core-macro-env"
+(mu:intern :core "%core-macro-env"
    (:lambda (symbol macro-fn)
       ((:lambda (macro-ns symbol-ns)
           (:if macro-ns
-               (mu:intern macro-ns (mu:ns-name symbol-ns) macro-fn)
+               (mu:intern macro-ns symbol-ns macro-fn)
                (mu:intern (core:%make-macro-ns symbol-ns) (mu:sy-name symbol) macro-fn)))
        (core:%map-macro-symbol-ns symbol)
        (mu:sy-ns symbol))))
 
-(mu:intern core "%core-find-macro"
+(mu:intern :core "%core-find-macro"
    (:lambda (symbol env)
       (:if (mu:eq :symbol (mu:type-of symbol))
            ((:lambda (macro-ns symbol-ns symbol-name)
@@ -48,12 +48,12 @@
                     ()))
             (mu:ns-find
              core:%macro-ns%
-             (mu:ns-name (core:symbol-ns symbol)))
+             (core:symbol-ns symbol))
             (mu:sy-ns symbol)
             (mu:sy-name symbol))
            (core:raise symbol 'core:%core-find-macro "is not a symbol"))))
 
-(mu:intern core "%compile-macro-call"
+(mu:intern :core "%compile-macro-call"
    (:lambda (macro-symbol args env)
       (core:%compile
        (core:macroexpand `(,macro-symbol ,@args) env)
@@ -62,7 +62,7 @@
 ;;;
 ;;; macroexpand-1 expands a macro call once.
 ;;;
-(mu:intern core "macroexpand-1"
+(mu:intern :core "macroexpand-1"
    (:lambda (form env)
      (:if (core:consp form)
           ((:lambda (fn-symbol args)
@@ -80,7 +80,7 @@
 ;;;
 ;;; macroexpand: expand a form until it is no longer a macro call
 ;;;
-(mu:intern core "macroexpand"
+(mu:intern :core "macroexpand"
    (:lambda (form env)
      ((:lambda (expanded)
           (:if (mu:eq form expanded)
@@ -93,7 +93,7 @@
 ;;;
 ;;; acts as a predicate
 ;;;
-(mu:intern core "macro-function"
+(mu:intern :core "macro-function"
   (:lambda (symbol env)
      (:if (mu:eq :symbol (mu:type-of symbol))
           (:if (core:keywordp symbol)

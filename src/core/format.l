@@ -4,26 +4,26 @@
 ;;;
 ;;; core format
 ;;;
-(mu:intern core "%fmt-tilde"
+(mu:intern :core "%fmt-tilde"
   (:lambda (dest args)
     (core:write-char #\~ dest)
     args))
 
-(mu:intern core "%fmt-tab"
+(mu:intern :core "%fmt-tab"
   (:lambda (dest args)
     (core:write-char #\tab dest)
     args))
 
-(mu:intern core "%fmt-percent"
+(mu:intern :core "%fmt-percent"
   (:lambda (dest args)
     (core:terpri dest)
     args))
 
-(mu:intern core "%fmt-bang"
+(mu:intern :core "%fmt-bang"
   (:lambda (dest args)
     (mu:cdr args)))
 
-(mu:intern core "%fmt-decimal"
+(mu:intern :core "%fmt-decimal"
   (:lambda (dest args)
      (:if (core:fixnump (mu:car args))
           ((:lambda ()
@@ -31,7 +31,7 @@
               (mu:cdr args)))
           (core:raise (mu:car args) 'core:format "argument to ~D not a fixnum"))))
 
-(mu:intern core "%fmt-hex"
+(mu:intern :core "%fmt-hex"
   (:lambda (dest args)
      ((:lambda (fx)
        (:if (core:fixnump fx)
@@ -63,12 +63,12 @@
             (core:raise fx 'core:format "argument to ~X not a fixnum")))
       (mu:car args))))
 
-(mu:intern core "%fmt-aesthetic"
+(mu:intern :core "%fmt-aesthetic"
   (:lambda (dest args)
     (core:write (mu:car args) () dest)
     (mu:cdr args)))
 
-(mu:intern core "%fmt-standard"
+(mu:intern :core "%fmt-standard"
   (:lambda (dest args)
     (core:write (mu:car args) :t dest)
     (mu:cdr args)))
@@ -76,7 +76,7 @@
 ;;;
 ;;; control ops
 ;;;
-(mu:intern core "%fmt-op"
+(mu:intern :core "%fmt-op"
   (:lambda (dir dest args)
     ((:lambda (fn)
        (:if fn
@@ -94,7 +94,7 @@
          (#\% . core:%fmt-percent)
          (#\! . core:%fmt-bang)))))))
 
-(mu:intern core "%fmt-loop"
+(mu:intern :core "%fmt-loop"
   (:lambda (stream dest fmt args)
     (mu:fix
      (:lambda (loop)
@@ -122,7 +122,7 @@
          (core:get-output-stream-string dest)
          ())))
 
-(mu:intern core "format"
+(mu:intern :core "format"
    (:lambda (stream fmt args)
       (:if (core:stringp fmt)
            (:if (core:listp args)

@@ -4,9 +4,9 @@
 ;;;
 ;;; sequences
 ;;;
-(mu:intern core "sequencep" (:lambda (t) (:if (core:listp t) :t (core:vectorp t))))
+(mu:intern :core "sequencep" (:lambda (t) (:if (core:listp t) :t (core:vectorp t))))
 
-(mu:intern core "length"
+(mu:intern :core "length"
    (:lambda (seq)
       (:if (core:sequencep seq)
            (:if (core:listp seq)
@@ -14,7 +14,7 @@
                 (mu:sv-len seq))
            (core:raise seq 'core:length "not a sequence"))))
 
-(mu:intern core "elt"
+(mu:intern :core "elt"
    (:lambda (seq nth)
       (:if (core:sequencep seq)
            (:if (core:fixnump nth)

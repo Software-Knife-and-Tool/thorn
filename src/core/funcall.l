@@ -8,7 +8,7 @@
 ;;;
 ;;; core argument lists
 ;;;
-(mu:intern core "%arg-list"
+(mu:intern :core "%arg-list"
     (:lambda (args)
       (core:foldr
        (:lambda (elt acc)
@@ -16,7 +16,7 @@
        ()
        args)))
 
-(mu:intern core "%lambda-arg-list"
+(mu:intern :core "%lambda-arg-list"
    (:lambda (fn args)
       (:if (core:functionp fn)
            ((:lambda (rest nreqs)
@@ -33,7 +33,7 @@
 ;;;
 ;;; compiled argument lists
 ;;;
-(mu:intern core "%compile-arg-list"
+(mu:intern :core "%compile-arg-list"
    (:lambda (args env)
       (core:foldr
        (:lambda (elt acc)
@@ -44,7 +44,7 @@
            (core:%compile form env))
         args))))
 
-(mu:intern core "%compile-lambda-arg-list"
+(mu:intern :core "%compile-lambda-arg-list"
    (:lambda (fn args env)
      (core:%lambda-arg-list
       fn
@@ -55,7 +55,7 @@
 ;;;
 ;;; compile function applications to mu-appliable forms
 ;;;
-(mu:intern core "%compile-lambda-call"
+(mu:intern :core "%compile-lambda-call"
    (:lambda (form args env)
       ((:lambda (fn)
         (:if (core:functionp fn)
@@ -65,7 +65,7 @@
              (core:raise fn 'core:%compile-lambda-call "illegal function call")))
      (core:%compile form env))))
 
-(mu:intern core "%compile-symbol-call"
+(mu:intern :core "%compile-symbol-call"
    (:lambda (symbol args env)
       (:if (core:boundp symbol)
            ((:lambda (fn)
@@ -77,7 +77,7 @@
             (core:symbol-value symbol))
            `(core:apply ,symbol ,(core:%compile-arg-list args env)))))
 
-(mu:intern core "%compile-funcall"
+(mu:intern :core "%compile-funcall"
    (:lambda (fn args env)
       (:if (core:consp fn)
            (core:%compile-lambda-call fn args env)

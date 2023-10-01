@@ -4,7 +4,7 @@
 ;;;
 ;;; folds and maps
 ;;;
-(mu:intern core "%foldl"
+(mu:intern :core "%foldl"
   (:lambda (fn init list)
      (mu:cdr
       (mu:fix
@@ -19,7 +19,7 @@
            (mu:cdr arg)))
        (mu:cons list init)))))
 
-(mu:intern core "foldl"
+(mu:intern :core "foldl"
   (:lambda (fn init list)
      (:if (core:functionp fn)
           (:if (core:listp list)
@@ -38,7 +38,7 @@
                (core:raise list 'core:foldl "not a list"))
           (core:raise fn 'core:foldl "not a function"))))
 
-(mu:intern core "foldr"
+(mu:intern :core "foldr"
    (:lambda (fn init list)
     (:if (core:functionp fn)
          (:if (core:listp list)
@@ -49,7 +49,7 @@
 ;;;
 ;;; maps
 ;;;
-(mu:intern core "%mapc"
+(mu:intern :core "%mapc"
    (:lambda (fn list)
      (mu:fix
       (:lambda (lst)
@@ -61,7 +61,7 @@
       list)
      list))
 
-(mu:intern core "mapc"
+(mu:intern :core "mapc"
    (:lambda (fn list)
      (:if (core:functionp fn)
           (:if (core:listp list)
@@ -77,7 +77,7 @@
           (core:raise fn 'core:mapc "not a function"))
      list))
 
-(mu:intern core "%mapcar"
+(mu:intern :core "%mapcar"
    (:lambda (fn list)
       (core:%foldl
        (:lambda (elt acc)
@@ -85,7 +85,7 @@
        ()
        list)))
 
-(mu:intern core "mapcar"
+(mu:intern :core "mapcar"
    (:lambda (fn list)
      (:if (core:functionp fn)
           (:if (core:listp list)
@@ -97,7 +97,7 @@
                (core:raise list 'core:mapcar "not a list"))
           (core:raise fn 'core:mapcar "not a function"))))
 
-(mu:intern core "mapl"
+(mu:intern :core "mapl"
    (:lambda (fn list)
       (:if (core:functionp fn)
            (:if (core:listp list)
@@ -113,7 +113,7 @@
            (core:raise fn 'core:mapl "not a function"))
       list))
 
-(mu:intern core "maplist"
+(mu:intern :core "maplist"
    (:lambda (fn list)
       (:if (core:functionp fn)
            (:if (core:listp list)
@@ -132,7 +132,7 @@
                 (core:raise list 'core:maplist "not a list"))
            (core:raise fn 'core:maplist "not a function"))))
 
-(mu:intern core "%assoc"
+(mu:intern :core "%assoc"
    (:lambda (item alist)
       (mu:car
        (mu:fix
@@ -149,7 +149,7 @@
                 ()))
         alist))))
 
-(mu:intern core "assoc"
+(mu:intern :core "assoc"
    (:lambda (item alist)
       (:if (core:listp alist)
            (mu:car
