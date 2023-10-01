@@ -4,16 +4,16 @@
 ;;;
 ;;; core streams
 ;;;
-(mu:intern core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
+(mu:intern :core "streamp" (:lambda (t) (mu:eq :stream (mu:type-of t))))
 
-(mu:intern core "eof"
+(mu:intern :core "eof"
   (:lambda (designator)
     (mu:eof (core:%read-stream-designator designator))))
 
 ;;;
 ;;; utilities
 ;;;
-(mu:intern core "%write-stream-designator"
+(mu:intern :core "%write-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
          mu:std-out
@@ -23,7 +23,7 @@
                           'core:%write-stream-designator
                           "not a stream designator")))))
 
-(mu:intern core "%read-stream-designator"
+(mu:intern :core "%read-stream-designator"
   (:lambda (designator)
     (:if (core:null designator)
          mu:std-in
@@ -38,7 +38,7 @@
 ;;;
 ;;; constructors
 ;;;
-(mu:intern core "make-string-stream"
+(mu:intern :core "make-string-stream"
    (:lambda (dir init)
       (:if (core:keywordp dir)
            (:if (core:stringp init)
@@ -50,7 +50,7 @@
                 (core:raise dir 'core:make-string-stream "not a direction keyword"))
            (core:raise init 'core:make-string-stream "not a string initializer"))))
 
-(mu:intern core "open"
+(mu:intern :core "open"
   (:lambda (dir path)
      (:if (core:stringp path)
           (:if (core:keywordp dir)
@@ -62,13 +62,13 @@
                (core:raise path 'core:open "not a path string"))
           (core:raise dir 'core:open "not a direction keyword"))))
 
-(mu:intern core "close"
+(mu:intern :core "close"
    (:lambda (stream)
       (:if (core:streamp stream)
            (mu:close stream)
            (core:raise stream 'core:close "not a stream"))))
 
-(mu:intern core "with-open-stream"
+(mu:intern :core "with-open-stream"
    (:lambda (type dir specifier fn)
      (:if (core:functionp fn)                 
           (:if (core:stringp specifier)
@@ -89,15 +89,15 @@
 ;;;
 ;;; chars, bytes, and unread
 ;;;
-(mu:intern core "write-char"
+(mu:intern :core "write-char"
    (:lambda (char designator)
      (mu:wr-char char (core:%write-stream-designator designator))))
 
-(mu:intern core "write-byte"
+(mu:intern :core "write-byte"
    (:lambda (byte designator)
      (mu:wr-byte byte (core:%write-stream-designator designator))))
 
-(mu:intern core "read-char"
+(mu:intern :core "read-char"
   (:lambda (designator error-eofp eof-value)
     ((:lambda (stream)
        ((:lambda (ch)
@@ -109,7 +109,7 @@
         (mu:rd-char stream () ())))
      (core:%read-stream-designator designator))))
 
-(mu:intern core "read-byte"
+(mu:intern :core "read-byte"
    (:lambda (designator error-eofp eof-value)
      ((:lambda (stream)
         (:if (core:eof stream)
@@ -119,7 +119,7 @@
              (mu:rd-byte stream () ())))
       (core:%read-stream-designator designator))))
 
-(mu:intern core "unread-char"
+(mu:intern :core "unread-char"
    (:lambda (ch designator)
       (:if (core:charp ch)
            (mu:un-char ch (core:%write-stream-designator designator))
@@ -128,7 +128,7 @@
 ;;;
 ;;; read/write
 ;;;
-(mu:intern core "read"
+(mu:intern :core "read"
    (:lambda (designator eof-error eof-value)
      ((:lambda (stream)
         (:if (core:eof stream)
@@ -144,10 +144,10 @@
               (core:%read stream))))
       (core:%read-stream-designator designator))))
 
-(mu:intern core "write"
+(mu:intern :core "write"
   (:lambda (object escape designator)
      (mu:write object escape (core:%write-stream-designator designator))))
 
-(mu:intern core "terpri"
+(mu:intern :core "terpri"
    (:lambda (designator)
      (core:write-char #\linefeed designator)))

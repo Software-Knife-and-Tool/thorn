@@ -8,7 +8,7 @@
 ;;;
 ;;; backquote comma:
 ;;;
-(mu:intern core "%bq-comma"
+(mu:intern :core "%bq-comma"
    (:lambda (stream in-bq-list)
       ((:lambda (ch)
           (:if (mu:eq ch #\@)
@@ -32,7 +32,7 @@
 ;;;
 ;;;     return compilable backquote function call
 ;;;
-(mu:intern core "%bq-list-element"
+(mu:intern :core "%bq-list-element"
    (:lambda (obj)
       ;;; (core:warn `(,obj ,(mu:type-of obj)) "bq-list-element") 
       (:if (core:symbolp obj)
@@ -48,7 +48,7 @@
 ;;;
 ;;;    return compilable backquote function call
 ;;;
-(mu:intern core "%bq-list"
+(mu:intern :core "%bq-list"
    (:lambda (stream in-bq-list)
       ((:lambda (form)
           (:if (mu:eq form core:%read-list-eol%)
@@ -66,7 +66,7 @@
 ;;;
 ;;; parser
 ;;;
-(mu:intern core "%bq-read-dispatch"
+(mu:intern :core "%bq-read-dispatch"
    (:lambda (ch stream in-bq-list)
       ((:lambda (type dispatch-table)
           (:if (mu:eq type :tmacro)
@@ -98,7 +98,7 @@
 ;;;
 ;;; backquote reader
 ;;;
-(mu:intern core "%bq-read"
+(mu:intern :core "%bq-read"
    (:lambda (stream in-bq-list recursivep)
       ((:lambda (ch)
           (:if (core:eof stream)
@@ -110,6 +110,6 @@
                 (core:get-macro-character ch))))
        (core:%read-consume-ws stream))))
 
-(mu:intern core "%bq-reader"
+(mu:intern :core "%bq-reader"
    (:lambda (ch stream)
       (core:%bq-read stream () ())))

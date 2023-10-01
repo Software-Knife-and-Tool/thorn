@@ -8,7 +8,7 @@
 ;;;
 ;;; number reader
 ;;;
-(mu:intern core "parse-integer"
+(mu:intern :core "parse-integer"
   (:lambda (digits base)
     (:if (core:stringp digits)
          (:if (core:fixnump base)
@@ -51,7 +51,7 @@
               (core:raise base 'core:parse-integer "not a fixnum"))
          (core:raise digits 'core:parse-integer "not a string"))))
 
-(mu:intern core "parse-float"
+(mu:intern :core "parse-float"
   (:lambda (str)
     ((:lambda (stream)
        ((:lambda (float)

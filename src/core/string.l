@@ -4,17 +4,17 @@
 ;;;
 ;;; strings
 ;;;
-(mu:intern core "stringp"
+(mu:intern :core "stringp"
    (:lambda (string)
       (:if (core:vectorp string)
            (mu:eq :char (mu:sv-type string))
            ())))
 
-(mu:intern core "get-output-stream-string"
+(mu:intern :core "get-output-stream-string"
    (:lambda (stream)
       (mu:get-str stream)))
 
-(mu:intern core "schar"
+(mu:intern :core "schar"
   (:lambda (str index)
      (:if (core:stringp str)
           (:if (core:fixnump index)
@@ -22,7 +22,7 @@
                (core:raise index 'core:schar "not a string"))
           (core:raise str 'core:schar "not a string"))))
 
-(mu:intern core "string="
+(mu:intern :core "string="
    (:lambda (str-1 str-2)
       (:if (core:stringp str-1)
            (:if (core:stringp str-2)
@@ -46,7 +46,7 @@
 ;;;
 ;;; string-position
 ;;;
-(mu:intern core "string-position"
+(mu:intern :core "string-position"
   (:lambda (ch str)
     (:if (core:charp ch)
          (:if (core:stringp str)
@@ -70,7 +70,7 @@
 ;;;
 ;;; string-find
 ;;;
-(mu:intern core "string-find"
+(mu:intern :core "string-find"
   (:lambda (ch str)
     (:if (core:charp ch)
          (:if (core:stringp str)
@@ -94,7 +94,7 @@
 ;;;
 ;;; string construction
 ;;;
-(mu:intern core "string"
+(mu:intern :core "string"
    (:lambda (designator)
       (:if (core:stringp designator)
          designator
@@ -104,7 +104,7 @@
                    (mu:make-sv :char `(,designator))
                    (core:raise designator 'core:string "not a string designator"))))))
 
-(mu:intern core "string-append"
+(mu:intern :core "string-append"
    (:lambda (list)
       (:if (core:listp list)
            ((:lambda (stream)
@@ -124,7 +124,7 @@
             (mu:open :string :output ""))
            (core:raise list 'core:string "is not a list"))))
 
-(mu:intern core "substr"
+(mu:intern :core "substr"
   (:lambda (str start end)
      (:if (core:stringp str)
           (:if (core:fixnump start)

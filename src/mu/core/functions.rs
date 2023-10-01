@@ -10,7 +10,7 @@ use crate::{
         frame::{Frame, MuFunction as _},
         indirect::MuFunction as _,
         mu::{Core as _, Mu},
-        namespace::{Core as _, MuFunction as _, Namespace},
+        namespace::{Core as NSCore, MuFunction as _},
         types::{MuFunction as _, Tag, Type},
     },
     system::sys::System,
@@ -90,14 +90,11 @@ lazy_static! {
         ("fl-mul", 2, Float::mu_flmul),
         ("fl-div", 2, Float::mu_fldiv),
         // namespaces
-        ("untern", 2, Namespace::mu_untern),
-        ("intern", 3, Namespace::mu_intern),
-        ("make-ns", 1, Namespace::mu_make_ns),
-        ("map-ns", 1, Namespace::mu_map_ns),
-        ("ns-size", 1, Namespace::mu_ns_size),
-        ("ns-syms", 1, Namespace::mu_ns_symbols),
-        ("ns-find", 2, Namespace::mu_ns_find),
-        ("ns-name", 1, Namespace::mu_ns_name),
+        ("untern", 2, Mu::mu_untern),
+        ("intern", 3, Mu::mu_intern),
+        ("make-ns", 1, Mu::mu_make_ns),
+        ("ns-syms", 1, Mu::mu_ns_symbols),
+        ("ns-find", 2, Mu::mu_ns_find),
         // read/write
         ("read", 3, Stream::mu_read),
         ("write", 3, Stream::mu_write),
@@ -157,7 +154,7 @@ impl Core for Mu {
 
             funcv.push(*libfn);
 
-            Namespace::intern(mu, mu.mu_ns, name.to_string(), func);
+            <Mu as NSCore>::intern_symbol(mu, mu.mu_ns, name.to_string(), func);
         }
 
         funcv

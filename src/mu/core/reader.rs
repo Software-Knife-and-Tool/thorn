@@ -8,7 +8,7 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         mu::Mu,
-        namespace::{Core as _, Namespace},
+        namespace::Core as NSCore,
         readtable::{map_char_syntax, SyntaxType},
         types::{Tag, Type},
     },
@@ -66,14 +66,19 @@ impl Core for Reader {
     fn build(&self, mu: &Mu) -> Self {
         Reader {
             eol: self.eol,
-            cons: Namespace::intern(mu, mu.mu_ns, "cons".to_string(), Tag::nil()),
+            cons: <Mu as NSCore>::intern_symbol(mu, mu.mu_ns, "cons".to_string(), Tag::nil()),
             bq_str: StreamBuilder::new()
                 .string("".to_string())
                 .output()
                 .build(mu)
                 .unwrap()
                 .evict(mu),
-            bq_append: Namespace::intern(mu, mu.mu_ns, "%append".to_string(), Tag::nil()),
+            bq_append: <Mu as NSCore>::intern_symbol(
+                mu,
+                mu.mu_ns,
+                "%append".to_string(),
+                Tag::nil(),
+            ),
         }
     }
 

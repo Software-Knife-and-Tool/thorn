@@ -4,7 +4,7 @@
 ;;;
 ;;; symbol macros
 ;;;
-(mu:intern core "in-namespace"
+(mu:intern :core "in-namespace"
    (:lambda (ns)
      (:if (core:namespacep ns)
           ((:lambda ()
@@ -13,26 +13,26 @@
               ns))
           (core:raise ns 'core:in-namespace "not a namespace"))))
 
-(mu:intern core "%read-get-ns"
+(mu:intern :core "%read-get-ns"
    (:lambda ()
-     ((:lambda (name)
-        (mu:write name () core:%reader-ns-stream)
-        (mu:map-ns name))
+     ((:lambda (ns)
+        (mu:write ns () core:%reader-ns-stream)
+        ns)
       (core:get-output-stream-string core:%reader-ns-stream))))
 
-(mu:intern core "%read-set-ns"
+(mu:intern :core "%read-set-ns"
    (:lambda (ns)
       (core:get-output-stream-string core:%reader-ns-stream)
-      (mu:write (mu:ns-name ns) () core:%reader-ns-stream)))
+      (mu:write ns () core:%reader-ns-stream)))
 
 ;;;
 ;;; symbol readers
 ;;;
-(mu:intern core "%read-keywordp"
+(mu:intern :core "%read-keywordp"
   (:lambda (name)
       (mu:eq #\: (core:schar name 0))))
 
-(mu:intern core "%read-symbol-scope"
+(mu:intern :core "%read-symbol-scope"
   (:lambda (name)
      ((:lambda (colon)
         (:if (core:null colon)
@@ -42,7 +42,7 @@
                   :extern)))
         (core:string-position #\: name))))
 
-(mu:intern core "%read-symbol-ns"
+(mu:intern :core "%read-symbol-ns"
   (:lambda (name)
     ((:lambda (colon)
        (:if (core:null colon)
@@ -50,7 +50,7 @@
             (mu:map-ns (core:substr name 0 (mu:fx-sub colon 1)))))
      (core:string-position #\: name))))
 
-(mu:intern core "%read-symbol-name"
+(mu:intern :core "%read-symbol-name"
    (:lambda (name)
      ((:lambda (colon)
         (:if (core:null colon)
@@ -64,7 +64,7 @@
                                (mu:fx-add colon (mu:fx-sub (core:length name) (mu:fx-add 1 colon)))))))
      (core:string-position #\: name))))
 
-(mu:intern core "%read-symbol"
+(mu:intern :core "%read-symbol"
    (:lambda (symbol)
      (:if (core:%read-keywordp symbol)
           (core:keyword (core:%read-symbol-name symbol))
@@ -78,7 +78,7 @@
 ;;;
 ;;; symbol macros
 ;;;
-(mu:intern core "%symbol-macro-expand"
+(mu:intern :core "%symbol-macro-expand"
    (:lambda (symbol)
      (:if (core:uninternedp symbol)
           ((:lambda (sym)
@@ -88,13 +88,13 @@
            (core:%get-symbol-macro symbol))
           symbol)))
 
-(mu:intern core "%get-symbol-macro"
+(mu:intern :core "%get-symbol-macro"
    (:lambda (symbol)
       (:if (mu:eq :symbol (mu:type-of symbol))
            (mu:ns-find core:%symbol-macro-ns% (core:symbol-name symbol))
            (core:raise symbol 'get-symbol-macro-form "not a symbol"))))
 
-(mu:intern core "define-symbol-macro"
+(mu:intern :core "define-symbol-macro"
    (:lambda (symbol form)
       (:if (mu:eq :symbol (mu:type-of symbol))
            (mu:intern core:%symbol-macro-ns% (mu:sy-name symbol) form)

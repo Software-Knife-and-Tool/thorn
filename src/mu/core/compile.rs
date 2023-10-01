@@ -8,7 +8,7 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         mu::Mu,
-        namespace::{Core as _, Namespace},
+        namespace::Core,
         types::{Tag, Type},
     },
     types::{
@@ -51,7 +51,7 @@ impl Compiler for Mu {
             return Err(Exception::new(Condition::Syntax, ":if", args));
         }
 
-        let if_fn = Namespace::intern(mu, mu.mu_ns, "%if".to_string(), Tag::nil());
+        let if_fn = <Mu as Core>::intern_symbol(mu, mu.mu_ns, "%if".to_string(), Tag::nil());
         let lambda = Symbol::keyword("lambda");
 
         let if_vec = vec![
@@ -146,7 +146,7 @@ impl Compiler for Mu {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(*lex)) {
                 let lex_ref = vec![
-                    Namespace::intern(mu, mu.mu_ns, "fr-ref".to_string(), Tag::nil()),
+                    <Mu as Core>::intern_symbol(mu, mu.mu_ns, "fr-ref".to_string(), Tag::nil()),
                     Fixnum::as_tag(tag.as_u64() as i64),
                     Fixnum::as_tag(nth as i64),
                 ];

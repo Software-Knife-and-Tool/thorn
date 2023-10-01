@@ -1,13 +1,9 @@
 (mu:eq :func (mu:type-of mu:make-ns))	:t
-(mu:intern (mu:map-ns "mu") "foo" "foo")	mu:foo
-(mu:boundp (mu:intern (mu:map-ns "mu") "foo" ()))	mu:foo
-(mu:untern (mu:map-ns "mu") "foo")	mu:foo
-(mu:boundp (mu:untern (mu:map-ns "mu") "foo"))	:nil
-(mu:make-ns "core")	#s(:ns core)
-(mu:map-ns "mu")	#s(:ns mu)
-(mu:map-ns "notfound")	:nil
-(mu:map-ns (mu:ns-name (mu:make-ns "core")))	#s(:ns core)
-(mu:ns-find (mu:map-ns "mu") "eq")	mu:eq
-(mu:ns-find (mu:map-ns "mu") "foo")	:nil
-(mu:ns-name (mu:map-ns "mu"))	"mu"
-(mu:type-of (mu:ns-syms (mu:map-ns "mu")))	:cons
+(mu:intern :mu "foo" "foo")	mu:foo
+(mu:boundp (mu:intern :mu "foo" ()))	mu:foo
+(mu:untern :mu "foo")	mu:foo
+(mu:boundp (mu:untern :mu "foo"))	:nil
+(mu:make-ns :core)	:core
+(mu:ns-find :mu "eq")	mu:eq
+(mu:ns-find :mu "foo")	:nil
+(mu:type-of (mu:ns-syms :mu))	:cons

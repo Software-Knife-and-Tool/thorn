@@ -8,11 +8,11 @@
 ;;;
 ;;; sharpsign readers
 ;;;
-(mu:intern core "%read-sharp-char"
+(mu:intern :core "%read-sharp-char"
    (:lambda (ch stream)
       (core:read-char stream () ())))
 
-(mu:intern core "%read-sharp-comment"
+(mu:intern :core "%read-sharp-comment"
     (:lambda (ch stream)
       (mu:fix
        (:lambda (loop)
@@ -33,7 +33,7 @@
                     (core:read-char stream () ())))))
        ())))
 
-(mu:intern core "%read-sharp-vector"
+(mu:intern :core "%read-sharp-vector"
    (:lambda (ch stream)
       ((:lambda (type)
           (:if (core:keywordp type)
@@ -41,7 +41,7 @@
                (core:raise type 'core:%read-sharp-vector "not a type keyword")))
           (core:%read stream))))
 
-(mu:intern core "%read-sharp-symbol"
+(mu:intern :core "%read-sharp-symbol"
    (:lambda (ch stream)
      ((:lambda (symbol)
           (:if (mu:eq :symbol (mu:type-of symbol))
@@ -49,7 +49,7 @@
                (core:raise symbol 'core:%read-sharp-symbol "not a symbol")))
        (core:%read-atom ch stream))))
 
-(mu:intern core "%read-sharp-number"
+(mu:intern :core "%read-sharp-number"
   (:lambda (base stream)
     (mu:fix
       (:lambda (loop)
@@ -74,7 +74,7 @@
               (core:read-char stream () ()))))
       ())))
 
-(mu:intern core "%read-sharp"
+(mu:intern :core "%read-sharp"
   (:lambda (ch stream)
     ((:lambda (ch sharp-table)
        (mu:apply
@@ -92,13 +92,13 @@
 ;;;
 ;;; list reader
 ;;;
-(mu:intern core "%read-list-eol%" (mu:make-sy "eol"))
+(mu:intern :core "%read-list-eol%" (mu:make-sy "eol"))
 
-(mu:intern core "%read-list-eol"
+(mu:intern :core "%read-list-eol"
    (:lambda (ch stream)
       core:%read-list-eol%))
 
-(mu:intern core "%read-list"
+(mu:intern :core "%read-list"
    (:lambda (ch stream)
       (mu:fix
        (:lambda (loop)
@@ -125,7 +125,7 @@
 ;;;
 ;;; string reader
 ;;;
-(mu:intern core "%read-string"
+(mu:intern :core "%read-string"
    (:lambda (ch stream)
      (mu:fix
       (:lambda (loop)
@@ -143,14 +143,14 @@
 ;;;
 ;;; quote reader
 ;;;
-(mu:intern core "%read-quote"
+(mu:intern :core "%read-quote"
   (:lambda (ch stream)
      `(:quote ,(core:%read stream))))
 
 ;;;
 ;;; line comment
 ;;;
-(mu:intern core "%read-line-comment"
+(mu:intern :core "%read-line-comment"
     (:lambda (ch stream)
       (mu:fix
        (:lambda (loop)
@@ -166,7 +166,7 @@
 ;;;
 ;;; read macros
 ;;;
-(mu:intern core "%read-macro"
+(mu:intern :core "%read-macro"
   (:lambda (ch stream)
      ((:lambda (macro-table)
        (mu:apply
@@ -183,7 +183,7 @@
 ;;;
 ;;; get/set-macro-character
 ;;;
-(mu:intern core "get-macro-character"
+(mu:intern :core "get-macro-character"
    (:lambda (char)
      (:if (core:charp char)
           ((:lambda (macro-symbol)
@@ -193,7 +193,7 @@
            (mu:ns-find core:%char-macro-ns% (mu:make-sv :char `(,char))))
           (core:raise char 'core:get-macro-character "not a character"))))
 
-(mu:intern core "set-macro-character"
+(mu:intern :core "set-macro-character"
    (:lambda (char fn non-terminating)
       (:if (core:charp char)
          (:if (core:functionp fn)

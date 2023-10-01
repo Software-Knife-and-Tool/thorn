@@ -10,7 +10,7 @@ use {
             exception::{Condition, Exception},
             frame::Frame,
             functions::{Core as _, LibMuFunction},
-            namespace::{Core as _, Map, Namespace},
+            namespace::{Cache, Core as NSCore},
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
@@ -81,9 +81,9 @@ pub struct Mu {
 
     // namespace map/symbol caches
     #[cfg(feature = "async")]
-    pub ns_map: RwLock<<Mu as Map>::NSMap>,
+    pub ns_map: RwLock<<Mu as Cache>::NSMap>,
     #[cfg(not(feature = "async"))]
-    pub ns_map: RefCell<<Mu as Map>::NSMap>,
+    pub ns_map: RefCell<<Mu as Cache>::NSMap>,
 
     // functions
     pub functions: Vec<LibMuFunction>,
@@ -107,7 +107,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.17";
+    const VERSION: &'static str = "0.0.18";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -183,46 +183,42 @@ impl Core for Mu {
         };
 
         // establish the namespaces first
-        mu.mu_ns = Namespace::new("mu").evict(&mu);
-        match <Mu as Map>::add_ns(&mu, mu.mu_ns) {
+        mu.keyword_ns = Symbol::keyword("keyword");
+
+        mu.mu_ns = Symbol::keyword("mu");
+        match <Mu as Cache>::add_ns(&mu, mu.mu_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
-        mu.null_ns = Namespace::new("").evict(&mu);
-        match <Mu as Map>::add_ns(&mu, mu.null_ns) {
-            Ok(_) => (),
-            Err(_) => panic!(),
-        };
-
-        mu.keyword_ns = Namespace::new("keyword").evict(&mu);
-        match <Mu as Map>::add_ns(&mu, mu.keyword_ns) {
+        mu.null_ns = Tag::nil();
+        match <Mu as Cache>::add_ns(&mu, mu.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         // the version string
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
-        Namespace::intern(&mu, mu.mu_ns, "version".to_string(), mu.version);
+        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "version".to_string(), mu.version);
 
         // the standard streams
         mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
             Ok(stdin) => stdin.evict(&mu),
             Err(_) => panic!(),
         };
-        Namespace::intern(&mu, mu.mu_ns, "std-in".to_string(), mu.stdin);
+        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "std-in".to_string(), mu.stdin);
 
         mu.stdout = match StreamBuilder::new().stdout().build(&mu) {
             Ok(stdout) => stdout.evict(&mu),
             Err(_) => panic!(),
         };
-        Namespace::intern(&mu, mu.mu_ns, "std-out".to_string(), mu.stdout);
+        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "std-out".to_string(), mu.stdout);
 
         mu.errout = match StreamBuilder::new().errout().build(&mu) {
             Ok(errout) => errout.evict(&mu),
             Err(_) => panic!(),
         };
-        Namespace::intern(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
+        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
 
         // mu functions
         mu.functions = Self::install_lib_functions(&mu);
