@@ -21,14 +21,14 @@
    (:lambda (symbol)
       ((:lambda (ns-name)
           (mu:ns-find core:%macro-ns% ns-name))
-       (mu:ns-name (mu:sy-ns symbol)))))
+       (core:format () "~A" `(,(mu:sy-ns symbol))))))
 
 (mu:intern :core "%make-macro-ns"
    (:lambda (ns)
       ((:lambda (macro-ns)                 
           (mu:intern core:%macro-ns% ns macro-ns)
           macro-ns)      
-       (mu:make-ns (core:format () "%%~A%%" `(,ns))))))                 
+       (mu:make-ns :macros))))                 
 
 (mu:intern :core "%core-macro-env"
    (:lambda (symbol macro-fn)
@@ -94,7 +94,10 @@
 ;;; acts as a predicate
 ;;;
 (mu:intern :core "macro-function"
-  (:lambda (symbol env)
+   (:lambda (symbol env)
+            ()))
+
+#|
      (:if (mu:eq :symbol (mu:type-of symbol))
           (:if (core:keywordp symbol)
                ()
@@ -104,3 +107,4 @@
                        ()))
                 (core:%core-find-macro symbol env)))
           ())))
+|#

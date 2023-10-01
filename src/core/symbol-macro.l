@@ -47,7 +47,7 @@
     ((:lambda (colon)
        (:if (core:null colon)
             ()
-            (mu:map-ns (core:substr name 0 (mu:fx-sub colon 1)))))
+            (mu:keyword (core:substr name 0 (mu:fx-sub colon 1)))))
      (core:string-position #\: name))))
 
 (mu:intern :core "%read-symbol-name"

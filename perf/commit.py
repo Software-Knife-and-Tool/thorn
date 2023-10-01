@@ -55,7 +55,7 @@ def report(info_list):
             delta_bytes += bytes - then_bytes
             delta_times += time_diff
 
-            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes} / {bytes}, {bytes - then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
+            print(f'[{b:<1}{t:<1}] {nth_test:>02d} {test_name:<16} bytes: ({then_bytes}/{bytes}, {bytes - then_bytes}, {bytes_ratio:.2f})      \ttimes: ({then_time:.2f}/{time:.2f}, {time_diff:.2f}, {time_ratio:.2f})')
 
 print(f'Perf Report {date:<10}')
 print('-------------------------')
