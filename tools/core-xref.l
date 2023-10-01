@@ -15,6 +15,6 @@
                                   ,(core:type-of (mu:sy-val symbol))
                                   ,(mu:sy-val symbol)))
                    (core:format stream "unbound~Tunbound~T~A~%" `(,(mu:sy-name symbol)))))
-           (mu:ns-syms core)))
+           (mu:ns-syms :core)))
        (mu:open :file :output file-name))
       :t))
