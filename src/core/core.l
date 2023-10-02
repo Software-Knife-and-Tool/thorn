@@ -4,8 +4,7 @@
 ;;;
 ;;;  core namespace
 ;;;
-(mu:intern () "mu" :mu)
-(mu:intern () "core" (mu:make-ns :core))
+(mu:make-ns :core)
 
 (mu:intern :core "%char-macro-ns%" (mu:make-ns :%ch-mac))
 (mu:intern :core "%macro-ns%" (mu:make-ns :%macros))
@@ -35,7 +34,9 @@
           (:object . :t)
           (:source . :symbolp)
           (:reason . :string)
-          (:env    . :listp)))))
+          (:env    . :listp)))
+      
+      (mu:intern :core "%core-namespaces" (core:%gen-anon-ns))))
 
 ;;;
 ;;; predicates
@@ -94,12 +95,6 @@
       (:if (mu:eq :func (mu:type-of t))
            :t
            (mu:eq (core:type-of t) 'funct))))
-
-(mu:intern :core "namespacep"
-   (:lambda (t)
-      (:if (mu:eq :struct (mu:type-of t))
-           (mu:eq :ns (mu:st-type t))
-           ())))
 
 (mu:intern :core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
 (mu:intern :core "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))

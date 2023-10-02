@@ -10,7 +10,6 @@
 (mu:type-of core:listp)	:func
 (mu:type-of core:minusp)	:func
 (mu:type-of core:mu-function-p)	:func
-(mu:type-of core:namespacep)	:func
 (mu:type-of core:not)	:func
 (mu:type-of core:null)	:func
 (mu:type-of core:plusp)	:func
