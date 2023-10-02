@@ -11,7 +11,7 @@ def storage_bytes(hp_info):
     fields = hp_info[:-1].split()
 
     total = 0
-    for i in range(2, 28, 4):
+    for i in range(2, 26, 4):
         total += int(fields[i])
     return total
 

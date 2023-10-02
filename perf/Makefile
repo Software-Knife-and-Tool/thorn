@@ -23,9 +23,7 @@ help:
 	@echo "    commit - compare current with base (terse diff), promote current to base"
 	@echo "    diff - compare current with base (terse diff)"
 	@echo "    full-diff - compare current with base (verbose diff)"
-	@echo "    metrics/base - verbose metrics"
 	@echo "    metrics/current - verbose metrics"
-	@echo "    summary/base - summary metrics"
 	@echo "    summary/current - summary metrics"
 	@echo "    valgrind - run memcheck, callgrind, cachegrind reports"
 
@@ -77,19 +75,9 @@ current:
 	    python3 report-ns.py json/current.$$ns.json>> current.report;	\
 	done
 
-metrics/base:
-	@for ns in $(NAMESPACES); do				\
-	    python3 metrics-ns.py json/base.$$ns.json;		\
-	done
-
 metrics/current:
 	@for ns in $(NAMESPACES); do				\
 	    python3 metrics-ns.py json/current.$$ns.json;	\
-	done
-
-summary/base:
-	@for ns in $(NAMESPACES); do				\
-	    python3 summary-ns.py json/base.$$ns.json;		\
 	done
 
 summary/current:
