@@ -4,7 +4,7 @@
 ;;;
 ;;; exceptions
 ;;;
-(mu:untern core "%debug-core-symbols%")
+(mu:untern :core "%debug-core-symbols%")
 
 ;;;
 ;;; [*exception descriptor*] #s(:except cond obj source reason env)

@@ -20,6 +20,7 @@ CORE = \
 	list.l		\
 	macro.l		\
 	map.l		\
+	namespace.l	\
 	parse.l		\
 	read-macro.l	\
 	read.l		\
