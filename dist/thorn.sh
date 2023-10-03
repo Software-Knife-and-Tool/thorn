@@ -25,7 +25,7 @@ CORE=(\
         core.l	     	       \
 	backquote.l            \    
 	compile.l    	       \
-	describe.l             \
+	debug.l                \
 	exception.l 	       \
 	fasl.l                 \
 	fixnum.l               \
@@ -47,7 +47,6 @@ CORE=(\
 	symbol.l    	       \
 	type.l	               \
 	vector.l               \
-        repl.l                 \
     )
 
 for src in ${CORE[@]}; do
