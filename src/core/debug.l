@@ -26,7 +26,7 @@
 (mu:intern :core "%describe-struct"
    (:lambda (struct)
       (core:format :t
-       "funct: :struct ~A~%    type:  ~A~%    props: ~A~%"
+       "struct: :struct ~A~%    type:  ~A~%    props: ~A~%"
        `(,(core:type-of struct)
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
@@ -71,6 +71,11 @@
       (core:format :t "fixnum: :fixnum ~A~%    format: 61b signed integer~%    value:  ~A~%"
         `(,(core:type-of fx) ,fx))))
 
+(mu:intern :core "%describe-char"
+   (:lambda (ch)
+      (core:format :t "char: :char ~A~%    format: 8b ASCII character~%    value:  ~A~%"
+        `(,(core:type-of ch) ,ch))))
+
 (mu:intern :core "%describe-float"
    (:lambda (fl)
       (core:format :t
@@ -80,7 +85,7 @@
 (mu:intern :core "%describe-string"
    (:lambda (str)
       (core:format :t
-       "string: :vector string~%    format: unsigned 8bit character vector~%    length: ~A~%    value:  ~A~%"
+       "string: :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
        `(,(mu:sv-len str) ,str))))
 
 (mu:intern :core "%describe-vector"
@@ -114,6 +119,7 @@
                (mu:car (mu:car list))
                (mu:cdr (mu:car list)))))
        `(,(mu:cons core:functionp core:%describe-function)
+         ,(mu:cons core:charp core:%describe-char)
          ,(mu:cons core:core-type-p core:%describe-core-type)
          ,(mu:cons core:structp core:%describe-struct)
          ,(mu:cons core:symbolp core:%describe-symbol)
@@ -136,21 +142,27 @@
                   (:if (mu:eq form :h)
                        ((:lambda ()
                            (core:format :t "debugger help:~%" ())
+                           (core:format :t ":d - describe exception object~%" ())      
                            (core:format :t ":e - print the full exception~%" ())
                            (core:format :t ":r - return from break~%" ())
                            (core:format :t ":x - exit process~%" ())
                            (core:null loop)))
-                       (:if (mu:eq form :x)
-                            (mu:exit 0)
-                            (:if (mu:eq form :e)
-                                 ((:lambda ()
-                                     (core:exceptf mu:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
-                                     (core:null loop)))
-                                 (:if (mu:eq form :r)
-                                      loop
+                       (:if (mu:eq form :d)
+                            ((:lambda (obj)
+                                (core:describe (mu:cdr obj))
+                                (core:null loop))
+                             (core:%exception-prop :object except))
+                            (:if (mu:eq form :x)
+                                 (mu:exit 0)
+                                 (:if (mu:eq form :e)
                                       ((:lambda ()
-                                          (core:format :t ";;; unrecognized debugger command: h for help~%" ()))
-                                          (core:null loop)))))))
+                                          (core:exceptf mu:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                          (core:null loop)))
+                                      (:if (mu:eq form :r)
+                                           loop
+                                           ((:lambda ()
+                                               (core:format :t ";;; unrecognized debugger command: h for help~%" ())
+                                               (core:null loop)))))))))
                    ((:lambda ()
                        (core:format :t "core:debug> " ())
                        (mu:flush mu:std-out)

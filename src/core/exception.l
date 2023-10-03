@@ -39,7 +39,7 @@
    (:lambda (obj)
       (:if (mu:boundp 'core:%debug-core-symbols%)
            ()
-           (mu:intern :core "%debug-core-symbols%" `(mu:ns-syms core)))
+           (mu:intern :core "%debug-core-symbols%" (mu:ns-syms :core)))
       (mu:fix
        (:lambda (list)
           (:if (core:consp list)
@@ -55,7 +55,7 @@
    (:lambda (obj)
       ((:lambda (symbol)
           (core:%orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
-      (core:%debug-map-symbol obj))))
+       (core:%debug-map-symbol obj))))
 
 (mu:intern :core "exceptf"
    (:lambda (stream fmt printenv except)
@@ -64,8 +64,8 @@
               (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
               (core:format stream fmt `(,cond ,object ,source ,reason)))
          (:if (core:%andf printenv env)
-              ((:lambda ()           
-                  (core:format stream "" ())
+              ((:lambda ()
+                  (core:format stream "env:~%" ())
                   (core:%mapc
                    (:lambda (frame)
                       (core:format stream "  ~A~T(~A ~A)~%"
