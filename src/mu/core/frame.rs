@@ -211,7 +211,7 @@ impl Frame {
             Type::Function => match Tag::type_of(Function::form(mu, func)) {
                 Type::Null => Ok(Tag::nil()),
                 Type::Fixnum => {
-                    let nreqs = Fixnum::as_i64(mu, Function::nreq(mu, func)) as usize;
+                    let nreqs = Fixnum::as_i64(mu, Function::arity(mu, func)) as usize;
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
@@ -227,7 +227,7 @@ impl Frame {
                     }
                 }
                 Type::Cons => {
-                    let nreqs = Fixnum::as_i64(mu, Function::nreq(mu, func)) as usize;
+                    let nreqs = Fixnum::as_i64(mu, Function::arity(mu, func)) as usize;
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
