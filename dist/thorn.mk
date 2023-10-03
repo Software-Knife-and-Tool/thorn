@@ -9,7 +9,7 @@ CORE = \
 	core.l		\
 	backquote.l	\
 	compile.l	\
-	describe.l	\
+	debug.l		\
 	exception.l	\
 	fasl.l		\
 	fixnum.l	\
@@ -24,7 +24,6 @@ CORE = \
 	parse.l		\
 	read-macro.l	\
 	read.l		\
-	repl.l		\
 	sequence.l	\
 	stream.l	\
 	string.l	\
