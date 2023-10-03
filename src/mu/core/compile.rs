@@ -20,6 +20,8 @@ use crate::{
 };
 
 #[cfg(feature = "async")]
+use crate::core::async_context::{AsyncContext, Core as _};
+#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 // special forms
@@ -28,7 +30,8 @@ type SpecMap = (Tag, SpecFn);
 
 lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
-        (Symbol::keyword("async"), Mu::compile_if),
+        #[cfg(feature = "async")]
+        (Symbol::keyword("async"), Mu::compile_async),
         (Symbol::keyword("if"), Mu::compile_if),
         (Symbol::keyword("lambda"), Mu::compile_lambda),
         (Symbol::keyword("quote"), Mu::compile_quoted_list),
@@ -37,8 +40,8 @@ lazy_static! {
 
 pub trait Compiler {
     fn compile(_: &Mu, _: Tag) -> exception::Result<Tag>;
+    #[cfg(feature = "async")]
     fn compile_async(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_frame_symbols(_: &Mu, _: Tag) -> exception::Result<Vec<Tag>>;
     fn compile_if(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lambda(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lexical(_: &Mu, _: Tag) -> exception::Result<Tag>;
@@ -118,23 +121,109 @@ impl Compiler for Mu {
         Ok(Cons::vlist(mu, &body_vec))
     }
 
-    // lexical symbols
-    fn compile_frame_symbols(mu: &Mu, lambda: Tag) -> exception::Result<Vec<Tag>> {
-        let mut symv = Vec::new();
+    fn compile_lambda(mu: &Mu, args: Tag) -> exception::Result<Tag> {
+        fn compile_frame_symbols(mu: &Mu, lambda: Tag) -> exception::Result<Vec<Tag>> {
+            let mut symvec = Vec::new();
 
-        for cons in ConsIter::new(mu, lambda) {
-            let symbol = Cons::car(mu, cons);
-            if Tag::type_of(symbol) == Type::Symbol {
-                match symv.iter().rev().position(|lex| symbol.eq_(*lex)) {
-                    Some(_) => return Err(Exception::new(Condition::Syntax, "lexical", symbol)),
-                    _ => symv.push(symbol),
+            for cons in ConsIter::new(mu, lambda) {
+                let symbol = Cons::car(mu, cons);
+                if Tag::type_of(symbol) == Type::Symbol {
+                    match symvec.iter().rev().position(|lex| symbol.eq_(*lex)) {
+                        Some(_) => {
+                            return Err(Exception::new(Condition::Syntax, "lexical", symbol))
+                        }
+                        _ => symvec.push(symbol),
+                    }
+                } else {
+                    return Err(Exception::new(Condition::Type, "lexical", symbol));
                 }
-            } else {
-                return Err(Exception::new(Condition::Type, "lexical", symbol));
             }
+
+            Ok(symvec)
         }
 
-        Ok(symv)
+        let (lambda, body) = match Tag::type_of(args) {
+            Type::Cons => {
+                let lambda = Cons::car(mu, args);
+
+                match Tag::type_of(lambda) {
+                    Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
+                    _ => return Err(Exception::new(Condition::Type, "lambda", args)),
+                }
+            }
+            _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
+        };
+
+        let id = Symbol::new(mu, Tag::nil(), "lambda", Tag::nil()).evict(mu);
+
+        match compile_frame_symbols(mu, lambda) {
+            Ok(lexicals) => {
+                #[cfg(feature = "async")]
+                let mut lexenv_ref = block_on(mu.compile.write());
+                #[cfg(not(feature = "async"))]
+                let mut lexenv_ref = mu.compile.borrow_mut();
+
+                lexenv_ref.push((id, lexicals));
+            }
+            Err(e) => return Err(e),
+        };
+
+        let form = match Self::compile_list(mu, body) {
+            Ok(form) => match Cons::length(mu, lambda) {
+                Some(len) => Ok(Function::new(Fixnum::as_tag(len as i64), form, id).evict(mu)),
+                None => panic!(":lambda"),
+            },
+            Err(e) => Err(e),
+        };
+
+        #[cfg(feature = "async")]
+        let mut lexenv_ref = block_on(mu.compile.write());
+        #[cfg(not(feature = "async"))]
+        let mut lexenv_ref = mu.compile.borrow_mut();
+
+        lexenv_ref.pop();
+
+        form
+    }
+
+    #[cfg(feature = "async")]
+    fn compile_async(mu: &Mu, args: Tag) -> exception::Result<Tag> {
+        let (func, arg_list) = match Tag::type_of(args) {
+            Type::Cons => {
+                let fn_arg = match Self::compile(mu, Cons::car(mu, args)) {
+                    Ok(fn_) => match Tag::type_of(fn_) {
+                        Type::Function => fn_,
+                        Type::Symbol => {
+                            let sym_val = Symbol::value(mu, fn_);
+                            match Tag::type_of(sym_val) {
+                                Type::Function => sym_val,
+                                _ => return Err(Exception::new(Condition::Type, "async", sym_val)),
+                            }
+                        }
+                        _ => return Err(Exception::new(Condition::Type, "async", fn_)),
+                    },
+                    Err(e) => return Err(e),
+                };
+
+                let async_args = match Self::compile_list(mu, Cons::cdr(mu, args)) {
+                    Ok(list) => list,
+                    Err(e) => return Err(e),
+                };
+
+                let arity = Fixnum::as_i64(mu, Function::arity(mu, fn_arg));
+                if arity != Cons::length(mu, async_args).unwrap() as i64 {
+                    return Err(Exception::new(Condition::Arity, "async", args));
+                }
+
+                (fn_arg, async_args)
+            }
+            _ => return Err(Exception::new(Condition::Syntax, "async", args)),
+        };
+
+        match AsyncContext::async_context(mu, func, arg_list) {
+            Ok(asyncid) => Ok(asyncid),
+            Err(e) => Err(e),
+        }
     }
 
     fn compile_lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
@@ -163,96 +252,6 @@ impl Compiler for Mu {
         Ok(symbol)
     }
 
-    fn compile_lambda(mu: &Mu, args: Tag) -> exception::Result<Tag> {
-        let (lambda, body) = match Tag::type_of(args) {
-            Type::Cons => {
-                let lambda = Cons::car(mu, args);
-
-                match Tag::type_of(lambda) {
-                    Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
-                    _ => return Err(Exception::new(Condition::Type, "lambda", args)),
-                }
-            }
-            _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
-        };
-
-        let id = Symbol::new(mu, Tag::nil(), "lambda", Tag::nil()).evict(mu);
-
-        match Self::compile_frame_symbols(mu, lambda) {
-            Ok(lexicals) => {
-                #[cfg(feature = "async")]
-                let mut lexenv_ref = block_on(mu.compile.write());
-                #[cfg(not(feature = "async"))]
-                let mut lexenv_ref = mu.compile.borrow_mut();
-
-                lexenv_ref.push((id, lexicals));
-            }
-            Err(e) => return Err(e),
-        };
-
-        let form = match Self::compile_list(mu, body) {
-            Ok(form) => match Cons::length(mu, lambda) {
-                Some(len) => Ok(Function::new(Fixnum::as_tag(len as i64), form, id).evict(mu)),
-                None => panic!(":lambda"),
-            },
-            Err(e) => Err(e),
-        };
-
-        #[cfg(feature = "async")]
-        let mut lexenv_ref = block_on(mu.compile.write());
-        #[cfg(not(feature = "async"))]
-        let mut lexenv_ref = mu.compile.borrow_mut();
-
-        lexenv_ref.pop();
-
-        form
-    }
-
-    fn compile_async(mu: &Mu, args: Tag) -> exception::Result<Tag> {
-        let (lambda, body) = match Tag::type_of(args) {
-            Type::Cons => {
-                let lambda = Cons::car(mu, args);
-
-                match Tag::type_of(lambda) {
-                    Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
-                    _ => return Err(Exception::new(Condition::Type, "lambda", args)),
-                }
-            }
-            _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
-        };
-
-        let id = Symbol::new(mu, Tag::nil(), "lambda", Tag::nil()).evict(mu);
-
-        match Self::compile_frame_symbols(mu, lambda) {
-            Ok(lexicals) => {
-                #[cfg(feature = "async")]
-                let mut lexenv_ref = block_on(mu.compile.write());
-                #[cfg(not(feature = "async"))]
-                let mut lexenv_ref = mu.compile.borrow_mut();
-
-                lexenv_ref.push((id, lexicals));
-            }
-            Err(e) => return Err(e),
-        };
-
-        let form = match Self::compile_list(mu, body) {
-            Ok(form) => match Cons::length(mu, lambda) {
-                Some(len) => Ok(Function::new(Fixnum::as_tag(len as i64), form, id).evict(mu)),
-                None => panic!(":lambda"),
-            },
-            Err(e) => Err(e),
-        };
-
-        #[cfg(feature = "async")]
-        let mut lexenv_ref = block_on(mu.compile.write());
-        #[cfg(not(feature = "async"))]
-        let mut lexenv_ref = mu.compile.borrow_mut();
-
-        lexenv_ref.pop();
-
-        form
-    }
-
     fn compile(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
         match Tag::type_of(expr) {
             Type::Symbol => Self::compile_lexical(mu, expr),
@@ -266,6 +265,7 @@ impl Compiler for Mu {
                     },
                     Type::Symbol | Type::Function => match Self::compile_list(mu, args) {
                         Ok(arglist) => Ok(Cons::new(func, arglist).evict(mu)),
+
                         Err(e) => Err(e),
                     },
                     Type::Cons => match Self::compile_list(mu, args) {

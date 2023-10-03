@@ -34,29 +34,16 @@ pub struct AsyncContext {
 
 pub trait Core {
     type AsyncFuture;
+
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
+    fn async_context(_: &Mu, _: Tag, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Core for AsyncContext {
     type AsyncFuture = BoxFuture<'static, Result<Tag, Exception>>;
 
-    fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        mu.write_string(format!("#<:asyncid [id:{}]>", Tag::data(&tag, mu)), stream)
-    }
-}
-
-pub trait MuFunction {
-    fn mu_async(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_await(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_abort(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-}
-
-impl MuFunction for Mu {
-    fn mu_async(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let func = fp.argv[0];
-        let args = fp.argv[1];
-
-        fp.value = match Tag::type_of(func) {
+    fn async_context(mu: &Mu, func: Tag, args: Tag) -> exception::Result<Tag> {
+        let async_id = match Tag::type_of(func) {
             Type::Function => match Tag::type_of(args) {
                 Type::Cons | Type::Null => {
                     let mut map_ref = block_on(mu.async_map.write());
@@ -105,9 +92,20 @@ impl MuFunction for Mu {
             _ => return Err(Exception::new(Condition::Type, "async", func)),
         };
 
-        Ok(())
+        Ok(async_id)
     }
 
+    fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
+        mu.write_string(format!("#<:asyncid [id:{}]>", Tag::data(&tag, mu)), stream)
+    }
+}
+
+pub trait MuFunction {
+    fn mu_await(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_abort(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+}
+
+impl MuFunction for Mu {
     fn mu_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 

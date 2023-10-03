@@ -22,19 +22,19 @@ use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Function {
-    nreq: Tag, // fixnum # of required arguments
-    form: Tag, // cons body or fixnum native table offset
-    id: Tag,   // frame id, nil or a symbol
+    arity: Tag, // fixnum # of required arguments
+    form: Tag,  // cons body or fixnum native table offset
+    id: Tag,    // frame id, nil or a symbol
 }
 
 impl Function {
-    pub fn new(nreq: Tag, form: Tag, id: Tag) -> Self {
-        Function { nreq, form, id }
+    pub fn new(arity: Tag, form: Tag, id: Tag) -> Self {
+        Function { arity, form, id }
     }
 
     pub fn evict(&self, mu: &Mu) -> Tag {
         let image: &[[u8; 8]] = &[
-            self.nreq.as_slice(),
+            self.arity.as_slice(),
             self.form.as_slice(),
             self.id.as_slice(),
         ];
@@ -62,7 +62,7 @@ impl Function {
                     let heap_ref = mu.heap.borrow();
 
                     Function {
-                        nreq: Tag::from_slice(
+                        arity: Tag::from_slice(
                             heap_ref.of_length(main.offset() as usize, 8).unwrap(),
                         ),
                         form: Tag::from_slice(
@@ -79,10 +79,10 @@ impl Function {
         }
     }
 
-    pub fn nreq(mu: &Mu, func: Tag) -> Tag {
+    pub fn arity(mu: &Mu, func: Tag) -> Tag {
         match Tag::type_of(func) {
             Type::Function => match func {
-                Tag::Indirect(_) => Self::to_image(mu, func).nreq,
+                Tag::Indirect(_) => Self::to_image(mu, func).arity,
                 _ => panic!(),
             },
             _ => panic!(),
@@ -118,7 +118,7 @@ pub trait Core {
 impl Core for Function {
     fn view(mu: &Mu, func: Tag) -> Tag {
         let vec = vec![
-            Self::nreq(mu, func),
+            Self::arity(mu, func),
             Self::form(mu, func),
             Self::id(mu, func),
         ];
@@ -129,7 +129,7 @@ impl Core for Function {
     fn write(mu: &Mu, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match Tag::type_of(func) {
             Type::Function => {
-                let nreq = Fixnum::as_i64(mu, Function::nreq(mu, func));
+                let nreq = Fixnum::as_i64(mu, Function::arity(mu, func));
                 let form = Function::form(mu, func);
 
                 let desc = match Tag::type_of(form) {

@@ -49,8 +49,6 @@ lazy_static! {
         ("nthcdr", 2, Cons::mu_nthcdr),
         // async
         #[cfg(feature="async")]
-        ("async", 2, Mu::mu_async),
-        #[cfg(feature="async")]
         ("await", 1, Mu::mu_await),
         #[cfg(feature="async")]
         ("abort", 1, Mu::mu_abort),
