@@ -6,10 +6,6 @@
 ;;;
 (mu:make-ns :core)
 
-(mu:intern :core "%char-macro-ns%" (mu:make-ns :%ch-mac))
-(mu:intern :core "%macro-ns%" (mu:make-ns :%macros))
-(mu:intern :core "%symbol-macro-ns%" (mu:make-ns :%sy-mac))
-
 ;;;
 ;;; core types
 ;;;
@@ -22,7 +18,7 @@
           (:fn      . :func)
           (:env     . :listp)))
 
-      ;;; lambda
+      ;;; core lambda
       (core:define-core-type "lambda"
         '((:bound  . :listp)
           (:rest   . :symbolp)
@@ -35,7 +31,10 @@
           (:source . :symbolp)
           (:reason . :string)
           (:env    . :listp)))
-      
+
+      (mu:intern :core "%char-macro-ns%" (mu:make-ns :%ch-mac))
+      (mu:intern :core "%macro-ns%" (mu:make-ns :%macros))
+      (mu:intern :core "%symbol-macro-ns%" (mu:make-ns :%sy-mac))
       (mu:intern :core "%core-namespaces" (core:%gen-anon-ns))))
 
 ;;;
