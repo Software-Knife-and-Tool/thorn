@@ -91,7 +91,7 @@
                                       object
                                       source
                                       "mu:raise"
-                                      (core:dropl (mu:frames) 8))))))
+                                      (core:dropl (mu:frames) 0))))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;
@@ -101,13 +101,13 @@
    (:lambda (fmt object)
       (core:format mu:err-out fmt `(,object))                
       (mu:raise
-       (core:make-exception :error object :error "" (core:dropl (mu:frames) 5))
+       (core:make-exception :error object :error "" (core:dropl (mu:frames) 0))
        :except)))
 
 (mu:intern :core "raise"
    (:lambda (object source reason)
       (mu:raise
-       (core:make-exception :error object source reason (core:dropl (mu:frames) 5))
+       (core:make-exception :error object source reason (core:dropl (mu:frames) 0))
        :except)))
 
 (mu:intern :core "warn"

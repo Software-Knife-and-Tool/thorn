@@ -32,10 +32,10 @@
           (:reason . :string)
           (:env    . :listp)))
 
-      (mu:intern :core "%char-macro-ns%" (mu:make-ns :%ch-mac))
-      (mu:intern :core "%macro-ns%" (mu:make-ns :%macros))
-      (mu:intern :core "%symbol-macro-ns%" (mu:make-ns :%sy-mac))
-      (mu:intern :core "%core-namespaces" (core:%gen-anon-ns))))
+      (mu:intern :core "%core-namespaces" (core:%gen-anon-ns))
+      (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))
+      (mu:intern :core "%macro-ns%" (core:%gen-anon-ns))
+      (mu:intern :core "%symbol-macro-ns%" (core:%gen-anon-ns))))
 
 ;;;
 ;;; predicates

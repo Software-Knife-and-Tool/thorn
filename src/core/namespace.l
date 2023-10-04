@@ -11,7 +11,7 @@
    (:lambda ()
       ((:lambda (counter)                 
           (mu:write (core:1+ counter) () core:%gen-anon-ns-counter)
-          (mu:make-ns (mu:keyword (core:format () "~X" `(,counter)))))
+          (mu:make-ns (mu:keyword (core:format () "%~X" `(,counter)))))
        (mu:read (mu:open :string :input (mu:get-str core:%gen-anon-ns-counter)) () ()))))
 
 (mu:intern :core "%make-namespace"

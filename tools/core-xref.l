@@ -4,7 +4,7 @@
 ;;;
 ;;; cross reference
 ;;;
-(mu:intern core "xref"
+(mu:intern :core "xref"
    (:lambda (file-name)
       ((:lambda (stream)
           (core:mapc
