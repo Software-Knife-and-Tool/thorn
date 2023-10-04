@@ -21,37 +21,36 @@
    (:lambda (symbol)
       ((:lambda (ns-name)
           (mu:ns-find core:%macro-ns% ns-name))
-       (core:format () "~A" `(,(mu:sy-ns symbol))))))
+       (mu:sy-name (mu:sy-ns symbol)))))
 
 (mu:intern :core "%make-macro-ns"
    (:lambda (ns)
-      ((:lambda (macro-ns)                 
-          (mu:intern core:%macro-ns% ns macro-ns)
-          macro-ns)      
-       (mu:make-ns :macros))))                 
+      ((:lambda (macro-ns)
+          (mu:intern core:%macro-ns% (mu:sy-name ns) macro-ns)
+          macro-ns)
+       (core:%gen-anon-ns))))    
 
-(mu:intern :core "%core-macro-env"
+(mu:intern :core "%macro-env"
    (:lambda (symbol macro-fn)
       ((:lambda (macro-ns symbol-ns)
           (:if macro-ns
                (mu:intern macro-ns symbol-ns macro-fn)
-               (mu:intern (core:%make-macro-ns symbol-ns) (mu:sy-name symbol) macro-fn)))
+               (mu:intern (core:%make-macro-ns symbol-ns) (mu:sy-name symbol) macro-fn))
+          symbol)
        (core:%map-macro-symbol-ns symbol)
        (mu:sy-ns symbol))))
 
-(mu:intern :core "%core-find-macro"
+(mu:intern :core "%find-macro"
    (:lambda (symbol env)
-      (:if (mu:eq :symbol (mu:type-of symbol))
-           ((:lambda (macro-ns symbol-ns symbol-name)
-               (:if macro-ns
-                    (mu:ns-find (mu:sy-val macro-ns) symbol-name)
-                    ()))
-            (mu:ns-find
-             core:%macro-ns%
-             (core:symbol-ns symbol))
-            (mu:sy-ns symbol)
-            (mu:sy-name symbol))
-           (core:raise symbol 'core:%core-find-macro "is not a symbol"))))
+      ((:lambda (macro-ns symbol-ns symbol-name)
+          (:if macro-ns
+               (mu:ns-find (mu:sy-ns macro-ns) symbol-name)
+               ()))
+       (mu:ns-find
+        core:%macro-ns%
+        (mu:sy-name (mu:sy-ns symbol)))
+       (mu:sy-name (mu:sy-ns symbol))
+       (mu:sy-name symbol))))
 
 (mu:intern :core "%compile-macro-call"
    (:lambda (macro-symbol args env)
@@ -95,16 +94,10 @@
 ;;;
 (mu:intern :core "macro-function"
    (:lambda (symbol env)
-            ()))
-
-#|
-     (:if (mu:eq :symbol (mu:type-of symbol))
-          (:if (core:keywordp symbol)
-               ()
-               ((:lambda (macro)
-                  (:if macro
-                       (mu:sy-val macro)
-                       ()))
-                (core:%core-find-macro symbol env)))
+      (:if (mu:eq :symbol (mu:type-of symbol))
+           ((:lambda (macro)
+               (:if macro
+                    (mu:sy-val macro)
+                    ()))
+            (core:%find-macro symbol env))
           ())))
-|#

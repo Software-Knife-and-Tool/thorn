@@ -41,8 +41,8 @@
 (mu:intern :core "%compile-defmacro"
    (:lambda (form env)
       ((:lambda (symbol lambda-form)
-          (:if (core:symbolp symbol)
-               (core:%core-macro-env symbol (core:%compile-lambda lambda-form env))
+          (:if (core:symbolp symbol)           
+               (core:%macro-env symbol (core:%compile-lambda lambda-form env))
                (core:raise symbol 'core:%compile-defmacro "not a symbol"))
           `(:quote ,symbol))
        (mu:nth 1 form)
