@@ -88,7 +88,9 @@
                (core:maplist
                 (:lambda (body-cdr)
                    (:if (mu:cdr body-cdr)
-                        (core:%compile (mu:car body-cdr) env)
+                        ((:lambda (obj)
+                            (core:%compile obj env))
+                            (mu:car body-cdr))
                         ((:lambda (form)
                             (:if (core:consp form)
                                  (:if (mu:eq 'lambda (mu:car form))

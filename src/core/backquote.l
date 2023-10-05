@@ -34,14 +34,9 @@
 ;;;
 (mu:intern :core "%bq-list-element"
    (:lambda (obj)
-      ;;; (core:warn `(,obj ,(mu:type-of obj)) "bq-list-element") 
       (:if (core:symbolp obj)
-           ((:lambda (list)
-               `(:quote ,list))
-            (mu:cons obj ()))
-           ((:lambda (list)
-               `(:quote ,list))
-            (mu:cons obj ())))))
+           `(:quote ,(mu:cons obj ()))
+           `(:quote ,(mu:cons obj ())))))
 
 ;;;
 ;;; backquote list:
@@ -56,11 +51,7 @@
                ((:lambda (quoted-list append-tail)
                    `(mu:%append ,quoted-list ,append-tail))
                 (core:%bq-list-element form)
-                ((:lambda (el)
-                    (:if (core:null el)
-                         ()
-                         el))
-                 (core:%bq-list stream in-bq-list)))))
+                (core:%bq-list stream in-bq-list))))
        (core:%bq-read stream :t :t))))
 
 ;;;
