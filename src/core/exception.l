@@ -35,28 +35,6 @@
            (core:%core-type-ref prop except)
            (core:raise prop 'except-prop "not an except property"))))
 
-(mu:intern :core "%debug-map-symbol"
-   (:lambda (obj)
-      (:if (mu:boundp 'core:%debug-core-symbols%)
-           ()
-           (mu:intern :core "%debug-core-symbols%" (mu:ns-syms :core)))
-      (mu:fix
-       (:lambda (list)
-          (:if (core:consp list)
-               ((:lambda (symbol)
-                   (:if (mu:eq (mu:sy-val symbol) obj)
-                        symbol
-                        (mu:cdr list)))
-                (mu:car list))
-               list))
-       core:%debug-core-symbols%)))
-
-(mu:intern :core "%fmt-mapped-symbol"
-   (:lambda (obj)
-      ((:lambda (symbol)
-          (core:%orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
-       (core:%debug-map-symbol obj))))
-
 (mu:intern :core "exceptf"
    (:lambda (stream fmt printenv except)
      ((:lambda (cond object source reason env)
@@ -91,7 +69,7 @@
                                       object
                                       source
                                       "mu:raise"
-                                      (core:dropl (mu:frames) 0))))))
+                                      mu:frames)))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;
@@ -101,13 +79,13 @@
    (:lambda (fmt object)
       (core:format mu:err-out fmt `(,object))                
       (mu:raise
-       (core:make-exception :error object :error "" (core:dropl (mu:frames) 0))
+       (core:make-exception :error object :error "" (mu:frames))
        :except)))
 
 (mu:intern :core "raise"
    (:lambda (object source reason)
       (mu:raise
-       (core:make-exception :error object source reason (core:dropl (mu:frames) 0))
+       (core:make-exception :error object source reason (mu:frames))
        :except)))
 
 (mu:intern :core "warn"

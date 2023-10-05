@@ -2,7 +2,32 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; debug repl
+;;; debugging
+;;;
+(mu:intern :core "%debug-map-symbol"
+   (:lambda (obj)
+      (:if (mu:boundp 'core:%debug-core-symbols%)
+           ()
+           (mu:intern :core "%debug-core-symbols%" (mu:ns-syms :core)))
+      (mu:fix
+       (:lambda (list)
+          (:if (core:consp list)
+               ((:lambda (symbol)
+                   (:if (mu:eq (mu:sy-val symbol) obj)
+                        symbol
+                        (mu:cdr list)))
+                (mu:car list))
+               list))
+       core:%debug-core-symbols%)))
+
+(mu:intern :core "%fmt-mapped-symbol"
+   (:lambda (obj)
+      ((:lambda (symbol)
+          (core:%orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
+       (core:%debug-map-symbol obj))))
+
+;;;
+;;; describe
 ;;;
 (mu:intern :core "%describe-function"
    (:lambda (fn)
@@ -129,6 +154,9 @@
          ,(mu:cons core:vectorp core:%describe-vector)
          ,(mu:cons core:consp core:%describe-cons)))))
 
+;;;
+;;; debugger
+;;;
 (mu:intern :core "debugger"
    (:lambda (except)
      (core:format :t ";;; entering break loop with exception~%" ())
@@ -169,6 +197,9 @@
                        (core:read :t () ()))))))
      ())))
 
+;;;
+;;; repl
+;;;
 (mu:intern :core "repl"
    (:lambda ()
      (mu:fix

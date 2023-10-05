@@ -103,14 +103,7 @@
                loop
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
-                       ((:lambda ()
-                           #|
-                           (core:raise-if (mu:eq (mu:fx-add 1 nth)
-                                                 (core:length fmt))
-                                          nth
-                                          'core:format "unexpected end of format string")
-                           |#
-                           (mu:cons (mu:fx-add 2 nth) (core:%fmt-op (core:schar fmt (mu:fx-add 1 nth)) dest argl))))
+                       (mu:cons (mu:fx-add 2 nth) (core:%fmt-op (core:schar fmt (mu:fx-add 1 nth)) dest argl))
                        ((:lambda ()
                            (core:write-char ch dest)
                            (mu:cons (mu:fx-add 1 nth) argl)))))
@@ -139,4 +132,4 @@
                                      stream
                                      (core:raise stream 'core:format "not a stream designator"))))))
                 (core:raise args 'core:format "not a list"))
-           (core:raise fmt 'core:format "not a string"))))
+           (core:raise fmt 'core:format "not a format string"))))
