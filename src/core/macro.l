@@ -40,11 +40,12 @@
        (core:%map-macro-symbol-ns symbol)
        (mu:sy-ns symbol))))
 
+;;; sshould return () or a symbol
 (mu:intern :core "%find-macro"
    (:lambda (symbol env)
       ((:lambda (macro-ns symbol-ns symbol-name)
           (:if macro-ns
-               (mu:ns-find (mu:sy-ns macro-ns) symbol-name)
+               (mu:ns-find (mu:sy-val macro-ns) symbol-name)
                ()))
        (mu:ns-find
         core:%macro-ns%
@@ -67,8 +68,9 @@
           ((:lambda (fn-symbol args)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
-                      (:if macro-fn
-                           (core:apply macro-fn (mu:eval (core:%arg-list args)))
+                       (:if macro-fn
+                            ((:lambda ()
+                                (core:apply macro-fn (mu:eval (core:%arg-list args)))))
                            form))
                    (core:macro-function fn-symbol env))
                   form))
