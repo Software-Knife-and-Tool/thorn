@@ -26,7 +26,6 @@ use {
     std::str,
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 pub enum Vector {
@@ -57,10 +56,7 @@ impl Vector {
         match Tag::type_of(tag) {
             Type::Vector => match tag {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
 
                     VectorImage {
                         vtype: Tag::from_slice(
@@ -169,11 +165,7 @@ impl<'a> Core<'a> for Vector {
                     _ => panic!(),
                 },
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
-
                     let vec: VectorImage = Self::to_image(mu, tag);
 
                     str::from_utf8(

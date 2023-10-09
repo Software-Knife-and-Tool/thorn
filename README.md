@@ -17,6 +17,10 @@ While *thorn* has much in common with Scheme, it is meant to be familiar to trad
 
 *thorn* is a 2-Lisp, which gives it flexibility in implementation and subsequent customization. A small, native code runtime kernel supports system classes, function application, heap/system image management, and the FFI framework.
 
+Subsequent layers based on the runtime offer advanced features.
+
+
+
 #### Rationale
 
 ------
@@ -25,7 +29,7 @@ Functional languages bring us closer to a time where we can automatically prove 
 
 *thorn* attempts to express modern programming concepts with a simple, familiar syntax. The venerable Common Lisp macro system helps the system designer create domain specific languages.
 
-*LISPs* are intentionally dynamic which has selected against them for use in production environments, yet statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few of the dynamic languages in use today have adequate meta programming facilities. We need systems that can we reason about and can supplement themselves.
+*LISPs* are intentionally dynamic which has selected against them for use in production environments, yet statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few languages in use today have adequate meta-programming facilities. We need systems that can we reason about and can supplement themselves.
 
 Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. An evolving system can have a runtime measured in months or years.
 
@@ -128,7 +132,8 @@ git clone https://github.com/Software-Knife-and-Tool/thorn.git
 After cloning the *thorn* repository, the *rust* system can be built and installed with the supplied makefile.
 
 ```
-% make world
+% make release
+% make debug
 ```
 
 Having built the distribution, install it in `/opt/thorn`.
@@ -137,9 +142,7 @@ Having built the distribution, install it in `/opt/thorn`.
 % sudo make install
 ```
 
-Related build targets, `debug` and `profile`, compile for debugging and profiling respectively.
-
-`make` with no arguments prints the available targets.
+Related build targets, `debug` and `profile`, compile for debugging and profiling respectively.`make` with no arguments prints the available targets.
 
 If you want to repackage *thorn* after a change to the library sources:
 
@@ -147,7 +150,7 @@ If you want to repackage *thorn* after a change to the library sources:
 % make dist
 ```
 
-and then install.
+and then reinstall.
 
 Note: the installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will tend to accrete. The make uninstall target will remove that if desired.
 
@@ -200,7 +203,7 @@ Metrics include the average amount of time (in microsconds) taken for an individ
 
 The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a Core I7 CPU at 3+ GHz, the default perf tests take approximately four minutes of elapsed time for both the *mu* and *core* namespaces.
+On a modern Core I7 CPU at 3+ GHz, the default perf tests take approximately four minutes of elapsed time for both the *mu* and *core* namespaces.
 
 ```
 % make -C perf base
@@ -209,7 +212,7 @@ On a Core I7 CPU at 3+ GHz, the default perf tests take approximately four minut
 % make -C perf commit
 ```
 
-The `base` target produces a performance run and establishes a base line. The `current`  target produces a secondary performance run. The current summary will be checked into the repo as the base at the next commit. The `diff` target produces human-readable diff between `base` and `current`. 
+The `base` target produces a performance run and establishes a base line. The `current`  target produces a secondary performance run. The current summary will be checked into the repo as the base at the next commit. The `diff` target produces a human-readable diff between `base` and `current`. 
 
 The `perf` makefile has additional facilities for development, including reporting on individual tests. The`help` target will list them. 
 
@@ -219,7 +222,7 @@ In specific, a summary of significant performance changes (differences in measur
 % make -C perf commit
 ```
 
-produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary, and timing changes greater than 20% for any individual test. `commit` also establishes the `current` report as the new baseline in preparation for a commit to the rep.
+produces a report of the differences between the current summary and the established baseline. The *commit* target reports on any change in storage consumption between the baseline and the current summary, and timing changes greater than 20% for any individual test. `commit` also establishes the `current` report as the new baseline in preparation for a commit to the repo.
 
 For convenience, the *thorn* Makefile provides:
 
@@ -255,8 +258,6 @@ The  `perf`  makefile offers some development options.
 ------
 
 The *thorn* binaries, libraries, and source files are installed in `/opt/thorn`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `core` and `preface` library sources.
-
-
 
 ```
 runtime			runtime binary, minimal repl
@@ -296,7 +297,7 @@ user>
 % alias thorn='rlwrap -m /opt/thorn/bin/thorn'
 ```
 
-Depending on your version *rlwrap*, may exhibit odd echoing behavior. Adding
+Depending on your version of *rlwrap*, *thorn* may exhibit odd echoing behavior. Adding
 
 ```
 set enable-bracketed-paste off

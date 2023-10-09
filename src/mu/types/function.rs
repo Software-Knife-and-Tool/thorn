@@ -17,7 +17,6 @@ use crate::{
     },
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
@@ -39,11 +38,7 @@ impl Function {
             self.id.as_slice(),
         ];
 
-        #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
-        #[cfg(not(feature = "async"))]
-        let mut heap_ref = mu.heap.borrow_mut();
-
         let ind = IndirectTag::new()
             .with_offset(heap_ref.alloc(image, Type::Function as u8) as u64)
             .with_heap_id(1)
@@ -56,10 +51,7 @@ impl Function {
         match Tag::type_of(tag) {
             Type::Function => match tag {
                 Tag::Indirect(main) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
 
                     Function {
                         arity: Tag::from_slice(

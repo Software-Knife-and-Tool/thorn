@@ -20,7 +20,6 @@ use crate::{
     },
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
@@ -38,10 +37,7 @@ impl Cons {
         match Tag::type_of(tag) {
             Type::Cons => match tag {
                 Tag::Indirect(main) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
 
                     Cons {
                         car: Tag::from_slice(
@@ -131,11 +127,7 @@ impl Core for Cons {
             Some(tag) => tag,
             None => {
                 let image: &[[u8; 8]] = &[self.car.as_slice(), self.cdr.as_slice()];
-
-                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(not(feature = "async"))]
-                let mut heap_ref = mu.heap.borrow_mut();
 
                 let ind = IndirectTag::new()
                     .with_offset(heap_ref.alloc(image, Type::Cons as u8) as u64)
