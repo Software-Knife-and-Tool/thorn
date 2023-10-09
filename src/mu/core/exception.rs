@@ -17,7 +17,6 @@ use {
     std::fmt,
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 pub type Result<T> = std::result::Result<T, Exception>;
@@ -145,15 +144,8 @@ impl MuFunction for Exception {
             Type::Function => match Tag::type_of(handler) {
                 Type::Function => {
                     {
-                        #[cfg(feature = "async")]
                         let dynamic_ref = block_on(mu.dynamic.read());
-                        #[cfg(not(feature = "async"))]
-                        let dynamic_ref = mu.dynamic.borrow();
-
-                        #[cfg(feature = "async")]
                         let mut unwind_ref = block_on(mu.unwind.write());
-                        #[cfg(not(feature = "async"))]
-                        let mut unwind_ref = mu.unwind.borrow_mut();
 
                         unwind_ref.push(dynamic_ref.len())
                     }
@@ -165,15 +157,8 @@ impl MuFunction for Exception {
                                 vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
                             match mu.apply_(handler, args) {
                                 Ok(value) => {
-                                    #[cfg(feature = "async")]
                                     let mut dynamic_ref = block_on(mu.dynamic.write());
-                                    #[cfg(not(feature = "async"))]
-                                    let mut dynamic_ref = mu.dynamic.borrow_mut();
-
-                                    #[cfg(feature = "async")]
                                     let mut unwind_ref = block_on(mu.unwind.write());
-                                    #[cfg(not(feature = "async"))]
-                                    let mut unwind_ref = mu.unwind.borrow_mut();
 
                                     match unwind_ref.pop() {
                                         Some(len) => {

@@ -19,9 +19,7 @@ use crate::{
     },
 };
 
-#[cfg(feature = "async")]
 use crate::core::async_context::{AsyncContext, Core as _};
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 // special forms
@@ -30,7 +28,6 @@ type SpecMap = (Tag, SpecFn);
 
 lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
-        #[cfg(feature = "async")]
         (Symbol::keyword("async"), Mu::compile_async),
         (Symbol::keyword("if"), Mu::compile_if),
         (Symbol::keyword("lambda"), Mu::compile_lambda),
@@ -40,7 +37,6 @@ lazy_static! {
 
 pub trait Compiler {
     fn compile(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    #[cfg(feature = "async")]
     fn compile_async(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_if(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn compile_lambda(_: &Mu, _: Tag) -> exception::Result<Tag>;
@@ -158,10 +154,7 @@ impl Compiler for Mu {
 
         match compile_frame_symbols(mu, lambda) {
             Ok(lexicals) => {
-                #[cfg(feature = "async")]
                 let mut lexenv_ref = block_on(mu.compile.write());
-                #[cfg(not(feature = "async"))]
-                let mut lexenv_ref = mu.compile.borrow_mut();
 
                 lexenv_ref.push((id, lexicals));
             }
@@ -176,17 +169,13 @@ impl Compiler for Mu {
             Err(e) => Err(e),
         };
 
-        #[cfg(feature = "async")]
         let mut lexenv_ref = block_on(mu.compile.write());
-        #[cfg(not(feature = "async"))]
-        let mut lexenv_ref = mu.compile.borrow_mut();
 
         lexenv_ref.pop();
 
         form
     }
 
-    #[cfg(feature = "async")]
     fn compile_async(mu: &Mu, args: Tag) -> exception::Result<Tag> {
         let (func, arg_list) = match Tag::type_of(args) {
             Type::Cons => {
@@ -227,10 +216,7 @@ impl Compiler for Mu {
     }
 
     fn compile_lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
-        #[cfg(feature = "async")]
         let lexenv_ref = block_on(mu.compile.read());
-        #[cfg(not(feature = "async"))]
-        let lexenv_ref = mu.compile.borrow();
 
         for frame in lexenv_ref.iter().rev() {
             let (tag, symbols) = frame;

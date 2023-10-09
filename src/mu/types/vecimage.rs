@@ -18,7 +18,6 @@ use crate::{
     },
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 pub struct VectorImage {
@@ -68,10 +67,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 };
 
-                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(not(feature = "async"))]
-                let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
                     IndirectTag::new()
@@ -88,10 +84,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 };
 
-                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(not(feature = "async"))]
-                let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
                     IndirectTag::new()
@@ -112,10 +105,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 }
 
-                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(not(feature = "async"))]
-                let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
                     IndirectTag::new()
@@ -136,10 +126,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 }
 
-                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(not(feature = "async"))]
-                let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
                     IndirectTag::new()
@@ -164,10 +151,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     _ => panic!(),
                 };
 
-                #[cfg(feature = "async")]
                 let mut heap_ref = block_on(mu.heap.write());
-                #[cfg(not(feature = "async"))]
-                let mut heap_ref = mu.heap.borrow_mut();
 
                 Tag::Indirect(
                     IndirectTag::new()
@@ -192,11 +176,7 @@ impl<'a> IVector for IndirectVector<'a> {
         match Vector::to_type(image.vtype).unwrap() {
             Type::Byte => match vector {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
-
                     let slice = heap_ref
                         .of_length(image.offset() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
@@ -207,11 +187,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::Char => match vector {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
-
                     let slice = heap_ref
                         .of_length(image.offset() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
@@ -222,10 +198,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::T => match vector {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
 
                     Some(Tag::from_slice(
                         heap_ref
@@ -240,11 +213,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::Fixnum => match vector {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
-
                     let slice = heap_ref
                         .of_length(
                             image.offset() as usize + Self::IMAGE_NBYTES + (index * 8),
@@ -260,11 +229,7 @@ impl<'a> IVector for IndirectVector<'a> {
             },
             Type::Float => match vector {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
-
                     let slice = heap_ref
                         .of_length(
                             image.offset() as usize + Self::IMAGE_NBYTES + (index * 4),

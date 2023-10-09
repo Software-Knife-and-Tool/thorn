@@ -19,7 +19,6 @@ use {
     std::fmt,
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 // tag storage classes
@@ -100,10 +99,7 @@ impl fmt::Display for Tag {
 
 impl Tag {
     pub fn data(&self, mu: &Mu) -> u64 {
-        #[cfg(feature = "async")]
         let heap_ref = block_on(mu.heap.read());
-        #[cfg(not(feature = "async"))]
-        let heap_ref = mu.heap.borrow();
 
         match self {
             Tag::Fixnum(fx) => (*fx >> 3) as u64,

@@ -20,9 +20,6 @@ use {
     std::{collections::HashMap, str},
 };
 
-#[cfg(not(feature = "async"))]
-use std::cell::RefCell;
-#[cfg(feature = "async")]
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub trait Cache {
@@ -36,18 +33,12 @@ pub trait Cache {
 }
 
 impl Cache for Mu {
-    #[cfg(feature = "async")]
     type NSCache = RwLock<HashMap<String, Tag>>;
-    #[cfg(not(feature = "async"))]
-    type NSCache = RefCell<HashMap<String, Tag>>;
 
     type NSMap = HashMap<u64, (Tag, Self::NSCache)>;
 
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
-        #[cfg(feature = "async")]
         let mut ns_ref = block_on(mu.ns_map.write());
-        #[cfg(not(feature = "async"))]
-        let mut ns_ref = mu.ns_map.borrow_mut();
 
         if ns_ref.contains_key(&ns.as_u64()) {
             return Err(Exception::new(Condition::Type, "make-ns", ns));
@@ -55,27 +46,18 @@ impl Cache for Mu {
 
         ns_ref.insert(
             ns.as_u64(),
-            #[cfg(feature = "async")]
             (ns, RwLock::new(HashMap::<String, Tag>::new())),
-            #[cfg(not(feature = "async"))]
-            (ns, RefCell::new(HashMap::<String, Tag>::new())),
         );
 
         Ok(ns)
     }
 
     fn map_symbol(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
-        #[cfg(feature = "async")]
         let ns_ref = block_on(mu.ns_map.read());
-        #[cfg(not(feature = "async"))]
-        let ns_ref = mu.ns_map.borrow();
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 
-        #[cfg(feature = "async")]
         let hash = block_on(ns_cache.read());
-        #[cfg(not(feature = "async"))]
-        let hash = ns_cache.borrow();
 
         if hash.contains_key(name) {
             Some(hash[name])
@@ -85,18 +67,12 @@ impl Cache for Mu {
     }
 
     fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
-        #[cfg(feature = "async")]
         let ns_ref = block_on(mu.ns_map.read());
-        #[cfg(not(feature = "async"))]
-        let ns_ref = mu.ns_map.borrow();
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(mu, Symbol::name(mu, symbol));
 
-        #[cfg(feature = "async")]
         let mut hash = block_on(ns_cache.write());
-        #[cfg(not(feature = "async"))]
-        let mut hash = ns_cache.borrow_mut();
 
         hash.insert(name, symbol);
     }
@@ -105,10 +81,7 @@ impl Cache for Mu {
         match Tag::type_of(tag) {
             Type::Null => Some(tag),
             Type::Keyword => {
-                #[cfg(feature = "async")]
                 let ns_ref = block_on(mu.ns_map.read());
-                #[cfg(not(feature = "async"))]
-                let ns_ref = mu.ns_map.borrow();
 
                 if ns_ref.contains_key(&tag.as_u64()) {
                     Some(tag)
@@ -148,10 +121,7 @@ impl Core for Mu {
                             _ => panic!(),
                         } as usize;
 
-                        #[cfg(feature = "async")]
                         let mut heap_ref = block_on(mu.heap.write());
-                        #[cfg(not(feature = "async"))]
-                        let mut heap_ref = mu.heap.borrow_mut();
 
                         heap_ref.write_image(slices, offset);
                     }
@@ -318,17 +288,11 @@ impl MuFunction for Mu {
 
         fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
-                #[cfg(feature = "async")]
                 let ns_ref = block_on(mu.ns_map.read());
-                #[cfg(not(feature = "async"))]
-                let ns_ref = mu.ns_map.borrow();
 
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 
-                #[cfg(feature = "async")]
                 let hash = block_on(ns_cache.read());
-                #[cfg(not(feature = "async"))]
-                let hash = ns_cache.borrow();
 
                 let mut vec = vec![];
 

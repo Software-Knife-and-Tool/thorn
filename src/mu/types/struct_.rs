@@ -19,7 +19,6 @@ use crate::{
     },
 };
 
-#[cfg(feature = "async")]
 use futures::executor::block_on;
 
 // a struct is a vector with an arbitrary type
@@ -55,10 +54,7 @@ impl Struct {
         match Tag::type_of(tag) {
             Type::Struct => match tag {
                 Tag::Indirect(image) => {
-                    #[cfg(feature = "async")]
                     let heap_ref = block_on(mu.heap.read());
-                    #[cfg(not(feature = "async"))]
-                    let heap_ref = mu.heap.borrow();
 
                     Struct {
                         stype: Tag::from_slice(
@@ -179,11 +175,7 @@ impl<'a> Core<'a> for Struct {
 
     fn evict(&self, mu: &Mu) -> Tag {
         let image: &[[u8; 8]] = &[self.stype.as_slice(), self.vector.as_slice()];
-
-        #[cfg(feature = "async")]
         let mut heap_ref = block_on(mu.heap.write());
-        #[cfg(not(feature = "async"))]
-        let mut heap_ref = mu.heap.borrow_mut();
 
         Tag::Indirect(
             IndirectTag::new()

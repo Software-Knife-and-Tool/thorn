@@ -1,27 +1,26 @@
 #
 # thorn makefile
 #
-.PHONY: world run clean doc dist format tests runtime release
-RUNTIME=target/debug/runtime
+.PHONY: release debug
+.PHONY: doc dist install uninstall
+.PH)NY: clobber commit tags
+.PHONY: tests/rust tests/summary tests/report
+.PHONY: perf/base perf/current perf/diff perf/commit
 
 help:
 	@echo "thorn top-level makefile -----------------"
 	@echo
 	@echo "--- build options"
-	@echo "    world - build release and package dist"
-	@echo "    world-no-async - build release and package dist"
-	@echo "    debug - build runtime for debug"
-	@echo "    release - build runtime for release with async feature"
-	@echo "    no-async - build runtime for release without async feature"
+	@echo "    debug - build runtime for debug and package for distribution"
+	@echo "    release - build runtime for release and package for distribution"
 	@echo "--- distribution options"
 	@echo "    doc - generate documentation"
 	@echo "    dist - build distribution image"
 	@echo "    install - install distribution (needs sudo)"
 	@echo "    uninstall - uninstall distribution (needs sudo)"
 	@echo "--- development options"
-	@echo "    clean - remove build artifacts"
+	@echo "    clobber - remove build artifacts"
 	@echo "    commit - run clippy, rustfmt, make test and perf reports"
-	@echo "    report - view test and perf reports"
 	@echo "    tags - make etags"
 	@echo "--- test options"
 	@echo "    tests/rust - rust tests"
@@ -30,26 +29,21 @@ help:
 	@echo "--- perf options"
 	@echo "    perf/base - baseline report"
 	@echo "    perf/current - current report"
-	@echo "    perf/diff - compare abseline and current"
+	@echo "    perf/diff - compare base and current"
 	@echo "    perf/commit - condensed report"
-
-world: release dist
-world-no-async: no-async dist
 
 tags:
 	@etags `find src/mu -name '*.rs' -print`
 
 release:
-	@cargo build --release --features async
-	@cp target/release/runtime dist
-
-no-async:
 	@cargo build --release
 	@cp target/release/runtime dist
+	@make dist
 
 debug:
 	@cargo build
 	@cp target/debug/runtime dist
+	@make dist
 
 dist:
 	@make -C ./dist --no-print-directory
@@ -87,16 +81,15 @@ perf/commit:
 commit:
 	@cargo fmt
 	@echo ";;; rust tests"
-	@cargo -q test --features async | sed -e '/^$$/d'
-	@cargo -q test --features no-async | sed -e '/^$$/d'
+	@cargo -q test | sed -e '/^$$/d'
 	@echo ";;; clippy tests"
-	@cargo clippy --features async
-	@cargo clippy --features no-async
+	@cargo clippy
 	@make -C tests commit --no-print-directory
 	@make -C perf commit --no-print-directory
 
 clobber:
 	@rm -f TAGS
+	@rm -rf target Cargo.lock
 	@make -C docker clean --no-print-directory
 	@make -C dist clean --no-print-directory
 	@make -C tests clean --no-print-directory

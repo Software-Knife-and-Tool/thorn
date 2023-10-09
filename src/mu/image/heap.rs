@@ -11,22 +11,14 @@ use {
     },
 };
 
-#[cfg(feature = "async")]
 use {futures::executor::block_on, futures_locks::RwLock};
-
-#[cfg(not(feature = "async"))]
-use std::cell::RefCell;
 
 // (type, total-size, alloc, in-use)
 type AllocMap = (u8, usize, usize, usize);
 
 pub struct Heap {
     pub mmap: Box<memmap::MmapMut>,
-
-    #[cfg(feature = "async")]
     pub alloc_map: RwLock<Vec<AllocMap>>,
-    #[cfg(not(feature = "async"))]
-    pub alloc_map: RefCell<Vec<AllocMap>>,
     pub page_size: usize,
     pub npages: usize,
     pub size: usize,
@@ -72,18 +64,12 @@ impl Heap {
             page_size: 4096,
             npages: pages,
             size: pages * 4096,
-            #[cfg(feature = "async")]
             alloc_map: RwLock::new(Vec::new()),
-            #[cfg(not(feature = "async"))]
-            alloc_map: RefCell::new(Vec::new()),
             write_barrier: 0,
         };
 
         {
-            #[cfg(feature = "async")]
             let mut alloc_ref = block_on(heap.alloc_map.write());
-            #[cfg(not(feature = "async"))]
-            let mut alloc_ref = heap.alloc_map.borrow_mut();
 
             for id in 0..256 {
                 alloc_ref.push((id as u8, 0, 0, 0))
@@ -95,20 +81,14 @@ impl Heap {
 
     // allocation statistics
     pub fn alloc_id(&self, id: u8) -> (usize, usize, usize) {
-        #[cfg(feature = "async")]
         let alloc_ref = block_on(self.alloc_map.read());
-        #[cfg(not(feature = "async"))]
-        let alloc_ref = self.alloc_map.borrow();
 
         let (_, total_size, alloc, in_use) = alloc_ref[id as usize];
         (total_size, alloc, in_use)
     }
 
     fn alloc_map(&self, id: u8, size: usize) {
-        #[cfg(feature = "async")]
         let mut alloc_ref = block_on(self.alloc_map.write());
-        #[cfg(not(feature = "async"))]
-        let mut alloc_ref = self.alloc_map.borrow_mut();
 
         let (_, total_size, alloc, in_use) = alloc_ref[id as usize];
         alloc_ref[id as usize] = (id, total_size + size, alloc + 1, in_use + 1);

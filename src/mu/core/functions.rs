@@ -28,7 +28,6 @@ use crate::{
     },
 };
 
-#[cfg(feature = "async")]
 use crate::core::async_context::MuFunction as _;
 
 // native functions
@@ -48,9 +47,7 @@ lazy_static! {
         ("nth", 2, Cons::mu_nth),
         ("nthcdr", 2, Cons::mu_nthcdr),
         // async
-        #[cfg(feature="async")]
         ("await", 1, Mu::mu_await),
-        #[cfg(feature="async")]
         ("abort", 1, Mu::mu_abort),
         // mu
         ("apply", 2, Mu::mu_apply),
