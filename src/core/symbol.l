@@ -42,20 +42,3 @@
                 (mu:keyword name)
                 (core:%make-core-type "keyword" `(,(mu:cons :name name))))
            (core:raise name 'core:keyword "not a keyword name"))))
-
-(mu:intern :core "intern"
-   (:lambda (symbol value)
-      (:if (core:uninternedp symbol)
-           ((:lambda (sym)
-               (:if sym
-                    (:if (core:boundp sym)
-                         symbol
-                         (mu:intern (core:%read-get-ns) (mu:sy-name symbol) value))
-                    (mu:intern (core:%read-get-ns) (mu:sy-name symbol) value)))
-            (mu:ns-find (core:%read-get-ns) (mu:sy-name symbol)))
-           ((:lambda (name)
-               (mu:intern
-                (core:%read-get-ns)
-                name
-                value))
-            (mu:sy-name symbol)))))
