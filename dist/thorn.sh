@@ -35,8 +35,8 @@ CORE=(\
 	lambda.l     	       \
 	list.l      	       \
 	macro.l      	       \
-	map.l		       \
-        namespace.l            \
+	map.l    	       \
+        package.l              \
 	parse.l      	       \
 	read-macro.l           \
 	read.l       	       \

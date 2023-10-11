@@ -110,7 +110,7 @@ impl Heap {
         let base = self.write_barrier;
 
         if base + (((ntypes + 1) * 8) as usize) > self.size {
-            panic!();
+            panic!("heap exhausted");
         } else {
             let data = &mut self.mmap;
             let hinfo = Info::new()

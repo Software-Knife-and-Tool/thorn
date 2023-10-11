@@ -7,6 +7,25 @@
 (mu:intern :core "%reader-stream" (mu:open :string :output ""))
 (mu:intern :core "%reader-ns-stream" (mu:open :string :output "core"))
 
+(mu:intern :core "in-namespace"
+   (:lambda (ns)
+      ((:lambda ()
+          (mu:make-ns ns)
+          (core:%read-set-ns ns)
+          ns))))
+
+(mu:intern :core "%read-get-ns"
+   (:lambda ()
+     ((:lambda (ns)
+        (mu:write ns () core:%reader-ns-stream)
+        ns)
+      (core:get-output-stream-string core:%reader-ns-stream))))
+
+(mu:intern :core "%read-set-ns"
+   (:lambda (ns)
+      (core:get-output-stream-string core:%reader-ns-stream)
+      (mu:write ns () core:%reader-ns-stream)))
+
 ;;;
 ;;; readtable
 ;;;

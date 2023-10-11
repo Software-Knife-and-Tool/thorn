@@ -64,28 +64,23 @@
 
 (mu:intern :core "%make-core-type"
     (:lambda (name property-values)
-       ((:lambda (str)
-           ((:lambda (type-symbol)
-               (core:%mapc
-                (:lambda (property-value)
-                   (core:findl
-                    (:lambda (property-def)
-                       (:if (mu:eq (mu:car property-value) (mu:car property-def))
-                            ((:lambda (type value)
-                                (:if (core:%core-type-predicate type value)
-                                     property-def
-                                     (core:raise
-                                      property-value
-                                      'core:%make-core-type
-                                      `(,type ,value "property type botch"))))
-                             (mu:cdr property-def)
-                             (mu:cdr property-value))
-                            ()))
-                    (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1)))
-                property-values))
-            (mu:ns-find core:%core-types str))
-           (mu:make-st :<ctype> `(,str ,property-values)))
-        (core:string name))))
+       ((:lambda (type-symbol)
+           (core:%mapc
+            (:lambda (property-value)
+               (core:findl
+                (:lambda (property-def)
+                   (:if (mu:eq (mu:car property-value) (mu:car property-def))
+                        ((:lambda (type value)
+                            (:if (core:%core-type-predicate type value)
+                                 property-def
+                                 (mu:raise property-value :type)))
+                         (mu:cdr property-def)
+                         (mu:cdr property-value))
+                        ()))
+                (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1)))
+            property-values))
+        (mu:ns-find core:%core-types name))
+       (mu:make-st :<ctype> `(,name ,property-values))))
 
 ;;;
 ;;; returns () if not found
