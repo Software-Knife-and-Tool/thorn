@@ -35,7 +35,6 @@
                      :intern  ,(core:%gen-anon-ns)
                      :extern  ,(core:%gen-anon-ns)
                      :ch-mac  ,(core:%gen-anon-ns)
-                     :rd-mac  ,(core:%gen-anon-ns)
                      :sy-mac  ,(core:%gen-anon-ns)
                      :uses    ,uses)))
                 (core:raise uses 'make-package "not a uses list"))

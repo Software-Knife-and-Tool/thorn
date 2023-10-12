@@ -38,10 +38,9 @@
           (:intern  . :keyword)
           (:extern  . :keyword)
           (:ch-mac  . :keyword)
-          (:rd-mac  . :keyword)
           (:sy-mac  . :keyword)
           (:uses    . :listp)))
-      
+
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))
       (mu:intern :core "%macro-ns%" (core:%gen-anon-ns))

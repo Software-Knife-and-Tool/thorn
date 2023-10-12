@@ -49,6 +49,7 @@
      ,(mu:cons :func core:functionp)
      ,(mu:cons :listp core:listp)
      ,(mu:cons :keyword core:keywordp)
+     ,(mu:cons :package core:packagep)
      ,(mu:cons :string core:stringp)
      ,(mu:cons :struct core:structp)
      ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
