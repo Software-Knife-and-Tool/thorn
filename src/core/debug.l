@@ -33,8 +33,9 @@
    (:lambda (fn)
       ((:lambda (view)
           (core:format :t
-            "function: :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
-            `(,(core:type-of fn)
+            "function: (~A bytes) :func ~A~%    name:  [~A]~%    arity: ~A~%    body:  ~A~%"
+            `(,(mu:size-of fn)
+              ,(core:type-of fn)
               ,(mu:sv-ref view 2)
               ,(mu:sv-ref view 0)
               ,(mu:sv-ref view 1))))
@@ -43,63 +44,58 @@
 (mu:intern :core "%describe-core-type"
    (:lambda (core-type)
       (core:format :t
-       "core-type: :<ctype> ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(core:type-of core-type)
+       "core-type: (~A bytes) :<ctype> ~A~%    type:  ~A~%    props: ~A~%"
+       `(,(mu:size-of core-type)
+         ,(core:type-of core-type)
          ,(mu:sv-ref (mu:st-vec core-type) 0)
          ,(mu:sv-ref (mu:st-vec core-type) 0)))))
 
 (mu:intern :core "%describe-struct"
    (:lambda (struct)
       (core:format :t
-       "struct: :struct ~A~%    type:  ~A~%    props: ~A~%"
-       `(,(core:type-of struct)
+       "struct: (~A bytes) :struct ~A~%    type:  ~A~%    props: ~A~%"
+       `(,(mu:size-of struct)
+         ,(core:type-of struct)
          ,(mu:st-type struct)
          ,(mu:st-vec struct)))))
-
-(mu:intern :core "%describe-function"
-   (:lambda (fn)
-      (core:format :t
-       "function: :struct ~A~%    arity: ~A~%    fn:    ~A~%    env:  ~A~%"
-       `(,(core:type-of gn)
-         ,(core:%function-prop :nargs fn)
-         ,(core:%function-prop :fn fn)
-         ,(core:%function-prop :env fn)))))
 
 (mu:intern :core "%describe-symbol"
    (:lambda (symbol)
       (:if (core:null symbol)
            (core:format :t
-            "symbol: :null null~%    ns:    ()~%    name:  :nil~%    value: ()~%"
-            ())
+            "symbol: (~A bytes) :null null~%    ns:    ()~%    name:  :nil~%    value: ()~%"
+            `(,(mu:size-of symbol)))
            (:if (core:keywordp symbol)
                 (core:format :t
-                 "symbol: :symbol keyword~%    ns:    ()~%    name:  ~A~%    value: ~A~%"
-                 `(,(mu:sy-name symbol) ,(mu:sy-val symbol)))
+                 "symbol: (~A bytes) :symbol keyword~%    ns:    ()~%    name:  ~A~%    value: ~A~%"
+                 `(,(mu:size-of symbol) ,(mu:sy-name symbol) ,(mu:sy-val symbol)))
                 (:if (mu:boundp symbol)
                      ((:lambda (view)
                          (core:format :t
-                          "symbol: :symbol symbol~%    ns:    ~A~%    name:  ~A~%    value: ~A~%"
-                          `(,(mu:sv-ref view 0)
+                          "symbol: (~A bytes) :symbol symbol~%    ns:    ~A~%    name:  ~A~%    value: ~A~%"
+                          `(,(mu:size-of symbol)
+                            ,(mu:sv-ref view 0)
                             ,(mu:sv-ref view 1)
                             ,(mu:sv-ref view 2))))
                       (mu:view symbol))
                      ((:lambda (view)
                          (core:format :t
-                          "symbol: :symbol symbol~%    ns:      ~A~%    name:    ~A~%    unbound: :t~%"
-                          `(,(mu:sv-ref view 0)
+                          "symbol: (~A bytes) :symbol symbol~%    ns:      ~A~%    name:    ~A~%    unbound: :t~%"
+                          `(,(mu:size-of symbol)
+                            ,(mu:sv-ref view 0)
                             ,(mu:sv-ref view 1)
                             ,(mu:sv-ref view 2))))
                       (mu:view symbol)))))))
 
 (mu:intern :core "%describe-fixnum"
    (:lambda (fx)
-      (core:format :t "fixnum: :fixnum ~A~%    format: 61b signed integer~%    value:  ~A~%"
-        `(,(core:type-of fx) ,fx))))
+      (core:format :t "fixnum: (~A bytes) :fixnum ~A~%    format: 61b signed integer~%    value:  ~A~%"
+        `(,(mu:size-of fx) ,(core:type-of fx) ,fx))))
 
 (mu:intern :core "%describe-char"
    (:lambda (ch)
-      (core:format :t "char: :char ~A~%    format: 8b ASCII character~%    value:  ~A~%"
-        `(,(core:type-of ch) ,ch))))
+      (core:format :t "char: (~A bytes) :char ~A~%    format: 8b ASCII character~%    value:  ~A~%"
+        `(,(mu:size-of ch) ,(core:type-of ch) ,ch))))
 
 (mu:intern :core "%describe-float"
    (:lambda (fl)
@@ -110,24 +106,24 @@
 (mu:intern :core "%describe-string"
    (:lambda (str)
       (core:format :t
-       "string: :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
-       `(,(mu:sv-len str) ,str))))
+       "string: (~A bytes) :vector string~%    format: unsigned 8b character vector~%    length: ~A~%    value:  ~A~%"
+       `(,(mu:size-of str) ,(mu:sv-len str) ,str))))
 
 (mu:intern :core "%describe-vector"
    (:lambda (vec)
       (core:format :t
-       "string: :vector ~A~%    format: ~A~%    length: ~A~%    value:  ~A~%"
-       `(,(core:type-of vec) ,(mu:sv-type vec) ,(mu:sv-type vec) ,vec))))
+       "vector: (~A bytes) :vector ~A~%    format: ~A~%    length: ~A~%    elements:  ~A~%"
+       `(,(mu:size-of vec) ,(core:type-of vec) ,(mu:sv-type vec) ,(mu:sv-type vec) ,vec))))
 
 (mu:intern :core "%describe-cons"
    (:lambda (cons)
       (:if (core:dotted-pair-p cons)
            (core:format :t
-            "dotted pair: :cons ~A~%    value:  ~A~%"
-            `(,(core:type-of cons) ,cons))
+            "dotted pair: (~A bytes) :cons ~A~%    value:  ~A~%"
+            `(,(mu:size-of cons) ,(core:type-of cons) ,cons))
            (core:format :t
-            "cons: :cons ~A~%    length: ~A~%    value:  ~A~%"
-            `(,(core:type-of cons) ,(mu:length cons) ,cons)))))
+            "cons: (~A bytes) :cons ~A~%    length: ~A~%    value:  ~A~%"
+            `(,(mu:size-of bytes) ,(core:type-of cons) ,(mu:length cons) ,cons)))))
 
 (mu:intern :core "describe"
    (:lambda (obj)
