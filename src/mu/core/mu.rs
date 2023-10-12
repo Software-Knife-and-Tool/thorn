@@ -6,8 +6,8 @@
 use {
     crate::{
         core::{
-            exception,
-            exception::{Condition, Exception},
+            direct::DirectTag,
+            exception::{self, Condition, Exception},
             frame::Frame,
             functions::{Core as _, LibMuFunction},
             namespace::{Cache, Core as NSCore},
@@ -83,7 +83,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.19";
+    const VERSION: &'static str = "0.0.20";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -91,6 +91,7 @@ pub trait Core {
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
     fn write(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn write_string(&self, _: String, _: Tag) -> exception::Result<()>;
+    fn size_of(&self, tag: Tag) -> exception::Result<usize>;
 }
 
 impl Core for Mu {
@@ -271,6 +272,23 @@ impl Core for Mu {
         }
 
         Ok(())
+    }
+
+    fn size_of(&self, tag: Tag) -> exception::Result<usize> {
+        let size = match Tag::type_of(tag) {
+            Type::Char | Type::Fixnum | Type::Float | Type::Null | Type::Keyword => {
+                std::mem::size_of::<DirectTag>()
+            }
+            Type::Cons => Cons::size_of(self, tag),
+            Type::Function => Function::size_of(self, tag),
+            Type::Stream => Stream::size_of(self, tag),
+            Type::Struct => Struct::size_of(self, tag),
+            Type::Symbol => Symbol::size_of(self, tag),
+            Type::Vector => Vector::size_of(self, tag),
+            _ => panic!(),
+        };
+
+        Ok(size)
     }
 }
 

@@ -106,16 +106,14 @@ impl Vector {
 
 /// core
 pub trait Core<'a> {
-    fn read(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
-    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-
-    fn evict(&self, _: &Mu) -> Tag;
-    fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
-
-    fn from_string(_: &str) -> Vector;
     fn as_string(_: &Mu, _: Tag) -> String;
-
+    fn evict(&self, _: &Mu) -> Tag;
+    fn from_string(_: &str) -> Vector;
+    fn read(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
+    fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
+    fn size_of(_: &Mu, _: Tag) -> usize;
     fn view(_: &Mu, _: Tag) -> Tag;
+    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl<'a> Core<'a> for Vector {
@@ -129,6 +127,23 @@ impl<'a> Core<'a> for Vector {
         ];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+    }
+
+    fn size_of(mu: &Mu, vector: Tag) -> usize {
+        match vector {
+            Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
+            Tag::Indirect(_) => {
+                let len = Self::length(mu, vector);
+                let size = match Vector::type_of(mu, vector) {
+                    Type::Byte | Type::Char => 1,
+                    Type::Fixnum | Type::Float | Type::T => 8,
+                    _ => panic!(),
+                };
+
+                std::mem::size_of::<VectorImage>() + (size * len)
+            }
+            _ => panic!(),
+        }
     }
 
     fn from_string(str: &str) -> Vector {

@@ -56,6 +56,7 @@ lazy_static! {
         ("exit", 1, Mu::mu_exit),
         ("fix", 2, Mu::mu_fix),
         ("hp-info", 0, Mu::mu_hp_info),
+        ("size-of", 1, Mu::mu_size_of),
         ("view", 1, Mu::mu_view),
         ("repr", 2, Mu::mu_repr),
         ("%append", 2, Mu::append_),
@@ -167,6 +168,7 @@ pub trait MuFunction {
     fn mu_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_run_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_size_of(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
@@ -316,6 +318,17 @@ impl MuFunction for Mu {
                 }
                 _ => return Err(Exception::new(Condition::Type, "repr", arg)),
             },
+        };
+
+        Ok(())
+    }
+
+    fn mu_size_of(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let tag = fp.argv[0];
+
+        fp.value = match mu.size_of(tag) {
+            Ok(size) => Fixnum::as_tag(size as i64),
+            Err(e) => return Err(e),
         };
 
         Ok(())
