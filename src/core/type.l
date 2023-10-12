@@ -74,7 +74,7 @@
                         ((:lambda (type value)
                             (:if (core:%core-type-predicate type value)
                                  property-def
-                                 (mu:raise property-value :type)))
+                                 (core:raise property-value '%make-core-type "type mismatch")))
                          (mu:cdr property-def)
                          (mu:cdr property-value))
                         ()))

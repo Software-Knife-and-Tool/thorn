@@ -72,7 +72,7 @@
    (:lambda (symbol)
       (:if (mu:eq :symbol (mu:type-of symbol))
            (mu:ns-find core:%symbol-macro-ns% (core:symbol-name symbol))
-           (core:raise symbol 'get-symbol-macro-form "not a symbol"))))
+           (core:raise symbol 'core:%get-symbol-macro "not a symbol"))))
 
 (mu:intern :core "define-symbol-macro"
    (:lambda (symbol form)
