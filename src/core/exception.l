@@ -69,7 +69,7 @@
                                       object
                                       source
                                       "mu:raise"
-                                      mu:frames)))))
+                                      (mu:frames))))))
       (:lambda () (core:apply thunk ())))))
 
 ;;;
