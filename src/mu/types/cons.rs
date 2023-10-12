@@ -111,6 +111,7 @@ pub trait Core {
     fn nth(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn read(_: &Mu, _: Tag) -> exception::Result<Tag>;
+    fn size_of(_: &Mu, _: Tag) -> usize;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn view(_: &Mu, _: Tag) -> Tag;
 }
@@ -120,6 +121,20 @@ impl Core for Cons {
         let vec = vec![Self::car(mu, cons), Self::cdr(mu, cons)];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+    }
+
+    fn size_of(_: &Mu, cons: Tag) -> usize {
+        match cons {
+            Tag::Direct(dtag) => match dtag.dtype() {
+                DirectType::Ext => match dtag.info() {
+                    2 => std::mem::size_of::<DirectTag>(),
+                    _ => panic!(),
+                },
+                _ => panic!(),
+            },
+            Tag::Indirect(_) => std::mem::size_of::<Cons>(),
+            _ => panic!(),
+        }
     }
 
     fn evict(&self, mu: &Mu) -> Tag {

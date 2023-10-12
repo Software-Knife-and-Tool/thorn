@@ -21,9 +21,9 @@ use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Function {
+    id: Tag,    // frame id, nil or a symbol
     arity: Tag, // fixnum # of required arguments
     form: Tag,  // cons body or fixnum native table offset
-    id: Tag,    // frame id, nil or a symbol
 }
 
 impl Function {
@@ -104,6 +104,7 @@ impl Function {
 
 pub trait Core {
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
+    fn size_of(_: &Mu, _: Tag) -> usize;
     fn view(_: &Mu, _: Tag) -> Tag;
 }
 
@@ -116,6 +117,14 @@ impl Core for Function {
         ];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+    }
+
+    fn size_of(mu: &Mu, fn_: Tag) -> usize {
+        match Tag::type_of(Self::form(mu, fn_)) {
+            Type::Null | Type::Cons => std::mem::size_of::<Function>(),
+            Type::Fixnum => std::mem::size_of::<Function>(),
+            _ => panic!(),
+        }
     }
 
     fn write(mu: &Mu, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {

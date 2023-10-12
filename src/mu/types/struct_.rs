@@ -15,7 +15,7 @@ use crate::{
         stream::{Core as _, Stream},
         symbol::{Core as _, Symbol},
         vecimage::{TypedVec, VecType, VectorIter},
-        vector::Core as _,
+        vector::{Core as _, Vector},
     },
 };
 
@@ -89,6 +89,7 @@ pub trait Core<'a> {
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn evict(&self, _: &Mu) -> Tag;
     fn view(_: &Mu, _: Tag) -> Tag;
+    fn size_of(_: &Mu, _: Tag) -> usize;
 }
 
 impl<'a> Core<'a> for Struct {
@@ -104,6 +105,10 @@ impl<'a> Core<'a> for Struct {
         let vec = vec![image.stype, image.vector];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+    }
+
+    fn size_of(mu: &Mu, struct_: Tag) -> usize {
+        std::mem::size_of::<Struct>() + Vector::size_of(mu, Self::vector(mu, struct_))
     }
 
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {

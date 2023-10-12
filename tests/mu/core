@@ -18,7 +18,11 @@
 (mu:type-of mu:std-in)	:stream
 (mu:type-of mu:hp-info)	:func
 (mu:type-of "type-of")	:vector
+(mu:view ())	#(:t :nil nil :nil)
+(mu:view :keyword)	#(:t :keyword keyword :keyword)
 (mu:view #\a)	#(:t a)
+(mu:view "abcdefg")	#(:t 7 :char)
+(mu:view "abcdefgh")	#(:t 8 :char)
 (mu:view '(1 2))	#(:t 1 (2))
 (mu:view 1234)	#(:t 1234)
 (mu:view 1.0)	#(:t 1.0000)
@@ -26,6 +30,21 @@
 (mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
 (mu:view 'a)	#(:t :nil a :UNBOUND)
 (mu:view 'mu:eq)	#(:t :mu eq #<:function mu:eq [req:2, tag:0]>)
+(mu:view mu:eq)	#(:t 2 0 eq)
 (mu:view mu:std-in)	#(:t 2147483648 :input :nil :nil)
+(mu:size-of ())	8
+(mu:size-of :keyword)	8
+(mu:size-of #\a)	8
+(mu:size-of '(1 2))	8
+(mu:size-of 1234)	8
+(mu:size-of 1.0)	8
+(mu:size-of #s(:foo 1 2))	80
+(mu:size-of "abcdefg")	8
+(mu:size-of "abcdefgh")	40
+(mu:size-of #(:t 1 2))	48
+(mu:size-of 'a)	72
+(mu:size-of 'mu:eq)	112
+(mu:size-of mu:eq)	48
+(mu:size-of mu:std-in)	64
 (mu:with-ex (:lambda (cond obj) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 1)))	1
 (mu:repr :t (mu:repr () :t))	:t
