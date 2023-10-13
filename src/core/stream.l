@@ -145,9 +145,9 @@
       (core:%read-stream-designator designator))))
 
 (mu:intern :core "write"
-  (:lambda (object escape designator)
-     (mu:write object escape (core:%write-stream-designator designator))))
+   (:lambda (object escape designator)
+      (mu:write object escape (core:%write-stream-designator designator))))
 
 (mu:intern :core "terpri"
    (:lambda (designator)
-     (core:write-char #\linefeed designator)))
+      (core:write-char #\linefeed (core:%write-stream-designator designator))))
