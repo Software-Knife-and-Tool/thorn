@@ -34,6 +34,7 @@ CORE=(\
 	function.l             \
 	lambda.l     	       \
 	list.l      	       \
+        log.l      	       \
 	macro.l      	       \
 	map.l    	       \
         package.l              \
