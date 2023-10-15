@@ -38,13 +38,13 @@
 (mu:size-of '(1 2))	8
 (mu:size-of 1234)	8
 (mu:size-of 1.0)	8
-(mu:size-of #s(:foo 1 2))	80
+(mu:size-of #s(:foo 1 2))	52
 (mu:size-of "abcdefg")	8
-(mu:size-of "abcdefgh")	40
-(mu:size-of #(:t 1 2))	48
-(mu:size-of 'a)	72
-(mu:size-of 'mu:eq)	112
-(mu:size-of mu:eq)	48
-(mu:size-of mu:std-in)	64
+(mu:size-of "abcdefgh")	26
+(mu:size-of #(:t 1 2))	34
+(mu:size-of 'a)	27
+(mu:size-of 'mu:eq)	54
+(mu:size-of mu:eq)	27
+(mu:size-of mu:std-in)	36
 (mu:with-ex (:lambda (cond obj) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 1)))	1
 (mu:repr :t (mu:repr () :t))	:t

@@ -162,14 +162,14 @@ impl Frame {
             Type::Function => match Tag::type_of(Function::form(mu, func)) {
                 Type::Null => Ok(Tag::nil()),
                 Type::Fixnum => {
-                    let nreqs = Fixnum::as_i64(mu, Function::arity(mu, func)) as usize;
+                    let nreqs = Fixnum::as_i64(Function::arity(mu, func)) as usize;
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
                         return Err(Exception::new(Condition::Arity, "apply", func));
                     }
 
-                    let fn_off = Fixnum::as_i64(mu, Function::form(mu, func)) as usize;
+                    let fn_off = Fixnum::as_i64(Function::form(mu, func)) as usize;
                     let fnc = mu.functions[fn_off];
 
                     match fnc(mu, &mut self) {
@@ -178,7 +178,7 @@ impl Frame {
                     }
                 }
                 Type::Cons => {
-                    let nreqs = Fixnum::as_i64(mu, Function::arity(mu, func)) as usize;
+                    let nreqs = Fixnum::as_i64(Function::arity(mu, func)) as usize;
                     let nargs = self.argv.len();
 
                     if nargs != nreqs {
@@ -273,8 +273,8 @@ impl MuFunction for Frame {
             Type::Fixnum => match Tag::type_of(offset) {
                 Type::Fixnum => match Frame::frame_ref(
                     mu,
-                    Fixnum::as_i64(mu, frame) as u64,
-                    Fixnum::as_i64(mu, offset) as usize,
+                    Fixnum::as_i64(frame) as u64,
+                    Fixnum::as_i64(offset) as usize,
                 ) {
                     Some(tag) => {
                         fp.value = tag;

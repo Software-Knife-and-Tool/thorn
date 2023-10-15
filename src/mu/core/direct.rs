@@ -25,18 +25,19 @@ pub struct DirectTag {
 
 #[derive(BitfieldSpecifier, Copy, Clone, Eq, PartialEq)]
 pub enum DirectType {
-    Char = 0,
+    Ext = 0,
     Byte = 1,
     Keyword = 2,
-    Ext = 3,
+    Char = 3,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, TryFromPrimitive)]
 #[repr(u8)]
 pub enum ExtType {
-    Float = 0,
-    AsyncId = 1,
-    Cons = 2,
+    Fixnum = 0,
+    Float = 1,
+    AsyncId = 2,
+    Cons = 3,
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -46,6 +47,11 @@ pub enum DirectInfo {
 }
 
 impl DirectTag {
+    pub const EXT_TYPE_FIXNUM: u8 = 0;
+    pub const EXT_TYPE_FLOAT: u8 = 1;
+    pub const EXT_TYPE_ASYNC: u8 = 2;
+    pub const EXT_TYPE_CONS: u8 = 3;
+
     pub const DIRECT_STR_MAX: usize = 7;
 
     pub fn length(tag: Tag) -> usize {
@@ -72,6 +78,10 @@ impl DirectTag {
 
         Tag::Direct(dir)
     }
+
+    //
+    // direct cons
+    //
 
     // can tag be sign extended to 64 from 28 bits?
     pub fn sext_from_tag(tag: Tag) -> Option<u32> {
@@ -107,7 +117,7 @@ impl DirectTag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.info() {
-                    2 => {
+                    Self::EXT_TYPE_CONS => {
                         let mask_32: u64 = 0xffffffff;
                         let mut u64_: u64 = dtag.data() >> 28;
                         let sign = (u64_ >> 27) & 1;
@@ -130,7 +140,7 @@ impl DirectTag {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.info() {
-                    2 => {
+                    Self::EXT_TYPE_CONS => {
                         let mask_28: u64 = 0xfffffff;
                         let mask_32: u64 = 0xffffffff;
 

@@ -199,7 +199,7 @@ impl Compiler for Mu {
                     Err(e) => return Err(e),
                 };
 
-                let arity = Fixnum::as_i64(mu, Function::arity(mu, fn_arg));
+                let arity = Fixnum::as_i64(Function::arity(mu, fn_arg));
                 if arity != Cons::length(mu, async_args).unwrap() as i64 {
                     return Err(Exception::new(Condition::Arity, "async", args));
                 }

@@ -88,7 +88,6 @@ impl Vector {
                     None => panic!(),
                 }
             }
-            _ => panic!(),
         }
     }
 
@@ -97,9 +96,8 @@ impl Vector {
             Tag::Direct(direct) => direct.info() as usize,
             Tag::Indirect(_) => {
                 let image = Self::to_image(mu, vector);
-                Fixnum::as_i64(mu, image.length) as usize
+                Fixnum::as_i64(image.length) as usize
             }
-            _ => panic!(),
         }
     }
 }
@@ -142,7 +140,6 @@ impl<'a> Core<'a> for Vector {
 
                 std::mem::size_of::<VectorImage>() + (size * len)
             }
-            _ => panic!(),
         }
     }
 
@@ -187,14 +184,13 @@ impl<'a> Core<'a> for Vector {
                         heap_ref
                             .of_length(
                                 (image.offset() + 16) as usize,
-                                Fixnum::as_i64(mu, vec.length) as usize,
+                                Fixnum::as_i64(vec.length) as usize,
                             )
                             .unwrap(),
                     )
                     .unwrap()
                     .to_string()
                 }
-                _ => panic!(),
             },
             _ => panic!(),
         }
@@ -273,7 +269,6 @@ impl<'a> Core<'a> for Vector {
                     mu.write_string(")".to_string(), stream)
                 }
             },
-            _ => panic!(),
         }
     }
 
@@ -353,7 +348,7 @@ impl<'a> Core<'a> for Vector {
                                 let el = Cons::car(mu, cons);
                                 match Tag::type_of(el) {
                                     Type::Fixnum => {
-                                        let byte = Fixnum::as_i64(mu, el);
+                                        let byte = Fixnum::as_i64(el);
                                         if !(0..255).contains(&byte) {
                                             return Err(Exception::new(
                                                 Condition::Range,
@@ -377,7 +372,7 @@ impl<'a> Core<'a> for Vector {
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {
                                 let el = Cons::car(mu, cons);
                                 match Tag::type_of(el) {
-                                    Type::Fixnum => vec.push(Fixnum::as_i64(mu, el)),
+                                    Type::Fixnum => vec.push(Fixnum::as_i64(el)),
                                     _ => {
                                         return Err(Exception::new(Condition::Type, "read:sv", el))
                                     }
@@ -433,7 +428,6 @@ impl<'a> Core<'a> for Vector {
                     Some(Char::as_tag(vector.data(mu).to_le_bytes()[index] as char))
                 }
                 Tag::Indirect(_) => IndirectVector::ref_(mu, vector, index),
-                _ => panic!(),
             },
             _ => panic!(),
         }
@@ -488,7 +482,7 @@ impl MuFunction for Vector {
 
                         match Tag::type_of(el) {
                             Type::Fixnum => {
-                                let byte = Fixnum::as_i64(mu, el);
+                                let byte = Fixnum::as_i64(el);
 
                                 if !(0..=255).contains(&byte) {
                                     return Err(Exception::new(Condition::Range, "make-sv", el));
@@ -509,7 +503,7 @@ impl MuFunction for Vector {
 
                         match Tag::type_of(el) {
                             Type::Fixnum => {
-                                vec.push(Fixnum::as_i64(mu, el));
+                                vec.push(Fixnum::as_i64(el));
                             }
                             _ => return Err(Exception::new(Condition::Type, "make-sv", el)),
                         }
@@ -550,7 +544,7 @@ impl MuFunction for Vector {
 
         match Tag::type_of(index) {
             Type::Fixnum => {
-                let nth = Fixnum::as_i64(mu, index);
+                let nth = Fixnum::as_i64(index);
 
                 if nth < 0 || nth as usize >= Self::length(mu, vector) {
                     return Err(Exception::new(Condition::Range, "sv-ref", index));

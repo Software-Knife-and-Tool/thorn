@@ -137,10 +137,12 @@ impl Core for Symbol {
     }
 
     fn size_of(mu: &Mu, symbol: Tag) -> usize {
+        let name_sz = Mu::size_of(mu, Self::name(mu, symbol)).unwrap();
+        let value_sz = Mu::size_of(mu, Self::value(mu, symbol)).unwrap();
+
         std::mem::size_of::<Symbol>()
-            + Mu::size_of(mu, Self::namespace(mu, symbol)).unwrap()
-            + Mu::size_of(mu, Self::name(mu, symbol)).unwrap()
-            + Mu::size_of(mu, Self::value(mu, symbol)).unwrap()
+            + if name_sz > 8 { name_sz } else { 0 }
+            + if value_sz > 8 { value_sz } else { 0 }
     }
 
     fn evict(&self, mu: &Mu) -> Tag {

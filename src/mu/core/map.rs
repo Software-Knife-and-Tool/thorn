@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! mu symbol namespaces
+//! mu maps
 use {
     crate::{
         core::{
@@ -23,8 +23,8 @@ use {
 use {futures::executor::block_on, futures_locks::RwLock};
 
 pub trait Cache {
-    type NSCache;
-    type NSIndex;
+    type MapCache;
+    type MapIndex;
 
     fn add_ns(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn intern(_: &Mu, _: Tag, _: Tag);
@@ -33,8 +33,8 @@ pub trait Cache {
 }
 
 impl Cache for Mu {
-    type NSCache = RwLock<HashMap<String, Tag>>;
-    type NSIndex = HashMap<u64, (Tag, Self::NSCache)>;
+    type MapCache = RwLock<HashMap<String, Tag>>;
+    type MapIndex = HashMap<u64, (Tag, Self::MapCache)>;
 
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
         let mut ns_ref = block_on(mu.ns_map.write());
@@ -311,7 +311,7 @@ impl MuFunction for Mu {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn namespace() {
+    fn map() {
         assert_eq!(true, true)
     }
 }

@@ -1,0 +1,322 @@
+//  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
+//  SPDX-License-Identifier: MIT
+
+//! mu stream functions
+#![allow(unused_braces)]
+#![allow(dead_code)]
+#![allow(unused_variables)]
+#![allow(clippy::identity_op)]
+
+use crate::{
+    core::{
+        exception::{self, Condition, Exception},
+        frame::Frame,
+        mu::{Core as _, Mu},
+        reader::{Core as _, Reader},
+        types::{Tag, Type},
+    },
+    system::{stream::Core as _, sys::System},
+    types::{
+        char::Char,
+        fixnum::Fixnum,
+        stream::{Core as _, Stream},
+        streambuilder::StreamBuilder,
+        symbol::{Core as _, Symbol},
+        vector::{Core as _, Vector},
+    },
+};
+
+pub trait MuFunction {
+    fn mu_close(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_eof(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_flush(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_get_string(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_open(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_openp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_read(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_read_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_read_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_unread_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_write_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_write_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+}
+
+impl MuFunction for Stream {
+    fn mu_close(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        fp.value = match Tag::type_of(stream) {
+            Type::Stream => {
+                if Self::is_open(mu, stream) {
+                    Self::close(mu, stream);
+                    Symbol::keyword("t")
+                } else {
+                    Tag::nil()
+                }
+            }
+            _ => return Err(Exception::new(Condition::Type, "close", stream)),
+        };
+
+        Ok(())
+    }
+
+    fn mu_openp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        fp.value = match Tag::type_of(stream) {
+            Type::Stream => {
+                if Self::is_open(mu, stream) {
+                    stream
+                } else {
+                    Tag::nil()
+                }
+            }
+            _ => return Err(Exception::new(Condition::Type, "openp", stream)),
+        };
+
+        Ok(())
+    }
+
+    fn mu_open(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let st_type = fp.argv[0];
+        let st_dir = fp.argv[1];
+        let st_arg = fp.argv[2];
+
+        let arg = match Tag::type_of(st_arg) {
+            Type::Vector => Vector::as_string(mu, st_arg),
+            _ => return Err(Exception::new(Condition::Type, "open", st_arg)),
+        };
+
+        let input = match Tag::type_of(st_dir) {
+            Type::Keyword if st_dir.eq_(Symbol::keyword("input")) => true,
+            Type::Keyword if st_dir.eq_(Symbol::keyword("output")) => false,
+            _ => return Err(Exception::new(Condition::Type, "open", st_dir)),
+        };
+
+        match Tag::type_of(st_type) {
+            Type::Keyword if st_type.eq_(Symbol::keyword("file")) => {
+                let stream = if input {
+                    StreamBuilder::new().file(arg).input().build(mu)
+                } else {
+                    StreamBuilder::new().file(arg).output().build(mu)
+                };
+
+                fp.value = match stream {
+                    Err(e) => return Err(e),
+                    Ok(stream) => stream.evict(mu),
+                };
+
+                Ok(())
+            }
+            Type::Keyword if st_type.eq_(Symbol::keyword("string")) => {
+                let stream = if input {
+                    StreamBuilder::new().string(arg).input().build(mu)
+                } else {
+                    StreamBuilder::new().string(arg).output().build(mu)
+                };
+
+                fp.value = match stream {
+                    Err(e) => return Err(e),
+                    Ok(stream) => stream.evict(mu),
+                };
+
+                Ok(())
+            }
+            _ => Err(Exception::new(Condition::Type, "open", st_type)),
+        }
+    }
+
+    fn mu_flush(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        let image = Self::to_image(mu, stream);
+
+        fp.value = Tag::nil();
+
+        if !Self::is_open(mu, stream) {
+            return Ok(());
+        }
+
+        if image.direction.eq_(Symbol::keyword("input")) {
+            return Err(Exception::new(Condition::Stream, "flush", stream));
+        }
+
+        match Tag::type_of(image.stream_id) {
+            Type::Fixnum => {
+                let stream_id = Fixnum::as_i64(image.stream_id) as usize;
+                System::flush(&mu.system, stream_id).unwrap()
+            }
+            _ => return Err(Exception::new(Condition::Type, "flush", stream)),
+        }
+
+        Ok(())
+    }
+
+    fn mu_read(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+        let eofp = fp.argv[1];
+        let eof_value = fp.argv[2];
+
+        match Tag::type_of(stream) {
+            Type::Stream => match Reader::read(mu, stream, !eofp.null_(), eof_value, false) {
+                Ok(tag) => {
+                    fp.value = tag;
+                    Ok(())
+                }
+                Err(e) => Err(e),
+            },
+            _ => Err(Exception::new(Condition::Type, "read", stream)),
+        }
+    }
+
+    fn mu_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let value = fp.argv[0];
+        let escape = fp.argv[1];
+        let stream = fp.argv[2];
+
+        match Tag::type_of(stream) {
+            Type::Stream => match mu.write(value, !escape.null_(), stream) {
+                Ok(_) => {
+                    fp.value = value;
+                    Ok(())
+                }
+                Err(e) => Err(e),
+            },
+            _ => Err(Exception::new(Condition::Type, "write", stream)),
+        }
+    }
+
+    fn mu_eof(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        match Tag::type_of(stream) {
+            Type::Stream => {
+                fp.value = if Self::is_eof(mu, stream) {
+                    Symbol::keyword("t")
+                } else {
+                    Tag::nil()
+                };
+                Ok(())
+            }
+            _ => Err(Exception::new(Condition::Type, "eof", stream)),
+        }
+    }
+
+    fn mu_get_string(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+
+        match Tag::type_of(stream) {
+            Type::Stream => match Self::get_string(mu, stream) {
+                Ok(string) => {
+                    fp.value = Vector::from_string(&string).evict(mu);
+                    Ok(())
+                }
+                Err(e) => Err(e),
+            },
+            _ => Err(Exception::new(Condition::Type, "get-str", stream)),
+        }
+    }
+
+    fn mu_read_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+        let eoferrp = fp.argv[1];
+        let eof_value = fp.argv[2];
+
+        fp.value = match Tag::type_of(stream) {
+            Type::Stream => match Self::read_char(mu, stream) {
+                Ok(Some(ch)) => Char::as_tag(ch),
+                Ok(None) if eoferrp.null_() => eof_value,
+                Ok(None) => return Err(Exception::new(Condition::Eof, "rd-char", stream)),
+                Err(e) => return Err(e),
+            },
+            _ => return Err(Exception::new(Condition::Type, "rd-char", stream)),
+        };
+
+        Ok(())
+    }
+
+    fn mu_read_byte(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let stream = fp.argv[0];
+        let erreofp = fp.argv[1];
+        let eof_value = fp.argv[2];
+
+        fp.value = match Tag::type_of(stream) {
+            Type::Stream => match Self::read_byte(mu, stream) {
+                Ok(Some(byte)) => Fixnum::as_tag(byte as i64),
+                Ok(None) if erreofp.null_() => eof_value,
+                Ok(None) => return Err(Exception::new(Condition::Eof, "rd-byte", stream)),
+                Err(e) => return Err(e),
+            },
+            _ => return Err(Exception::new(Condition::Type, "rd-byte", stream)),
+        };
+
+        Ok(())
+    }
+
+    fn mu_unread_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let ch = fp.argv[0];
+        let stream = fp.argv[1];
+
+        match Tag::type_of(stream) {
+            Type::Stream => match Self::unread_char(mu, stream, Char::as_char(mu, ch)) {
+                Ok(Some(_)) => {
+                    panic!()
+                }
+                Ok(None) => {
+                    fp.value = ch;
+                    Ok(())
+                }
+                Err(e) => Err(e),
+            },
+            _ => Err(Exception::new(Condition::Type, "un-char", stream)),
+        }
+    }
+
+    fn mu_write_char(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let ch = fp.argv[0];
+        let stream = fp.argv[1];
+
+        match Tag::type_of(ch) {
+            Type::Char => match Tag::type_of(stream) {
+                Type::Stream => match Self::write_char(mu, stream, Char::as_char(mu, ch)) {
+                    Ok(_) => {
+                        fp.value = ch;
+                        Ok(())
+                    }
+                    Err(e) => Err(e),
+                },
+                _ => Err(Exception::new(Condition::Type, "wr-char", stream)),
+            },
+            _ => Err(Exception::new(Condition::Type, "wr-char", stream)),
+        }
+    }
+
+    fn mu_write_byte(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let byte = fp.argv[0];
+        let stream = fp.argv[1];
+
+        match Tag::type_of(byte) {
+            Type::Fixnum if Fixnum::as_i64(byte) < 256 => match Tag::type_of(stream) {
+                Type::Stream => match Self::write_byte(mu, stream, Fixnum::as_i64(byte) as u8) {
+                    Ok(_) => {
+                        fp.value = byte;
+                        Ok(())
+                    }
+                    Err(e) => Err(e),
+                },
+                _ => Err(Exception::new(Condition::Type, "wr-byte", stream)),
+            },
+            Type::Fixnum => Err(Exception::new(Condition::Range, "wr-byte", byte)),
+            _ => Err(Exception::new(Condition::Type, "wr-byte", byte)),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn it_works() {
+        assert_eq!(2 + 2, 4);
+    }
+}
