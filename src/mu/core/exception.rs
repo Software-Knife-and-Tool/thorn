@@ -35,6 +35,7 @@ pub enum Condition {
     Eof,
     Error,
     Open,
+    Over,
     Namespace,
     Range,
     Read,
@@ -42,6 +43,7 @@ pub enum Condition {
     Syntax,
     Type,
     Unbound,
+    Under,
     Write,
     ZeroDivide,
 }
@@ -54,6 +56,7 @@ lazy_static! {
         (Symbol::keyword("eof"), Condition::Eof),
         (Symbol::keyword("error"), Condition::Error),
         (Symbol::keyword("open"), Condition::Open),
+        (Symbol::keyword("over"), Condition::Over),
         (Symbol::keyword("ns"), Condition::Namespace),
         (Symbol::keyword("range"), Condition::Range),
         (Symbol::keyword("read"), Condition::Read),
@@ -61,6 +64,7 @@ lazy_static! {
         (Symbol::keyword("syntax"), Condition::Syntax),
         (Symbol::keyword("type"), Condition::Type),
         (Symbol::keyword("unbound"), Condition::Unbound),
+        (Symbol::keyword("under"), Condition::Under),
         (Symbol::keyword("write"), Condition::Write),
     ];
 }

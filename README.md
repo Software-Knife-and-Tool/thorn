@@ -15,7 +15,7 @@
 
 While *thorn* has much in common with Scheme, it is meant to be familiar to traditional LISP programmers.
 
-*thorn* is a 2-Lisp, which gives it flexibility in implementation and subsequent customization. A small, native code runtime kernel supports system classes, function application, heap/system image management, and the FFI framework.
+*thorn* is a 2-Lisp, which gives it flexibility in implementation and subsequent customization. A small native code runtime kernel supports system classes, function application, heap/system image management, and an FFI framework.
 
 Subsequent layers based on the runtime offer advanced features.
 

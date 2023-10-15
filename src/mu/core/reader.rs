@@ -239,7 +239,17 @@ impl Core for Reader {
         }
 
         match token.parse::<i64>() {
-            Ok(fx) => Ok(Fixnum::as_tag(fx)),
+            Ok(fx) => {
+                if Fixnum::is_i56(fx as u64) {
+                    Ok(Fixnum::as_tag(fx))
+                } else {
+                    Err(Exception::new(
+                        Condition::Over,
+                        "read:at",
+                        Vector::from_string(&token).evict(mu),
+                    ))
+                }
+            }
             Err(_) => match token.parse::<f32>() {
                 Ok(fl) => Ok(Float::as_tag(fl)),
                 Err(_) => match Symbol::parse(mu, token) {
@@ -330,7 +340,17 @@ impl Core for Reader {
                 'x' => match Self::read_token(mu, stream) {
                     Ok(token) => match token {
                         Some(hex) => match i64::from_str_radix(&hex, 16) {
-                            Ok(fx) => Ok(Some(Fixnum::as_tag(fx))),
+                            Ok(fx) => {
+                                if Fixnum::is_i56(fx as u64) {
+                                    Ok(Some(Fixnum::as_tag(fx)))
+                                } else {
+                                    Err(Exception::new(
+                                        Condition::Over,
+                                        "read:#x",
+                                        Vector::from_string(&hex).evict(mu),
+                                    ))
+                                }
+                            }
                             Err(_) => Err(Exception::new(
                                 Condition::Syntax,
                                 "read:#",
