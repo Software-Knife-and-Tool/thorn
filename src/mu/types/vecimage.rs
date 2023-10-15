@@ -168,7 +168,7 @@ impl<'a> IVector for IndirectVector<'a> {
     fn ref_(mu: &Mu, vector: Tag, index: usize) -> Option<Tag> {
         let image = Vector::to_image(mu, vector);
 
-        let len = Fixnum::as_i64(mu, image.length) as usize;
+        let len = Fixnum::as_i64(image.length) as usize;
         if index >= len {
             return None;
         }

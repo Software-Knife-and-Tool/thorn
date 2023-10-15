@@ -59,7 +59,7 @@ pub struct Mu {
     pub unwind: RwLock<Vec<usize>>,
 
     // namespace map/symbol caches
-    pub ns_map: RwLock<<Mu as Cache>::NSMap>,
+    pub ns_map: RwLock<<Mu as Cache>::NSIndex>,
 
     // functions
     pub functions: Vec<LibMuFunction>,
@@ -83,7 +83,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.20";
+    const VERSION: &'static str = "0.0.21";
 
     fn new(config: String) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;

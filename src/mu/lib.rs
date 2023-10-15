@@ -154,7 +154,7 @@ impl Mu {
     }
 
     /// serialize a tag
-    pub fn as_64(&self, tag: Tag) -> u64 {
+    pub fn as_u64(&self, tag: Tag) -> u64 {
         tag.as_u64()
     }
 

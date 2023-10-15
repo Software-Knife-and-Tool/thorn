@@ -130,7 +130,7 @@ impl Core for Function {
     fn write(mu: &Mu, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match Tag::type_of(func) {
             Type::Function => {
-                let nreq = Fixnum::as_i64(mu, Function::arity(mu, func));
+                let nreq = Fixnum::as_i64(Function::arity(mu, func));
                 let form = Function::form(mu, func);
 
                 let desc = match Tag::type_of(form) {

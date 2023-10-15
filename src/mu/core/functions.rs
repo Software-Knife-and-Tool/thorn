@@ -20,7 +20,8 @@ use crate::{
         fixnum::{Core as _, Fixnum, MuFunction as _},
         float::{Core as _, Float, MuFunction as _},
         function::{Core as _, Function},
-        stream::{Core as _, MuFunction as _, Stream},
+        stream::{Core as _, Stream},
+        stream_fns::MuFunction as _,
         struct_::{Core as _, MuFunction as _, Struct},
         symbol::{Core as _, MuFunction as _, Symbol},
         vecimage::{TypedVec, VecType},
@@ -273,11 +274,11 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_exit(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
         match Tag::type_of(rc) {
-            Type::Fixnum => std::process::exit(Fixnum::as_i64(mu, rc) as i32),
+            Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
             _ => Err(Exception::new(Condition::Type, "exit", rc)),
         }
     }
@@ -309,7 +310,7 @@ impl MuFunction for Mu {
                     for index in (0..8).rev() {
                         u64_ <<= 8;
                         u64_ |= match Vector::ref_(mu, arg, index as usize) {
-                            Some(byte) => Fixnum::as_i64(mu, byte) as u64,
+                            Some(byte) => Fixnum::as_i64(byte) as u64,
                             None => panic!(),
                         }
                     }

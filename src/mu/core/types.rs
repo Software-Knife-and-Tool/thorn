@@ -24,7 +24,6 @@ use futures::executor::block_on;
 // tag storage classes
 #[derive(Copy, Clone)]
 pub enum Tag {
-    Fixnum(i64),
     Direct(DirectTag),
     Indirect(IndirectTag),
 }
@@ -41,6 +40,7 @@ pub enum Type {
     Float,
     Function,
     Keyword,
+    Map,
     Namespace,
     Null,
     Stream,
@@ -52,14 +52,14 @@ pub enum Type {
 
 #[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]
 pub enum TagType {
-    Fixnum = 0,   // 61 bit signed integer
-    Direct = 1,   // chars, short strings, keywords, direct conses
-    Cons = 2,     // cons heap tag
-    Function = 3, // function heap tag
-    Stream = 4,   // stream heap tag
-    Struct = 5,   // struct heap tags
-    Symbol = 6,   // symbol heap tag
-    Vector = 7,   // vector heap tag
+    Direct = 0,   // 56 bit direct objects
+    Cons = 1,     // cons heap tag
+    Function = 2, // function heap tag
+    Stream = 3,   // stream heap tag
+    Struct = 4,   // struct heap tags
+    Symbol = 5,   // symbol heap tag
+    Vector = 6,   // vector heap tag
+    Map = 7,      // map vector tag
 }
 
 lazy_static! {
@@ -77,6 +77,7 @@ lazy_static! {
         (Type::Float, Symbol::keyword("float")),
         (Type::Function, Symbol::keyword("func")),
         (Type::Keyword, Symbol::keyword("keyword")),
+        (Type::Map, Symbol::keyword("map")),
         (Type::Null, Symbol::keyword("null")),
         (Type::Stream, Symbol::keyword("stream")),
         (Type::Struct, Symbol::keyword("struct")),
@@ -90,7 +91,6 @@ impl fmt::Display for Tag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:x}: ", self.as_u64()).unwrap();
         match self {
-            Tag::Fixnum(i64_) => write!(f, "fixnum: {}", i64_ >> 3),
             Tag::Direct(direct) => write!(f, "direct: type {:?}", direct.dtype() as u8),
             Tag::Indirect(indirect) => write!(f, "indirect: type {:?}", indirect.tag()),
         }
@@ -102,7 +102,6 @@ impl Tag {
         let heap_ref = block_on(mu.heap.read());
 
         match self {
-            Tag::Fixnum(fx) => (*fx >> 3) as u64,
             Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => match heap_ref.info(heap.offset() as usize) {
                 Some(info) => match Type::try_from(info.tag_type()) {
@@ -117,7 +116,6 @@ impl Tag {
     pub fn as_slice(&self) -> [u8; 8] {
         match self {
             Tag::Direct(tag) => tag.into_bytes(),
-            Tag::Fixnum(tag) => tag.to_le_bytes(),
             Tag::Indirect(tag) => tag.into_bytes(),
         }
     }
@@ -152,7 +150,6 @@ impl Tag {
         let _u64: u64 = u64::from_le_bytes(data);
 
         match tag {
-            tag if tag == TagType::Fixnum as u8 => Tag::Fixnum(_u64 as i64),
             tag if tag == TagType::Direct as u8 => Tag::Direct(DirectTag::from(_u64)),
             _ => Tag::Indirect(IndirectTag::from(_u64)),
         }
@@ -163,7 +160,6 @@ impl Tag {
             Type::Null
         } else {
             match tag {
-                Tag::Fixnum(_) => Type::Fixnum,
                 Tag::Direct(direct) => match direct.dtype() {
                     DirectType::Byte => Type::Vector,
                     DirectType::Char => Type::Char,
@@ -172,7 +168,8 @@ impl Tag {
                         Ok(ExtType::Float) => Type::Float,
                         Ok(ExtType::AsyncId) => Type::AsyncId,
                         Ok(ExtType::Cons) => Type::Cons,
-                        _ => panic!(),
+                        Ok(ExtType::Fixnum) => Type::Fixnum,
+                        _ => panic!("direct type botch {:x}", tag.as_u64()),
                     },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
@@ -182,7 +179,8 @@ impl Tag {
                     TagType::Struct => Type::Struct,
                     TagType::Symbol => Type::Symbol,
                     TagType::Vector => Type::Vector,
-                    _ => panic!("indirect type-of botch {:x}", tag.as_u64()),
+                    TagType::Map => Type::Map,
+                    _ => panic!("indirect type botch {:x}", tag.as_u64()),
                 },
             }
         }

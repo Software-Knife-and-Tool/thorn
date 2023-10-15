@@ -8,6 +8,7 @@ pub mod fixnum;
 pub mod float;
 pub mod function;
 pub mod stream;
+pub mod stream_fns;
 pub mod streambuilder;
 pub mod struct_;
 pub mod symbol;

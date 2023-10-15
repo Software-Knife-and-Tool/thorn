@@ -60,7 +60,6 @@ impl Cons {
             Type::Cons => match cons {
                 Tag::Direct(_) => DirectTag::car(cons),
                 Tag::Indirect(_) => Self::to_image(mu, cons).car,
-                _ => panic!(),
             },
             _ => panic!(),
         }
@@ -72,7 +71,6 @@ impl Cons {
             Type::Cons => match cons {
                 Tag::Indirect(_) => Self::to_image(mu, cons).cdr,
                 Tag::Direct(_) => DirectTag::cdr(cons),
-                _ => panic!(),
             },
             _ => panic!(),
         }
@@ -127,13 +125,12 @@ impl Core for Cons {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.info() {
-                    2 => std::mem::size_of::<DirectTag>(),
+                    DirectTag::EXT_TYPE_CONS => std::mem::size_of::<DirectTag>(),
                     _ => panic!(),
                 },
                 _ => panic!(),
             },
             Tag::Indirect(_) => std::mem::size_of::<Cons>(),
-            _ => panic!(),
         }
     }
 
@@ -345,7 +342,7 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
+        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(nth) < 0 {
             return Err(Exception::new(Condition::Type, "nth", nth));
         }
 
@@ -355,7 +352,7 @@ impl MuFunction for Cons {
                 Ok(())
             }
             Type::Cons => {
-                fp.value = match Self::nth(mu, Fixnum::as_i64(mu, nth) as usize, list) {
+                fp.value = match Self::nth(mu, Fixnum::as_i64(nth) as usize, list) {
                     Some(tag) => tag,
                     None => return Err(Exception::new(Condition::Type, "nth", list)),
                 };
@@ -370,7 +367,7 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(mu, nth) < 0 {
+        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(nth) < 0 {
             return Err(Exception::new(Condition::Type, "nthcdr", nth));
         }
 
@@ -380,7 +377,7 @@ impl MuFunction for Cons {
                 Ok(())
             }
             Type::Cons => {
-                fp.value = match Self::nthcdr(mu, Fixnum::as_i64(mu, nth) as usize, list) {
+                fp.value = match Self::nthcdr(mu, Fixnum::as_i64(nth) as usize, list) {
                     Some(tag) => tag,
                     None => return Err(Exception::new(Condition::Type, "nth", list)),
                 };
