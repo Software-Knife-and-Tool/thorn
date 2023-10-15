@@ -17,6 +17,8 @@ use crate::{
     },
 };
 
+use std::ops::add;
+
 #[derive(Copy, Clone)]
 #[allow(dead_code)]
 pub enum Float {
@@ -78,17 +80,24 @@ impl MuFunction for Float {
     fn mu_fladd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
+        
+        fp.value =    
+            match Tag::type_of(fl0) {
+                Type::Float => match Tag::type_of(fl1) {
+                    Type::Float => {
+                        let sum = Self::as_f32(mu, fl0).add(Self::as_f32(mu, fl1));
+                        if sum.is_nan() {
+                            return Err(Exception::new(Condition::Over, "fl-add", fl1))
+                        } else {
+                            Self::as_tag(sum)
+                        }
+                    },
+                    _ => return Err(Exception::new(Condition::Type, "fl-add", fl1)),
+                },
+                _ => return Err(Exception::new(Condition::Type, "fl-add", fl0)),
+            };
 
-        match Tag::type_of(fl0) {
-            Type::Float => match Tag::type_of(fl1) {
-                Type::Float => {
-                    fp.value = Self::as_tag(Self::as_f32(mu, fl0) + Self::as_f32(mu, fl1));
-                    Ok(())
-                }
-                _ => Err(Exception::new(Condition::Type, "fl-add", fl1)),
-            },
-            _ => Err(Exception::new(Condition::Type, "fl-add", fl0)),
-        }
+        Ok(())
     }
 
     fn mu_flsub(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
