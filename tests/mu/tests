@@ -3,6 +3,7 @@ compile
 core
 exception
 list
+map
 namespace
 number
 reader

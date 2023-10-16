@@ -20,6 +20,7 @@ use crate::{
         fixnum::{Core as _, Fixnum, MuFunction as _},
         float::{Core as _, Float, MuFunction as _},
         function::{Core as _, Function},
+        map::MuFunction as _,
         stream::{Core as _, Stream},
         stream_fns::MuFunction as _,
         struct_::{Core as _, MuFunction as _, Struct},
@@ -50,6 +51,12 @@ lazy_static! {
         // async
         ("await", 1, Mu::mu_await),
         ("abort", 1, Mu::mu_abort),
+        // maps
+        ("make-mp", 0, Mu::mu_make_map),
+        ("mp-add", 3, Mu::mu_map_add),
+        ("mp-get", 2, Mu::mu_map_get),
+        ("mp-list", 1, Mu::mu_map_list),
+        ("mp-size", 1, Mu::mu_map_size),
         // mu
         ("apply", 2, Mu::mu_apply),
         ("compile", 1, Mu::mu_compile),

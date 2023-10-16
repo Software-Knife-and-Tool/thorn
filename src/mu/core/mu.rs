@@ -22,6 +22,7 @@ use {
             fixnum::{Core as _, Fixnum},
             float::{Core as _, Float},
             function::{Core as _, Function},
+            map::{Core as _, Map},
             stream::{Core as _, Stream},
             streambuilder::StreamBuilder,
             struct_::{Core as _, Struct},
@@ -57,6 +58,9 @@ pub struct Mu {
 
     // exception dynamic unwind stack
     pub unwind: RwLock<Vec<usize>>,
+
+    // map cache index
+    pub map_index: RwLock<HashMap<usize, HashMap<u64, Tag>>>,
 
     // namespace map/symbol caches
     pub ns_map: RwLock<<Mu as Cache>::NSIndex>,
@@ -113,6 +117,9 @@ impl Core for Mu {
 
             // exception unwind stack
             unwind: RwLock::new(Vec::new()),
+
+            // map caches
+            map_index: RwLock::new(HashMap::new()),
 
             // namespace maps
             ns_map: RwLock::new(HashMap::new()),
@@ -252,10 +259,13 @@ impl Core for Mu {
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),
             Type::Float => Float::write(self, tag, escape, stream),
             Type::Function => Function::write(self, tag, escape, stream),
-            Type::Null | Type::Symbol | Type::Keyword => Symbol::write(self, tag, escape, stream),
+            Type::Keyword => Symbol::write(self, tag, escape, stream),
+            Type::Map => Map::write(self, tag, escape, stream),
+            Type::Null => Symbol::write(self, tag, escape, stream),
             Type::Stream => Stream::write(self, tag, escape, stream),
-            Type::Vector => Vector::write(self, tag, escape, stream),
             Type::Struct => Struct::write(self, tag, escape, stream),
+            Type::Symbol => Symbol::write(self, tag, escape, stream),
+            Type::Vector => Vector::write(self, tag, escape, stream),
             _ => panic!(),
         }
     }
@@ -281,6 +291,7 @@ impl Core for Mu {
             }
             Type::Cons => Cons::size_of(self, tag),
             Type::Function => Function::size_of(self, tag),
+            Type::Map => Map::size_of(self, tag),
             Type::Stream => Stream::size_of(self, tag),
             Type::Struct => Struct::size_of(self, tag),
             Type::Symbol => Symbol::size_of(self, tag),
