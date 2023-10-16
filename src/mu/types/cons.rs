@@ -103,6 +103,7 @@ impl Cons {
 
 // core operations
 pub trait Core {
+    fn gc_mark(_: &Mu, _: Tag);
     fn evict(&self, _: &Mu) -> Tag;
     fn vlist(_: &Mu, _: &[Tag]) -> Tag;
     fn vappend(_: &Mu, _: &[Tag], _: Tag) -> Tag;
@@ -115,6 +116,25 @@ pub trait Core {
 }
 
 impl Core for Cons {
+    fn gc_mark(mu: &Mu, cons: Tag) {
+        match cons {
+            Tag::Direct(_) => {
+                // GcMark(env, car(ptr));
+                // GcMark(env, cdr(ptr));
+            }
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    // GcMark(env, ptr)
+                    // GcMark(env, car(ptr));
+                    // GcMark(env, cdr(ptr));
+                }
+            }
+        }
+    }
+
     fn view(mu: &Mu, cons: Tag) -> Tag {
         let vec = vec![Self::car(mu, cons), Self::cdr(mu, cons)];
 

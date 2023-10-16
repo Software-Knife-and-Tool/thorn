@@ -61,6 +61,7 @@ lazy_static! {
         // mu
         ("apply", 2, Mu::mu_apply),
         ("compile", 1, Mu::mu_compile),
+        ("gc", 0, Mu::mu_compile),
         ("eval", 1, Mu::mu_eval),
         ("exit", 1, Mu::mu_exit),
         ("fix", 2, Mu::mu_fix),
@@ -170,6 +171,7 @@ pub trait MuFunction {
     fn mu_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_gc(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -212,6 +214,15 @@ impl MuFunction for Mu {
     fn mu_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.eval(fp.argv[0]) {
             Ok(tag) => tag,
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match mu.gc() {
+            Ok(_) => Symbol::keyword("t"),
             Err(e) => return Err(e),
         };
 

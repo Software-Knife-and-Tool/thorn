@@ -103,7 +103,7 @@ impl Tag {
 
         match self {
             Tag::Direct(tag) => tag.data(),
-            Tag::Indirect(heap) => match heap_ref.info(heap.offset() as usize) {
+            Tag::Indirect(heap) => match heap_ref.image_info(heap.offset() as usize) {
                 Some(info) => match Type::try_from(info.tag_type()) {
                     Ok(etype) => etype as u64,
                     Err(_) => panic!(),

@@ -89,7 +89,7 @@ impl Map {
         let index_ref = block_on(mu.map_index.read());
 
         match index_ref.get(&cache_id) {
-            Some(hash) => hash.get(&key.as_u64()).map(|value| *value),
+            Some(hash) => hash.get(&key.as_u64()).copied(),
             None => None,
         }
     }
@@ -138,12 +138,32 @@ impl Map {
 
 pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
+    fn gc_mark(_: &Mu, _: Tag);
     fn size_of(_: &Mu, _: Tag) -> usize;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn view(_: &Mu, _: Tag) -> Tag;
 }
 
 impl Core for Map {
+    fn gc_mark(mu: &Mu, tag: Tag) {
+        match tag {
+            Tag::Direct(_) => {
+                // GcMark(env, car(ptr));
+                // GcMark(env, cdr(ptr));
+            }
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    // GcMark(env, ptr)
+                    // GcMark(env, car(ptr));
+                    // GcMark(env, cdr(ptr));
+                }
+            }
+        }
+    }
+
     fn view(mu: &Mu, map: Tag) -> Tag {
         let vec = vec![Self::cache_id(mu, map), Self::list(mu, map)];
 

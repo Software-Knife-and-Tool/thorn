@@ -111,11 +111,31 @@ pub trait Core {
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn write_byte(_: &Mu, _: Tag, _: u8) -> exception::Result<Option<()>>;
     fn write_char(_: &Mu, _: Tag, _: char) -> exception::Result<Option<()>>;
+    fn gc_mark(_: &Mu, _: Tag);
     fn view(_: &Mu, _: Tag) -> Tag;
     fn size_of(_: &Mu, _: Tag) -> usize;
 }
 
 impl Core for Stream {
+    fn gc_mark(mu: &Mu, tag: Tag) {
+        match tag {
+            Tag::Direct(dir) => {
+                // GcMark(env, car(ptr));
+                // GcMark(env, cdr(ptr));
+            }
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    // GcMark(env, ptr)
+                    // GcMark(env, car(ptr));
+                    // GcMark(env, cdr(ptr));
+                }
+            }
+        }
+    }
+
     fn view(mu: &Mu, stream: Tag) -> Tag {
         let image = Self::to_image(mu, stream);
         let vec = vec![image.stream_id, image.direction, image.eof, image.unch];

@@ -106,6 +106,7 @@ impl Vector {
 pub trait Core<'a> {
     fn as_string(_: &Mu, _: Tag) -> String;
     fn evict(&self, _: &Mu) -> Tag;
+    fn gc_mark(_: &Mu, _: Tag);
     fn from_string(_: &str) -> Vector;
     fn read(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
     fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
@@ -193,6 +194,25 @@ impl<'a> Core<'a> for Vector {
                 }
             },
             _ => panic!(),
+        }
+    }
+
+    fn gc_mark(mu: &Mu, tag: Tag) {
+        match tag {
+            Tag::Direct(_) => {
+                // GcMark(env, car(ptr));
+                // GcMark(env, cdr(ptr));
+            }
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    // GcMark(env, ptr)
+                    // GcMark(env, car(ptr));
+                    // GcMark(env, cdr(ptr));
+                }
+            }
         }
     }
 

@@ -27,6 +27,7 @@ pub struct Heap {
 
 #[bitfield]
 #[repr(align(8))]
+#[derive(Copy, Clone)]
 pub struct Info {
     pub reloc: u32, // relocation
     #[skip]
@@ -94,16 +95,6 @@ impl Heap {
         alloc_ref[id as usize] = (id, total_size + size, alloc + 1, in_use + 1);
     }
 
-    // rewrite object data
-    pub fn write_image(&mut self, image: &[[u8; 8]], offset: usize) {
-        let mut index = offset;
-
-        for n in image {
-            self.mmap[index..(index + 8)].copy_from_slice(n);
-            index += 8;
-        }
-    }
-
     // allocate
     pub fn alloc(&mut self, src: &[[u8; 8]], id: u8) -> usize {
         let ntypes = src.len() as u64;
@@ -169,25 +160,100 @@ impl Heap {
         }
     }
 
-    // object header
-    pub fn info(&self, offset: usize) -> Option<Info> {
-        if offset == 0 || offset > self.write_barrier {
+    // rewrite object data
+    pub fn write_image(&mut self, image: &[[u8; 8]], offset: usize) {
+        let mut index = offset;
+
+        for n in image {
+            self.mmap[index..(index + 8)].copy_from_slice(n);
+            index += 8;
+        }
+    }
+
+    // gc
+    pub fn clear_refbits(&mut self) {
+        let mut off: usize = 8;
+
+        while let Some(mut info) = self.image_info(off) {
+            info.set_mark(false);
+            self.mmap[off..(off + 8)].copy_from_slice(&(info.into_bytes()));
+            off += info.len() as usize
+        }
+    }
+
+    pub fn set_image_refbit(&mut self, off: usize) {
+        if off == 0 || off > self.write_barrier {
+            panic!()
+        } else {
+            match self.image_info(off) {
+                Some(mut info) => {
+                    info.set_mark(true);
+                    self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
+                }
+                None => panic!(),
+            }
+        }
+    }
+
+    // image header info from heap tag
+    pub fn image_info(&self, off: usize) -> Option<Info> {
+        if off == 0 || off > self.write_barrier {
             None
         } else {
             let data = &self.mmap;
             let mut info = 0u64.to_le_bytes();
 
-            info.copy_from_slice(&data[(offset - 8)..offset]);
+            info.copy_from_slice(&data[(off - 8)..off]);
             Some(Info::from_bytes(info))
         }
     }
 
-    pub fn of_length(&self, offset: usize, len: usize) -> Option<&[u8]> {
-        if offset == 0 || offset > self.write_barrier {
+    pub fn of_length(&self, off: usize, len: usize) -> Option<&[u8]> {
+        if off == 0 || off > self.write_barrier {
             None
         } else {
             let data = &self.mmap;
-            Some(&data[offset..offset + len])
+            Some(&data[off..off + len])
         }
+    }
+
+    pub fn image_reloc(&self, off: usize) -> Option<u32> {
+        self.image_info(off).map(|info| info.reloc())
+    }
+
+    pub fn image_length(&self, off: usize) -> Option<usize> {
+        self.image_info(off).map(|info| info.len() as usize)
+    }
+
+    pub fn image_refbit(&self, off: usize) -> Option<bool> {
+        self.image_info(off).map(|info| info.mark())
+    }
+
+    pub fn image_tag_type(&self, off: usize) -> Option<u8> {
+        self.image_info(off).map(|info| info.tag_type())
+    }
+}
+
+/// iterator
+pub struct HeapInfoIter<'a> {
+    pub heap: &'a Heap,
+    pub offset: usize,
+}
+
+impl<'a> HeapInfoIter<'a> {
+    pub fn new(heap: &'a Heap) -> Self {
+        Self { heap, offset: 8 }
+    }
+}
+
+// proper lists only
+impl<'a> Iterator for HeapInfoIter<'a> {
+    type Item = Info;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let info = self.heap.image_info(self.offset).unwrap();
+        self.offset += info.len() as usize;
+
+        Some(info)
     }
 }
