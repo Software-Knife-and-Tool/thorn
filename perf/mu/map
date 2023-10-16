@@ -1,0 +1,6 @@
+(mu:mp-add (mu:make-mp) 1 2)
+(mu:mp-size (mu:make-mp))
+(mu:mp-has (mu:make-mp) ())
+(mu:mp-list (mu:make-mp))
+((:lambda (map) (mu:mp-add map 1 2) (mu:mp-has map 1)) (mu:make-mp))
+((:lambda (map) (mu:mp-add map 1 2) (mu:mp-get map 1)) (mu:make-mp))
