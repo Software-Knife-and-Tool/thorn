@@ -10,7 +10,6 @@ pub mod exception;
 pub mod frame;
 pub mod functions;
 pub mod indirect;
-pub mod map;
 pub mod mu;
 pub mod namespace;
 pub mod reader;

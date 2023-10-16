@@ -7,6 +7,7 @@ pub mod cons;
 pub mod fixnum;
 pub mod float;
 pub mod function;
+pub mod map;
 pub mod stream;
 pub mod stream_fns;
 pub mod streambuilder;

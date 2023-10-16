@@ -165,21 +165,21 @@ impl Tag {
                     DirectType::Char => Type::Char,
                     DirectType::Keyword => Type::Keyword,
                     DirectType::Ext => match ExtType::try_from(direct.info()) {
-                        Ok(ExtType::Float) => Type::Float,
                         Ok(ExtType::AsyncId) => Type::AsyncId,
                         Ok(ExtType::Cons) => Type::Cons,
                         Ok(ExtType::Fixnum) => Type::Fixnum,
+                        Ok(ExtType::Float) => Type::Float,
                         _ => panic!("direct type botch {:x}", tag.as_u64()),
                     },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
                     TagType::Cons => Type::Cons,
                     TagType::Function => Type::Function,
+                    TagType::Map => Type::Map,
                     TagType::Stream => Type::Stream,
                     TagType::Struct => Type::Struct,
                     TagType::Symbol => Type::Symbol,
                     TagType::Vector => Type::Vector,
-                    TagType::Map => Type::Map,
                     _ => panic!("indirect type botch {:x}", tag.as_u64()),
                 },
             }
