@@ -103,12 +103,32 @@ impl Function {
 }
 
 pub trait Core {
+    fn gc_mark(_: &Mu, _: Tag);
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn size_of(_: &Mu, _: Tag) -> usize;
     fn view(_: &Mu, _: Tag) -> Tag;
 }
 
 impl Core for Function {
+    fn gc_mark(mu: &Mu, tag: Tag) {
+        match tag {
+            Tag::Direct(_) => {
+                // GcMark(env, car(ptr));
+                // GcMark(env, cdr(ptr));
+            }
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    // GcMark(env, ptr)
+                    // GcMark(env, car(ptr));
+                    // GcMark(env, cdr(ptr));
+                }
+            }
+        }
+    }
+
     fn view(mu: &Mu, func: Tag) -> Tag {
         let vec = vec![
             Self::arity(mu, func),

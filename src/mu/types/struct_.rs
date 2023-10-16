@@ -88,6 +88,7 @@ pub trait Core<'a> {
     fn read(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn evict(&self, _: &Mu) -> Tag;
+    fn gc_mark(_: &Mu, _: Tag);
     fn view(_: &Mu, _: Tag) -> Tag;
     fn size_of(_: &Mu, _: Tag) -> usize;
 }
@@ -97,6 +98,25 @@ impl<'a> Core<'a> for Struct {
         Struct {
             stype: Symbol::keyword(&key),
             vector: TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu),
+        }
+    }
+
+    fn gc_mark(mu: &Mu, tag: Tag) {
+        match tag {
+            Tag::Direct(_) => {
+                // GcMark(env, car(ptr));
+                // GcMark(env, cdr(ptr));
+            }
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    // GcMark(env, ptr)
+                    // GcMark(env, car(ptr));
+                    // GcMark(env, cdr(ptr));
+                }
+            }
         }
     }
 

@@ -6,6 +6,7 @@
 use {
     crate::{
         core::{
+            async_context::{AsyncContext, Core as _},
             direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -35,10 +36,7 @@ use {
 };
 
 // locking protocols
-use {
-    crate::core::async_context::{AsyncContext, Core as _},
-    futures_locks::RwLock,
-};
+use {futures::executor::block_on, futures_locks::RwLock};
 
 // mu environment
 pub struct Mu {
@@ -47,6 +45,7 @@ pub struct Mu {
 
     // heap
     pub heap: RwLock<Heap>,
+    pub gc_root: RwLock<Vec<Tag>>,
 
     // async environments
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
@@ -87,9 +86,11 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.21";
+    const VERSION: &'static str = "0.0.22";
 
     fn new(config: String) -> Self;
+    fn gc(&self) -> exception::Result<bool>;
+    fn gc_mark(&self, _: Tag);
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
@@ -106,6 +107,7 @@ impl Core for Mu {
 
             // heap
             heap: RwLock::new(Heap::new(1024)),
+            gc_root: RwLock::new(Vec::<Tag>::new()),
 
             // async contexts
             async_map: RwLock::new(HashMap::new()),
@@ -245,6 +247,35 @@ impl Core for Mu {
             }
             _ => Ok(expr),
         }
+    }
+
+    fn gc_mark(&self, tag: Tag) {
+        match tag {
+            Tag::Direct(_) => (),
+            Tag::Indirect(_) => match Tag::type_of(tag) {
+                Type::Cons => Cons::gc_mark(self, tag),
+                Type::Function => Function::gc_mark(self, tag),
+                Type::Map => Map::gc_mark(self, tag),
+                Type::Stream => Stream::gc_mark(self, tag),
+                Type::Struct => Struct::gc_mark(self, tag),
+                Type::Symbol => Symbol::gc_mark(self, tag),
+                Type::Vector => Vector::gc_mark(self, tag),
+                _ => (),
+            },
+        }
+    }
+
+    fn gc(&self) -> exception::Result<bool> {
+        let mut heap_ref = block_on(self.heap.write());
+        heap_ref.clear_refbits();
+
+        let root_ref = block_on(self.gc_root.write());
+
+        for tag in &*root_ref {
+            self.gc_mark(*tag)
+        }
+
+        Ok(true)
     }
 
     fn write(&self, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
