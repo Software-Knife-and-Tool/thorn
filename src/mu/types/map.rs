@@ -14,6 +14,7 @@ use {
         types::{
             cons::{Cons, Core as _},
             fixnum::Fixnum,
+            symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},
             vector::Core as _,
         },
@@ -88,10 +89,7 @@ impl Map {
         let index_ref = block_on(mu.map_index.read());
 
         match index_ref.get(&cache_id) {
-            Some(hash) => match hash.get(&key.as_u64()) {
-                Some(value) => Some(*value),
-                None => None,
-            },
+            Some(hash) => hash.get(&key.as_u64()).map(|value| *value),
             None => None,
         }
     }
@@ -101,11 +99,11 @@ impl Map {
 
         match index_ref.get_mut(&cache_id) {
             Some(hash) => {
-                if hash.contains_key(&key.as_u64()) {
-                    None
-                } else {
-                    hash.insert(key.as_u64(), value);
+                if let std::collections::hash_map::Entry::Vacant(e) = hash.entry(key.as_u64()) {
+                    e.insert(value);
                     Some(())
+                } else {
+                    None
                 }
             }
             None => None,
@@ -186,6 +184,7 @@ pub trait MuFunction {
     fn mu_make_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_add(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_get(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_map_has(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_list(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
@@ -237,6 +236,25 @@ impl MuFunction for Mu {
                 }
             }
             _ => return Err(Exception::new(Condition::Type, "map-get", map)),
+        };
+
+        Ok(())
+    }
+
+    fn mu_map_has(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let map = fp.argv[0];
+        let key = fp.argv[1];
+
+        fp.value = match Tag::type_of(map) {
+            Type::Map => {
+                let cache_id = Map::cache_id(mu, map);
+
+                match Map::map_get(mu, Fixnum::as_i64(cache_id) as usize, key) {
+                    Some(_) => Symbol::keyword("t"),
+                    None => Tag::nil(),
+                }
+            }
+            _ => return Err(Exception::new(Condition::Type, "map-has", map)),
         };
 
         Ok(())

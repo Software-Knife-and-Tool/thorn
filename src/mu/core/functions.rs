@@ -55,6 +55,7 @@ lazy_static! {
         ("make-mp", 0, Mu::mu_make_map),
         ("mp-add", 3, Mu::mu_map_add),
         ("mp-get", 2, Mu::mu_map_get),
+        ("mp-has", 2, Mu::mu_map_has),
         ("mp-list", 1, Mu::mu_map_list),
         ("mp-size", 1, Mu::mu_map_size),
         // mu

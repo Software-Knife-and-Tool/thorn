@@ -2,6 +2,7 @@ compile
 core
 gcd
 list
+map
 namespace
 number
 reader
