@@ -7,7 +7,8 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
         exception::{self, Condition, Exception, Result},
         frame::Frame,
-        mu::{Core as _, Mu},
+        mu::Mu,
+        stream,
         types::{Tag, Type},
     },
     types::{
@@ -61,7 +62,7 @@ pub trait Core {
 
 impl Core for Fixnum {
     fn write(mu: &Mu, tag: Tag, _escape: bool, stream: Tag) -> Result<()> {
-        mu.write_string(Self::as_i64(tag).to_string(), stream)
+        <Mu as stream::Core>::write_string(mu, Self::as_i64(tag).to_string(), stream)
     }
 
     fn view(mu: &Mu, fx: Tag) -> Tag {

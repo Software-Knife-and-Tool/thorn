@@ -8,7 +8,8 @@ use {
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            mu::{Core as _, Mu},
+            mu::Mu,
+            stream,
             types::{Tag, Type},
         },
         types::{
@@ -65,7 +66,7 @@ impl Core for Float {
     }
 
     fn write(mu: &Mu, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
-        mu.write_string(format!("{:.4}", Self::as_f32(mu, tag)), stream)
+        <Mu as stream::Core>::write_string(mu, format!("{:.4}", Self::as_f32(mu, tag)), stream)
     }
 }
 

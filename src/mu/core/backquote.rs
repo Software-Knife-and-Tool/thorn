@@ -8,9 +8,10 @@ use crate::{
         compile::Compiler,
         exception::{self, Condition, Exception},
         frame::Frame,
-        mu::{Core as _, Mu},
+        mu::{self, Core as _, Mu},
         reader::{Core as _, Reader},
         readtable::{map_char_syntax, SyntaxType},
+        stream::{self, Core as _},
         types::{Tag, Type},
     },
     types::{
@@ -42,7 +43,7 @@ impl Backquote for Mu {
             Ok(Some(ch)) => match ch {
                 '@' => {
                     if in_list {
-                        Reader::read(mu, stream, false, Tag::nil(), false)
+                        <Mu as stream::Core>::read(mu, stream, false, Tag::nil(), false)
                     } else {
                         Err(Exception::new(Condition::Range, "comma", stream))
                     }
@@ -55,7 +56,13 @@ impl Backquote for Mu {
                             mu,
                             &[
                                 mu.reader.cons,
-                                match Reader::read(mu, stream, false, Tag::nil(), false) {
+                                match <Mu as stream::Core>::read(
+                                    mu,
+                                    stream,
+                                    false,
+                                    Tag::nil(),
+                                    false,
+                                ) {
                                     Ok(expr) => expr,
                                     Err(e) => return Err(e),
                                 },
@@ -63,7 +70,7 @@ impl Backquote for Mu {
                             ],
                         ))
                     } else {
-                        Reader::read(mu, stream, false, Tag::nil(), false)
+                        <Mu as stream::Core>::read(mu, stream, false, Tag::nil(), false)
                     }
                 }
             },
@@ -168,7 +175,13 @@ impl Backquote for Mu {
                                     Ok(expr)
                                 }
                             }
-                            Ok(None) => Reader::read(mu, stream, false, Tag::nil(), recursivep),
+                            Ok(None) => <Mu as stream::Core>::read(
+                                mu,
+                                stream,
+                                false,
+                                Tag::nil(),
+                                recursivep,
+                            ),
                             Err(e) => Err(e),
                         },
                         _ => Err(Exception::new(
@@ -180,7 +193,13 @@ impl Backquote for Mu {
                     SyntaxType::Tmacro => match ch {
                         '`' => Self::bq_read(mu, in_list, stream, true),
                         ',' => Self::bq_comma(mu, in_list, stream),
-                        '\'' => match Reader::read(mu, stream, false, Tag::nil(), recursivep) {
+                        '\'' => match <Mu as stream::Core>::read(
+                            mu,
+                            stream,
+                            false,
+                            Tag::nil(),
+                            recursivep,
+                        ) {
                             Ok(tag) => Ok(Mu::compile_quoted_list(
                                 mu,
                                 Cons::new(tag, Tag::nil()).evict(mu),
@@ -222,7 +241,13 @@ impl Backquote for Mu {
                             }
                         }
                         ';' => match Reader::read_comment(mu, stream) {
-                            Ok(_) => Reader::read(mu, stream, false, Tag::nil(), recursivep),
+                            Ok(_) => <Mu as stream::Core>::read(
+                                mu,
+                                stream,
+                                false,
+                                Tag::nil(),
+                                recursivep,
+                            ),
                             Err(e) => Err(e),
                         },
                         _ => Err(Exception::new(

@@ -11,7 +11,8 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         indirect::IndirectTag,
-        mu::{Core as _, Mu},
+        mu::Mu,
+        stream,
         types::{Tag, TagType, Type},
     },
     system::{stream::Core as _, sys::System},
@@ -192,14 +193,21 @@ impl Core for Stream {
             Type::Stream => {
                 let image = Self::to_image(mu, tag);
                 match Tag::type_of(image.stream_id) {
-                    Type::Keyword => mu.write_string("#<stream: closed>".to_string(), stream),
-                    Type::Fixnum => mu.write_string(
+                    Type::Keyword => <Mu as stream::Core>::write_string(
+                        mu,
+                        "#<stream: closed>".to_string(),
+                        stream,
+                    ),
+                    Type::Fixnum => <Mu as stream::Core>::write_string(
+                        mu,
                         format!("#<stream: id: {}>", Fixnum::as_i64(image.stream_id)),
                         stream,
                     ),
-                    Type::Null | Type::Cons | Type::Vector => {
-                        mu.write_string("#<stream: string>".to_string(), stream)
-                    }
+                    Type::Null | Type::Cons | Type::Vector => <Mu as stream::Core>::write_string(
+                        mu,
+                        "#<stream: string>".to_string(),
+                        stream,
+                    ),
                     _ => panic!(
                         "internal: stream type inconsistency {:?}",
                         Tag::type_of(image.stream_id)

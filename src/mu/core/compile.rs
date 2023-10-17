@@ -7,7 +7,8 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
-        mu::Mu,
+        frame::Frame,
+        mu::{Core as _, Mu},
         namespace::Core,
         types::{Tag, Type},
     },
@@ -269,6 +270,43 @@ impl Compiler for Mu {
             }
             _ => Ok(expr),
         }
+    }
+}
+
+pub trait MuFunction {
+    fn mu_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+}
+
+impl MuFunction for Mu {
+    fn if_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let test = fp.argv[0];
+        let true_fn = fp.argv[1];
+        let false_fn = fp.argv[2];
+
+        fp.value = match Tag::type_of(true_fn) {
+            Type::Function => match Tag::type_of(false_fn) {
+                Type::Function => {
+                    match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
+                        Ok(tag) => tag,
+                        Err(e) => return Err(e),
+                    }
+                }
+                _ => return Err(Exception::new(Condition::Type, "::if", false_fn)),
+            },
+            _ => return Err(Exception::new(Condition::Type, "::if", true_fn)),
+        };
+
+        Ok(())
+    }
+
+    fn mu_compile(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match <Mu as Compiler>::compile(mu, fp.argv[0]) {
+            Ok(tag) => tag,
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 }
 

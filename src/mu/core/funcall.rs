@@ -5,28 +5,27 @@
 use crate::{
     core::{
         backquote::MuFunction as _,
-        compile::Compiler,
+        compile::MuFunction as _,
         exception::{self, Condition, Exception, MuFunction as _},
         frame::{Frame, MuFunction as _},
-        indirect::MuFunction as _,
+        heap::MuFunction as _,
         mu::{Core as _, Mu},
         namespace::{Core as NSCore, MuFunction as _},
+        stream::MuFunction as _,
+        system::MuFunction as _,
         types::{MuFunction as _, Tag, Type},
     },
-    system::sys::System,
     types::{
-        char::{Char, Core as _},
-        cons::{Cons, ConsIter, Core as _, MuFunction as _},
-        fixnum::{Core as _, Fixnum, MuFunction as _},
-        float::{Core as _, Float, MuFunction as _},
-        function::{Core as _, Function},
+        cons::{Cons, ConsIter, MuFunction as _},
+        fixnum::{Fixnum, MuFunction as _},
+        float::{Float, MuFunction as _},
+        function::Function,
         map::MuFunction as _,
-        stream::{Core as _, Stream},
+        stream::Stream,
         stream_fns::MuFunction as _,
-        struct_::{Core as _, MuFunction as _, Struct},
+        struct_::{MuFunction as _, Struct},
         symbol::{Core as _, MuFunction as _, Symbol},
-        vecimage::{TypedVec, VecType},
-        vector::{Core as _, MuFunction as _, Vector},
+        vector::{MuFunction as _, Vector},
     },
 };
 
@@ -41,6 +40,7 @@ lazy_static! {
         // types
         ("eq", 2, Tag::mu_eq),
         ("type-of", 1, Tag::mu_typeof),
+        ("repr", 2, Tag::mu_repr),
         // conses and lists
         ("car", 1, Cons::mu_car),
         ("cdr", 1, Cons::mu_cdr),
@@ -58,19 +58,19 @@ lazy_static! {
         ("mp-has", 2, Mu::mu_map_has),
         ("mp-list", 1, Mu::mu_map_list),
         ("mp-size", 1, Mu::mu_map_size),
-        // mu
-        ("apply", 2, Mu::mu_apply),
-        ("compile", 1, Mu::mu_compile),
-        ("gc", 0, Mu::mu_compile),
-        ("eval", 1, Mu::mu_eval),
-        ("exit", 1, Mu::mu_exit),
-        ("fix", 2, Mu::mu_fix),
+        // heap
+        ("gc", 0, Mu::mu_gc),
         ("hp-info", 0, Mu::mu_hp_info),
         ("size-of", 1, Mu::mu_size_of),
         ("view", 1, Mu::mu_view),
-        ("repr", 2, Mu::mu_repr),
+        // mu
+        ("apply", 2, Mu::mu_apply),
+        ("compile", 1, Mu::mu_compile),
+        ("eval", 1, Mu::mu_eval),
+        ("fix", 2, Mu::mu_fix),
         ("%append", 2, Mu::append_),
-        // time
+        // system
+        ("exit", 1, Mu::mu_exit),
         ("real-tm", 0, Mu::mu_real_time),
         ("run-us", 0, Mu::mu_run_time),
         // exceptions
@@ -102,8 +102,8 @@ lazy_static! {
         ("ns-syms", 1, Mu::mu_ns_symbols),
         ("ns-find", 2, Mu::mu_ns_find),
         // read/write
-        ("read", 3, Stream::mu_read),
-        ("write", 3, Stream::mu_write),
+        ("read", 3, Mu::mu_read),
+        ("write", 3, Mu::mu_write),
         // symbols
         ("boundp", 1, Symbol::mu_boundp),
         ("keyword", 1, Symbol::mu_keyword),
@@ -169,60 +169,14 @@ impl Core for Mu {
 
 pub trait MuFunction {
     fn mu_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_gc(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_real_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_run_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_size_of(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
-    fn mu_real_time(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match System::real_time() {
-            Ok(us) => Fixnum::as_tag(us as i64),
-            Err(_) => return Err(Exception::new(Condition::Error, "real-us", Tag::nil())),
-        };
-
-        Ok(())
-    }
-
-    fn mu_run_time(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let time = mu.start_time.elapsed();
-        let usec = time.as_micros();
-
-        fp.value = Fixnum::as_tag(usec.try_into().unwrap());
-
-        Ok(())
-    }
-
-    fn mu_compile(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match <Mu as Compiler>::compile(mu, fp.argv[0]) {
-            Ok(tag) => tag,
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
-    }
-
     fn mu_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.eval(fp.argv[0]) {
             Ok(tag) => tag,
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
-    }
-
-    fn mu_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.gc() {
-            Ok(_) => Symbol::keyword("t"),
             Err(e) => return Err(e),
         };
 
@@ -251,123 +205,6 @@ impl MuFunction for Mu {
                 _ => return Err(Exception::new(Condition::Type, "apply", args)),
             },
             _ => return Err(Exception::new(Condition::Type, "apply", func)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let form = fp.argv[0];
-        let escape = fp.argv[1];
-        let stream = fp.argv[2];
-
-        fp.value = form;
-
-        match Tag::type_of(stream) {
-            Type::Stream => match mu.write(form, !escape.null_(), stream) {
-                Ok(_) => Ok(()),
-                Err(e) => Err(e),
-            },
-            _ => Err(Exception::new(Condition::Type, "write", stream)),
-        }
-    }
-
-    fn if_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let test = fp.argv[0];
-        let true_fn = fp.argv[1];
-        let false_fn = fp.argv[2];
-
-        fp.value = match Tag::type_of(true_fn) {
-            Type::Function => match Tag::type_of(false_fn) {
-                Type::Function => {
-                    match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
-                        Ok(tag) => tag,
-                        Err(e) => return Err(e),
-                    }
-                }
-                _ => return Err(Exception::new(Condition::Type, "::if", false_fn)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "::if", true_fn)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let rc = fp.argv[0];
-
-        match Tag::type_of(rc) {
-            Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
-            _ => Err(Exception::new(Condition::Type, "exit", rc)),
-        }
-    }
-
-    fn mu_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let conv = fp.argv[0];
-        let arg = fp.argv[1];
-
-        // if conv is (), convert arg tag bits to a byte vector
-        // if not, convert arg byte vector to a tag
-
-        fp.value = match Tag::null_(&conv) {
-            true => {
-                let slice = arg.as_slice();
-
-                TypedVec::<Vec<u8>> {
-                    vec: slice.to_vec(),
-                }
-                .vec
-                .to_vector()
-                .evict(mu)
-            }
-            false => match Tag::type_of(arg) {
-                Type::Vector
-                    if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 =>
-                {
-                    let mut u64_: u64 = 0;
-
-                    for index in (0..8).rev() {
-                        u64_ <<= 8;
-                        u64_ |= match Vector::ref_(mu, arg, index as usize) {
-                            Some(byte) => Fixnum::as_i64(byte) as u64,
-                            None => panic!(),
-                        }
-                    }
-
-                    Tag::from_u64(u64_)
-                }
-                _ => return Err(Exception::new(Condition::Type, "repr", arg)),
-            },
-        };
-
-        Ok(())
-    }
-
-    fn mu_size_of(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let tag = fp.argv[0];
-
-        fp.value = match mu.size_of(tag) {
-            Ok(size) => Fixnum::as_tag(size as i64),
-            Err(e) => return Err(e),
-        };
-
-        Ok(())
-    }
-
-    fn mu_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let tag = fp.argv[0];
-
-        fp.value = match Tag::type_of(tag) {
-            Type::Char => Char::view(mu, tag),
-            Type::Cons => Cons::view(mu, tag),
-            Type::Fixnum => Fixnum::view(mu, tag),
-            Type::Float => Float::view(mu, tag),
-            Type::Function => Function::view(mu, tag),
-            Type::Null | Type::Symbol | Type::Keyword => Symbol::view(mu, tag),
-            Type::Stream => Stream::view(mu, tag),
-            Type::Struct => Struct::view(mu, tag),
-            Type::Vector => Vector::view(mu, tag),
-            _ => return Err(Exception::new(Condition::Type, "view", tag)),
         };
 
         Ok(())

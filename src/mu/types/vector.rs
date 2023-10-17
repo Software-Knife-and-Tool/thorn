@@ -8,8 +8,9 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            mu::{Core as _, Mu},
+            mu::Mu,
             readtable::{map_char_syntax, SyntaxType},
+            stream,
             types::{Tag, Type},
         },
         types::{
@@ -221,7 +222,7 @@ impl<'a> Core<'a> for Vector {
             Tag::Direct(_) => match str::from_utf8(&vector.data(mu).to_le_bytes()) {
                 Ok(s) => {
                     if escape {
-                        mu.write_string("\"".to_string(), stream).unwrap()
+                        <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream).unwrap()
                     }
 
                     for nth in 0..DirectTag::length(vector) {
@@ -232,7 +233,7 @@ impl<'a> Core<'a> for Vector {
                     }
 
                     if escape {
-                        mu.write_string("\"".to_string(), stream).unwrap()
+                        <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream).unwrap()
                     }
 
                     Ok(())
@@ -242,21 +243,21 @@ impl<'a> Core<'a> for Vector {
             Tag::Indirect(_) => match Self::type_of(mu, vector) {
                 Type::Char => {
                     if escape {
-                        match mu.write_string("\"".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
                     }
 
                     for ch in VectorIter::new(mu, vector) {
-                        match mu.write(ch, false, stream) {
+                        match <Mu as stream::Core>::write(mu, ch, false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
                     }
 
                     if escape {
-                        match mu.write_string("\"".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
@@ -265,28 +266,33 @@ impl<'a> Core<'a> for Vector {
                     Ok(())
                 }
                 _ => {
-                    match mu.write_string("#(".to_string(), stream) {
+                    match <Mu as stream::Core>::write_string(mu, "#(".to_string(), stream) {
                         Ok(_) => (),
                         Err(e) => return Err(e),
                     }
-                    match mu.write(Self::to_image(mu, vector).vtype, true, stream) {
+                    match <Mu as stream::Core>::write(
+                        mu,
+                        Self::to_image(mu, vector).vtype,
+                        true,
+                        stream,
+                    ) {
                         Ok(_) => (),
                         Err(e) => return Err(e),
                     }
 
                     for tag in VectorIter::new(mu, vector) {
-                        match mu.write_string(" ".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, " ".to_string(), stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
 
-                        match mu.write(tag, false, stream) {
+                        match <Mu as stream::Core>::write(mu, tag, false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
                     }
 
-                    mu.write_string(")".to_string(), stream)
+                    <Mu as stream::Core>::write_string(mu, ")".to_string(), stream)
                 }
             },
         }

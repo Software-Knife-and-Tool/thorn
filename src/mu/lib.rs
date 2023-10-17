@@ -60,7 +60,7 @@ use {
         compile::Compiler,
         exception,
         mu::{self, Core},
-        reader::{Core as _, Reader},
+        stream::{self, Core as _},
     },
     std::fs,
     types::{
@@ -122,13 +122,19 @@ impl Mu {
 
     /// read a tagged s-expression from a mu stream
     pub fn read(&self, stream: Tag, eofp: bool, eof_value: Tag) -> exception::Result<Tag> {
-        Reader::read(&self.0, stream, eofp, eof_value, false)
+        <mu::Mu as stream::Core>::read(&self.0, stream, eofp, eof_value, false)
     }
 
     /// convert a rust String to a tagged s-expression
     pub fn read_string(&self, string: String) -> exception::Result<Tag> {
         match StreamBuilder::new().string(string).input().build(&self.0) {
-            Ok(stream) => Reader::read(&self.0, stream.evict(&self.0), true, Tag::nil(), false),
+            Ok(stream) => <mu::Mu as stream::Core>::read(
+                &self.0,
+                stream.evict(&self.0),
+                true,
+                Tag::nil(),
+                false,
+            ),
             Err(e) => Err(e),
         }
     }
@@ -230,7 +236,7 @@ impl System {
             .input()
             .build(&self.mu.0)
         {
-            Ok(stream) => Reader::read(
+            Ok(stream) => <mu::Mu as stream::Core>::read(
                 &self.mu.0,
                 stream.evict(&self.mu.0),
                 true,

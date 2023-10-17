@@ -4,7 +4,6 @@
 //! mu reader
 use crate::{
     core::{
-        backquote::Backquote,
         direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         mu::Mu,
@@ -14,7 +13,6 @@ use crate::{
     },
     types::{
         char::Char,
-        cons::{Cons, Core as _},
         fixnum::Fixnum,
         float::Float,
         stream::{Core as _, Stream},
@@ -44,7 +42,6 @@ pub trait Core {
     fn new() -> Self;
     fn build(&self, _: &Mu) -> Self;
     fn read_atom(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
-    fn read(_: &Mu, _: Tag, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
     fn read_block_comment(_: &Mu, _: Tag) -> exception::Result<Option<()>>;
     fn read_char_literal(_: &Mu, _: Tag) -> exception::Result<Option<Tag>>;
     fn read_comment(_: &Mu, _: Tag) -> exception::Result<Option<()>>;
@@ -368,99 +365,6 @@ impl Core for Reader {
                 _ => Err(Exception::new(Condition::Type, "read:#", Char::as_tag(ch))),
             },
             Ok(None) => Err(Exception::new(Condition::Eof, "read:#", stream)),
-            Err(e) => Err(e),
-        }
-    }
-
-    // read returns:
-    //
-    //     Err raise exception if I/O problem, syntax error, or end of file and !eofp
-    //     Ok(eof_value) if end of file and eofp
-    //     Ok(tag) if the read succeeded,
-    //
-    #[allow(clippy::only_used_in_recursion)]
-    fn read(
-        mu: &Mu,
-        stream: Tag,
-        eofp: bool,
-        eof_value: Tag,
-        recursivep: bool,
-    ) -> exception::Result<Tag> {
-        match Self::read_ws(mu, stream) {
-            Ok(None) => {
-                if eofp {
-                    return Ok(eof_value);
-                } else {
-                    return Err(Exception::new(Condition::Eof, "read:eo", stream));
-                }
-            }
-            Ok(_) => (),
-            Err(e) => return Err(e),
-        };
-
-        match Stream::read_char(mu, stream) {
-            Ok(None) => {
-                if eofp {
-                    Ok(eof_value)
-                } else {
-                    Err(Exception::new(Condition::Eof, "read:sm", stream))
-                }
-            }
-            Ok(Some(ch)) => match map_char_syntax(ch) {
-                Some(stype) => match stype {
-                    SyntaxType::Constituent => Self::read_atom(mu, ch, stream),
-                    SyntaxType::Macro => match ch {
-                        '#' => match Self::sharp_macro(mu, stream) {
-                            Ok(Some(tag)) => Ok(tag),
-                            Ok(None) => Self::read(mu, stream, eofp, eof_value, recursivep),
-                            Err(e) => Err(e),
-                        },
-                        _ => Err(Exception::new(
-                            Condition::Type,
-                            "read:sx",
-                            Fixnum::as_tag(ch as i64),
-                        )),
-                    },
-                    SyntaxType::Tmacro => match ch {
-                        '`' => <Mu as Backquote>::bq_read(mu, false, stream, false),
-                        '\'' => match Self::read(mu, stream, false, Tag::nil(), recursivep) {
-                            Ok(tag) => Ok(Cons::new(
-                                Symbol::keyword("quote"),
-                                Cons::new(tag, Tag::nil()).evict(mu),
-                            )
-                            .evict(mu)),
-                            Err(e) => Err(e),
-                        },
-                        '"' => match Vector::read(mu, '"', stream) {
-                            Ok(tag) => Ok(tag),
-                            Err(e) => Err(e),
-                        },
-                        '(' => match Cons::read(mu, stream) {
-                            Ok(cons) => Ok(cons),
-                            Err(e) => Err(e),
-                        },
-                        ')' => {
-                            if recursivep {
-                                Ok(mu.reader.eol)
-                            } else {
-                                Err(Exception::new(Condition::Syntax, "read:)", stream))
-                            }
-                        }
-                        ';' => match Self::read_comment(mu, stream) {
-                            Ok(_) => Self::read(mu, stream, eofp, eof_value, recursivep),
-                            Err(e) => Err(e),
-                        },
-                        ',' => Err(Exception::new(Condition::Range, "read:,", Char::as_tag(ch))),
-                        _ => Err(Exception::new(
-                            Condition::Range,
-                            "read::@",
-                            Char::as_tag(ch),
-                        )),
-                    },
-                    _ => Err(Exception::new(Condition::Read, "read::@", Char::as_tag(ch))),
-                },
-                _ => Err(Exception::new(Condition::Read, "read::@", Char::as_tag(ch))),
-            },
             Err(e) => Err(e),
         }
     }

@@ -6,7 +6,8 @@ use crate::{
     core::{
         exception,
         indirect::IndirectTag,
-        mu::{Core as _, Mu},
+        mu::Mu,
+        stream,
         types::{Tag, TagType, Type},
     },
     types::{
@@ -169,7 +170,8 @@ impl Core for Function {
                     }
                 };
 
-                mu.write_string(
+                <Mu as stream::Core>::write_string(
+                    mu,
                     format!("#<:function {} [req:{nreq}, tag:{}]>", desc.0, desc.1),
                     stream,
                 )
