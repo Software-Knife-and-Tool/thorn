@@ -148,3 +148,52 @@
                (core:raise str 'core:substr "is not a string"))
           (core:raise start 'core:substr "start is not a fixnum"))))
 
+;;;
+;;; read line
+;;;
+(mu:intern :core "read-line"
+   (:lambda (stream eof-error eof-value)
+      (:if (core:streamp stream)
+           ((:lambda (sstream)  
+               (mu:fix
+                (:lambda (loop)
+                   (:if (core:stringp loop)
+                        loop
+                        ((:lambda (ch)
+                            (:if (mu:eq ch #\linefeed)
+                                 (mu:get-str sstream)
+                                 ((:lambda ()
+                                     (mu:wr-char ch sstream)
+                                     (core:null loop)))))
+                         (mu:rd-char stream eof-error eof-value))))
+                ()))
+            (mu:open :string :output ""))
+           (core:raise str 'core:read-line "is not a stream"))))
+
+;;;
+;;; read from string
+;;;
+(mu:intern :core "read-string"
+   (:lambda (str eof-error eof-value)
+      (:if (core:stringp str)
+           (mu:read (mu:open :string :input str) eof-error eof-value)
+           (core:raise str 'core:read-string "is not a string"))))
+
+;;;
+;;; write string
+;;;
+(mu:intern :core "write-string"
+   (:lambda (str stream)
+      (:if (core:stringp str)
+           (:if (core:streamp stream)           
+                (mu:write str () stream)
+                (core:raise str 'core:write-string "is not a stream"))
+           (core:raise str 'core:write-string "is not a string"))))
+
+;;;
+;;; write line
+;;;
+(mu:intern :core "write-line"
+   (:lambda (str stream)
+      (core:write-string str stream)
+      (core:terpri stream)))

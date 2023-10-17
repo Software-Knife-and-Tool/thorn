@@ -35,7 +35,7 @@
       ((:lambda (counter)                 
           (mu:write (core:1+ counter) () core:%gensym-counter)
           (mu:make-sy (core:format () "g~X" `(,counter))))
-       (mu:read (mu:open :string :input (mu:get-str core:%gensym-counter)) () ()))))
+       (core:read-string (mu:get-str core:%gensym-counter) () ()))))
 
 (mu:intern :core "symbol-name" mu:sy-name)
 
