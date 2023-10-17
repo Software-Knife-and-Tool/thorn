@@ -6,7 +6,8 @@ use crate::{
     core::{
         direct::{DirectInfo, DirectTag, DirectType},
         exception,
-        mu::{Core as _, Mu},
+        mu::Mu,
+        stream,
         types::Tag,
     },
     types::{
@@ -42,7 +43,7 @@ impl Core for Char {
         let ch: u8 = (chr.data(mu) & 0xff) as u8;
 
         if escape {
-            match mu.write_string("#\\".to_string(), stream) {
+            match <Mu as stream::Core>::write_string(mu, "#\\".to_string(), stream) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
@@ -56,7 +57,7 @@ impl Core for Char {
                 _ => (ch as char).to_string(),
             };
 
-            match mu.write_string(phrase, stream) {
+            match <Mu as stream::Core>::write_string(mu, phrase, stream) {
                 Ok(_) => Ok(()),
                 Err(e) => Err(e),
             }

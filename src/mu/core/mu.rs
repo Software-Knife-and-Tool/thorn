@@ -6,11 +6,10 @@
 use {
     crate::{
         core::{
-            async_context::{AsyncContext, Core as _},
-            direct::DirectTag,
+            async_context::AsyncContext,
             exception::{self, Condition, Exception},
             frame::Frame,
-            functions::{Core as _, LibMuFunction},
+            funcall::{Core as _, LibMuFunction},
             namespace::{Cache, Core as NSCore},
             reader::{Core as _, Reader},
             types::{Tag, Type},
@@ -18,15 +17,8 @@ use {
         image::heap::Heap,
         system::sys as system,
         types::{
-            char::{Char, Core as _},
-            cons::{Cons, ConsIter, Core as _},
-            fixnum::{Core as _, Fixnum},
-            float::{Core as _, Float},
-            function::{Core as _, Function},
-            map::{Core as _, Map},
-            stream::{Core as _, Stream},
+            cons::{Cons, ConsIter},
             streambuilder::StreamBuilder,
-            struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
         },
@@ -36,7 +28,7 @@ use {
 };
 
 // locking protocols
-use {futures::executor::block_on, futures_locks::RwLock};
+use futures_locks::RwLock;
 
 // mu environment
 pub struct Mu {
@@ -89,14 +81,9 @@ pub trait Core {
     const VERSION: &'static str = "0.0.22";
 
     fn new(config: String) -> Self;
-    fn gc(&self) -> exception::Result<bool>;
-    fn gc_mark(&self, _: Tag);
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
-    fn write(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn write_string(&self, _: String, _: Tag) -> exception::Result<()>;
-    fn size_of(&self, tag: Tag) -> exception::Result<usize>;
 }
 
 impl Core for Mu {
@@ -247,90 +234,6 @@ impl Core for Mu {
             }
             _ => Ok(expr),
         }
-    }
-
-    fn gc_mark(&self, tag: Tag) {
-        match tag {
-            Tag::Direct(_) => (),
-            Tag::Indirect(_) => match Tag::type_of(tag) {
-                Type::Cons => Cons::gc_mark(self, tag),
-                Type::Function => Function::gc_mark(self, tag),
-                Type::Map => Map::gc_mark(self, tag),
-                Type::Stream => Stream::gc_mark(self, tag),
-                Type::Struct => Struct::gc_mark(self, tag),
-                Type::Symbol => Symbol::gc_mark(self, tag),
-                Type::Vector => Vector::gc_mark(self, tag),
-                _ => (),
-            },
-        }
-    }
-
-    fn gc(&self) -> exception::Result<bool> {
-        let mut heap_ref = block_on(self.heap.write());
-        heap_ref.clear_refbits();
-
-        let root_ref = block_on(self.gc_root.write());
-
-        for tag in &*root_ref {
-            self.gc_mark(*tag)
-        }
-
-        Ok(true)
-    }
-
-    fn write(&self, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        if Tag::type_of(stream) != Type::Stream {
-            panic!("{:?}", Tag::type_of(stream))
-        }
-
-        match Tag::type_of(tag) {
-            Type::AsyncId => AsyncContext::write(self, tag, escape, stream),
-            Type::Char => Char::write(self, tag, escape, stream),
-            Type::Cons => Cons::write(self, tag, escape, stream),
-            Type::Fixnum => Fixnum::write(self, tag, escape, stream),
-            Type::Float => Float::write(self, tag, escape, stream),
-            Type::Function => Function::write(self, tag, escape, stream),
-            Type::Keyword => Symbol::write(self, tag, escape, stream),
-            Type::Map => Map::write(self, tag, escape, stream),
-            Type::Null => Symbol::write(self, tag, escape, stream),
-            Type::Stream => Stream::write(self, tag, escape, stream),
-            Type::Struct => Struct::write(self, tag, escape, stream),
-            Type::Symbol => Symbol::write(self, tag, escape, stream),
-            Type::Vector => Vector::write(self, tag, escape, stream),
-            _ => panic!(),
-        }
-    }
-
-    fn write_string(&self, str: String, stream: Tag) -> exception::Result<()> {
-        if Tag::type_of(stream) != Type::Stream {
-            panic!("{:?}", Tag::type_of(stream))
-        }
-        for ch in str.chars() {
-            match Stream::write_char(self, stream, ch) {
-                Ok(_) => (),
-                Err(e) => return Err(e),
-            }
-        }
-
-        Ok(())
-    }
-
-    fn size_of(&self, tag: Tag) -> exception::Result<usize> {
-        let size = match Tag::type_of(tag) {
-            Type::Char | Type::Fixnum | Type::Float | Type::Null | Type::Keyword => {
-                std::mem::size_of::<DirectTag>()
-            }
-            Type::Cons => Cons::size_of(self, tag),
-            Type::Function => Function::size_of(self, tag),
-            Type::Map => Map::size_of(self, tag),
-            Type::Stream => Stream::size_of(self, tag),
-            Type::Struct => Struct::size_of(self, tag),
-            Type::Symbol => Symbol::size_of(self, tag),
-            Type::Vector => Vector::size_of(self, tag),
-            _ => panic!(),
-        };
-
-        Ok(size)
     }
 }
 

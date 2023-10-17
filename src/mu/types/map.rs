@@ -7,8 +7,10 @@ use {
         core::{
             exception::{self, Condition, Exception},
             frame::Frame,
+            heap::Core as _,
             indirect::IndirectTag,
-            mu::{Core as _, Mu},
+            mu::Mu,
+            stream,
             types::{Tag, TagType, Type},
         },
         types::{
@@ -181,7 +183,11 @@ impl Core for Map {
                 let index_ref = block_on(mu.map_index.write());
                 let size = index_ref.len();
 
-                mu.write_string(format!("#<:map [size:{size}, tag:{}]>", cache_id), stream)
+                <Mu as stream::Core>::write_string(
+                    mu,
+                    format!("#<:map [size:{size}, tag:{}]>", cache_id),
+                    stream,
+                )
             }
             _ => panic!(),
         }

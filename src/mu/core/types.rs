@@ -8,12 +8,17 @@ use {
     crate::{
         core::{
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
-            exception,
+            exception::{self, Condition, Exception},
             frame::Frame,
             indirect::IndirectTag,
             mu::Mu,
         },
-        types::symbol::{Core as _, Symbol},
+        types::{
+            fixnum::Fixnum,
+            symbol::{Core as _, Symbol},
+            vecimage::{TypedVec, VecType},
+            vector::{Core as _, Vector},
+        },
     },
     num_enum::TryFromPrimitive,
     std::fmt,
@@ -206,9 +211,51 @@ impl Tag {
 pub trait MuFunction {
     fn mu_eq(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_typeof(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Tag {
+    fn mu_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let conv = fp.argv[0];
+        let arg = fp.argv[1];
+
+        // if conv is (), convert arg tag bits to a byte vector
+        // if not, convert arg byte vector to a tag
+
+        fp.value = match Tag::null_(&conv) {
+            true => {
+                let slice = arg.as_slice();
+
+                TypedVec::<Vec<u8>> {
+                    vec: slice.to_vec(),
+                }
+                .vec
+                .to_vector()
+                .evict(mu)
+            }
+            false => match Tag::type_of(arg) {
+                Type::Vector
+                    if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 =>
+                {
+                    let mut u64_: u64 = 0;
+
+                    for index in (0..8).rev() {
+                        u64_ <<= 8;
+                        u64_ |= match Vector::ref_(mu, arg, index as usize) {
+                            Some(byte) => Fixnum::as_i64(byte) as u64,
+                            None => panic!(),
+                        }
+                    }
+
+                    Tag::from_u64(u64_)
+                }
+                _ => return Err(Exception::new(Condition::Type, "repr", arg)),
+            },
+        };
+
+        Ok(())
+    }
+
     fn mu_eq(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = if fp.argv[0].eq_(fp.argv[1]) {
             Symbol::keyword("t")
@@ -220,7 +267,7 @@ impl MuFunction for Tag {
     }
 
     fn mu_typeof(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match Self::type_key(Self::type_of(fp.argv[0])) {
+        fp.value = match Tag::type_key(Tag::type_of(fp.argv[0])) {
             Some(type_key) => type_key,
             None => panic!(),
         };

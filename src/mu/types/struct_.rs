@@ -7,7 +7,8 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         indirect::IndirectTag,
-        mu::{Core as _, Mu},
+        mu::Mu,
+        stream,
         types::{Tag, TagType, Type},
     },
     types::{
@@ -134,29 +135,29 @@ impl<'a> Core<'a> for Struct {
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match tag {
             Tag::Indirect(_) => {
-                match mu.write_string("#s(".to_string(), stream) {
+                match <Mu as stream::Core>::write_string(mu, "#s(".to_string(), stream) {
                     Ok(_) => (),
                     Err(e) => return Err(e),
                 }
 
-                match mu.write(Self::to_image(mu, tag).stype, true, stream) {
+                match <Mu as stream::Core>::write(mu, Self::to_image(mu, tag).stype, true, stream) {
                     Ok(_) => (),
                     Err(e) => return Err(e),
                 }
 
                 for tag in VectorIter::new(mu, Self::to_image(mu, tag).vector) {
-                    match mu.write_string(" ".to_string(), stream) {
+                    match <Mu as stream::Core>::write_string(mu, " ".to_string(), stream) {
                         Ok(_) => (),
                         Err(e) => return Err(e),
                     }
 
-                    match mu.write(tag, false, stream) {
+                    match <Mu as stream::Core>::write(mu, tag, false, stream) {
                         Ok(_) => (),
                         Err(e) => return Err(e),
                     }
                 }
 
-                mu.write_string(")".to_string(), stream)
+                <Mu as stream::Core>::write_string(mu, ")".to_string(), stream)
             }
             _ => panic!(),
         }

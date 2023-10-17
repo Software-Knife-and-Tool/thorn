@@ -11,8 +11,7 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
-        mu::{Core as _, Mu},
-        reader::{Core as _, Reader},
+        mu::Mu,
         types::{Tag, Type},
     },
     system::{stream::Core as _, sys::System},
@@ -33,11 +32,9 @@ pub trait MuFunction {
     fn mu_get_string(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_open(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_openp(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_read(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_read_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_read_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_unread_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_write(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_write_byte(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_write_char(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
@@ -151,40 +148,6 @@ impl MuFunction for Stream {
         }
 
         Ok(())
-    }
-
-    fn mu_read(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let stream = fp.argv[0];
-        let eofp = fp.argv[1];
-        let eof_value = fp.argv[2];
-
-        match Tag::type_of(stream) {
-            Type::Stream => match Reader::read(mu, stream, !eofp.null_(), eof_value, false) {
-                Ok(tag) => {
-                    fp.value = tag;
-                    Ok(())
-                }
-                Err(e) => Err(e),
-            },
-            _ => Err(Exception::new(Condition::Type, "read", stream)),
-        }
-    }
-
-    fn mu_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let value = fp.argv[0];
-        let escape = fp.argv[1];
-        let stream = fp.argv[2];
-
-        match Tag::type_of(stream) {
-            Type::Stream => match mu.write(value, !escape.null_(), stream) {
-                Ok(_) => {
-                    fp.value = value;
-                    Ok(())
-                }
-                Err(e) => Err(e),
-            },
-            _ => Err(Exception::new(Condition::Type, "write", stream)),
-        }
     }
 
     fn mu_eof(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {

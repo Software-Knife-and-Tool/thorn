@@ -8,8 +8,8 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         indirect::IndirectTag,
-        mu::{Core as _, Mu},
-        reader::{Core as _, Reader},
+        mu::Mu,
+        stream,
         types::{Tag, TagType, Type},
     },
     types::{
@@ -174,17 +174,23 @@ impl Core for Cons {
     fn read(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
         let dot = DirectTag::to_direct('.' as u64, DirectInfo::Length(1), DirectType::Byte);
 
-        match Reader::read(mu, stream, false, Tag::nil(), true) {
+        match <Mu as stream::Core>::read(mu, stream, false, Tag::nil(), true) {
             Ok(car) => {
                 if mu.reader.eol.eq_(car) {
                     Ok(Tag::nil())
                 } else {
                     match Tag::type_of(car) {
                         Type::Symbol if dot.eq_(Symbol::name(mu, car)) => {
-                            match Reader::read(mu, stream, false, Tag::nil(), true) {
+                            match <Mu as stream::Core>::read(mu, stream, false, Tag::nil(), true) {
                                 Ok(cdr) if mu.reader.eol.eq_(cdr) => Ok(Tag::nil()),
                                 Ok(cdr) => {
-                                    match Reader::read(mu, stream, false, Tag::nil(), true) {
+                                    match <Mu as stream::Core>::read(
+                                        mu,
+                                        stream,
+                                        false,
+                                        Tag::nil(),
+                                        true,
+                                    ) {
                                         Ok(eol) if mu.reader.eol.eq_(eol) => Ok(cdr),
                                         Ok(_) => Err(Exception::new(Condition::Eof, "car", stream)),
                                         Err(e) => Err(e),
@@ -207,8 +213,8 @@ impl Core for Cons {
     fn write(mu: &Mu, cons: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let car = Self::car(mu, cons);
 
-        mu.write_string("(".to_string(), stream).unwrap();
-        mu.write(car, escape, stream).unwrap();
+        <Mu as stream::Core>::write_string(mu, "(".to_string(), stream).unwrap();
+        <Mu as stream::Core>::write(mu, car, escape, stream).unwrap();
 
         let mut tail = Self::cdr(mu, cons);
 
@@ -216,20 +222,20 @@ impl Core for Cons {
         loop {
             match Tag::type_of(tail) {
                 Type::Cons => {
-                    mu.write_string(" ".to_string(), stream).unwrap();
-                    mu.write(Self::car(mu, tail), escape, stream).unwrap();
+                    <Mu as stream::Core>::write_string(mu, " ".to_string(), stream).unwrap();
+                    <Mu as stream::Core>::write(mu, Self::car(mu, tail), escape, stream).unwrap();
                     tail = Self::cdr(mu, tail);
                 }
                 _ if tail.null_() => break,
                 _ => {
-                    mu.write_string(" . ".to_string(), stream).unwrap();
-                    mu.write(tail, escape, stream).unwrap();
+                    <Mu as stream::Core>::write_string(mu, " . ".to_string(), stream).unwrap();
+                    <Mu as stream::Core>::write(mu, tail, escape, stream).unwrap();
                     break;
                 }
             }
         }
 
-        mu.write_string(")".to_string(), stream)
+        <Mu as stream::Core>::write_string(mu, ")".to_string(), stream)
     }
 
     fn vlist(mu: &Mu, vec: &[Tag]) -> Tag {

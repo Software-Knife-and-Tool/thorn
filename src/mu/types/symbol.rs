@@ -8,10 +8,12 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            heap::Core as _,
             indirect::IndirectTag,
-            mu::{Core as _, Mu},
+            mu::Mu,
             namespace::{Cache, Core as NSCore},
             readtable::{map_char_syntax, SyntaxType},
+            stream,
             types::{Tag, TagType, Type},
         },
         types::{
@@ -279,18 +281,18 @@ impl Core for Symbol {
                     let ns = Self::namespace(mu, symbol);
 
                     if !Tag::null_(&ns) && !mu.null_ns.eq_(ns) {
-                        match mu.write(Symbol::name(mu, ns), false, stream) {
+                        match <Mu as stream::Core>::write(mu, Symbol::name(mu, ns), false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
 
-                        match mu.write_string(":".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, ":".to_string(), stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
                     }
                 }
-                mu.write(name, false, stream)
+                <Mu as stream::Core>::write(mu, name, false, stream)
             }
             _ => panic!(),
         }

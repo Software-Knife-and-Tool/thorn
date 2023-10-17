@@ -11,6 +11,7 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             mu::{Core as _, Mu},
+            stream::Core as _,
             types::{Tag, Type},
         },
         types::{
