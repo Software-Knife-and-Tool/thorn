@@ -16,7 +16,7 @@ use {futures::executor::block_on, futures_locks::RwLock};
 // (type, total-size, alloc, in-use)
 type AllocMap = (u8, usize, usize, usize);
 
-pub struct Heap {
+pub struct BumpHeap {
     pub mmap: Box<memmap::MmapMut>,
     pub alloc_map: RwLock<Vec<AllocMap>>,
     pub page_size: usize,
@@ -37,7 +37,7 @@ pub struct Info {
     pub tag_type: B4, // tag type
 }
 
-impl Heap {
+impl BumpHeap {
     pub fn new(pages: usize) -> Self {
         let path = "/var/tmp/thorn.heap";
 
@@ -60,7 +60,7 @@ impl Heap {
                 .expect("Could not access data from memory mapped file")
         };
 
-        let heap = Heap {
+        let heap = BumpHeap {
             mmap: Box::new(data),
             page_size: 4096,
             npages: pages,
@@ -235,19 +235,18 @@ impl Heap {
 }
 
 /// iterator
-pub struct HeapInfoIter<'a> {
-    pub heap: &'a Heap,
+pub struct BumpHeapInfoIter<'a> {
+    pub heap: &'a BumpHeap,
     pub offset: usize,
 }
 
-impl<'a> HeapInfoIter<'a> {
-    pub fn new(heap: &'a Heap) -> Self {
+impl<'a> BumpHeapInfoIter<'a> {
+    pub fn new(heap: &'a BumpHeap) -> Self {
         Self { heap, offset: 8 }
     }
 }
 
-// proper lists only
-impl<'a> Iterator for HeapInfoIter<'a> {
+impl<'a> Iterator for BumpHeapInfoIter<'a> {
     type Item = Info;
 
     fn next(&mut self) -> Option<Self::Item> {

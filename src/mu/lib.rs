@@ -51,7 +51,7 @@ extern crate lazy_static;
 extern crate modular_bitfield;
 
 mod core;
-mod image;
+mod heap;
 mod system;
 mod types;
 

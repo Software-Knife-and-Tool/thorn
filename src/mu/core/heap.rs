@@ -3,32 +3,67 @@
 
 //! mu gc
 //!    Mu
-use crate::{
-    core::{
-        direct::DirectTag,
-        exception,
-        frame::Frame,
-        indirect::{self, IndirectTag},
-        mu::Mu,
-        types::{Tag, Type},
+use {
+    crate::{
+        core::{
+            direct::DirectTag,
+            exception,
+            frame::Frame,
+            indirect::{self, IndirectTag},
+            mu::Mu,
+            types::{Tag, Type},
+        },
+        types::{
+            char::{Char, Core as _},
+            cons::{Cons, Core as _},
+            fixnum::{Core as _, Fixnum},
+            float::{Core as _, Float},
+            function::{Core as _, Function},
+            map::{Core as _, Map},
+            stream::{Core as _, Stream},
+            struct_::{Core as _, Struct},
+            symbol::{Core as _, Symbol},
+            vecimage::{TypedVec, VecType},
+            vector::{Core as _, Vector},
+        },
     },
-    types::{
-        char::{Char, Core as _},
-        cons::{Cons, Core as _},
-        fixnum::{Core as _, Fixnum},
-        float::{Core as _, Float},
-        function::{Core as _, Function},
-        map::{Core as _, Map},
-        stream::{Core as _, Stream},
-        struct_::{Core as _, Struct},
-        symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType},
-        vector::{Core as _, Vector},
-    },
+    memmap,
+    modular_bitfield::specifiers::{B11, B4},
 };
 
 // locking protocols
-use futures::executor::block_on;
+use {futures::executor::block_on, futures_locks::RwLock};
+
+// (type, total-size, alloc, in-use)
+type AllocMap = (u8, usize, usize, usize);
+
+#[bitfield]
+#[repr(align(8))]
+#[derive(Copy, Clone)]
+pub struct Info {
+    pub reloc: u32, // relocation
+    #[skip]
+    __: B11, // expansion
+    pub mark: bool, // reference counting
+    pub len: u16,   // in bytes
+    pub tag_type: B4, // tag type
+}
+
+pub struct HeapInterface<'a> {
+    mmap: &'a memmap::MmapMut,
+    alloc: Box<dyn Fn(u8, u16) -> u32>,
+    begin_gc: Box<dyn Fn(u8, u16) -> u32>,
+    info_iter: Box<dyn Iterator<Item = Info>>,
+    image_iter: Box<dyn Iterator<Item = Info>>,
+    page_size: usize,
+    npages: usize,
+}
+
+pub struct Heap {
+    heap: HeapInterface<'static>,
+    alloc_map: RwLock<Vec<AllocMap>>,
+    freelist: [Vec<Tag>; 8],
+}
 
 lazy_static! {
     static ref INFOTYPE: Vec<Tag> = vec![
@@ -190,3 +225,28 @@ mod tests {
         assert_eq!(2 + 2, 4);
     }
 }
+
+/*
+/// iterator
+pub struct HeapInfoIter<'a> {
+    pub heap: &'a Heap,
+    pub offset: usize,
+}
+
+impl<'a> HeapInfoIter<'a> {
+    pub fn new(heap: &'a Heap) -> Self {
+        Self { heap, offset: 8 }
+    }
+}
+
+impl<'a> Iterator for HeapInfoIter<'a> {
+    type Item = Info;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let info = self.heap.image_info(self.offset).unwrap();
+        self.offset += info.len() as usize;
+
+        Some(info)
+    }
+}
+*/
