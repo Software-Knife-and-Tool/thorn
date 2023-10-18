@@ -107,11 +107,11 @@ impl Vector {
 pub trait Core<'a> {
     fn as_string(_: &Mu, _: Tag) -> String;
     fn evict(&self, _: &Mu) -> Tag;
-    fn gc_mark(_: &Mu, _: Tag);
     fn from_string(_: &str) -> Vector;
+    fn gc_mark(_: &Mu, _: Tag);
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn read(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
     fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
-    fn size_of(_: &Mu, _: Tag) -> usize;
     fn view(_: &Mu, _: Tag) -> Tag;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
@@ -129,7 +129,7 @@ impl<'a> Core<'a> for Vector {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(mu: &Mu, vector: Tag) -> usize {
+    fn heap_size(mu: &Mu, vector: Tag) -> usize {
         match vector {
             Tag::Direct(_) => std::mem::size_of::<DirectTag>(),
             Tag::Indirect(_) => {

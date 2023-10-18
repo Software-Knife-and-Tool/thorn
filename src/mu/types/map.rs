@@ -7,7 +7,7 @@ use {
         core::{
             exception::{self, Condition, Exception},
             frame::Frame,
-            heap::Core as _,
+            heap,
             indirect::IndirectTag,
             mu::Mu,
             stream,
@@ -86,6 +86,17 @@ impl Map {
         }
     }
 
+    fn view(mu: &Mu, map: Tag) -> Tag {
+        let image = Self::to_image(mu, map);
+        let vec = vec![image.cache_id, image.list];
+
+        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+    }
+
+    fn heap_size(_: &Mu, _: Tag) -> usize {
+        std::mem::size_of::<Map>()
+    }
+
     // do we need a lock at all?
     fn map_get(mu: &Mu, cache_id: usize, key: Tag) -> Option<Tag> {
         let index_ref = block_on(mu.map_index.read());
@@ -141,7 +152,7 @@ impl Map {
 pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
     fn gc_mark(_: &Mu, _: Tag);
-    fn size_of(_: &Mu, _: Tag) -> usize;
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn view(_: &Mu, _: Tag) -> Tag;
 }
@@ -172,8 +183,8 @@ impl Core for Map {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(mu: &Mu, symbol: Tag) -> usize {
-        std::mem::size_of::<Map>() + Mu::size_of(mu, Self::list(mu, symbol)).unwrap()
+    fn heap_size(mu: &Mu, symbol: Tag) -> usize {
+        std::mem::size_of::<Map>() + heap::Core::heap_size(mu, Self::list(mu, symbol))
     }
 
     fn write(mu: &Mu, map: Tag, _: bool, stream: Tag) -> exception::Result<()> {

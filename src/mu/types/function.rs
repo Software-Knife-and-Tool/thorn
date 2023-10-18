@@ -105,9 +105,9 @@ impl Function {
 
 pub trait Core {
     fn gc_mark(_: &Mu, _: Tag);
-    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn size_of(_: &Mu, _: Tag) -> usize;
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn view(_: &Mu, _: Tag) -> Tag;
+    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Function {
@@ -140,7 +140,7 @@ impl Core for Function {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(mu: &Mu, fn_: Tag) -> usize {
+    fn heap_size(mu: &Mu, fn_: Tag) -> usize {
         match Tag::type_of(Self::form(mu, fn_)) {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Fixnum => std::mem::size_of::<Function>(),

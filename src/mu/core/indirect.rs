@@ -25,10 +25,11 @@ lazy_static! {
     static ref TYPEMAP: Vec<(Tag, Type)> = vec![
         (Symbol::keyword("cons"), Type::Cons),
         (Symbol::keyword("func"), Type::Function),
+        (Symbol::keyword("map"), Type::Map),
         (Symbol::keyword("nil"), Type::Null),
         (Symbol::keyword("stream"), Type::Stream),
-        (Symbol::keyword("symbol"), Type::Symbol),
         (Symbol::keyword("struct"), Type::Struct),
+        (Symbol::keyword("symbol"), Type::Symbol),
         (Symbol::keyword("t"), Type::T),
         (Symbol::keyword("vector"), Type::Vector),
     ];

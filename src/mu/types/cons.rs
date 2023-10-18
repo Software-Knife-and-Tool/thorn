@@ -103,16 +103,16 @@ impl Cons {
 
 // core operations
 pub trait Core {
-    fn gc_mark(_: &Mu, _: Tag);
     fn evict(&self, _: &Mu) -> Tag;
-    fn vlist(_: &Mu, _: &[Tag]) -> Tag;
-    fn vappend(_: &Mu, _: &[Tag], _: Tag) -> Tag;
+    fn gc_mark(_: &Mu, _: Tag);
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn nth(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn read(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn size_of(_: &Mu, _: Tag) -> usize;
-    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
+    fn vappend(_: &Mu, _: &[Tag], _: Tag) -> Tag;
     fn view(_: &Mu, _: Tag) -> Tag;
+    fn vlist(_: &Mu, _: &[Tag]) -> Tag;
+    fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Cons {
@@ -141,7 +141,7 @@ impl Core for Cons {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(_: &Mu, cons: Tag) -> usize {
+    fn heap_size(_: &Mu, cons: Tag) -> usize {
         match cons {
             Tag::Direct(dtag) => match dtag.dtype() {
                 DirectType::Ext => match dtag.info() {
