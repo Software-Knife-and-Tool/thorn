@@ -14,7 +14,7 @@ use {
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
-        image::heap::Heap,
+        heap::bump_heap::BumpHeap,
         system::sys as system,
         types::{
             cons::{Cons, ConsIter},
@@ -36,7 +36,7 @@ pub struct Mu {
     pub version: Tag,
 
     // heap
-    pub heap: RwLock<Heap>,
+    pub heap: RwLock<BumpHeap>,
     pub gc_root: RwLock<Vec<Tag>>,
 
     // async environments
@@ -93,7 +93,7 @@ impl Core for Mu {
             version: Tag::nil(),
 
             // heap
-            heap: RwLock::new(Heap::new(1024)),
+            heap: RwLock::new(BumpHeap::new(1024)),
             gc_root: RwLock::new(Vec::<Tag>::new()),
 
             // async contexts
