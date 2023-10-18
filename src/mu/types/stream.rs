@@ -114,7 +114,7 @@ pub trait Core {
     fn write_char(_: &Mu, _: Tag, _: char) -> exception::Result<Option<()>>;
     fn gc_mark(_: &Mu, _: Tag);
     fn view(_: &Mu, _: Tag) -> Tag;
-    fn size_of(_: &Mu, _: Tag) -> usize;
+    fn heap_size(_: &Mu, _: Tag) -> usize;
 }
 
 impl Core for Stream {
@@ -144,7 +144,7 @@ impl Core for Stream {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(_: &Mu, _: Tag) -> usize {
+    fn heap_size(_: &Mu, _: Tag) -> usize {
         std::mem::size_of::<Stream>()
     }
 

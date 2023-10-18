@@ -115,12 +115,12 @@ impl Symbol {
 
 pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
+    fn gc_mark(_: &Mu, _: Tag);
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn is_unbound(_: &Mu, _: Tag) -> bool;
     fn keyword(_: &str) -> Tag;
     fn parse(_: &Mu, _: String) -> exception::Result<Tag>;
     fn view(_: &Mu, _: Tag) -> Tag;
-    fn gc_mark(_: &Mu, _: Tag);
-    fn size_of(_: &Mu, _: Tag) -> usize;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
 
@@ -139,9 +139,9 @@ impl Core for Symbol {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(mu: &Mu, symbol: Tag) -> usize {
-        let name_sz = Mu::size_of(mu, Self::name(mu, symbol)).unwrap();
-        let value_sz = Mu::size_of(mu, Self::value(mu, symbol)).unwrap();
+    fn heap_size(mu: &Mu, symbol: Tag) -> usize {
+        let name_sz = Mu::heap_size(mu, Self::name(mu, symbol));
+        let value_sz = Mu::heap_size(mu, Self::value(mu, symbol));
 
         std::mem::size_of::<Symbol>()
             + if name_sz > 8 { name_sz } else { 0 }

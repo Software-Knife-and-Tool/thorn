@@ -6,7 +6,7 @@
 use crate::{
     core::{
         direct::DirectTag,
-        exception::{self, Condition, Exception},
+        exception,
         frame::Frame,
         indirect::{self, IndirectTag},
         mu::Mu,
@@ -34,6 +34,7 @@ lazy_static! {
     static ref INFOTYPE: Vec<Tag> = vec![
         Symbol::keyword("cons"),
         Symbol::keyword("func"),
+        Symbol::keyword("map"),
         Symbol::keyword("stream"),
         Symbol::keyword("struct"),
         Symbol::keyword("symbol"),
@@ -45,9 +46,9 @@ pub trait Core {
     fn add_gc_root(&self, _: Tag);
     fn gc(&self) -> exception::Result<bool>;
     fn gc_mark(&self, _: Tag);
-    fn size_of(&self, _: Tag) -> exception::Result<usize>;
-    fn hp_info(_: &Mu) -> (usize, usize);
-    fn hp_type(_: &Mu, _: Type) -> (u8, usize, usize, usize);
+    fn heap_size(&self, _: Tag) -> usize;
+    fn heap_info(_: &Mu) -> (usize, usize);
+    fn heap_type(_: &Mu, _: Type) -> (u8, usize, usize, usize);
 }
 
 impl Core for Mu {
@@ -86,31 +87,26 @@ impl Core for Mu {
         Ok(true)
     }
 
-    fn size_of(&self, tag: Tag) -> exception::Result<usize> {
-        let size = match Tag::type_of(tag) {
-            Type::Char | Type::Fixnum | Type::Float | Type::Null | Type::Keyword => {
-                std::mem::size_of::<DirectTag>()
-            }
-            Type::Cons => Cons::size_of(self, tag),
-            Type::Function => Function::size_of(self, tag),
-            Type::Map => Map::size_of(self, tag),
-            Type::Stream => Stream::size_of(self, tag),
-            Type::Struct => Struct::size_of(self, tag),
-            Type::Symbol => Symbol::size_of(self, tag),
-            Type::Vector => Vector::size_of(self, tag),
-            _ => panic!(),
-        };
-
-        Ok(size)
+    fn heap_size(&self, tag: Tag) -> usize {
+        match Tag::type_of(tag) {
+            Type::Cons => Cons::heap_size(self, tag),
+            Type::Function => Function::heap_size(self, tag),
+            Type::Map => Map::heap_size(self, tag),
+            Type::Stream => Stream::heap_size(self, tag),
+            Type::Struct => Struct::heap_size(self, tag),
+            Type::Symbol => Symbol::heap_size(self, tag),
+            Type::Vector => Vector::heap_size(self, tag),
+            _ => std::mem::size_of::<DirectTag>(),
+        }
     }
 
-    fn hp_info(mu: &Mu) -> (usize, usize) {
+    fn heap_info(mu: &Mu) -> (usize, usize) {
         let heap_ref = block_on(mu.heap.read());
 
         (heap_ref.page_size, heap_ref.npages)
     }
 
-    fn hp_type(mu: &Mu, htype: Type) -> (u8, usize, usize, usize) {
+    fn heap_type(mu: &Mu, htype: Type) -> (u8, usize, usize, usize) {
         let heap_ref = block_on(mu.heap.read());
         let alloc_ref = block_on(heap_ref.alloc_map.read());
 
@@ -119,15 +115,15 @@ impl Core for Mu {
 }
 
 pub trait MuFunction {
-    fn mu_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_gc(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_size_of(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_hp_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
     fn mu_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let (pagesz, npages) = Self::hp_info(mu);
+        let (pagesz, npages) = Self::heap_info(mu);
 
         let mut vec = vec![
             Symbol::keyword("t"),
@@ -137,7 +133,7 @@ impl MuFunction for Mu {
         ];
 
         for htype in INFOTYPE.iter() {
-            let (_, size, alloc, in_use) = Self::hp_type(
+            let (_, size, alloc, in_use) = Self::heap_type(
                 mu,
                 <IndirectTag as indirect::Core>::to_indirect_type(*htype).unwrap(),
             );
@@ -161,13 +157,8 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_size_of(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let tag = fp.argv[0];
-
-        fp.value = match mu.size_of(tag) {
-            Ok(size) => Fixnum::as_tag(size as i64),
-            Err(e) => return Err(e),
-        };
+    fn mu_hp_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = Fixnum::as_tag(Self::heap_size(mu, fp.argv[0]) as i64);
 
         Ok(())
     }
@@ -181,11 +172,11 @@ impl MuFunction for Mu {
             Type::Fixnum => Fixnum::view(mu, tag),
             Type::Float => Float::view(mu, tag),
             Type::Function => Function::view(mu, tag),
-            Type::Null | Type::Symbol | Type::Keyword => Symbol::view(mu, tag),
+            Type::Map => Map::view(mu, tag),
             Type::Stream => Stream::view(mu, tag),
             Type::Struct => Struct::view(mu, tag),
             Type::Vector => Vector::view(mu, tag),
-            _ => return Err(Exception::new(Condition::Type, "view", tag)),
+            _ => Symbol::view(mu, tag),
         };
 
         Ok(())

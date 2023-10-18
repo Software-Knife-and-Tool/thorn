@@ -32,19 +32,20 @@
 (mu:view 'mu:eq)	#(:t :mu eq #<:function mu:eq [req:2, tag:0]>)
 (mu:view mu:eq)	#(:t 2 0 eq)
 (mu:view mu:std-in)	#(:t 2147483648 :input :nil :nil)
-(mu:size-of ())	8
-(mu:size-of :keyword)	8
-(mu:size-of #\a)	8
-(mu:size-of '(1 2))	8
-(mu:size-of 1234)	8
-(mu:size-of 1.0)	8
-(mu:size-of #s(:foo 1 2))	52
-(mu:size-of "abcdefg")	8
-(mu:size-of "abcdefgh")	26
-(mu:size-of #(:t 1 2))	34
-(mu:size-of 'a)	27
-(mu:size-of 'mu:eq)	54
-(mu:size-of mu:eq)	27
-(mu:size-of mu:std-in)	36
+(mu:view (mu:make-mp))	#(:t 0 :nil)
+(mu:hp-size ())	8
+(mu:hp-size :keyword)	8
+(mu:hp-size #\a)	8
+(mu:hp-size '(1 2))	8
+(mu:hp-size 1234)	8
+(mu:hp-size 1.0)	8
+(mu:hp-size #s(:foo 1 2))	52
+(mu:hp-size "abcdefg")	8
+(mu:hp-size "abcdefgh")	26
+(mu:hp-size #(:t 1 2))	34
+(mu:hp-size 'a)	27
+(mu:hp-size 'mu:eq)	54
+(mu:hp-size mu:eq)	27
+(mu:hp-size mu:std-in)	36
 (mu:with-ex (:lambda (cond obj) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 1)))	1
 (mu:repr :t (mu:repr () :t))	:t

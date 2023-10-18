@@ -91,7 +91,7 @@ pub trait Core<'a> {
     fn evict(&self, _: &Mu) -> Tag;
     fn gc_mark(_: &Mu, _: Tag);
     fn view(_: &Mu, _: Tag) -> Tag;
-    fn size_of(_: &Mu, _: Tag) -> usize;
+    fn heap_size(_: &Mu, _: Tag) -> usize;
 }
 
 impl<'a> Core<'a> for Struct {
@@ -128,8 +128,8 @@ impl<'a> Core<'a> for Struct {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn size_of(mu: &Mu, struct_: Tag) -> usize {
-        std::mem::size_of::<Struct>() + Vector::size_of(mu, Self::vector(mu, struct_))
+    fn heap_size(mu: &Mu, struct_: Tag) -> usize {
+        std::mem::size_of::<Struct>() + Vector::heap_size(mu, Self::vector(mu, struct_))
     }
 
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
