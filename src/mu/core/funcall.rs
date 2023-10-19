@@ -61,6 +61,7 @@ lazy_static! {
         // heap
         ("gc", 0, Mu::mu_gc),
         ("hp-info", 0, Mu::mu_hp_info),
+        ("hp-stat", 0, Mu::mu_hp_stat),
         ("hp-size", 1, Mu::mu_hp_size),
         ("view", 1, Mu::mu_view),
         // mu

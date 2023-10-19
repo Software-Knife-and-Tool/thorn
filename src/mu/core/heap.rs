@@ -153,11 +153,21 @@ pub trait MuFunction {
     fn mu_gc(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_hp_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_hp_stat(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
-    fn mu_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match mu.gc() {
+            Ok(_) => Symbol::keyword("t"),
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_hp_stat(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (pagesz, npages) = Self::heap_info(mu);
 
         let mut vec = vec![
@@ -183,11 +193,16 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.gc() {
-            Ok(_) => Symbol::keyword("t"),
-            Err(e) => return Err(e),
-        };
+    fn mu_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let (page_size, npages) = Self::heap_info(mu);
+
+        let vec = vec![
+            Symbol::keyword("bump"),
+            Fixnum::as_tag(page_size as i64),
+            Fixnum::as_tag(npages as i64),
+        ];
+
+        fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
 
         Ok(())
     }
