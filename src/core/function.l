@@ -4,6 +4,17 @@
 ;;;
 ;;; closures
 ;;;
+;;;
+;;; predicates
+;;;
+(mu:intern :core "core-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
+(mu:intern :core "mu-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
+
+(mu:intern :core "functionp"
+   (:lambda (t)
+      (:if (mu:eq :func (mu:type-of t))
+           :t
+           (mu:eq (core:type-of t) 'funct))))
 
 ;;;
 ;;; [*function descriptor*] #s(:<ctype> :funct (lambda nargs fn env))

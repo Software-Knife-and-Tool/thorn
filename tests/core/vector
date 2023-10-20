@@ -1,1 +1,13 @@
-(mu:type-of core:%map-vector)	:func
+(mu:type-of core:make-vector)	:func
+(mu:type-of core:slice)	:func
+(mu:type-of core:vector-length)	:func
+(mu:type-of core:vector-ref)	:func
+(mu:type-of core:vectorp)	:func
+(core:make-vector '(1 2 3))	#s(:<ctype> vector ((:base . #(:t 1 2 3)) (:start . 0) (:length . 3)))
+(core:core-type-p (core:make-vector '(1 2 3)))	:t
+(core:slice (core:make-vector '(1 2 3)) 1 2)	#s(:<ctype> vector ((:base . #s(:<ctype> vector ((:base . #(:t 1 2 3)) (:start . 0) (:length . 3)))) (:start . 1) (:length . 2)))
+(core:vector-length (core:make-vector '(1 2 3)))	3
+(core:vector-ref (core:make-vector '(1 2 3)) 1)	2
+(core:vectorp (core:make-vector '(1 2 3)))	:t
+(core:vectorp (mu:make-sv :t '(1 2 3)))	:t
+(core:vector-ref (core:slice (core:make-vector '(1 2 3)) 1 2) 0)	2

@@ -6,7 +6,7 @@
 ;;;
 (mu:intern :core "stringp"
    (:lambda (string)
-      (:if (core:vectorp string)
+      (:if (mu:eq (mu:type-of string) :vector)
            (mu:eq :char (mu:sv-type string))
            ())))
 
