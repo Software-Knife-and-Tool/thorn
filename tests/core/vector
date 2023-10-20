@@ -4,10 +4,10 @@
 (mu:type-of core:vector-ref)	:func
 (mu:type-of core:vectorp)	:func
 (core:make-vector '(1 2 3))	#s(:<ctype> vector ((:base . #(:byte 1 2 3)) (:start . 0) (:length . 3)))
-(core:make-vector '(1204 2 3))	#s(:<ctype> vector ((:base . #(:fixnum 1 2 3)) (:start . 0) (:length . 3)))
+(core:make-vector '(1024 2 3))	#s(:<ctype> vector ((:base . #(:fixnum 1024 2 3)) (:start . 0) (:length . 3)))
 (core:make-vector '(#\a #\b #\c))	#s(:<ctype> vector ((:base . abc) (:start . 0) (:length . 3)))
-(core:make-vector '(1.0 1.0 1.0))	#s(:<ctype> vector ((:base . #(:float 1.0000 1.0000 1.0000) (:start . 0) (:length . 3)))
-(core:make-vector '(1.0 #\a ()))	#s(:<ctype> vector ((:base . #(:t 1.0000 #\a :nil) (:start . 0) (:length . 3)))
+(core:make-vector '(1.0 1.0 1.0))	#s(:<ctype> vector ((:base . #(:float 1.0000 1.0000 1.0000)) (:start . 0) (:length . 3)))
+(core:make-vector '(1.0 #\a ()))	#s(:<ctype> vector ((:base . #(:t 1.0000 a :nil)) (:start . 0) (:length . 3)))
 (core:core-type-p (core:make-vector '(1 2 3)))	:t
 (core:slice (core:make-vector '(1 2 3)) 1 2)	#s(:<ctype> vector ((:base . #s(:<ctype> vector ((:base . #(:byte 1 2 3)) (:start . 0) (:length . 3)))) (:start . 1) (:length . 2)))
 (core:vector-length (core:make-vector '(1 2 3)))	3

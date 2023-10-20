@@ -269,10 +269,10 @@ impl MuFunction for Mu {
 
                 match Map::map_get(mu, Fixnum::as_i64(cache_id) as usize, key) {
                     Some(value) => value,
-                    None => return Err(Exception::new(Condition::Range, "map-get", key)),
+                    None => return Err(Exception::new(Condition::Range, "mp-get", key)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "map-get", map)),
+            _ => return Err(Exception::new(Condition::Type, "mp-get", map)),
         };
 
         Ok(())
