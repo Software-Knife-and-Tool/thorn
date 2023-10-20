@@ -18,7 +18,7 @@
               (:lambda (pair)
                 ((:lambda (symbol value)
                    (:if (core:symbolp symbol) 
-                        (core:add-env symbol value env)
+                        (core:add-env env symbol value)
                         (core:raise symbol 'core:make-env "not a symbol")))
                  (mu:car pair)
                  (mu:cdr pair)))
@@ -28,28 +28,28 @@
           (core:raise symbol 'core:make-env "not a symbol"))))
 
 (mu:intern :core "get-env"
-   (:lambda (symbol env)
+   (:lambda (env symbol)
      (:if (core:symbolp symbol)
          (:if (core:envp env)
               ((:lambda (map)
                  (:if (mu:mp-has map symbol)
                       (mu:mp-get map symbol)
-                      (core:raise symbol 'core:map-env "symbol not in map")))
+                      (core:raise symbol 'core:get-env "symbol not in map")))
                (core:%env-prop :symbols env))
               (core:raise env 'core:get-env "not an env"))
          (core:raise symbol 'core:get-env "not a symbol"))))
 
 (mu:intern :core "add-env"
-   (:lambda (symbol value env)
+   (:lambda (env symbol value)
      (:if (core:symbolp symbol)
          (:if (core:envp env)
               ((:lambda (map)
                  (:if (mu:mp-has map symbol)
                       (core:raise symbol 'core:add-env "symbol already in map")
-                      (mu:mp-get map symbol)))
+                      (mu:mp-add map symbol value)))
                (core:%env-prop :symbols env))
-              (core:raise env 'core:map-env "not an env"))
-         (core:raise symbol 'core:map-env "not a symbol"))))
+              (core:raise env 'core:add-env "not an env"))
+         (core:raise symbol 'core:add-env "not a symbol"))))
 
 (mu:intern :core "env-size"
    (:lambda (env)
