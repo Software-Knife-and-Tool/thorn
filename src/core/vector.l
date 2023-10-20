@@ -37,7 +37,7 @@
      (:if (core:vectorp vector)
           (:if (mu:eq :vector (mu:type-of vector))
                (mu:sv-len vector)
-               (mu:cdr (core:%vector-prop :length vector)))
+               (core:%vector-prop :length vector))
           (core:raise vector 'core:make-vector "not a vector"))))
 
 (mu:intern :core "vector-ref"
@@ -48,8 +48,8 @@
                     (mu:sv-ref vector nth)
                     ((:lambda (base start)
                        (core:vector-ref base (mu:fx-add start nth)))
-                     (mu:cdr (core:%vector-prop :base vector))
-                     (mu:cdr (core:%vector-prop :start vector))))
+                     (core:%vector-prop :base vector)
+                     (core:%vector-prop :start vector)))
                (core:raise nth 'core:vector-ref "not a fixnum"))
           (core:raise prop 'core:vector-ref "not a vector"))))
 
@@ -67,7 +67,7 @@
 (mu:intern :core "%vector-prop"
    (:lambda (prop vec)
       (:if (core:findl (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :start :length))
-           (core:%core-type-ref prop vec)
+           (mu:cdr (core:%core-type-ref prop vec))
            (core:raise prop 'core:%vector-prop "not a vector property"))))
 
 (mu:intern :core "%map-vector"
