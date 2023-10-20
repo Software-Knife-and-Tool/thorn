@@ -1,0 +1,7 @@
+(core:type-of (core:make-env ()))
+(core:envp (core:make-env ()))
+(core:add-env (core:make-env ()) 'a 'b)
+(core:env-size (core:make-env '((a . b))))
+(core:env-size (core:make-env ()))
+(core:get-env (core:make-env '((a . b))) 'a)
+(core:make-env '((a . b)))
