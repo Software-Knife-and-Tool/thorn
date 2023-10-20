@@ -35,7 +35,7 @@ core       stream         total: 22       passed: 22       failed: 0        exce
 core       string         total: 20       passed: 20       failed: 0        exceptions: 0       
 core       symbol         total: 3        passed: 3        failed: 0        exceptions: 0       
 core       types          total: 6        passed: 6        failed: 0        exceptions: 0       
-core       vector         total: 13       passed: 13       failed: 0        exceptions: 0       
+core       vector         total: 17       passed: 14       failed: 3        exceptions: 0       
 -----------------------
-core       passed: 333    total: 338      failed: 4        exceptions: 1         
+core       passed: 334    total: 342      failed: 7        exceptions: 1         
 
