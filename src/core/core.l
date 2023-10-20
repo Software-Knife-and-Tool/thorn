@@ -13,39 +13,43 @@
    (:lambda ()
       ;;; core function
       (core:define-core-type "funct"
-        '((:lambda  . :struct)
-          (:nargs   . :fixnum)
-          (:fn      . :func)
-          (:env     . :listp)))
+          '((:lambda  . :struct)
+            (:nargs   . :fixnum)
+            (:fn      . :func)
+            (:env     . :listp)))
 
       ;;; core lambda
       (core:define-core-type "lambda"
-        '((:bound  . :listp)
-          (:rest   . :symbolp)
-          (:lexenv . :listp)))
+          '((:bound  . :listp)
+            (:rest   . :symbolp)
+            (:lexenv . :listp)))
 
       ;;; core exception
       (core:define-core-type "except"
-        '((:cond   . :symbolp)
-          (:object . :t)
-          (:source . :symbolp)
-          (:reason . :string)
-          (:env    . :listp)))
+          '((:cond   . :symbolp)
+            (:object . :t)
+            (:source . :symbolp)
+            (:reason . :string)
+            (:env    . :listp)))
 
       ;;; core package
       (core:define-core-type "package"
-        '((:name    . :string)
-          (:intern  . :keyword)
-          (:extern  . :keyword)
-          (:ch-mac  . :keyword)
-          (:sy-mac  . :keyword)
-          (:uses    . :listp)))
+          '((:name    . :string)
+            (:intern  . :keyword)
+            (:extern  . :keyword)
+            (:ch-mac  . :keyword)
+            (:sy-mac  . :keyword)
+            (:uses    . :listp)))
 
       ;;; core vector
       (core:define-core-type "vector"
-        '((:base    . :vector)
-          (:start   . :fixnum)
-          (:length  . :fixnum)))
+          '((:base    . :vector)
+            (:start   . :fixnum)
+            (:length  . :fixnum)))
+
+      ;;; core vector
+      (core:define-core-type "env"
+          '((:symbols . :map)))
       
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))

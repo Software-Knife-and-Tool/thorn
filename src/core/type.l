@@ -48,6 +48,7 @@
       ,(mu:cons :float (:lambda (t) (core:floatp t)))
       ,(mu:cons :func (:lambda (t) (core:functionp t)))
       ,(mu:cons :listp (:lambda (t) (core:listp t)))
+      ,(mu:cons :map (:lambda (t) (mu:eq :map (mu:type-of t))))
       ,(mu:cons :keyword (:lambda (t) (core:keywordp t)))
       ,(mu:cons :package (:lambda (t) (core:packagep t)))
       ,(mu:cons :string (:lambda (t) (core:stringp t)))

@@ -26,6 +26,7 @@ CORE=(\
 	backquote.l            \    
 	compile.l    	       \
 	debug.l                \
+	environment.l 	       \
 	exception.l 	       \
 	fasl.l                 \
 	fixnum.l               \
