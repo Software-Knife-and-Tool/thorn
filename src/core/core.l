@@ -41,6 +41,12 @@
           (:sy-mac  . :keyword)
           (:uses    . :listp)))
 
+      ;;; core vector
+      (core:define-core-type "vector"
+        '((:base    . :vector)
+          (:start   . :fixnum)
+          (:length  . :fixnum)))
+      
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))
       (mu:intern :core "%macro-ns%" (core:%gen-anon-ns))
@@ -95,17 +101,7 @@
 (mu:intern :core "charp" (:lambda (t) (mu:eq :char (mu:type-of t))))
 (mu:intern :core "fixnump" (:lambda (t) (mu:eq :fixnum (mu:type-of t))))
 (mu:intern :core "floatp" (:lambda (t) (mu:eq :float (mu:type-of t))))
-(mu:intern :core "core-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
-(mu:intern :core "mu-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
-
-(mu:intern :core "functionp"
-   (:lambda (t)
-      (:if (mu:eq :func (mu:type-of t))
-           :t
-           (mu:eq (core:type-of t) 'funct))))
-
 (mu:intern :core "structp" (:lambda (t) (mu:eq :struct (mu:type-of t))))
-(mu:intern :core "vectorp" (:lambda (t) (mu:eq :vector (mu:type-of t))))
 
 ;;;
 ;;; syntactic sugar
