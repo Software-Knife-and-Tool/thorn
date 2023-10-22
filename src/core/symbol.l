@@ -2,9 +2,10 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;;  symbols
+;;;  symbol predicates
 ;;;
 (mu:intern :core "boundp" mu:boundp)
+
 (mu:intern :core "fboundp"
   (:lambda (symbol)
     (:if (core:boundp symbol)
@@ -25,6 +26,25 @@
                 (mu:eq 'symbol (core:type-of t)))))
 
 ;;;
+;;; symbol components
+;;;
+(mu:intern :core "symbol-name" mu:sy-name)
+
+(mu:intern :core "symbol-ns"
+   (:lambda (sym)
+      (mu:sy-ns sym)))
+
+(mu:intern :core "symbol-value" mu:sy-val)
+
+(mu:intern :core "keyword"
+   (:lambda (name)
+      (:if (core:stringp name)
+           (:if (mu:fx-lt (mu:sv-len name) 8)
+                (mu:keyword name)
+                (core:%make-core-type "keyword" `(,(mu:cons :name name))))
+           (core:raise name 'core:keyword "not a legal name"))))
+
+;;;
 ;;; utilities
 ;;;
 (mu:intern :core "%gensym-counter"
@@ -37,18 +57,15 @@
           (mu:make-sy (core:format () "g~X" `(,counter))))
        (core:read-string (mu:get-str core:%gensym-counter) () ()))))
 
-(mu:intern :core "symbol-name" mu:sy-name)
-
-(mu:intern :core "symbol-ns"
-   (:lambda (sym)
-      (mu:sy-ns sym)))                 
-
-(mu:intern :core "symbol-value" mu:sy-val)
-
-(mu:intern :core "keyword"
-   (:lambda (name)
-      (:if (core:stringp name)
-           (:if (mu:fx-lt (mu:sv-len name) 8)
-                (mu:keyword name)
-                (core:%make-core-type "keyword" `(,(mu:cons :name name))))
-           (core:raise name 'core:keyword "not a keyword name"))))
+(mu:intern :core "genkeyword"
+   (:lambda (prefix)
+      (:if (core:%orf (core:null prefix) (core:charp prefix))
+           ((:lambda (counter)
+              (mu:write (core:1+ counter) () core:%gensym-counter)
+              ((:lambda (keyword-name)
+                 (mu:read (mu:open :string :input keyword-name) () ()))
+               (:if (core:charp prefix)
+                    (core:format () ":~A~X" `(,prefix ,counter))
+                    (core:format () ":<~X>" `(,counter)))))
+            (core:read-string (mu:get-str core:%gensym-counter) () ()))
+           (core:raise name 'core:genkeyword "not a legal name"))))

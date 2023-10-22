@@ -8,15 +8,9 @@
 ;;;
 ;;; namespace components
 ;;;
-(mu:intern :core "%gen-anon-ns-counter"
-   (mu:open :string :output "0"))
-
 (mu:intern :core "%gen-anon-ns"
    (:lambda ()
-      ((:lambda (counter)                 
-          (mu:write (core:1+ counter) () core:%gen-anon-ns-counter)
-          (mu:make-ns (mu:keyword (core:format () "%~X" `(,counter)))))
-       (core:read-string (mu:get-str core:%gen-anon-ns-counter) () ()))))
+      (mu:make-ns (core:genkeyword #\%))))      
 
 ;;;
 ;;; package functions
