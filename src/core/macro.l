@@ -28,7 +28,7 @@
       ((:lambda (macro-ns)
           (mu:intern core:%macro-ns% (mu:sy-name ns) macro-ns)
           macro-ns)
-       (core:%gen-anon-ns))))    
+       (core:%gen-anon-ns))))
 
 (mu:intern :core "%macro-env"
    (:lambda (symbol macro-fn)
@@ -53,9 +53,9 @@
        (mu:sy-name symbol))))
 
 (mu:intern :core "%compile-macro-call"
-   (:lambda (macro-symbol args env)
+   (:lambda (macro-symbol arg-list env)
       (core:%compile
-       (core:macroexpand `(,macro-symbol ,@args) env)
+       (core:macroexpand `(,macro-symbol ,@arg-list) env)
        env)))
 
 ;;;
@@ -64,11 +64,11 @@
 (mu:intern :core "macroexpand-1"
    (:lambda (form env)
      (:if (core:consp form)
-          ((:lambda (fn-symbol args)
+          ((:lambda (fn-symbol arg-list)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
                   ((:lambda (macro-fn)
                        (:if macro-fn
-                            (core:apply macro-fn (mu:eval (core:%arg-list args)))
+                            (core:apply macro-fn (mu:eval (core:%arg-list arg-list)))
                             form))
                    (core:macro-function fn-symbol env))
                   form))

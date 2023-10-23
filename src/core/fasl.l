@@ -188,7 +188,7 @@
             ,(mu:cons "file-version" (core:read-byte elf64 t ()))
             ,(mu:cons "OS-ABI" (core:read-byte elf64 :t ()))
             ,(mu:cons "ABI-version" (core:read-byte elf64 :t ()))
-            ,(mu:cons "e_object" (core:elf64-read :half elf64))
+            ,(mu:cons "e_value" (core:elf64-read :half elf64))
             ,(mu:cons "e_machine" (core:elf64-read :half elf64))
             ,(mu:cons "e_version" (core:elf64-read :half elf64))
             ,(mu:cons "e_entry" (core:elf64-read :half elf64))

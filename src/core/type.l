@@ -7,22 +7,22 @@
 (mu:intern :core "%core-types" (mu:make-ns :%ctypes))
 
 (mu:intern :core "core-type-p"
-   (:lambda (object)
-      (:if (core:structp object)
-           (mu:eq :<ctype> (mu:st-type object))
+   (:lambda (value)
+      (:if (core:structp value)
+           (mu:eq :<ctype> (mu:st-type value))
            ())))
 
 (mu:intern :core "type-of"
-   (:lambda (object)
+   (:lambda (value)
       ((:lambda (type)
           (:if (mu:eq type :struct)
-               (:if (mu:eq :<ctype> (mu:st-type object))
-                    (mu:untern () (mu:sv-ref (mu:st-vec object) 0))
-                    (mu:st-type object))
-               (:if (core:stringp object)
+               (:if (mu:eq :<ctype> (mu:st-type value))
+                    (mu:untern () (mu:sv-ref (mu:st-vec value) 0))
+                    (mu:st-type value))
+               (:if (core:stringp value)
                     'string
                     (mu:untern () (mu:sy-name type)))))
-       (mu:type-of object))))
+       (mu:type-of value))))
 
 ;;;
 ;;; ctype struct: #s(:<ctype> #(:t name property-alist))
@@ -59,9 +59,9 @@
       ,(mu:cons :vector (:lambda (t) (core:vectorp t)))))
 
 (mu:intern :core "%core-type-predicate"
-   (:lambda (type object)
+   (:lambda (type value)
       ((:lambda (predicate)
-          (mu:apply predicate `(,object)))
+          (mu:apply predicate `(,value)))
        (mu:cdr (core:%assoc type core:%core-type-predicate-map%)))))
 
 (mu:intern :core "%make-core-type"

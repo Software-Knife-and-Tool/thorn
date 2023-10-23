@@ -154,7 +154,7 @@
 (mu:intern :core "read-line"
    (:lambda (stream eof-error eof-value)
       (:if (core:streamp stream)
-           ((:lambda (sstream)  
+           ((:lambda (sstream)
                (mu:fix
                 (:lambda (loop)
                    (:if (core:stringp loop)
@@ -185,7 +185,7 @@
 (mu:intern :core "write-string"
    (:lambda (str stream)
       (:if (core:stringp str)
-           (:if (core:streamp stream)           
+           (:if (core:streamp stream)
                 (mu:write str () stream)
                 (core:raise str 'core:write-string "is not a stream"))
            (core:raise str 'core:write-string "is not a string"))))

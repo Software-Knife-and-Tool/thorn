@@ -7,66 +7,66 @@
 (mu:untern :core "%debug-core-symbols%")
 
 ;;;
-;;; [*exception descriptor*] #s(:except cond obj source reason env)
+;;; [*exception descriptor*] #s(:except cond value source reason env)
 ;;;
 ;;; cond:    condition type symbol
-;;; object:  exception raised on object
+;;; value:  exception raised on value
 ;;; source:  function designator, usually a symbol
 ;;; reason:  extended condition, usually a string
 ;;; env:     dynamic environment, list of frames
 ;;;
-(mu:intern :core "exceptionp"
+(mu:intern :core "exceptp"
    (:lambda (ex)
       (mu:eq (core:type-of ex) 'except)))
 
-(mu:intern :core "make-exception"
-   (:lambda (cond object source reason env)
+(mu:intern :core "make-except"
+   (:lambda (cond value source reason env)
       (core:%make-core-type "except"
         (core:%pair-list
          `(:cond   ,cond
-           :object ,object
+           :value ,value
            :source ,source
            :reason ,reason
            :env    ,env)))))
- 
-(mu:intern :core "%exception-prop"
+
+(mu:intern :core "%except-prop"
    (:lambda (prop except)
-      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :object :source :reason :env))
+      (:if (core:findl (:lambda (lambda-prop) (mu:eq prop lambda-prop)) '(:cond :value :source :reason :env))
            (core:%core-type-ref prop except)
-           (core:raise prop 'except-prop "not an except property"))))
+           (core:raise prop 'core:%except-prop "not an except property"))))
 
 (mu:intern :core "exceptf"
-   (:lambda (stream fmt printenv except)
-     ((:lambda (cond object source reason env)
-         (:if (core:null fmt)
-              (core:format stream "~S ~S ~S ~S~%" `(,cond ,object ,source ,reason))
-              (core:format stream fmt `(,cond ,object ,source ,reason)))
+   (:lambda (stream format-string printenv except)
+     ((:lambda (cond value source reason env)
+         (:if (core:null format-string)
+              (core:format stream "~S ~S ~S ~S~%" `(,cond ,value ,source ,reason))
+              (core:format stream format-string `(,cond ,value ,source ,reason)))
          (:if (core:%andf printenv env)
               ((:lambda ()
                   (core:format stream "env:~%" ())
                   (core:%mapc
                    (:lambda (frame)
                       (core:format stream "  ~A~T(~A ~A)~%"
-                                   `(,(core:%fmt-mapped-symbol (mu:car frame))
+                                   `(,(core:%format-mapped-symbol (mu:car frame))
                                      ,(mu:car frame)
                                      ,(mu:cdr frame))))
                    (mu:cdr env))))
               ()))
-      (core:%exception-prop :cond except)
-      (core:%exception-prop :object except)
-      (core:%exception-prop :source except)
-      (core:%exception-prop :reason except)
-      (core:%exception-prop :env except))))
+      (core:%except-prop :cond except)
+      (core:%except-prop :value except)
+      (core:%except-prop :source except)
+      (core:%except-prop :reason except)
+      (core:%except-prop :env except))))
 
 (mu:intern :core "with-exception"
   (:lambda (handler thunk)
      (mu:with-ex
-      (:lambda (object condition source)
+      (:lambda (value condition source)
          (:if (mu:eq condition :except)
-              (core:apply handler `(,object))
-              (core:apply handler `(,(core:make-exception
+              (core:apply handler `(,value))
+              (core:apply handler `(,(core:make-except
                                       condition
-                                      object
+                                      value
                                       source
                                       "mu:raise"
                                       (mu:frames))))))
@@ -76,19 +76,19 @@
 ;;; exception flavors
 ;;;
 (mu:intern :core "error"
-   (:lambda (fmt object)
-      (core:format mu:err-out fmt `(,object))                
+   (:lambda (format-string value)
+      (core:format mu:err-out format-string `(,value))
       (mu:raise
-       (core:make-exception :error object :error "" (mu:frames))
+       (core:make-except :error value :error "" (mu:frames))
        :except)))
 
 (mu:intern :core "raise"
-   (:lambda (object source reason)
+   (:lambda (value source reason)
       (mu:raise
-       (core:make-exception :error object source reason (mu:frames))
+       (core:make-except :error value source reason (mu:frames))
        :except)))
 
 (mu:intern :core "warn"
-  (:lambda (obj msg)
-     (core:format mu:err-out ";;; warning: ~S ~A~%" `(,obj ,msg))
-    obj))
+  (:lambda (value msg)
+     (core:format mu:err-out ";;; warning: ~S ~A~%" `(,value ,message))
+    value))

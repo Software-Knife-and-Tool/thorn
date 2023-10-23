@@ -52,7 +52,7 @@
 
 (mu:intern :core "gensym"
    (:lambda ()
-      ((:lambda (counter)                 
+      ((:lambda (counter)
           (mu:write (core:1+ counter) () core:%gensym-counter)
           (mu:make-sy (core:format () "g~X" `(,counter))))
        (core:read-string (mu:get-str core:%gensym-counter) () ()))))

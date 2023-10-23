@@ -27,7 +27,7 @@
       ;;; core exception
       (core:define-core-type "except"
           '((:cond   . :symbolp)
-            (:object . :t)
+            (:value . :t)
             (:source . :symbolp)
             (:reason . :string)
             (:env    . :listp)))
@@ -50,7 +50,7 @@
       ;;; core vector
       (core:define-core-type "env"
           '((:symbols . :map)))
-      
+
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))
       (mu:intern :core "%macro-ns%" (core:%gen-anon-ns))
@@ -59,16 +59,17 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern :core "not" (:lambda (t) (core:null t)))
-(mu:intern :core "atom" (:lambda (obj) (core:not (core:consp obj))))
+(mu:intern :core "not" (:lambda (value) (core:null value)))
+(mu:intern :core "atom" (:lambda (value) (core:not (core:consp value))))
+
 (mu:intern :core "constantp"
-   (:lambda (form)
-      (:if (core:%orf (core:null form) (core:keywordp form))
+   (:lambda (value)
+      (:if (core:%orf (core:null value) (core:keywordp value))
            :t
-           (:if (core:consp form)
-                (mu:eq :quote (mu:car form))
-                (core:not (core:symbolp form))))))
-           
+           (:if (core:consp value)
+                (mu:eq :quote (mu:car value))
+                (core:not (core:symbolp value))))))
+
 (mu:intern :core "numberp"
   (:lambda (n)
      (:if (core:fixnump n)
@@ -122,36 +123,36 @@
 ;;; apply
 ;;;
 (mu:intern :core "apply"
-   (:lambda (fn args)
-     (:if (core:functionp fn)
-          (:if (core:core-function-p fn)
-               (core:%function-apply fn args)
-               (mu:apply fn args))
-          (core:raise fn 'core:apply "not a function designator"))))
+   (:lambda (function arg-list)
+     (:if (core:functionp function)
+          (:if (core:functp function)
+               (core:%funct-apply function arg-list)
+               (mu:apply function arg-list))
+          (core:raise function 'core:apply "not a function designator"))))
 
 ;;;
-;;; apply closure to list of args => obj
+;;; apply closure to argument list
 ;;;
-(mu:intern :core "%function-apply"
-   (:lambda (fn args)
+(mu:intern :core "%funct-apply"
+   (:lambda (funct arg-list)
       ((:lambda (env)
         (core:%mapc mu:fr-push env)
         ((:lambda (value)
            (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
            value)
          ((:lambda (mu-fn)
-             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list fn args))))
-          (core:%function-prop :fn fn))))
-        (core:%function-prop :env fn))))
+             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list funct arg-list))))
+          (core:%funct-prop :fn funct))))
+        (core:%funct-prop :env funct))))
 
-(mu:intern :core "%function-apply-quoted"
-   (:lambda (fn args)
+(mu:intern :core "%funct-apply-quoted"
+   (:lambda (funct arg-list)
       ((:lambda (env)
         (core:%mapc mu:fr-push env)
         ((:lambda (value)
            (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
            value)
          ((:lambda (mu-fn)
-             (mu:apply mu-fn args))
-          (core:%function-prop :fn fn))))
-        (core:%function-prop :env fn))))
+             (mu:apply mu-fn arg-list))
+          (core:%funct-prop :fn funct))))
+        (core:%funct-prop :env funct))))

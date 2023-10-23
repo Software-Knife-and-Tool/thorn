@@ -5,36 +5,36 @@
 ;;;  core vectors
 ;;;
 (mu:intern :core "vectorp"
-   (:lambda (vec)
+   (:lambda (vector)
      ((:lambda (type)
         (:if (mu:eq type :vector)
           :t
           (:if (core:core-type-p vec)
-               (mu:eq 'vector (core:type-of vec))
+               (mu:eq 'vector (core:type-of vector))
                ())))
-      (mu:type-of vec))))
+      (mu:type-of vector))))
 
 (mu:intern :core "make-vector"
    (:lambda (list)
      (:if (core:listp list)
-          ((:lambda (vec)
-              (core:%make-vector vec 0 (mu:sv-len vec)))
+          ((:lambda (vector)
+              (core:%make-vector vector 0 (mu:sv-len vector)))
            (mu:make-sv (core:%specialized-vector-type list) list))
           (core:raise list 'core:make-vector "not a list"))))
 
 (mu:intern :core "slice"
-   (:lambda (vec start length)
-     (:if (core:vectorp vec)
+   (:lambda (vector start length)
+     (:if (core:vectorp vector)
           (:if (core:fixnump start)
-               (:if (core:%orf (core:minusp start) (mu:fx-lt (core:vector-length vec) start))
+               (:if (core:%orf (core:minusp start) (mu:fx-lt (core:vector-length vector) start))
                     (core:raise start 'core:slice "illegal start")
                     (:if (core:fixnump length)
-                         (:if (core:%orf (core:minusp length) (mu:fx-lt (core:vector-length vec) length))
+                         (:if (core:%orf (core:minusp length) (mu:fx-lt (core:vector-length vector) length))
                               (core:raise length 'core:slice "illegal length")
-                              (core:%make-vector vec start length))
+                              (core:%make-vector vector start length))
                          (core:raise start 'core:slice "not a fixnum")))
                (core:raise length 'core:slice "not a fixnum"))
-          (core:raise vec 'core:slice "not a vector"))))
+          (core:raise vector 'core:slice "not a vector"))))
 
 (mu:intern :core "vector-length"
    (:lambda (vector)
@@ -63,10 +63,10 @@
 ;;; implementation
 ;;;
 (mu:intern :core "%make-vector"
-   (:lambda (vec start length)          
+   (:lambda (vector start length)
      (core:%make-core-type "vector"
           (core:%pair-list
-           `(:base   ,vec
+           `(:base   ,vector
              :start  ,start
              :length ,length)))))
 
@@ -99,9 +99,9 @@
       (mu:cdr list)))))
 
 (mu:intern :core "%vector-prop"
-   (:lambda (prop vec)
+   (:lambda (prop vector)
       (:if (core:findl (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :start :length))
-           (mu:cdr (core:%core-type-ref prop vec))
+           (mu:cdr (core:%core-type-ref prop vector))
            (core:raise prop 'core:%vector-prop "not a vector property"))))
 
 (mu:intern :core "%map-vector"

@@ -5,13 +5,13 @@
 ;;; logging
 ;;;
 (mu:intern :core "%logf"
-   (:lambda (stream fmt args)
-      (core:apply core:format `(,stream ,fmt ,args))))
+   (:lambda (stream format-satring arg-list)
+      (core:apply core:format `(,stream ,format-string ,arg-list))))
 
 (mu:intern :core "logf"
-   (:lambda (env fmt args)                 
+   (:lambda (env format-string arg-list)
       ((:lambda (stream)
-          (core:apply core:format `(,stream ,fmt ,args))))
+          (core:apply core:format `(,stream ,format-string ,arg-list))))
       (core:env-prop :log env)))
 
 (mu:intern :core "%open-log-file"
@@ -22,16 +22,16 @@
 ;;; exception flavors
 ;;;
 (mu:intern :core "log-error"
-   (:lambda (fmt object env)
-      (core:logf env fmt `(,object))
-      (core:error fmt object)))
+   (:lambda (format-string value env)
+      (core:logf env format-string `(,value))
+      (core:error format-string value)))
 
 (mu:intern :core "log-raise"
-   (:lambda (object source reason env)
-      (core:logf env fmt `(,object ,source ,reason ,env))
-      (core:raise object source reason)))
+   (:lambda (format-string value source reason env)
+      (core:logf env format-string `(,value ,source ,reason ,env))
+      (core:raise value source reason)))
 
 (mu:intern :core "log-warn"
-   (:lambda (obj msg env)
-      (core:logf env ";;; warning: ~S ~A~%" `(,obj ,msg))
-      obj))
+   (:lambda (value message env)
+      (core:logf env ";;; warning: ~S ~A~%" `(,value ,messagee))
+      value))
