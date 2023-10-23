@@ -7,13 +7,15 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern :core "functp" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
+(mu:intern :core "functp"
+   (:lambda (fn)
+      (mu:eq 'funct (core:type-of fn))))
 
 (mu:intern :core "functionp"
    (:lambda (function)
       (:if (mu:eq :func (mu:type-of function))
            :t
-           (core:functp function))))
+           (mu:eq 'funct (core:type-of function)))))
 
 ;;;
 ;;; [*function descriptor*] #s(:<ctype> :funct (lambda narg-list fn env))
