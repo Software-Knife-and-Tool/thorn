@@ -10,7 +10,7 @@
 ;;;
 (mu:intern :core "%gen-anon-ns"
    (:lambda ()
-      (mu:make-ns (core:genkeyword #\%))))      
+      (mu:make-ns (core:genkeyword #\%))))
 
 ;;;
 ;;; package functions
@@ -22,7 +22,7 @@
 (mu:intern :core "make-package"
    (:lambda (name uses)
       (:if (core:stringp name)
-           (:if (core:listp uses)           
+           (:if (core:listp uses)
                 (core:%make-core-type "package"
                   (core:%pair-list
                    `(:name    ,name
@@ -33,7 +33,7 @@
                      :uses    ,uses)))
                 (core:raise uses 'make-package "not a uses list"))
            (core:raise name 'make-package "not a name string"))))
- 
+
 (mu:intern :core "%package-prop"
    (:lambda (prop package)
       (:if (core:findl

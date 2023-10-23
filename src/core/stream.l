@@ -70,7 +70,7 @@
 
 (mu:intern :core "with-open-stream"
    (:lambda (type dir specifier fn)
-     (:if (core:functionp fn)                 
+     (:if (core:functionp fn)
           (:if (core:stringp specifier)
                (:if (core:%orf (mu:eq :file type)
                                (mu:eq :string type))
@@ -145,8 +145,8 @@
       (core:%read-stream-designator designator))))
 
 (mu:intern :core "write"
-   (:lambda (object escape designator)
-      (mu:write object escape (core:%write-stream-designator designator))))
+   (:lambda (value escape designator)
+      (mu:write value escape (core:%write-stream-designator designator))))
 
 (mu:intern :core "terpri"
    (:lambda (designator)

@@ -9,32 +9,32 @@
 ;;; core argument lists
 ;;;
 (mu:intern :core "%arg-list"
-    (:lambda (args)
+    (:lambda (arg-list)
       (core:foldr
        (:lambda (elt acc)
          `(mu:cons ,elt ,acc))
        ()
-       args)))
+       arg-list)))
 
 (mu:intern :core "%lambda-arg-list"
-   (:lambda (fn args)
-      (:if (core:functionp fn)
+   (:lambda (function arg-list)
+      (:if (core:functp function)
            ((:lambda (rest nreqs)
                (:if (core:%andf rest (core:zerop nreqs))
-                    `(mu:cons ,(core:%arg-list args) ())
+                    `(mu:cons ,(core:%arg-list arg-list) ())
                     ((:lambda (reqs rest)
                         (core:%arg-list `(,@reqs ,(core:%arg-list rest))))
-                     (core:dropr args (mu:fx-sub (mu:length args) nreqs))
-                     (core:dropl args nreqs))))
-            (core:%function-prop :rest fn)
-            (core:%function-prop :nargs fn))
-           (core:%arg-list args))))
+                     (core:dropr arg-list (mu:fx-sub (mu:length arg-list) nreqs))
+                     (core:dropl arg-list nreqs))))
+            (core:%funct-prop :rest function)
+            (core:%funct-prop :nargs function))
+           (core:%arg-list arg-list))))
 
 ;;;
 ;;; compiled argument lists
 ;;;
 (mu:intern :core "%compile-arg-list"
-   (:lambda (args env)
+   (:lambda (arg-list env)
       (core:foldr
        (:lambda (elt acc)
           (mu:cons 'mu:cons (mu:cons elt `(,acc))))
@@ -42,13 +42,11 @@
        (core:mapcar
         (:lambda (form)
            (core:%compile form env))
-        args))))
+        arg-list))))
 
 (mu:intern :core "%compile-lambda-arg-list"
-   (:lambda (fn args env)
-     (core:%lambda-arg-list
-      fn
-      (core:%mapcar (:lambda (elt) (core:%compile elt env)) args))))
+   (:lambda (function arg-list env)
+     (core:%lambda-arg-list function (core:%mapcar (:lambda (elt) (core:%compile elt env)) arg-list))))
 
 ;;;
 ;;; compile-funcall
@@ -56,31 +54,31 @@
 ;;; compile function applications to mu-appliable forms
 ;;;
 (mu:intern :core "%compile-lambda-call"
-   (:lambda (form args env)
-      ((:lambda (fn)
-        (:if (core:functionp fn)
-             (:if (core:core-function-p fn)
-                  `(core:%function-apply-quoted ,fn ,(core:%compile-lambda-arg-list fn args env))
-                  `(mu:apply ,fn ,(core:%compile-arg-list args env)))
-             (core:raise fn 'core:%compile-lambda-call "illegal function call")))
-     (core:%compile form env))))
+   (:lambda (lambda-form arg-list env)
+      ((:lambda (compiled-function)
+        (:if (core:functionp compiled-function)
+             (:if (core:functp compiled-function)
+                  `(core:%funct-apply-quoted ,compiled-function ,(core:%compile-lambda-arg-list compiled-function arg-list env))
+                  `(mu:apply ,compiled-function ,(core:%compile-arg-list arg-list env)))
+             (core:raise compiled-function 'core:%compile-lambda-call "illegal function call")))
+     (core:%compile lambda-form env))))
 
 (mu:intern :core "%compile-symbol-call"
-   (:lambda (symbol args env)
-      (:if (core:boundp symbol)
-           ((:lambda (fn)
-               (:if (core:functionp fn)
-                    (:if (core:core-function-p fn)
-                         `(core:%function-apply-quoted ,fn ,(core:%compile-lambda-arg-list fn args env))
-                         `(mu:apply ,fn ,(core:%compile-arg-list args env)))
-                    (core:raise fn 'core:%compile-symbol-call "illegal function call")))
-            (core:symbol-value symbol))
-           `(core:apply ,symbol ,(core:%compile-arg-list args env)))))
+   (:lambda (function-symbol arg-list env)
+      (:if (core:boundp function-symbol)
+           ((:lambda (function)
+               (:if (core:functionp function)
+                    (:if (core:functp function)
+                         `(core:%funct-apply-quoted ,fn ,(core:%compile-lambda-arg-list function arg-list env))
+                         `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
+                    (core:raise function 'core:%compile-symbol-call "illegal function call")))
+            (core:symbol-value function-symbol))
+           `(core:apply ,function-symbol ,(core:%compile-arg-list arg-list env)))))
 
 (mu:intern :core "%compile-funcall"
-   (:lambda (fn args env)
-      (:if (core:consp fn)
-           (core:%compile-lambda-call fn args env)
-           (:if (mu:eq :symbol (mu:type-of fn))
-                (core:%compile-symbol-call fn args env)
-                (core:raise form 'core:%compile "illegal function call")))))
+   (:lambda (function-form arg-list env)
+      (:if (core:consp function-form)
+           (core:%compile-lambda-call function-form arg-list env)
+           (:if (mu:eq :symbol (mu:type-of function-form))
+                (core:%compile-symbol-call function-form arg-list env)
+                (core:raise function-form 'core:%compile-funcall "illegal function call")))))

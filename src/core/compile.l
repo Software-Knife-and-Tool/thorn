@@ -10,7 +10,9 @@
 ;;;
 
 ;;;
-;;; lambda compiles to a function core-type
+;;; compile a lambda form to a function core-type
+;;;
+;;; returns the compiled function
 ;;;
 (mu:intern :core "%compile-lambda"
    (:lambda (form env)
@@ -18,12 +20,12 @@
            (core:raise form 'core:%compile-defmacro "malformed lambda expression")
            ((:lambda (lambda body)
                ((:lambda (lambda-desc)
-                   ((:lambda (fn)
+                   ((:lambda (compiled-function)
                        (:if (core:%orf
                              (core:%lambda-prop :lexenv lambda-desc)
                              (core:%lambda-prop :rest lambda-desc))
-                            (core:%make-function lambda-desc fn ())
-                            fn))
+                            (core:%make-funct lambda-desc compiled-function ())
+                            compiled-function))
                     (mu:compile
                      `(:lambda
                        ,(core:%lambda-prop :bound lambda-desc)
@@ -31,25 +33,29 @@
                           lambda-desc
                           body
                           env)))))
-                (core:%core-lambda lambda env)))
+                (core:%compile-core-lambda lambda env)))
             (mu:nth 1 form)
             (mu:nthcdr 2 form)))))
 
 ;;;
-;;; defmacro compiles to a bound macro symbol
+;;; compile a defmacro form to a bound macro symbol
+;;;
+;;; returns the macro symbol
 ;;;
 (mu:intern :core "%compile-defmacro"
    (:lambda (form env)
-      ((:lambda (symbol lambda-form)
-          (:if (core:symbolp symbol)           
-               (core:%macro-env symbol (core:%compile-lambda lambda-form env))
-               (core:raise symbol 'core:%compile-defmacro "not a symbol"))
-          `(:quote ,symbol))
+      ((:lambda (macro-symbol lambda-form)
+          (:if (core:symbolp macro-symbol)
+               (core:%macro-env macro-symbol (core:%compile-lambda lambda-form env))
+               (core:raise macro-symbolsymbol 'core:%compile-defmacro "not a symbol"))
+          `(:quote ,macro-symbol))
        (mu:nth 1 form)
        (mu:nthcdr 1 form))))
 
 ;;;
 ;;; this if form can take two or three arguments
+;;;
+;;; returns an application of the if form
 ;;;
 (mu:intern :core "%thunk"
   (:lambda (form env)
@@ -59,11 +65,10 @@
 
 (mu:intern :core "%compile-if"
    (:lambda (form env)
-      ((:lambda (len)
-          (:if (core:%orf (mu:eq len 3) (mu:eq len 4))
+      ((:lambda (length)
+          (:if (core:%orf (mu:eq length 3) (mu:eq length 4))
                ((:lambda (t-arm f-arm)
                   (mu:compile `(:if ,(mu:nth 1 form) ,t-arm ,f-arm)))
-                  ;;; (mu:compile `(:if ,(mu:cons (core:%thunk (mu:nth 1 form) env) ()) ,t-arm ,f-arm)))
                (:if (core:constantp (mu:nth 2 form))
                     (mu:nth 2 form)
                     `(core:apply ,(core:%thunk (mu:nth 2 form) env) ()))
@@ -74,44 +79,42 @@
        (mu:length form))))
 
 ;;;
-;;; compiler
+;;; core compiler
 ;;;
-;;; rewrites a funcall/special/macro call against an environment
-;;; into something the runtime can execute. constants compile
-;;; to themselves.
+;;; rewrites a function call/special call/macro call against an environment
+;;; into something the runtime can execute. constants compile to themselves.
 ;;;
-;;; arguments:
-;;;
-;;;   form : function call, macro call, special form call, or constant
-;;;   env  : lexical environment list
-;;;
-;;; returns: mu form or funct ctype (in the case of a define-core-lambda)
+;;; returns a mu form or funct ctype (in the case of a define-core-lambda)
 ;;;
 (mu:intern :core "%compile"
    (:lambda (form env)
       (:if (core:consp form)
-           ((:lambda (fn args)
-               (:if (core:keywordp fn)
+           ((:lambda (function-form arg-list)
+               (:if (core:keywordp function-form)
                     (mu:compile form)                    ; mu special form (:key ...)
-                    (:if (mu:eq :symbol (mu:type-of fn)) ; special form or macro
+                    (:if (mu:eq :symbol (mu:type-of function-form)) ; special form or macro
                          ((:lambda (special)
                              (:if special
                                   (mu:apply (mu:sy-val special) `(,form ,env))
-                                  ((:lambda (macro-fn)
-                                      (:if macro-fn
-                                           (core:%compile-macro-call fn args env)
-                                           (core:%compile-funcall fn args env)))
-                                   (core:macro-function fn env))))
+                                  ((:lambda (macro-function)
+                                      (:if macro-function
+                                           (core:%compile-macro-call function-form arg-list env)
+                                           (core:%compile-funcall function-form arg-list env)))
+                                   (core:macro-function function-form env))))
                           (mu:cdr (core:%assoc
-                                   fn
+                                   function-form
                                    '((define-macro . core:%compile-defmacro)
                                      (if           . core:%compile-if)
                                      (lambda       . core:%compile-lambda)))))
-                    (core:%compile-funcall fn args env))))
+                    (core:%compile-funcall function-form arg-list env))))
             (mu:car form)
             (mu:cdr form))
            form)))
 
+;;;
+;;; the external compile interface, compiles in
+;;; the null environment
+;;;
 (mu:intern :core "compile"
    (:lambda (form)
      (core:%compile form ())))

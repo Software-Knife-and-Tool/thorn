@@ -7,26 +7,25 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern :core "core-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
-(mu:intern :core "mu-function-p" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
+(mu:intern :core "functp" (:lambda (fn) (mu:eq (core:type-of fn) 'funct)))
 
 (mu:intern :core "functionp"
-   (:lambda (t)
-      (:if (mu:eq :func (mu:type-of t))
+   (:lambda (function)
+      (:if (mu:eq :func (mu:type-of function))
            :t
-           (mu:eq (core:type-of t) 'funct))))
+           (core:functp function))))
 
 ;;;
-;;; [*function descriptor*] #s(:<ctype> :funct (lambda nargs fn env))
+;;; [*function descriptor*] #s(:<ctype> :funct (lambda narg-list fn env))
 ;;;
-;;; lambda: lambda struct
+;;; lambda: lambda ctype
 ;;; nargs:  number of reqs plus rest
 ;;; fn:     implementation
 ;;; env:    dynamic environment, list of frames
 ;;;
 ;;; function
 ;;;
-(mu:intern :core "%make-function"
+(mu:intern :core "%make-funct"
    (:lambda (lambda fn env)
       ((:lambda (nargs)
           (core:%make-core-type "funct"
@@ -39,31 +38,33 @@
         (mu:length (core:%lambda-prop :bound lambda))
         (:if (core:%lambda-prop :rest lambda) 1 0)))))
 
-(mu:intern :core "%function-prop"
-   (:lambda (prop fn)
-      (:if (core:findl (:lambda (fn-prop) (mu:eq prop fn-prop)) '(:lambda :nargs :fn :env))
+(mu:intern :core "%funct-prop"
+   (:lambda (prop funct)
+      (:if (core:findl (:lambda (funct-prop) (mu:eq prop funct-prop)) '(:lambda :nargs :fn :env))
            ((:lambda (ref)
                ;;; (core:raise-when core:null prop 'core:%function-prop "property not bound")
                (mu:cdr ref))
-            (core:%core-type-ref prop fn))
-           (core:%lambda-prop prop (core:%function-prop :lambda fn)))))
+            (core:%core-type-ref prop funct))
+           (core:%lambda-prop prop (core:%funct-prop :lambda funct)))))
 
 ;;;
-;;; create closed environment => env
+;;; create closed environment
+;;;
+;;; retruns env
 ;;;
 (mu:intern :core "%closure-env"
-   (:lambda (lambda forms env)
+   (:lambda (lambda body env)
       ((:lambda (bound-symbols)
           (core:%foldl
-           (:lambda (form acc)
-              (:if (core:consp form)
-                   ((:lambda (fn)
+           (:lambda (elt acc)
+              (:if (core:consp elt)
+                   ((:lambda (function-form)
                        (:if (core:consp fn)
-                            `(,@(core:%closure-env lambda fn env) ,@acc)
-                            `(,@(core:%closure-env lambda (mu:cdr form) env) ,@acc)))
-                    (mu:car form))
-                   (:if (mu:eq :symbol (mu:type-of form))
-                        (:if (core:uninternedp form)
+                            `(,@(core:%closure-env lambda function-form env) ,@acc)
+                            `(,@(core:%closure-env lambda (mu:cdr elt) env) ,@acc)))
+                    (mu:car elt))
+                   (:if (mu:eq :symbol (mu:type-of elt))
+                        (:if (core:uninternedp elt)
                              ((:lambda (symbol)
                                  (:if symbol
                                       acc
@@ -81,7 +82,7 @@
                              acc)
                         acc)))
            ()
-           forms))
+           body))
        (core:%core-type-ref :bound lambda))))
 
 ;;;
@@ -93,12 +94,12 @@
 (mu:intern :core "%close-env"
   (:lambda (closure env)
      ((:lambda (lambda fn env)
-         (core:%make-function lambda fn env))
+         (core:%make-funct lambda fn env))
       (core:%make-lambda
        (core:%lambda-prop :bound fn)
        (core:%lambda-prop :rest fn)
        (mu:frames))
-      (core:%function-prop :fn fn))))
+      (core:%funct-prop :fn fn))))
 
 ;;;
 ;;; compile closed lambda => function
@@ -107,9 +108,9 @@
    (:lambda (form env)
       ((:lambda (lambda)
           ((:lambda (fn)
-              (core:%make-function lambda fn ()))
+              (core:%make-funct lambda fn ()))
            (mu:compile
             `(:lambda
               ,(core:%lambda-prop :bound lambda)
               ,(core:%compile-lambda-body lambda (mu:nthcdr 2 form) env)))))
-       (core:%core-lambda (mu:nth 1 form) env))))
+       (core:%compile-core-lambda (mu:nth 1 form) env))))

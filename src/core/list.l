@@ -9,9 +9,9 @@
 (mu:intern :core "listp" (:lambda (t) (:if (core:consp t) :t (core:null t))))
 
 (mu:intern :core "dotted-pair-p"
-  (:lambda (obj)
-    (:if (core:consp obj)
-         (core:atom (mu:cdr obj))
+  (:lambda (list)
+    (:if (core:consp list)
+         (core:atom (mu:cdr list))
          ())))
 
 ;;;
@@ -46,8 +46,8 @@
 ;;; finds
 ;;;
 (mu:intern :core "findl"
-   (:lambda (fn list)
-      (:if (core:functionp fn)
+   (:lambda (function list)
+      (:if (core:functionp function)
            (:if (core:listp list)
                 (mu:cdr
                  (mu:fix
@@ -56,46 +56,46 @@
                           loop
                           (:if (mu:cdr loop)
                                ((:lambda (el)
-                                   (:if (core:apply fn `(,el))
+                                   (:if (core:apply function `(,el))
                                         (mu:cons :t el)
                                         (mu:cons () (mu:cdr (mu:cdr loop)))))
                                 (mu:car (mu:cdr loop)))
                                loop)))
                   (mu:cons () list)))
                 (core:raise list 'core:findl "not a list"))
-           (core:raise fn 'core:findl "not a function"))))
+           (core:raise function 'core:findl "not a function"))))
 
 (mu:intern :core "findr"
-   (:lambda (fn list)
-     (core:findl fn (core:reverse list))))
+   (:lambda (function list)
+     (core:findl function (core:reverse list))))
 
 ;;;
 ;;; position
 ;;;
 (mu:intern :core "positionl"
-   (:lambda (fn list)
-     (:if (core:functionp fn)
+   (:lambda (function list)
+     (:if (core:functionp function)
           (:if (core:listp list)
                (:if list
-                    ((:lambda (len)
+                    ((:lambda (length)
                         (mu:car (mu:fix
                            (:lambda (loop)
                               (:if (core:listp loop)
                                    loop
-                                   (:if (mu:fx-lt len loop)
+                                   (:if (mu:fx-lt length loop)
                                         ()
-                                        (:if (core:apply fn `(,(mu:nth loop list)))
+                                        (:if (core:apply function `(,(mu:nth loop list)))
                                              `(,loop)
-                                             (mu:fx-add 1 loop)))))
+                                             (core:1+ loop)))))
                            0)))
                      (mu:length list))
                     ())
                (core:raise list 'core:positionl "not a list"))
-          (core:raise fn 'core:positionl "not a function"))))
+          (core:raise function 'core:positionl "not a function"))))
 
 (mu:intern :core "positionr"
-   (:lambda (fn list)
-      (:if (core:functionp fn)
+   (:lambda (function list)
+      (:if (core:functionp function)
            (:if (core:listp list)
                 (:if (core:null list)
                      ()
@@ -106,12 +106,12 @@
                                loop
                                (:if (mu:fx-lt loop 0)
                                     ()
-                                    (:if (core:apply fn `(,(mu:nth loop list)))
+                                    (:if (core:apply function `(,(mu:nth loop list)))
                                          `(,loop)
-                                         (mu:fx-sub loop 1)))))
+                                         (core:1- loop)))))
                        (mu:fx-sub (mu:length list) 1))))
                 (core:raise list 'core:positionr "not a list"))
-           (core:raise fn 'core:positionr "not a function"))))
+           (core:raise function 'core:positionr "not a function"))))
 
 ;;;
 ;;; fixed argument list functions
@@ -149,10 +149,10 @@
                 (core:foldl
                  mu:cons
                  ()
-                 ((:lambda (len)
+                 ((:lambda (length)
                      (core:foldl
                       (:lambda (el last)
-                         (:if (mu:fx-lt (mu:length last) (mu:fx-sub (mu:length list) n))
+                         (:if (mu:fx-lt (mu:length last) (mu:fx-sub length n))
                               (mu:cons el last)
                               last))
                       ()

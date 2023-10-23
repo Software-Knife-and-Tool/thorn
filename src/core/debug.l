@@ -5,7 +5,7 @@
 ;;; debugging
 ;;;
 (mu:intern :core "%debug-map-symbol"
-   (:lambda (obj)
+   (:lambda (value)
       (:if (mu:boundp 'core:%debug-core-symbols%)
            ()
            (mu:intern :core "%debug-core-symbols%" (mu:ns-syms :core)))
@@ -13,18 +13,18 @@
        (:lambda (list)
           (:if (core:consp list)
                ((:lambda (symbol)
-                   (:if (mu:eq (mu:sy-val symbol) obj)
+                   (:if (mu:eq (mu:sy-val symbol) value)
                         symbol
                         (mu:cdr list)))
                 (mu:car list))
                list))
        core:%debug-core-symbols%)))
 
-(mu:intern :core "%fmt-mapped-symbol"
-   (:lambda (obj)
+(mu:intern :core "%format-mapped-symbol"
+   (:lambda (value)
       ((:lambda (symbol)
           (core:%orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
-       (core:%debug-map-symbol obj))))
+       (core:%debug-map-symbol value))))
 
 ;;;
 ;;; describe
@@ -126,15 +126,15 @@
             `(,(mu:hp-size bytes) ,(core:type-of cons) ,(mu:length cons) ,cons)))))
 
 (mu:intern :core "describe"
-   (:lambda (obj)
+   (:lambda (value)
       (mu:fix
        (:lambda (list)
           (:if (core:null list)
                ()
                ((:lambda (predicate fn)
-                   (:if (mu:apply predicate `(,obj))
+                   (:if (mu:apply predicate `(,value))
                         ((:lambda ()
-                            (mu:apply fn `(,obj))
+                            (mu:apply fn `(,value))
                             ()))
                         (mu:cdr list)))
                (mu:car (mu:car list))
@@ -166,16 +166,16 @@
                   (:if (mu:eq form :h)
                        ((:lambda ()
                            (core:format :t "debugger help:~%" ())
-                           (core:format :t ":d - describe exception object~%" ())      
+                           (core:format :t ":d - describe exception value~%" ())
                            (core:format :t ":e - print the full exception~%" ())
                            (core:format :t ":r - return from break~%" ())
                            (core:format :t ":x - exit process~%" ())
                            (core:null loop)))
                        (:if (mu:eq form :d)
-                            ((:lambda (obj)
-                                (core:describe (mu:cdr obj))
+                            ((:lambda (value)
+                                (core:describe (mu:cdr value))
                                 (core:null loop))
-                             (core:%exception-prop :object except))
+                             (core:%exception-prop :value except))
                             (:if (mu:eq form :x)
                                  (mu:exit 0)
                                  (:if (mu:eq form :e)

@@ -17,7 +17,7 @@
              (core:mapc
               (:lambda (pair)
                 ((:lambda (symbol value)
-                   (:if (core:symbolp symbol) 
+                   (:if (core:symbolp symbol)
                         (core:add-env env symbol value)
                         (core:raise symbol 'core:make-env "not a symbol")))
                  (mu:car pair)
@@ -64,7 +64,7 @@
 ;;;
 
 (mu:intern :core "%make-env"
-   (:lambda ()          
+   (:lambda ()
      (core:%make-core-type "env"
           (core:%pair-list
            `(:symbols   ,(mu:make-mp))))))

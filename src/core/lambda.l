@@ -37,17 +37,17 @@
            (core:raise prop 'lambda-prop "not a lambda property"))))
 
 ;;;
-;;; `%core-lambda` compiles a core lambda form to a lambda descriptor
+;;; `%compile-lambda` compiles a core lambda form to a lambda descriptor
 ;;;
 ;;; `lambda:` lambda form
 ;;; `env:`    lexical environment
 ;;;
 ;;; `returns:` lambda descriptor
 ;;;
-(mu:intern :core "%core-lambda"
+(mu:intern :core "%compile-core-lambda"
    (:lambda (lambda env)
       (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-         (core:raise lambda 'core:%core-lambda "list syntax")
+         (core:raise lambda 'core:%compile-lambda "list syntax")
          ((:lambda (desc)
             (:if (core:fixnump desc)
                  (core:%make-lambda lambda () env)
@@ -62,7 +62,7 @@
                            `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:fx-sub (mu:length lambda) 1)))
                            (mu:nth (mu:fx-sub (mu:length lambda) 1) lambda)
                            env)
-                          (core:raise lambda 'core:%core-lambda "rest botch"))
+                          (core:raise lambda 'core:%compile-lambda "rest botch"))
                      (mu:fx-add 1 acc))))
             0
             lambda)))))
@@ -88,8 +88,8 @@
                (core:maplist
                 (:lambda (body-cdr)
                    (:if (mu:cdr body-cdr)
-                        ((:lambda (obj)
-                            (core:%compile obj env))
+                        ((:lambda (value)
+                            (core:%compile value env))
                             (mu:car body-cdr))
                         ((:lambda (form)
                             (:if (core:consp form)

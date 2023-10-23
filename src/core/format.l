@@ -5,34 +5,34 @@
 ;;; core format
 ;;;
 (mu:intern :core "%fmt-tilde"
-  (:lambda (dest args)
+  (:lambda (dest arg-list)
     (core:write-char #\~ dest)
-    args))
+    arg-list))
 
 (mu:intern :core "%fmt-tab"
-  (:lambda (dest args)
+  (:lambda (dest arg-list)
     (core:write-char #\tab dest)
-    args))
+    arg-list))
 
 (mu:intern :core "%fmt-percent"
-  (:lambda (dest args)
+  (:lambda (dest arg-list)
     (core:terpri dest)
-    args))
+    arg-list))
 
 (mu:intern :core "%fmt-bang"
-  (:lambda (dest args)
-    (mu:cdr args)))
+  (:lambda (dest arg-list)
+    (mu:cdr arg-list)))
 
 (mu:intern :core "%fmt-decimal"
-  (:lambda (dest args)
-     (:if (core:fixnump (mu:car args))
+  (:lambda (dest arg-list)
+     (:if (core:fixnump (mu:car arg-list))
           ((:lambda ()
-              (core:write (mu:car args) () dest)
-              (mu:cdr args)))
-          (core:raise (mu:car args) 'core:format "argument to ~D not a fixnum"))))
+              (core:write (mu:car arg-list) () dest)
+              (mu:cdr arg-list)))
+          (core:raise (mu:car arg-list) 'core:format "argument to ~D not a fixnum"))))
 
 (mu:intern :core "%fmt-hex"
-  (:lambda (dest args)
+  (:lambda (dest arg-list)
      ((:lambda (fx)
        (:if (core:fixnump fx)
             (:if (core:zerop fx)
@@ -61,26 +61,26 @@
                   (mu:get-str str-stream)))
              (mu:open :string :output "")))
             (core:raise fx 'core:format "argument to ~X not a fixnum")))
-      (mu:car args))))
+      (mu:car arg-list))))
 
 (mu:intern :core "%fmt-aesthetic"
-  (:lambda (dest args)
-    (core:write (mu:car args) () dest)
-    (mu:cdr args)))
+  (:lambda (dest arg-list)
+    (core:write (mu:car arg-list) () dest)
+    (mu:cdr arg-list)))
 
 (mu:intern :core "%fmt-standard"
-  (:lambda (dest args)
-    (core:write (mu:car args) :t dest)
-    (mu:cdr args)))
+  (:lambda (dest arg-list)
+    (core:write (mu:car arg-list) :t dest)
+    (mu:cdr arg-list)))
 
 ;;;
 ;;; control ops
 ;;;
 (mu:intern :core "%fmt-op"
-  (:lambda (dir dest args)
+  (:lambda (dir dest arg-list)
     ((:lambda (fn)
        (:if fn
-            (core:apply (mu:sy-val fn) `(,dest ,args))
+            (core:apply (mu:sy-val fn) `(,dest ,arg-list))
             (core:raise dir 'core:format "unrecognized format directive")))
      (mu:cdr
       (core:%assoc
@@ -95,7 +95,7 @@
          (#\! . core:%fmt-bang)))))))
 
 (mu:intern :core "%fmt-loop"
-  (:lambda (stream dest fmt args)
+  (:lambda (stream dest fmt arg-list)
     (mu:fix
      (:lambda (loop)
        ((:lambda (nth argl)
@@ -110,20 +110,20 @@
                 (core:schar fmt nth))))
         (mu:car loop)
         (mu:cdr loop)))
-     (mu:cons 0 args))
+     (mu:cons 0 arg-list))
     (:if (core:null stream)
          (core:get-output-stream-string dest)
          ())))
 
 (mu:intern :core "format"
-   (:lambda (stream fmt args)
-      (:if (core:stringp fmt)
-           (:if (core:listp args)
-                (:if (core:zerop (core:length fmt))
+   (:lambda (stream format-string arg-list)
+      (:if (core:stringp format-string)
+           (:if (core:listp arg-list)
+                (:if (core:zerop (core:length format-string))
                      (:if stream
                           ""
                           ())
-                     ((:lambda (dest) (core:%fmt-loop stream dest fmt args))
+                     ((:lambda (dest) (core:%fmt-loop stream dest format-string arg-list))
                       (:if (core:null stream)
                            (mu:open :string :output "")
                            (:if (mu:eq stream :t)
@@ -131,5 +131,5 @@
                                 (:if (core:streamp stream)
                                      stream
                                      (core:raise stream 'core:format "not a stream designator"))))))
-                (core:raise args 'core:format "not a list"))
+                (core:raise arg-list 'core:format "not a list"))
            (core:raise fmt 'core:format "not a format string"))))
