@@ -12,7 +12,7 @@
    (:lambda (env format-string arg-list)
       ((:lambda (stream)
           (core:apply core:format `(,stream ,format-string ,arg-list))))
-      (core:env-prop :log env)))
+      (core:%env-prop :log env)))
 
 (mu:intern :core "%open-log-file"
    (:lambda (file-name env)

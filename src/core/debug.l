@@ -175,7 +175,7 @@
                             ((:lambda (value)
                                 (core:describe (mu:cdr value))
                                 (core:null loop))
-                             (core:%exception-prop :value except))
+                             (core:%except-prop :value except))
                             (:if (mu:eq form :x)
                                  (mu:exit 0)
                                  (:if (mu:eq form :e)
