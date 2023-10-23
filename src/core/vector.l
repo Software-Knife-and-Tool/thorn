@@ -9,7 +9,7 @@
      ((:lambda (type)
         (:if (mu:eq type :vector)
           :t
-          (:if (core:core-type-p vec)
+          (:if (core:core-type-p vector)
                (mu:eq 'vector (core:type-of vector))
                ())))
       (mu:type-of vector))))
