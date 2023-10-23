@@ -6,13 +6,9 @@
 ;;;
 (mu:intern :core "vectorp"
    (:lambda (vector)
-     ((:lambda (type)
-        (:if (mu:eq type :vector)
+     (:if (mu:eq :vector (mu:type-of vector))
           :t
-          (:if (core:core-type-p vector)
-               (mu:eq 'vector (core:type-of vector))
-               ())))
-      (mu:type-of vector))))
+          (mu:eq 'vector (core:type-of vector)))))
 
 (mu:intern :core "make-vector"
    (:lambda (list)
