@@ -31,7 +31,7 @@ enum OptType {
 }
 
 fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
-    let mut opts = getopt::Parser::new(&argv, "h?psdvc:e:l:q:");
+    let mut opts = getopt::Parser::new(&argv, "h?pvc:e:l:q:");
     let mut optv = Vec::new();
 
     loop {

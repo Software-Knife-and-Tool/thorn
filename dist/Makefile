@@ -7,6 +7,7 @@ BASE = thorn
 DOCS = ../doc
 DIST = ../dist
 RUNTIME = ./runtime
+SERVER = ./server
 VERSION = 0.0.8
 
 dist:
@@ -25,6 +26,7 @@ dist:
 	@install -m 644 $(DIST)/thorn.l $(BASE)/$(BASE)
 
 	@install -m 755 $(RUNTIME) $(BASE)/bin
+	@install -m 755 $(SERVER) $(BASE)/bin
 	@install -m 755 ./thorn.sh $(BASE)/bin/thorn
 
 	@install -d $(BASE)/doc/html
@@ -35,4 +37,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(RUNTIME)
+	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(RUNTIME) $(SERVER)
