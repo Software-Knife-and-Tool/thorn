@@ -1,6 +1,7 @@
 Cargo.lock
 thorn*.tgz
 dist/runtime
+dist/server
 dist/core.l
 target
 *.out
