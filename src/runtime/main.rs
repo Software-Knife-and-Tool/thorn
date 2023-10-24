@@ -96,7 +96,7 @@ fn usage() {
     std::process::exit(0);
 }
 
-fn repl(system: &System, _config: &str) {
+fn listener(system: &System, _config: &str) {
     let mu = system.mu();
 
     let eval_string = system
@@ -214,6 +214,6 @@ pub fn main() {
     };
 
     if !pipe {
-        repl(&mu, "*default*")
+        listener(&mu, "*default*")
     }
 }

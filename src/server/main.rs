@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! runtime loader/repl
+//! runtime loader/listener
 #[cfg(not(target_env = "msvc"))]
 use tikv_jemallocator::Jemalloc;
 
@@ -248,7 +248,7 @@ where
     });
 }
 
-fn _repl(system: &System, _config: &str) {
+fn _listener(system: &System, _config: &str) {
     let mu = system.mu();
 
     let eval_string = system
