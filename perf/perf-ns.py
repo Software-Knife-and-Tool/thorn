@@ -14,7 +14,7 @@ with open(os.path.join(ns_path, ns, 'tests')) as f: perf_groups = f.readlines()
 
 def storage(ns, group, line, test):
     if ns == 'mu':
-        proc = subprocess.Popen(['../dist/runtime',
+        proc = subprocess.Popen(['../dist/local',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (mu:%sdelta (:lambda ()' + test + ') :nil)'],\
@@ -22,7 +22,7 @@ def storage(ns, group, line, test):
                                 stderr=subprocess.PIPE)
 
     if ns == 'core':
-        proc = subprocess.Popen(['../dist/runtime',
+        proc = subprocess.Popen(['../dist/local',
                                  '-l../dist/core.l',
                                  '-q (core:%init-core-ns)',
                                  '-p',
@@ -43,7 +43,7 @@ def storage(ns, group, line, test):
 
 def timing(ns, test):
     if ns == 'mu':
-        proc = subprocess.Popen(['../dist/runtime',
+        proc = subprocess.Popen(['../dist/local',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (mu:%tdelta (:lambda ()' + test + ') :nil)'],\
@@ -51,7 +51,7 @@ def timing(ns, test):
                                 stderr=subprocess.PIPE)
 
     if ns == 'core':
-        proc = subprocess.Popen(['../dist/runtime',
+        proc = subprocess.Popen(['../dist/local',
                                  '-l../dist/core.l',
                                  '-q (core:%init-core-ns)',
                                  '-p',
