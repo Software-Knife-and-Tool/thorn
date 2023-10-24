@@ -27,6 +27,7 @@ use {
         fs,
         future::Future,
         io::Write,
+        net::{SocketAddr, ToSocketAddrs},
         pin::Pin,
         sync::{Arc, Mutex},
         task::{Context, Poll, Waker},
@@ -120,12 +121,13 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
 }
 
 // 49152 to 65535 are dynamically available
-const _SERVER_PORT: u16 = 50000;
+const SERVER_PORT: u16 = 50000;
 
 fn server_options() {
     let mut _config = String::new();
-    let mut _socket = String::new();
     let mut _ping = false;
+
+    let mut socket = String::new();
 
     match options(std::env::args().collect()) {
         Some(opts) => {
@@ -149,7 +151,7 @@ fn server_options() {
                 match opt.0 {
                     OptType::Config => _config = opt.1.to_string(),
                     OptType::Ping => _ping = true,
-                    OptType::Socket => _socket = opt.1.to_string(),
+                    OptType::Socket => socket = opt.1.to_string(),
                     OptType::Eval => match mu.eval(&opt.1) {
                         Ok(eval) => println!("{}", mu.write(eval, true)),
                         Err(e) => {
@@ -178,26 +180,26 @@ fn server_options() {
     };
 
     if _ping {
-        if _socket.is_empty() {
-            eprintln!("ping mode requires a socket address");
-            std::process::exit(0)
+        if socket.is_empty() {
+            socket = format!("localhost:{}", SERVER_PORT);
         }
 
-        let socket: Vec<&str> = _socket.split(':').collect();
-        if socket.len() != 2 {
-            eprintln!("{} is not a legal socket designator", _socket);
-            std::process::exit(0)
-        }
+        match socket.to_socket_addrs() {
+            Ok(mut addrs) => match addrs.next() {
+                Some(addr) => {
+                    let is_server_port_open =
+                        block_on(oports::is_port_open(addr.ip(), addr.port()));
 
-        match socket[1].parse::<u16>() {
-            Ok(port) => {
-                let ip_v4_addr = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-                let is_server_port_open = block_on(oports::is_port_open(ip_v4_addr, port));
-
-                println!("server port is {}", is_server_port_open)
-            }
+                    println!("server port is {}", is_server_port_open)
+                }
+                None => {
+                    eprintln!("{} is not a legal socket designator", socket);
+                    std::process::exit(0)
+                }
+            },
             Err(_) => {
-                eprintln!("{} is not a legal socket designator", _socket);
+                eprintln!("cannot resolve host {}", socket);
+                std::process::exit(0)
             }
         }
     }
