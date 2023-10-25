@@ -3,12 +3,13 @@
 #
 .PHONY: dist clean
 
+VERSION = 0.0.22
+
 BASE = thorn
 DOCS = ../doc
 DIST = ../dist
-LOCAL = ./local
-SERVER = ./server
-VERSION = 0.0.8
+LOCAL = ./mu-local
+SERVER = ./mu-server
 
 dist:
 	@install -d $(BASE)

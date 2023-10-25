@@ -36,17 +36,17 @@ tags:
 	@etags `find src/mu -name '*.rs' -print`
 
 release:
-	@cargo build --release --bin local
-	@cp target/release/local dist
-	@cargo build --release --bin server
-	@cp target/release/server dist
+	@cargo build --release --bin mu-local
+	@cp target/release/mu-local dist
+	@cargo build --release --bin mu-server
+	@cp target/release/mu-server dist
 	@make dist --no-print-directory
 
 debug:
-	@cargo build --bin local
-	@cp target/debug/local dist
-	@cargo build --bin server
-	@cp target/debug/server dist
+	@cargo build --bin mu-local
+	@cp target/debug/mu-local dist
+	@cargo build --bin mu-server
+	@cp target/debug/mu-server dist
 	@make dist --no-print-directory
 
 dist:
