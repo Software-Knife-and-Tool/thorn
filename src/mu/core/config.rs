@@ -23,7 +23,7 @@ impl Core for Config {
     fn config(conf: String) -> Option<Config> {
         let mut config = Config {
             npages: 1024,
-            gcmode: GcMode::None,
+            gcmode: GcMode::Auto,
         };
 
         if !conf.is_empty() {
