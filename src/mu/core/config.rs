@@ -4,16 +4,10 @@
 //! mu config
 #[allow(unused_imports)]
 use crate::{
+    core::heap::GcMode,
     core::types::{Tag, TagType, Type},
     types::symbol::{Core as _, Symbol},
 };
-
-#[derive(Copy, Clone)]
-pub enum GcMode {
-    None,
-    Auto,
-    Demand,
-}
 
 #[derive(Copy, Clone)]
 pub struct Config {
