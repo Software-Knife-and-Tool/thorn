@@ -75,7 +75,7 @@ while getopts "$optspec" optchar; do
                     opt=${OPTARG%=$val}
                     OPTIONS+=" -q \"${val}\""
                     ;;
-                configure=*)
+                config=*)
                     val=${OPTARG#*=}
                     opt=${OPTARG%=$val}
                     OPTIONS+=" -c \"${val}\""
