@@ -5,6 +5,7 @@
 pub mod async_context;
 pub mod backquote;
 pub mod compile;
+pub mod config;
 pub mod direct;
 pub mod exception;
 pub mod frame;

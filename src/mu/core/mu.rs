@@ -7,6 +7,7 @@ use {
     crate::{
         core::{
             async_context::AsyncContext,
+            config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::{Core as _, LibMuFunction},
@@ -32,7 +33,6 @@ use futures_locks::RwLock;
 
 // mu environment
 pub struct Mu {
-    pub config: String,
     pub version: Tag,
 
     // heap
@@ -78,18 +78,17 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.22";
+    const VERSION: &'static str = "0.0.23";
 
-    fn new(config: String) -> Self;
+    fn new(config: &Config) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
 }
 
 impl Core for Mu {
-    fn new(config: String) -> Self {
+    fn new(_config: &Config) -> Self {
         let mut mu = Mu {
-            config,
             version: Tag::nil(),
 
             // heap

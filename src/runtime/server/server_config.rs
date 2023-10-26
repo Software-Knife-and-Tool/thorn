@@ -120,24 +120,34 @@ impl ServerConfig {
                     }
                 }
 
-                let mu = System::new(config);
+                let system = match System::config(&config) {
+                    Some(config) => System::new(&config),
+                    None => {
+                        eprintln!("server: config error {}", config);
+                        std::process::exit(-1)
+                    }
+                };
 
                 for opt in opts {
                     match opt.0 {
                         OptType::Config => (),
                         OptType::Ping => ping = true,
                         OptType::Socket => socket = opt.1.to_string(),
-                        OptType::Eval => match mu.eval(&opt.1) {
+                        OptType::Eval => match system.eval(&opt.1) {
                             Ok(_) => (),
                             Err(e) => {
-                                eprintln!("runtime: error {}, {}", opt.1, mu.error(e));
+                                eprintln!("runtime: error {}, {}", opt.1, system.error(e));
                                 std::process::exit(-1);
                             }
                         },
-                        OptType::Load => match mu.load(&opt.1) {
+                        OptType::Load => match system.load(&opt.1) {
                             Ok(_) => (),
                             Err(e) => {
-                                eprintln!("runtime: failed to load {}, {}", &opt.1, mu.error(e));
+                                eprintln!(
+                                    "runtime: failed to load {}, {}",
+                                    &opt.1,
+                                    system.error(e)
+                                );
                                 std::process::exit(-1);
                             }
                         },

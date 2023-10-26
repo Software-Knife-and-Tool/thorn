@@ -16,7 +16,7 @@
 //! thorn-mu characteristics:
 //! - 100% mostly-safe Rust
 //! - 64 bit immutable tagged objects
-//! - garbage collected object heap
+//! - garbage collected heap
 //! - lambda compiler
 //! - minimal external dependencies
 //! - multiple independent execution environments
@@ -24,7 +24,7 @@
 //! - symbol namespaces
 //!
 //! thorn-mu data types:
-//!    61 bit fixnums (immediate)
+//!    58 bit fixnums (immediate)
 //!    Lisp-1 symbols
 //!    character, string, and byte streams
 //!    characters (ASCII immediate)
@@ -58,6 +58,7 @@ mod types;
 use {
     crate::core::{
         compile::Compiler,
+        config::Config,
         exception,
         mu::{self, Core},
         stream::{self, Core as _},
@@ -95,8 +96,13 @@ impl Mu {
     /// current version
     pub const VERSION: &'static str = core::mu::Mu::VERSION;
 
+    /// config
+    pub fn config(config_string: &String) -> Option<Config> {
+        <Config as core::config::Core>::config(config_string.to_string())
+    }
+
     /// constructor
-    pub fn new(config: String) -> Self {
+    pub fn new(config: &Config) -> Self {
         Mu(core::mu::Mu::new(config))
     }
 
@@ -188,8 +194,9 @@ pub struct System {
 
 impl System {
     #[allow(clippy::new_without_default)]
-    pub fn new(config: String) -> Self {
+    pub fn new(config: &Config) -> Self {
         let mu = Mu::new(config);
+
         let sys_stream = mu
             .eval(
                 mu.compile(
@@ -203,8 +210,8 @@ impl System {
         System { mu, sys_stream }
     }
 
-    pub fn version(&self) -> String {
-        Mu::VERSION.to_string()
+    pub fn config(conf: &String) -> Option<Config> {
+        <Config as core::config::Core>::config(conf.to_string())
     }
 
     pub fn mu(&self) -> &Mu {
