@@ -3,9 +3,11 @@
 
 //! mu gc
 //!    Mu
+#[allow(unused_imports)]
 use {
     crate::{
         core::{
+            config::Config,
             direct::DirectTag,
             exception,
             frame::Frame,
@@ -33,6 +35,13 @@ use {
 
 // locking protocols
 use {futures::executor::block_on, futures_locks::RwLock};
+
+#[derive(Copy, Clone)]
+pub enum GcMode {
+    None,
+    Auto,
+    Demand,
+}
 
 // (type, total-size, alloc, in-use)
 type AllocMap = (u8, usize, usize, usize);
