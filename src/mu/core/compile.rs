@@ -314,13 +314,19 @@ impl MuFunction for Mu {
 mod tests {
     use crate::core::{
         compile::Compiler,
+        config::{self, Config},
         mu::{Core, Mu},
         types::{Tag, Type},
     };
 
     #[test]
     fn compile_test() {
-        let mu: &Mu = &Core::new("".to_string());
+        let config = match <Config as config::Core>::config("".to_string()) {
+            Some(config) => config,
+            None => return assert!(false),
+        };
+
+        let mu: &Mu = &Core::new(&config);
 
         match <Mu as Compiler>::compile(mu, Tag::nil()) {
             Ok(form) => match Tag::type_of(form) {

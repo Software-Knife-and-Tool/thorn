@@ -96,7 +96,7 @@ fn usage() {
     std::process::exit(0);
 }
 
-fn listener(system: &System, _config: &str) {
+fn listener(system: &System) {
     let mu = system.mu();
 
     let eval_string = system
@@ -176,33 +176,39 @@ pub fn main() {
         }
     }
 
-    let mu = System::new(String::new());
+    let system = match System::config(&_config) {
+        Some(config) => System::new(&config),
+        None => {
+            eprintln!("option: configuration error");
+            std::process::exit(-1)
+        }
+    };
 
     match options(std::env::args().collect()) {
         Some(opts) => {
             for opt in opts {
                 match opt.0 {
-                    OptType::Eval => match mu.eval(&opt.1) {
-                        Ok(eval) => println!("{}", mu.write(eval, true)),
+                    OptType::Eval => match system.eval(&opt.1) {
+                        Ok(eval) => println!("{}", system.write(eval, true)),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", opt.1, mu.error(e));
+                            eprintln!("runtime: error {}, {}", opt.1, system.error(e));
                             std::process::exit(-1);
                         }
                     },
                     OptType::Pipe => {
                         pipe = true;
                     }
-                    OptType::Load => match mu.load(&opt.1) {
+                    OptType::Load => match system.load(&opt.1) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: failed to load {}, {}", &opt.1, mu.error(e));
+                            eprintln!("runtime: failed to load {}, {}", &opt.1, system.error(e));
                             std::process::exit(-1);
                         }
                     },
-                    OptType::Quiet => match mu.eval(&opt.1) {
+                    OptType::Quiet => match system.eval(&opt.1) {
                         Ok(_) => (),
                         Err(e) => {
-                            eprintln!("runtime: error {}, {}", opt.1, mu.error(e));
+                            eprintln!("runtime: error {}, {}", opt.1, system.error(e));
                             std::process::exit(-1);
                         }
                     },
@@ -214,6 +220,6 @@ pub fn main() {
     };
 
     if !pipe {
-        listener(&mu, "*default*")
+        listener(&system)
     }
 }
