@@ -33,6 +33,7 @@ use futures_locks::RwLock;
 
 // mu environment
 pub struct Mu {
+    config: Config,
     pub version: Tag,
 
     // heap
@@ -87,12 +88,13 @@ pub trait Core {
 }
 
 impl Core for Mu {
-    fn new(_config: &Config) -> Self {
+    fn new(config: &Config) -> Self {
         let mut mu = Mu {
+            config: *config,
             version: Tag::nil(),
 
             // heap
-            heap: RwLock::new(BumpHeap::new(1024)),
+            heap: RwLock::new(BumpHeap::new(config.npages)),
             gc_root: RwLock::new(Vec::<Tag>::new()),
 
             // async contexts
