@@ -140,7 +140,7 @@ Having built the distribution, install it in `/opt/thorn`.
 % sudo make install
 ```
 
-Related build targets, `debug` and `profile`, compile for debugging and profiling respectively.`make` with no arguments prints the available targets.
+`make` with no arguments prints the available targets.
 
 If you want to repackage *thorn* after a change to the library sources:
 
@@ -150,7 +150,7 @@ If you want to repackage *thorn* after a change to the library sources:
 
 and then reinstall.
 
-Note: the installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will tend to accrete. The make uninstall target will remove that if desired.
+Note: the installation mechanism does not remove the installation directory before writing it and changes to directory structure and files will tend to accumulate. The make *uninstall* target will remove that if desired.
 
 ```
 % sudo make uninstall
@@ -258,8 +258,9 @@ The  `perf`  makefile offers some development options.
 The *thorn* binaries, libraries, and source files are installed in `/opt/thorn`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `core` and `preface` library sources.
 
 ```
-runtime			runtime binary, minimal repl
-thorn			shell script for running the extended repl
+mu-local		local runtime binary, minimal listener
+mu-server		server runtime, socket listener
+thorn			shell script for running the core listener with mu-local
 ```
 
 
@@ -285,8 +286,7 @@ An interactive session for the extended *thorn* system is invoked by the`thorn` 
 
 ```
 % /opt/thorn/bin/thorn
-;;; Thorn version 0.0.x (preface:repl) :h for help
-user>
+core>
 ```
 
 *rlwrap* makes the *thorn* and *runtime* repls much more useful, with command history and line editing.
@@ -301,9 +301,35 @@ Depending on your version of *rlwrap*, *thorn* may exhibit odd echoing behavior.
 set enable-bracketed-paste off
 ```
 
+to your `~/.inputrc` may help. If you want to run the core listener as part of an interactive session:
+
+```
+alias ,thorn='rlwrap thorn --eval='\''(core:repl)'\'''
+```
 
 
-to your `~/.inputrc` may help.
 
+#### System Configuration
 
+------
 
+The *thorn* runtimes can be configured to use a variable number of system resources, currently the number of pages of memory allocated to the heap at startup. The behavior of the garbage collector can also be specified, though garbage collection is still mostly unimplemented. The *-c* option to the various runtimes is a string of named attribute values:
+
+```
+npages			number of pages of virtual memory for the heap
+gcmode			{ none, auto, demand } how the garbage collector operates
+```
+
+Usage: (mu-server has similar options)
+
+```
+
+mu-local -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
+mu-local -c "npages:1024,gcmode:auto"	default configuration
+
+thorn --config="npages:4096,gcmode:demand"
+										 4096 pages, garbage collection runs on demand
+  
+```
+
+Tests shows that currently (as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *core* library and run the *core* listener. Any significant consing will likely run out of heap space in short order.
