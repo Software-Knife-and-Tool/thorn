@@ -12,7 +12,7 @@ use {
             exception,
             frame::Frame,
             indirect::{self, IndirectTag},
-            mu::Mu,
+            mu::{Core as _, Mu},
             types::{Tag, Type},
         },
         types::{
@@ -22,8 +22,8 @@ use {
             float::{Core as _, Float},
             function::{Core as _, Function},
             map::{Core as _, Map},
+            r#struct::{Core as _, Struct},
             stream::{Core as _, Stream},
-            struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},
             vector::{Core as _, Vector},
@@ -48,14 +48,14 @@ type AllocMap = (u8, usize, usize, usize);
 
 #[bitfield]
 #[repr(align(8))]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Info {
     pub reloc: u32, // relocation
     #[skip]
     __: B11, // expansion
     pub mark: bool, // reference counting
     pub len: u16,   // in bytes
-    pub tag_type: B4, // tag type
+    pub image_type: B4, // tag type
 }
 
 pub struct HeapInterface<'a> {
@@ -71,7 +71,7 @@ pub struct HeapInterface<'a> {
 pub struct Heap {
     heap: HeapInterface<'static>,
     alloc_map: RwLock<Vec<AllocMap>>,
-    freelist: [Vec<Tag>; 8],
+    freelist: [Vec<Tag>; 16],
 }
 
 lazy_static! {
@@ -88,8 +88,8 @@ lazy_static! {
 
 pub trait Core {
     fn add_gc_root(&self, _: Tag);
-    fn gc(&self) -> exception::Result<bool>;
-    fn gc_mark(&self, _: Tag);
+    fn cache_alloc(_: &Mu, _: u8) -> Option<usize>;
+    fn cache_free(_: &Mu, _: usize, _: u8);
     fn heap_size(&self, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
     fn heap_type(_: &Mu, _: Type) -> (u8, usize, usize, usize);
@@ -102,33 +102,16 @@ impl Core for Mu {
         root_ref.push(tag);
     }
 
-    fn gc_mark(&self, tag: Tag) {
-        match tag {
-            Tag::Direct(_) => (),
-            Tag::Indirect(_) => match Tag::type_of(tag) {
-                Type::Cons => Cons::gc_mark(self, tag),
-                Type::Function => Function::gc_mark(self, tag),
-                Type::Map => Map::gc_mark(self, tag),
-                Type::Stream => Stream::gc_mark(self, tag),
-                Type::Struct => Struct::gc_mark(self, tag),
-                Type::Symbol => Symbol::gc_mark(self, tag),
-                Type::Vector => Vector::gc_mark(self, tag),
-                _ => (),
-            },
-        }
+    fn cache_alloc(mu: &Mu, image_type: u8) -> Option<usize> {
+        let mut free_ref = block_on(mu.free.write());
+
+        free_ref[image_type as usize].pop()
     }
 
-    fn gc(&self) -> exception::Result<bool> {
-        let mut heap_ref = block_on(self.heap.write());
-        let root_ref = block_on(self.gc_root.write());
+    fn cache_free(mu: &Mu, off: usize, image_type: u8) {
+        let mut free_ref = block_on(mu.free.write());
 
-        heap_ref.clear_refbits();
-
-        for tag in &*root_ref {
-            self.gc_mark(*tag)
-        }
-
-        Ok(true)
+        free_ref[image_type as usize].push(off)
     }
 
     fn heap_size(&self, tag: Tag) -> usize {

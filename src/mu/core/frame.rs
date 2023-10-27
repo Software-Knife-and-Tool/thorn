@@ -17,7 +17,7 @@ use crate::{
         cons::{Cons, ConsIter, Core as _},
         fixnum::Fixnum,
         function::Function,
-        struct_::{Core as _, Struct},
+        r#struct::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vecimage::{TypedVec, VecType, VectorIter},
         vector::{Core as _, Vector},
@@ -49,7 +49,7 @@ impl Frame {
                 let stype = Struct::stype(mu, tag);
                 let frame = Struct::vector(mu, tag);
 
-                let func = Vector::ref_(mu, frame, 0).unwrap();
+                let func = Vector::r#ref(mu, frame, 0).unwrap();
 
                 match Tag::type_of(func) {
                     Type::Function => {

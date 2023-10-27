@@ -47,7 +47,7 @@ pub trait IVector {
     const IMAGE_NBYTES: usize = 2 * 8; // bytes in image
     fn image(_: &VectorImage) -> Vec<[u8; 8]>;
     fn evict(&self, _: &Mu) -> Tag;
-    fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
+    fn r#ref(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
 }
 
 impl<'a> IVector for IndirectVector<'a> {
@@ -165,7 +165,7 @@ impl<'a> IVector for IndirectVector<'a> {
         }
     }
 
-    fn ref_(mu: &Mu, vector: Tag, index: usize) -> Option<Tag> {
+    fn r#ref(mu: &Mu, vector: Tag, index: usize) -> Option<Tag> {
         let image = Vector::to_image(mu, vector);
 
         let len = Fixnum::as_i64(image.length) as usize;
@@ -348,7 +348,7 @@ impl<'a> Iterator for VectorIter<'a> {
         if self.index >= Vector::length(self.mu, self.vec) {
             None
         } else {
-            let el = Vector::ref_(self.mu, self.vec, self.index);
+            let el = Vector::r#ref(self.mu, self.vec, self.index);
             self.index += 1;
 
             Some(el.unwrap())

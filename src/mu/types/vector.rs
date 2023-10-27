@@ -111,7 +111,7 @@ pub trait Core<'a> {
     fn gc_mark(_: &Mu, _: Tag);
     fn heap_size(_: &Mu, _: Tag) -> usize;
     fn read(_: &Mu, _: char, _: Tag) -> exception::Result<Tag>;
-    fn ref_(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
+    fn r#ref(_: &Mu, _: Tag, _: usize) -> Option<Tag>;
     fn view(_: &Mu, _: Tag) -> Tag;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
 }
@@ -447,13 +447,13 @@ impl<'a> Core<'a> for Vector {
         }
     }
 
-    fn ref_(mu: &Mu, vector: Tag, index: usize) -> Option<Tag> {
+    fn r#ref(mu: &Mu, vector: Tag, index: usize) -> Option<Tag> {
         match Tag::type_of(vector) {
             Type::Vector => match vector {
                 Tag::Direct(_direct) => {
                     Some(Char::as_tag(vector.data(mu).to_le_bytes()[index] as char))
                 }
-                Tag::Indirect(_) => IndirectVector::ref_(mu, vector, index),
+                Tag::Indirect(_) => IndirectVector::r#ref(mu, vector, index),
             },
             _ => panic!(),
         }
@@ -578,7 +578,7 @@ impl MuFunction for Vector {
 
                 match Tag::type_of(vector) {
                     Type::Vector => {
-                        fp.value = match Self::ref_(mu, vector, nth as usize) {
+                        fp.value = match Self::r#ref(mu, vector, nth as usize) {
                             Some(ch) => ch,
                             None => panic!(),
                         };

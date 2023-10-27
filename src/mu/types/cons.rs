@@ -8,7 +8,7 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         indirect::IndirectTag,
-        mu::Mu,
+        mu::{Core as _, Mu},
         stream,
         types::{Tag, TagType, Type},
     },
@@ -104,8 +104,8 @@ impl Cons {
 // core operations
 pub trait Core {
     fn evict(&self, _: &Mu) -> Tag;
-    fn gc_mark(_: &Mu, _: Tag);
     fn heap_size(_: &Mu, _: Tag) -> usize;
+    fn gc_mark(_: &Mu, _: Tag);
     fn nth(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn nthcdr(_: &Mu, _: usize, _: Tag) -> Option<Tag>;
     fn read(_: &Mu, _: Tag) -> exception::Result<Tag>;
@@ -116,29 +116,24 @@ pub trait Core {
 }
 
 impl Core for Cons {
-    fn gc_mark(mu: &Mu, cons: Tag) {
-        match cons {
-            Tag::Direct(_) => {
-                // GcMark(env, car(ptr));
-                // GcMark(env, cdr(ptr));
-            }
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
-
-                if !mark {
-                    // GcMark(env, ptr)
-                    // GcMark(env, car(ptr));
-                    // GcMark(env, cdr(ptr));
-                }
-            }
-        }
-    }
-
     fn view(mu: &Mu, cons: Tag) -> Tag {
         let vec = vec![Self::car(mu, cons), Self::cdr(mu, cons)];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+    }
+
+    fn gc_mark(mu: &Mu, cons: Tag) {
+        match cons {
+            Tag::Direct(_) => {
+                mu.gc_mark(Self::car(mu, cons));
+                mu.gc_mark(Self::cdr(mu, cons))
+            }
+            Tag::Indirect(_) => {
+                mu.gc_mark(cons);
+                mu.gc_mark(Self::car(mu, cons));
+                mu.gc_mark(Self::cdr(mu, cons))
+            }
+        }
     }
 
     fn heap_size(_: &Mu, cons: Tag) -> usize {
