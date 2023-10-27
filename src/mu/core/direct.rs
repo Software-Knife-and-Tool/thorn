@@ -66,8 +66,8 @@ impl DirectTag {
 
     pub fn to_direct(data: u64, info: DirectInfo, tag: DirectType) -> Tag {
         let info: u8 = match info {
-            DirectInfo::Length(usize_) => usize_ as u8,
-            DirectInfo::ExtType(type_) => type_ as u8,
+            DirectInfo::Length(size) => size as u8,
+            DirectInfo::ExtType(ext_type) => ext_type as u8,
         };
 
         let dir = DirectTag::new()

@@ -32,9 +32,9 @@ impl Struct {
     pub fn stype(mu: &Mu, tag: Tag) -> Tag {
         match Tag::type_of(tag) {
             Type::Struct => {
-                let struct_ = Self::to_image(mu, tag);
+                let r#struct = Self::to_image(mu, tag);
 
-                struct_.stype
+                r#struct.stype
             }
             _ => panic!(),
         }
@@ -43,9 +43,9 @@ impl Struct {
     pub fn vector(mu: &Mu, tag: Tag) -> Tag {
         match Tag::type_of(tag) {
             Type::Struct => {
-                let struct_ = Self::to_image(mu, tag);
+                let r#struct = Self::to_image(mu, tag);
 
-                struct_.vector
+                r#struct.vector
             }
             _ => panic!(),
         }
@@ -128,8 +128,8 @@ impl<'a> Core<'a> for Struct {
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
 
-    fn heap_size(mu: &Mu, struct_: Tag) -> usize {
-        std::mem::size_of::<Struct>() + Vector::heap_size(mu, Self::vector(mu, struct_))
+    fn heap_size(mu: &Mu, r#struct: Tag) -> usize {
+        std::mem::size_of::<Struct>() + Vector::heap_size(mu, Self::vector(mu, r#struct))
     }
 
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {

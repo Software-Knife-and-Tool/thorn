@@ -20,6 +20,7 @@ pub struct BumpHeap {
     pub mmap: Box<memmap::MmapMut>,
     pub alloc_map: RwLock<Vec<AllocMap>>,
     pub page_size: usize,
+    pub unmarked: Vec<Vec<usize>>,
     pub npages: usize,
     pub size: usize,
     pub write_barrier: usize,
@@ -27,14 +28,14 @@ pub struct BumpHeap {
 
 #[bitfield]
 #[repr(align(8))]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct Info {
     pub reloc: u32, // relocation
     #[skip]
     __: B11, // expansion
     pub mark: bool, // reference counting
     pub len: u16,   // in bytes
-    pub tag_type: B4, // tag type
+    pub image_type: B4, // image type
 }
 
 impl BumpHeap {
@@ -60,14 +61,19 @@ impl BumpHeap {
                 .expect("Could not access data from memory mapped file")
         };
 
-        let heap = BumpHeap {
+        let mut heap = BumpHeap {
             mmap: Box::new(data),
             page_size: 4096,
             npages: pages,
+            unmarked: Vec::<Vec<usize>>::new(),
             size: pages * 4096,
             alloc_map: RwLock::new(Vec::new()),
             write_barrier: 0,
         };
+
+        for _i in 0..16 {
+            heap.unmarked.push(Vec::<usize>::new())
+        }
 
         {
             let mut alloc_ref = block_on(heap.alloc_map.write());
@@ -100,6 +106,14 @@ impl BumpHeap {
         let ntypes = src.len() as u64;
         let base = self.write_barrier;
 
+        match self.alloc_free(id) {
+            Some(off) => {
+                println!("using free: {}", off);
+                return off;
+            }
+            None => (),
+        }
+
         if base + (((ntypes + 1) * 8) as usize) > self.size {
             panic!("heap exhausted");
         } else {
@@ -108,7 +122,7 @@ impl BumpHeap {
                 .with_reloc(0)
                 .with_len(((ntypes + 1) * 8) as u16)
                 .with_mark(false)
-                .with_tag_type(id)
+                .with_image_type(id)
                 .into_bytes();
 
             data[self.write_barrier..(self.write_barrier + 8)].copy_from_slice(&hinfo);
@@ -139,7 +153,7 @@ impl BumpHeap {
                 .with_reloc(0)
                 .with_len((((ntypes + 1) * 8) + (len_to_8 as u64)) as u16)
                 .with_mark(false)
-                .with_tag_type(id)
+                .with_image_type(id)
                 .into_bytes();
 
             data[self.write_barrier..(self.write_barrier + 8)].copy_from_slice(&hinfo);
@@ -160,7 +174,12 @@ impl BumpHeap {
         }
     }
 
-    // rewrite object data
+    // rewrite info header
+    pub fn write_info(&mut self, info: Info, off: usize) {
+        self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
+    }
+
+    // rewrite image data
     pub fn write_image(&mut self, image: &[[u8; 8]], offset: usize) {
         let mut index = offset;
 
@@ -176,7 +195,7 @@ impl BumpHeap {
 
         while let Some(mut info) = self.image_info(off) {
             info.set_mark(false);
-            self.mmap[off..(off + 8)].copy_from_slice(&(info.into_bytes()));
+            self.write_info(info, off);
             off += info.len() as usize
         }
     }
@@ -188,11 +207,34 @@ impl BumpHeap {
             match self.image_info(off) {
                 Some(mut info) => {
                     info.set_mark(true);
-                    self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
+                    self.write_info(info, off)
                 }
                 None => panic!(),
             }
         }
+    }
+
+    pub fn sweep(&mut self) {
+        let mut off: usize = 8;
+
+        while let Some(info) = self.image_info(off) {
+            if !info.mark() {
+                self.unmarked[info.image_type() as usize].push(off)
+            }
+            off += info.len() as usize
+        }
+    }
+
+    pub fn dump_stats(&self) {
+        for (index, nmarked) in self.unmarked.iter().enumerate() {
+            if !nmarked.is_empty() {
+                println!("{}: {}", index, nmarked.len())
+            }
+        }
+    }
+
+    pub fn alloc_free(&mut self, image_type: u8) -> Option<usize> {
+        self.unmarked[image_type as usize].pop()
     }
 
     // image header info from heap tag
@@ -230,7 +272,7 @@ impl BumpHeap {
     }
 
     pub fn image_tag_type(&self, off: usize) -> Option<u8> {
-        self.image_info(off).map(|info| info.tag_type())
+        self.image_info(off).map(|info| info.image_type())
     }
 }
 

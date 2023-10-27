@@ -18,7 +18,11 @@ use {
         heap::bump_heap::BumpHeap,
         system::sys as system,
         types::{
-            cons::{Cons, ConsIter},
+            cons::{Cons, ConsIter, Core as _},
+            function::{Core as _, Function},
+            map::{Core as _, Map},
+            r#struct::{Core as _, Struct},
+            stream::{Core as _, Stream},
             streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
@@ -29,7 +33,7 @@ use {
 };
 
 // locking protocols
-use futures_locks::RwLock;
+use {futures::executor::block_on, futures_locks::RwLock};
 
 // mu environment
 pub struct Mu {
@@ -39,6 +43,7 @@ pub struct Mu {
     // heap
     pub heap: RwLock<BumpHeap>,
     pub gc_root: RwLock<Vec<Tag>>,
+    pub free: RwLock<Vec<Vec<usize>>>,
 
     // async environments
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
@@ -85,6 +90,8 @@ pub trait Core {
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn apply_(&self, _: Tag, _: Vec<Tag>) -> exception::Result<Tag>;
     fn eval(&self, _: Tag) -> exception::Result<Tag>;
+    fn gc(&self) -> exception::Result<bool>;
+    fn gc_mark(&self, _: Tag);
 }
 
 impl Core for Mu {
@@ -96,6 +103,7 @@ impl Core for Mu {
             // heap
             heap: RwLock::new(BumpHeap::new(config.npages)),
             gc_root: RwLock::new(Vec::<Tag>::new()),
+            free: RwLock::new(Vec::<Vec<usize>>::new()),
 
             // async contexts
             async_map: RwLock::new(HashMap::new()),
@@ -173,6 +181,15 @@ impl Core for Mu {
         };
         <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
 
+        // heap
+        {
+            let mut free_ref = block_on(mu.free.write());
+
+            for _i in 0..16 {
+                free_ref.push(Vec::<usize>::new())
+            }
+        }
+
         // mu functions
         mu.functions = Self::install_lib_functions(&mu);
 
@@ -235,6 +252,38 @@ impl Core for Mu {
             }
             _ => Ok(expr),
         }
+    }
+
+    fn gc_mark(&self, tag: Tag) {
+        match tag {
+            Tag::Direct(_) => (),
+            Tag::Indirect(_) => match Tag::type_of(tag) {
+                Type::Cons => Cons::gc_mark(self, tag),
+                Type::Function => Function::gc_mark(self, tag),
+                Type::Map => Map::gc_mark(self, tag),
+                Type::Stream => Stream::gc_mark(self, tag),
+                Type::Struct => Struct::gc_mark(self, tag),
+                Type::Symbol => Symbol::gc_mark(self, tag),
+                Type::Vector => Vector::gc_mark(self, tag),
+                _ => (),
+            },
+        }
+    }
+
+    fn gc(&self) -> exception::Result<bool> {
+        let mut heap_ref = block_on(self.heap.write());
+        let root_ref = block_on(self.gc_root.write());
+
+        heap_ref.clear_refbits();
+
+        for tag in &*root_ref {
+            self.gc_mark(*tag)
+        }
+
+        heap_ref.sweep();
+        heap_ref.dump_stats();
+
+        Ok(true)
     }
 }
 

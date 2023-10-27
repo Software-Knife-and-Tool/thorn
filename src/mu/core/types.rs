@@ -109,7 +109,7 @@ impl Tag {
         match self {
             Tag::Direct(tag) => tag.data(),
             Tag::Indirect(heap) => match heap_ref.image_info(heap.offset() as usize) {
-                Some(info) => match Type::try_from(info.tag_type()) {
+                Some(info) => match Type::try_from(info.image_type()) {
                     Ok(etype) => etype as u64,
                     Err(_) => panic!(),
                 },
@@ -241,7 +241,7 @@ impl MuFunction for Tag {
 
                     for index in (0..8).rev() {
                         u64_ <<= 8;
-                        u64_ |= match Vector::ref_(mu, arg, index as usize) {
+                        u64_ |= match Vector::r#ref(mu, arg, index as usize) {
                             Some(byte) => Fixnum::as_i64(byte) as u64,
                             None => panic!(),
                         }

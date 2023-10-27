@@ -18,7 +18,7 @@ use {
             cons::Cons,
             fixnum::Fixnum,
             function::Function,
-            struct_::Struct,
+            r#struct::Struct,
             symbol::{Core as _, Symbol, UNBOUND},
         },
     },
