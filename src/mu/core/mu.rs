@@ -43,7 +43,6 @@ pub struct Mu {
     // heap
     pub heap: RwLock<BumpHeap>,
     pub gc_root: RwLock<Vec<Tag>>,
-    pub free: RwLock<Vec<Vec<usize>>>,
 
     // async environments
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
@@ -103,7 +102,6 @@ impl Core for Mu {
             // heap
             heap: RwLock::new(BumpHeap::new(config.npages)),
             gc_root: RwLock::new(Vec::<Tag>::new()),
-            free: RwLock::new(Vec::<Vec<usize>>::new()),
 
             // async contexts
             async_map: RwLock::new(HashMap::new()),
@@ -180,15 +178,6 @@ impl Core for Mu {
             Err(_) => panic!(),
         };
         <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
-
-        // heap
-        {
-            let mut free_ref = block_on(mu.free.write());
-
-            for _i in 0..16 {
-                free_ref.push(Vec::<usize>::new())
-            }
-        }
 
         // mu functions
         mu.functions = Self::install_lib_functions(&mu);
@@ -281,7 +270,7 @@ impl Core for Mu {
         }
 
         heap_ref.sweep();
-        heap_ref.dump_stats();
+        heap_ref.gc_stats();
 
         Ok(true)
     }

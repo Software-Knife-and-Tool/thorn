@@ -410,7 +410,7 @@ impl MuFunction for Cons {
     }
 }
 
-/// iterator
+// iterator
 pub struct ConsIter<'a> {
     mu: &'a Mu,
     pub cons: Tag,

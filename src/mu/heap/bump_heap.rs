@@ -16,6 +16,7 @@ use {futures::executor::block_on, futures_locks::RwLock};
 // (type, total-size, alloc, in-use)
 type AllocMap = (u8, usize, usize, usize);
 
+#[derive(Debug)]
 pub struct BumpHeap {
     pub mmap: Box<memmap::MmapMut>,
     pub alloc_map: RwLock<Vec<AllocMap>>,
@@ -39,6 +40,13 @@ pub struct Info {
 }
 
 impl BumpHeap {
+    pub fn iter(&self) -> BumpHeapIterator {
+        BumpHeapIterator {
+            heap: self,
+            offset: 8,
+        }
+    }
+
     pub fn new(pages: usize) -> Self {
         let path = "/var/tmp/thorn.heap";
 
@@ -105,14 +113,6 @@ impl BumpHeap {
     pub fn alloc(&mut self, src: &[[u8; 8]], id: u8) -> usize {
         let ntypes = src.len() as u64;
         let base = self.write_barrier;
-
-        match self.alloc_free(id) {
-            Some(off) => {
-                println!("using free: {}", off);
-                return off;
-            }
-            None => (),
-        }
 
         if base + (((ntypes + 1) * 8) as usize) > self.size {
             panic!("heap exhausted");
@@ -200,20 +200,6 @@ impl BumpHeap {
         }
     }
 
-    pub fn set_image_refbit(&mut self, off: usize) {
-        if off == 0 || off > self.write_barrier {
-            panic!()
-        } else {
-            match self.image_info(off) {
-                Some(mut info) => {
-                    info.set_mark(true);
-                    self.write_info(info, off)
-                }
-                None => panic!(),
-            }
-        }
-    }
-
     pub fn sweep(&mut self) {
         let mut off: usize = 8;
 
@@ -225,7 +211,7 @@ impl BumpHeap {
         }
     }
 
-    pub fn dump_stats(&self) {
+    pub fn gc_stats(&self) {
         for (index, nmarked) in self.unmarked.iter().enumerate() {
             if !nmarked.is_empty() {
                 println!("{}: {}", index, nmarked.len())
@@ -276,25 +262,29 @@ impl BumpHeap {
     }
 }
 
-/// iterator
-pub struct BumpHeapInfoIter<'a> {
+// iterators
+pub struct BumpHeapIterator<'a> {
     pub heap: &'a BumpHeap,
     pub offset: usize,
 }
 
-impl<'a> BumpHeapInfoIter<'a> {
+impl<'a> BumpHeapIterator<'a> {
     pub fn new(heap: &'a BumpHeap) -> Self {
         Self { heap, offset: 8 }
     }
 }
 
-impl<'a> Iterator for BumpHeapInfoIter<'a> {
-    type Item = Info;
+impl<'a> Iterator for BumpHeapIterator<'a> {
+    type Item = (Info, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let info = self.heap.image_info(self.offset).unwrap();
-        self.offset += info.len() as usize;
-
-        Some(info)
+        match self.heap.image_info(self.offset) {
+            Some(info) => {
+                let id = self.offset;
+                self.offset += info.len() as usize;
+                Some((info, id))
+            }
+            None => None,
+        }
     }
 }
