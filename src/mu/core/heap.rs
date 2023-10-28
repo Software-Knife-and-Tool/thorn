@@ -15,6 +15,7 @@ use {
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },
+        heap::bump_heap::BumpHeap,
         types::{
             char::{Char, Core as _},
             cons::{Cons, Core as _},
@@ -88,8 +89,6 @@ lazy_static! {
 
 pub trait Core {
     fn add_gc_root(&self, _: Tag);
-    fn cache_alloc(_: &Mu, _: u8) -> Option<usize>;
-    fn cache_free(_: &Mu, _: usize, _: u8);
     fn heap_size(&self, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
     fn heap_type(_: &Mu, _: Type) -> (u8, usize, usize, usize);
@@ -100,18 +99,6 @@ impl Core for Mu {
         let mut root_ref = block_on(self.gc_root.write());
 
         root_ref.push(tag);
-    }
-
-    fn cache_alloc(mu: &Mu, image_type: u8) -> Option<usize> {
-        let mut free_ref = block_on(mu.free.write());
-
-        free_ref[image_type as usize].pop()
-    }
-
-    fn cache_free(mu: &Mu, off: usize, image_type: u8) {
-        let mut free_ref = block_on(mu.free.write());
-
-        free_ref[image_type as usize].push(off)
     }
 
     fn heap_size(&self, tag: Tag) -> usize {

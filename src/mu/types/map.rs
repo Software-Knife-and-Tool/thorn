@@ -9,12 +9,12 @@ use {
             frame::Frame,
             heap,
             indirect::IndirectTag,
-            mu::Mu,
+            mu::{Core as _, Mu},
             stream,
             types::{Tag, TagType, Type},
         },
         types::{
-            cons::{Cons, Core as _},
+            cons::{Cons, ConsIter, Core as _},
             fixnum::Fixnum,
             symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},
@@ -158,22 +158,21 @@ pub trait Core {
 }
 
 impl Core for Map {
-    fn gc_mark(mu: &Mu, tag: Tag) {
-        match tag {
-            Tag::Direct(_) => {
-                // GcMark(env, car(ptr));
-                // GcMark(env, cdr(ptr));
-            }
+    fn gc_mark(mu: &Mu, map: Tag) {
+        match map {
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
                 let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
 
                 if !mark {
-                    // GcMark(env, ptr)
-                    // GcMark(env, car(ptr));
-                    // GcMark(env, cdr(ptr));
+                    let symbols = Self::list(mu, map);
+
+                    for symbol in ConsIter::new(mu, symbols) {
+                        mu.gc_mark(symbol)
+                    }
                 }
             }
+            _ => panic!(),
         }
     }
 
