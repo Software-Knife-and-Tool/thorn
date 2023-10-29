@@ -76,33 +76,15 @@ impl Function {
     }
 
     pub fn arity(mu: &Mu, func: Tag) -> Tag {
-        match Tag::type_of(func) {
-            Type::Function => match func {
-                Tag::Indirect(_) => Self::to_image(mu, func).arity,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
+        Self::to_image(mu, func).arity
     }
 
     pub fn form(mu: &Mu, func: Tag) -> Tag {
-        match Tag::type_of(func) {
-            Type::Function => match func {
-                Tag::Indirect(_) => Self::to_image(mu, func).form,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
+        Self::to_image(mu, func).form
     }
 
     pub fn id(mu: &Mu, func: Tag) -> Tag {
-        match Tag::type_of(func) {
-            Type::Function => match func {
-                Tag::Indirect(_) => Self::to_image(mu, func).id,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
+        Self::to_image(mu, func).id
     }
 }
 
