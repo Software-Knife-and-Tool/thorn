@@ -7,7 +7,7 @@ use {
         core::{
             exception::{self, Condition, Exception},
             frame::Frame,
-            heap,
+            heap::{self, Core as _},
             indirect::IndirectTag,
             mu::{Core as _, Mu},
             stream,
@@ -160,9 +160,8 @@ pub trait Core {
 impl Core for Map {
     fn gc_mark(mu: &Mu, map: Tag) {
         match map {
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
+            Tag::Indirect(_) => {
+                let mark = mu.mark(map).unwrap();
 
                 if !mark {
                     let symbols = Self::list(mu, map);

@@ -260,10 +260,12 @@ impl Core for Mu {
     }
 
     fn gc(&self) -> exception::Result<bool> {
-        let mut heap_ref = block_on(self.heap.write());
         let root_ref = block_on(self.gc_root.write());
 
-        heap_ref.clear_refbits();
+        {
+            let mut heap_ref = block_on(self.heap.write());
+            heap_ref.clear_refbits();
+        }
 
         Mu::gc_ns(self);
 
@@ -271,8 +273,11 @@ impl Core for Mu {
             self.gc_mark(*tag)
         }
 
-        heap_ref.sweep();
-        heap_ref.gc_stats();
+        {
+            let mut heap_ref = block_on(self.heap.write());
+            heap_ref.sweep();
+            heap_ref.gc_stats();
+        }
 
         Ok(true)
     }
