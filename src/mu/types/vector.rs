@@ -61,10 +61,12 @@ impl Vector {
 
                     VectorImage {
                         vtype: Tag::from_slice(
-                            heap_ref.of_length(image.offset() as usize, 8).unwrap(),
+                            heap_ref.of_length(image.image_id() as usize, 8).unwrap(),
                         ),
                         length: Tag::from_slice(
-                            heap_ref.of_length(image.offset() as usize + 8, 8).unwrap(),
+                            heap_ref
+                                .of_length(image.image_id() as usize + 8, 8)
+                                .unwrap(),
                         ),
                     }
                 }
@@ -185,7 +187,7 @@ impl<'a> Core<'a> for Vector {
                     str::from_utf8(
                         heap_ref
                             .of_length(
-                                (image.offset() + 16) as usize,
+                                (image.image_id() + 16) as usize,
                                 Fixnum::as_i64(vec.length) as usize,
                             )
                             .unwrap(),
@@ -206,7 +208,7 @@ impl<'a> Core<'a> for Vector {
             }
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
 
                 if !mark {
                     // GcMark(env, ptr)

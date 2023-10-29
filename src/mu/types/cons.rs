@@ -41,10 +41,10 @@ impl Cons {
 
                     Cons {
                         car: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
                         ),
                         cdr: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
                         ),
                     }
                 }
@@ -130,7 +130,7 @@ impl Core for Cons {
             }
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
 
                 if !mark {
                     Mu::gc_mark(mu, cons);
@@ -162,7 +162,7 @@ impl Core for Cons {
                 let mut heap_ref = block_on(mu.heap.write());
 
                 let ind = IndirectTag::new()
-                    .with_offset(heap_ref.alloc(image, Type::Cons as u8) as u64)
+                    .with_image_id(heap_ref.alloc(image, Type::Cons as u8) as u64)
                     .with_heap_id(1)
                     .with_tag(TagType::Cons);
 

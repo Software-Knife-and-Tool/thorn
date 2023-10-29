@@ -71,7 +71,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 Tag::Indirect(
                     IndirectTag::new()
-                        .with_offset(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
+                        .with_image_id(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
                         .with_heap_id(1)
                         .with_tag(TagType::Vector),
                 )
@@ -88,7 +88,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 Tag::Indirect(
                     IndirectTag::new()
-                        .with_offset(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
+                        .with_image_id(heap_ref.valloc(&slices, data, Type::Vector as u8) as u64)
                         .with_heap_id(1)
                         .with_tag(TagType::Vector),
                 )
@@ -109,7 +109,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 Tag::Indirect(
                     IndirectTag::new()
-                        .with_offset(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
+                        .with_image_id(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
                         .with_heap_id(1)
                         .with_tag(TagType::Vector),
                 )
@@ -130,7 +130,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 Tag::Indirect(
                     IndirectTag::new()
-                        .with_offset(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
+                        .with_image_id(heap_ref.alloc(&slices, Type::Vector as u8) as u64)
                         .with_heap_id(1)
                         .with_tag(TagType::Vector),
                 )
@@ -155,9 +155,11 @@ impl<'a> IVector for IndirectVector<'a> {
 
                 Tag::Indirect(
                     IndirectTag::new()
-                        .with_offset(
-                            heap_ref.valloc(&Self::image(image), &data, Type::Vector as u8) as u64,
-                        )
+                        .with_image_id(heap_ref.valloc(
+                            &Self::image(image),
+                            &data,
+                            Type::Vector as u8,
+                        ) as u64)
                         .with_heap_id(1)
                         .with_tag(TagType::Vector),
                 )
@@ -178,7 +180,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
-                        .of_length(image.offset() as usize + Self::IMAGE_NBYTES + index, 1)
+                        .of_length(image.image_id() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
 
                     Some(Fixnum::as_tag(slice[0] as i64))
@@ -189,7 +191,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
-                        .of_length(image.offset() as usize + Self::IMAGE_NBYTES + index, 1)
+                        .of_length(image.image_id() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
 
                     Some(Char::as_tag(slice[0] as char))
@@ -203,7 +205,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     Some(Tag::from_slice(
                         heap_ref
                             .of_length(
-                                image.offset() as usize + Self::IMAGE_NBYTES + (index * 8),
+                                image.image_id() as usize + Self::IMAGE_NBYTES + (index * 8),
                                 8,
                             )
                             .unwrap(),
@@ -216,7 +218,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
                         .of_length(
-                            image.offset() as usize + Self::IMAGE_NBYTES + (index * 8),
+                            image.image_id() as usize + Self::IMAGE_NBYTES + (index * 8),
                             8,
                         )
                         .unwrap();
@@ -232,7 +234,7 @@ impl<'a> IVector for IndirectVector<'a> {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
                         .of_length(
-                            image.offset() as usize + Self::IMAGE_NBYTES + (index * 4),
+                            image.image_id() as usize + Self::IMAGE_NBYTES + (index * 4),
                             4,
                         )
                         .unwrap();

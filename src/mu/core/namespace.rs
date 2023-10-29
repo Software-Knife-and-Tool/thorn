@@ -128,7 +128,7 @@ impl Core for Mu {
                         ];
 
                         let offset = match symbol {
-                            Tag::Indirect(heap) => heap.offset(),
+                            Tag::Indirect(heap) => heap.image_id(),
                             _ => panic!(),
                         } as usize;
 

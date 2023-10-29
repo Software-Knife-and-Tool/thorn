@@ -41,7 +41,7 @@ impl Function {
 
         let mut heap_ref = block_on(mu.heap.write());
         let ind = IndirectTag::new()
-            .with_offset(heap_ref.alloc(image, Type::Function as u8) as u64)
+            .with_image_id(heap_ref.alloc(image, Type::Function as u8) as u64)
             .with_heap_id(1)
             .with_tag(TagType::Function);
 
@@ -56,13 +56,15 @@ impl Function {
 
                     Function {
                         arity: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
                         ),
                         form: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
                         ),
                         id: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
+                            heap_ref
+                                .of_length(main.image_id() as usize + 16, 8)
+                                .unwrap(),
                         ),
                     }
                 }
@@ -115,7 +117,7 @@ impl Core for Function {
         match function {
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let marked = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let marked = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
 
                 if !marked {
                     Mu::gc_mark(mu, function);
