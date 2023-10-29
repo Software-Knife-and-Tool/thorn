@@ -48,7 +48,7 @@ impl Stream {
 
         Tag::Indirect(
             IndirectTag::new()
-                .with_offset(heap_ref.alloc(slices, Type::Stream as u8) as u64)
+                .with_image_id(heap_ref.alloc(slices, Type::Stream as u8) as u64)
                 .with_heap_id(1)
                 .with_tag(TagType::Stream),
         )
@@ -61,16 +61,20 @@ impl Stream {
                     let heap_ref = block_on(mu.heap.read());
                     let image = Stream {
                         stream_id: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
                         ),
                         direction: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
                         ),
                         eof: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 16, 8).unwrap(),
+                            heap_ref
+                                .of_length(main.image_id() as usize + 16, 8)
+                                .unwrap(),
                         ),
                         unch: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 24, 8).unwrap(),
+                            heap_ref
+                                .of_length(main.image_id() as usize + 24, 8)
+                                .unwrap(),
                         ),
                     };
 
@@ -91,7 +95,7 @@ impl Stream {
         ];
 
         let offset = match stream {
-            Tag::Indirect(heap) => heap.offset(),
+            Tag::Indirect(heap) => heap.image_id(),
             _ => panic!(),
         } as usize;
 
@@ -126,7 +130,7 @@ impl Core for Stream {
             }
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
 
                 if !mark {
                     // GcMark(env, ptr)

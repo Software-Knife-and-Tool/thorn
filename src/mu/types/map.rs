@@ -53,10 +53,10 @@ impl Map {
 
                     Map {
                         cache_id: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
                         ),
                         list: Tag::from_slice(
-                            heap_ref.of_length(main.offset() as usize + 8, 8).unwrap(),
+                            heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
                         ),
                     }
                 }
@@ -128,7 +128,7 @@ impl Map {
 
         let mut heap_ref = block_on(mu.heap.write());
         let ind = IndirectTag::new()
-            .with_offset(heap_ref.alloc(image, Type::Map as u8) as u64)
+            .with_image_id(heap_ref.alloc(image, Type::Map as u8) as u64)
             .with_heap_id(1)
             .with_tag(TagType::Map);
 
@@ -139,7 +139,7 @@ impl Map {
         let slices: &[[u8; 8]] = &[image.cache_id.as_slice(), image.list.as_slice()];
 
         let offset = match tag {
-            Tag::Indirect(heap) => heap.offset(),
+            Tag::Indirect(heap) => heap.image_id(),
             _ => panic!(),
         } as usize;
 
@@ -162,7 +162,7 @@ impl Core for Map {
         match map {
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
 
                 if !mark {
                     let symbols = Self::list(mu, map);
@@ -208,7 +208,7 @@ impl Core for Map {
 
         let mut heap_ref = block_on(mu.heap.write());
         let ind = IndirectTag::new()
-            .with_offset(heap_ref.alloc(image, Type::Map as u8) as u64)
+            .with_image_id(heap_ref.alloc(image, Type::Map as u8) as u64)
             .with_heap_id(1)
             .with_tag(TagType::Function);
 

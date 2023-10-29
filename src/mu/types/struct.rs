@@ -59,10 +59,12 @@ impl Struct {
 
                     Struct {
                         stype: Tag::from_slice(
-                            heap_ref.of_length(image.offset() as usize, 8).unwrap(),
+                            heap_ref.of_length(image.image_id() as usize, 8).unwrap(),
                         ),
                         vector: Tag::from_slice(
-                            heap_ref.of_length(image.offset() as usize + 8, 8).unwrap(),
+                            heap_ref
+                                .of_length(image.image_id() as usize + 8, 8)
+                                .unwrap(),
                         ),
                     }
                 }
@@ -110,7 +112,7 @@ impl<'a> Core<'a> for Struct {
             }
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
 
                 if !mark {
                     // GcMark(env, ptr)
@@ -205,7 +207,7 @@ impl<'a> Core<'a> for Struct {
 
         Tag::Indirect(
             IndirectTag::new()
-                .with_offset(heap_ref.alloc(image, Type::Struct as u8) as u64)
+                .with_image_id(heap_ref.alloc(image, Type::Struct as u8) as u64)
                 .with_heap_id(1)
                 .with_tag(TagType::Struct),
         )

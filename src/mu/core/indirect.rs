@@ -18,7 +18,7 @@ pub struct IndirectTag {
     #[bits = 3]
     pub tag: TagType,
     pub heap_id: B1,
-    pub offset: B60,
+    pub image_id: B60,
 }
 
 lazy_static! {
