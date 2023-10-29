@@ -210,6 +210,10 @@ impl BumpHeap {
         }
     }
 
+    pub fn get_image_refbit(&self, off: usize) -> Option<bool> {
+        self.image_info(off).map(|info| info.mark())
+    }
+
     pub fn sweep(&mut self) {
         let mut off: usize = 8;
 
