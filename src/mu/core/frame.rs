@@ -9,17 +9,18 @@
 //!    frame_ref
 use crate::{
     core::{
+        dynamic::Core as _,
         exception::{self, Condition, Exception},
         mu::{Core as _, Mu},
         types::{Tag, Type},
     },
     types::{
-        cons::{Cons, ConsIter, Core as _},
+        cons::{Cons, ConsIter},
         fixnum::Fixnum,
         function::Function,
         r#struct::{Core as _, Struct},
         symbol::{Core as _, Symbol},
-        vecimage::{TypedVec, VecType, VectorIter},
+        vecimage::VectorIter,
         vector::{Core as _, Vector},
     },
 };
@@ -76,28 +77,6 @@ impl Frame {
         }
     }
 
-    // dynamic environment
-    fn env_push(mu: &Mu, func: Tag, offset: usize) {
-        let mut dynamic_ref = block_on(mu.dynamic.write());
-
-        dynamic_ref.push((func.as_u64(), offset));
-    }
-
-    fn env_pop(mu: &Mu) {
-        let mut dynamic_ref = block_on(mu.dynamic.write());
-
-        dynamic_ref.pop();
-    }
-
-    #[allow(dead_code)]
-    fn dynamic_ref(mu: &Mu, index: usize) -> (Tag, usize) {
-        let dynamic_ref = block_on(mu.dynamic.read());
-
-        let (func, offset) = dynamic_ref[index];
-
-        (Tag::from_u64(func), offset)
-    }
-
     // frame stacks
     fn frame_stack_push(self, mu: &Mu) {
         let id = Function::id(mu, self.func).as_u64();
@@ -132,7 +111,7 @@ impl Frame {
         }
     }
 
-    fn frame_stack_ref(mu: &Mu, id: Tag, offset: usize, argv: &mut Vec<u64>) {
+    pub fn frame_stack_ref(mu: &Mu, id: Tag, offset: usize, argv: &mut Vec<u64>) {
         let stack_ref = block_on(mu.lexical.read());
         let vec_ref = block_on(stack_ref[&id.as_u64()].read());
 
@@ -189,7 +168,7 @@ impl Frame {
                     let offset =
                         Self::frame_stack_len(mu, Function::id(mu, self.func)).unwrap_or(0);
 
-                    Self::env_push(mu, self.func, offset);
+                    mu.dynamic_push(self.func, offset);
                     self.frame_stack_push(mu);
 
                     for cons in ConsIter::new(mu, Function::form(mu, func)) {
@@ -200,7 +179,7 @@ impl Frame {
                     }
 
                     Self::frame_stack_pop(mu, Function::id(mu, func));
-                    Self::env_pop(mu);
+                    mu.dynamic_pop();
 
                     Ok(value)
                 }
@@ -212,37 +191,12 @@ impl Frame {
 }
 
 pub trait MuFunction {
-    fn mu_frames(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fr_pop(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fr_push(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fr_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Frame {
-    fn mu_frames(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let env_ref = block_on(mu.dynamic.read());
-
-        let mut frames = Vec::new();
-
-        for (func, offset) in env_ref.iter() {
-            let mut argv = Vec::new();
-
-            Self::frame_stack_ref(
-                mu,
-                Function::id(mu, Tag::from_u64(*func)),
-                *offset,
-                &mut argv,
-            );
-            let vec = argv.into_iter().map(Tag::from_u64).collect();
-            let values = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
-
-            frames.push(Cons::new(Tag::from_u64(*func), values).evict(mu))
-        }
-
-        fp.value = Cons::vlist(mu, &frames);
-        Ok(())
-    }
-
     fn mu_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = fp.argv[0];
 

@@ -8,6 +8,7 @@ use {
         core::{
             async_context::AsyncContext,
             config::Config,
+            dynamic::Core as _,
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::{Core as _, LibMuFunction},
@@ -44,22 +45,26 @@ pub struct Mu {
     pub heap: RwLock<BumpHeap>,
     pub gc_root: RwLock<Vec<Tag>>,
 
-    // async environments
+    // compiler
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
-    pub dynamic: RwLock<Vec<(u64, usize)>>,
+
+    // frame cache
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
 
-    // async context map
-    pub async_map: RwLock<HashMap<u64, AsyncContext>>,
+    // dynamic environment
+    pub dynamic: RwLock<Vec<(u64, usize)>>,
 
-    // exception dynamic unwind stack
-    pub unwind: RwLock<Vec<usize>>,
+    // exception unwind stack
+    pub exception: RwLock<Vec<usize>>,
+
+    // async context index
+    pub async_index: RwLock<HashMap<u64, AsyncContext>>,
 
     // map cache index
     pub map_index: RwLock<HashMap<usize, HashMap<u64, Tag>>>,
 
-    // namespace map/symbol caches
-    pub ns_map: RwLock<<Mu as Cache>::NSIndex>,
+    // namespace map/symbol caches index
+    pub ns_index: RwLock<<Mu as Cache>::NSIndex>,
 
     // functions
     pub functions: Vec<LibMuFunction>,
@@ -103,22 +108,26 @@ impl Core for Mu {
             heap: RwLock::new(BumpHeap::new(config.npages)),
             gc_root: RwLock::new(Vec::<Tag>::new()),
 
-            // async contexts
-            async_map: RwLock::new(HashMap::new()),
-
-            // async environments
+            // compiler
             compile: RwLock::new(Vec::new()),
-            dynamic: RwLock::new(Vec::new()),
+
+            // frame cache
             lexical: RwLock::new(HashMap::new()),
 
-            // exception unwind stack
-            unwind: RwLock::new(Vec::new()),
+            // dynamic environment
+            dynamic: RwLock::new(Vec::new()),
 
-            // map caches
+            // exception unwind stack
+            exception: RwLock::new(Vec::new()),
+
+            // async context index
+            async_index: RwLock::new(HashMap::new()),
+
+            // map cache index
             map_index: RwLock::new(HashMap::new()),
 
-            // namespace maps
-            ns_map: RwLock::new(HashMap::new()),
+            // namespace map index
+            ns_index: RwLock::new(HashMap::new()),
 
             // functions
             functions: Vec::new(),
@@ -267,7 +276,14 @@ impl Core for Mu {
             heap_ref.clear_refbits();
         }
 
+        // cache indices
         Mu::gc_ns(self);
+        // Mu::gc_map(self);
+        // Mu::gc_async(self);
+
+        // environments
+        Mu::gc_dynamic_env(self);
+        // Mu::gc_lexical(self);
 
         for tag in &*root_ref {
             self.gc_mark(*tag)
