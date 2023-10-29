@@ -6,7 +6,7 @@ use crate::{
     core::{
         exception,
         indirect::IndirectTag,
-        mu::Mu,
+        mu::{Core as _, Mu},
         stream,
         types::{Tag, TagType, Type},
     },
@@ -111,22 +111,18 @@ pub trait Core {
 }
 
 impl Core for Function {
-    fn gc_mark(mu: &Mu, tag: Tag) {
-        match tag {
-            Tag::Direct(_) => {
-                // GcMark(env, car(ptr));
-                // GcMark(env, cdr(ptr));
-            }
+    fn gc_mark(mu: &Mu, function: Tag) {
+        match function {
             Tag::Indirect(indir) => {
                 let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+                let marked = heap_ref.image_refbit(indir.offset() as usize).unwrap();
 
-                if !mark {
-                    // GcMark(env, ptr)
-                    // GcMark(env, car(ptr));
-                    // GcMark(env, cdr(ptr));
+                if !marked {
+                    Mu::gc_mark(mu, function);
+                    Mu::gc_mark(mu, Self::form(mu, function));
                 }
             }
+            _ => panic!(),
         }
     }
 

@@ -8,7 +8,7 @@ use {
             direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
-            mu::Mu,
+            mu::{Core as _, Mu},
             types::{Tag, Type},
         },
         types::{
@@ -28,6 +28,7 @@ pub trait Cache {
 
     fn add_ns(_: &Mu, _: Tag) -> exception::Result<Tag>;
     fn intern(_: &Mu, _: Tag, _: Tag);
+    fn gc_ns(_: &Mu);
     fn is_ns(_: &Mu, _: Tag) -> Option<Tag>;
     fn map_symbol(_: &Mu, _: Tag, _: &str) -> Option<Tag>;
 }
@@ -35,6 +36,17 @@ pub trait Cache {
 impl Cache for Mu {
     type NSCache = RwLock<HashMap<String, Tag>>;
     type NSIndex = HashMap<u64, (Tag, Self::NSCache)>;
+
+    fn gc_ns(mu: &Mu) {
+        let ns_map_ref = block_on(mu.ns_map.read());
+
+        for cache in (*ns_map_ref).values() {
+            let cache_ref = block_on(cache.1.read());
+            for symbol in (*cache_ref).values() {
+                Mu::gc_mark(mu, *symbol)
+            }
+        }
+    }
 
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
         let mut ns_ref = block_on(mu.ns_map.write());

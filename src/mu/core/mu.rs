@@ -265,6 +265,8 @@ impl Core for Mu {
 
         heap_ref.clear_refbits();
 
+        Mu::gc_ns(self);
+
         for tag in &*root_ref {
             self.gc_mark(*tag)
         }
