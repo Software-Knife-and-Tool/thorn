@@ -6,8 +6,9 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
+        heap::Core as _,
         indirect::IndirectTag,
-        mu::Mu,
+        mu::{Core as _, Mu},
         stream,
         types::{Tag, TagType, Type},
     },
@@ -104,22 +105,11 @@ impl<'a> Core<'a> for Struct {
         }
     }
 
-    fn gc_mark(mu: &Mu, tag: Tag) {
-        match tag {
-            Tag::Direct(_) => {
-                // GcMark(env, car(ptr));
-                // GcMark(env, cdr(ptr));
-            }
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
+    fn gc_mark(mu: &Mu, r#struct: Tag) {
+        let mark = mu.mark(r#struct).unwrap();
 
-                if !mark {
-                    // GcMark(env, ptr)
-                    // GcMark(env, car(ptr));
-                    // GcMark(env, cdr(ptr));
-                }
-            }
+        if !mark {
+            Mu::gc_mark(mu, Self::vector(mu, r#struct))
         }
     }
 

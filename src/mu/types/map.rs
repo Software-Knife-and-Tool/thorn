@@ -14,7 +14,7 @@ use {
             types::{Tag, TagType, Type},
         },
         types::{
-            cons::{Cons, ConsIter, Core as _},
+            cons::{Cons, Core as _},
             fixnum::Fixnum,
             symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},
@@ -159,19 +159,10 @@ pub trait Core {
 
 impl Core for Map {
     fn gc_mark(mu: &Mu, map: Tag) {
-        match map {
-            Tag::Indirect(_) => {
-                let mark = mu.mark(map).unwrap();
+        let mark = mu.mark(map).unwrap();
 
-                if !mark {
-                    let symbols = Self::list(mu, map);
-
-                    for symbol in ConsIter::new(mu, symbols) {
-                        mu.gc_mark(symbol)
-                    }
-                }
-            }
-            _ => panic!(),
+        if !mark {
+            mu.gc_mark(Self::list(mu, map))
         }
     }
 

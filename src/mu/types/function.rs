@@ -115,16 +115,11 @@ pub trait Core {
 
 impl Core for Function {
     fn gc_mark(mu: &Mu, function: Tag) {
-        match function {
-            Tag::Indirect(_) => {
-                let mark = mu.mark(function).unwrap();
+        let mark = mu.mark(function).unwrap();
 
-                if !mark {
-                    Mu::gc_mark(mu, function);
-                    Mu::gc_mark(mu, Self::form(mu, function));
-                }
-            }
-            _ => panic!(),
+        if !mark {
+            Mu::gc_mark(mu, function);
+            Mu::gc_mark(mu, Self::form(mu, function))
         }
     }
 

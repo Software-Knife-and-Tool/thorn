@@ -124,19 +124,12 @@ pub trait Core {
 
 impl Core for Stream {
     fn gc_mark(mu: &Mu, stream: Tag) {
-        match stream {
-            Tag::Direct(dir) => {
-                // GcMark(env, car(ptr));
-                // GcMark(env, cdr(ptr));
-            }
-            Tag::Indirect(_) => {
-                let mark = mu.mark(stream).unwrap();
-                if !mark {
-                    // GcMark(env, ptr)
-                    // GcMark(env, car(ptr));
-                    // GcMark(env, cdr(ptr));
-                }
-            }
+        let mark = mu.mark(stream).unwrap();
+
+        if !mark {
+            // GcMark(env, ptr)
+            // GcMark(env, car(ptr));
+            // GcMark(env, cdr(ptr));
         }
     }
 
