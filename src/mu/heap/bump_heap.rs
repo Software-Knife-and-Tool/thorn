@@ -114,8 +114,8 @@ impl BumpHeap {
         let ntypes = src.len() as u64;
         let base = self.write_barrier;
 
-        if let Some(r#usize) = self.alloc_free(id) {
-            return r#usize;
+        if let Some(size) = self.alloc_free(id) {
+            return size;
         }
 
         if base + (((ntypes + 1) * 8) as usize) > self.size {

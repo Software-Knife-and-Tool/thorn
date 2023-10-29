@@ -8,7 +8,8 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
-            mu::Mu,
+            heap::Core as _,
+            mu::{Core as _, Mu},
             readtable::{map_char_syntax, SyntaxType},
             stream,
             types::{Tag, Type},
@@ -200,20 +201,18 @@ impl<'a> Core<'a> for Vector {
         }
     }
 
-    fn gc_mark(mu: &Mu, tag: Tag) {
-        match tag {
-            Tag::Direct(_) => {
-                // GcMark(env, car(ptr));
-                // GcMark(env, cdr(ptr));
-            }
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
+    fn gc_mark(mu: &Mu, vector: Tag) {
+        match vector {
+            Tag::Direct(_) => (),
+            Tag::Indirect(_) => {
+                let mark = mu.mark(vector).unwrap();
+                let vtype = Self::type_of(mu, vector);
+                let length = Self::length(mu, vector);
 
-                if !mark {
-                    // GcMark(env, ptr)
-                    // GcMark(env, car(ptr));
-                    // GcMark(env, cdr(ptr));
+                if !mark && vtype == Type::T {
+                    for index in 0..length {
+                        mu.gc_mark(Self::r#ref(mu, vector, index).unwrap())
+                    }
                 }
             }
         }
