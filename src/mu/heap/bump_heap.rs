@@ -200,6 +200,16 @@ impl BumpHeap {
         }
     }
 
+    pub fn set_image_refbit(&mut self, off: usize) {
+        match self.image_info(off) {
+            Some(mut info) => {
+                info.set_mark(true);
+                self.write_info(info, off)
+            }
+            None => panic!(),
+        }
+    }
+
     pub fn sweep(&mut self) {
         let mut off: usize = 8;
 

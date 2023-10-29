@@ -125,13 +125,18 @@ impl Core for Cons {
     fn gc_mark(mu: &Mu, cons: Tag) {
         match cons {
             Tag::Direct(_) => {
-                mu.gc_mark(Self::car(mu, cons));
-                mu.gc_mark(Self::cdr(mu, cons))
+                Mu::gc_mark(mu, Self::car(mu, cons));
+                Mu::gc_mark(mu, Self::cdr(mu, cons))
             }
-            Tag::Indirect(_) => {
-                mu.gc_mark(cons);
-                mu.gc_mark(Self::car(mu, cons));
-                mu.gc_mark(Self::cdr(mu, cons))
+            Tag::Indirect(indir) => {
+                let heap_ref = block_on(mu.heap.read());
+                let mark = heap_ref.image_refbit(indir.offset() as usize).unwrap();
+
+                if !mark {
+                    Mu::gc_mark(mu, cons);
+                    Mu::gc_mark(mu, Self::car(mu, cons));
+                    Mu::gc_mark(mu, Self::cdr(mu, cons))
+                }
             }
         }
     }
