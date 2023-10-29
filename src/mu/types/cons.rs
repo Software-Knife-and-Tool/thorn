@@ -7,6 +7,7 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         frame::Frame,
+        heap::Core as _,
         indirect::IndirectTag,
         mu::{Core as _, Mu},
         stream,
@@ -128,12 +129,10 @@ impl Core for Cons {
                 Mu::gc_mark(mu, Self::car(mu, cons));
                 Mu::gc_mark(mu, Self::cdr(mu, cons))
             }
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
+            Tag::Indirect(_) => {
+                let mark = mu.mark(cons).unwrap();
 
                 if !mark {
-                    Mu::gc_mark(mu, cons);
                     Mu::gc_mark(mu, Self::car(mu, cons));
                     Mu::gc_mark(mu, Self::cdr(mu, cons))
                 }

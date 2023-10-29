@@ -5,6 +5,7 @@
 use crate::{
     core::{
         exception,
+        heap::Core as _,
         indirect::IndirectTag,
         mu::{Core as _, Mu},
         stream,
@@ -115,11 +116,10 @@ pub trait Core {
 impl Core for Function {
     fn gc_mark(mu: &Mu, function: Tag) {
         match function {
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let marked = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
+            Tag::Indirect(_) => {
+                let mark = mu.mark(function).unwrap();
 
-                if !marked {
+                if !mark {
                     Mu::gc_mark(mu, function);
                     Mu::gc_mark(mu, Self::form(mu, function));
                 }

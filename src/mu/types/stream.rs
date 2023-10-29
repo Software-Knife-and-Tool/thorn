@@ -10,6 +10,7 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
+        heap::Core as _,
         indirect::IndirectTag,
         mu::Mu,
         stream,
@@ -122,16 +123,14 @@ pub trait Core {
 }
 
 impl Core for Stream {
-    fn gc_mark(mu: &Mu, tag: Tag) {
-        match tag {
+    fn gc_mark(mu: &Mu, stream: Tag) {
+        match stream {
             Tag::Direct(dir) => {
                 // GcMark(env, car(ptr));
                 // GcMark(env, cdr(ptr));
             }
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let mark = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
-
+            Tag::Indirect(_) => {
+                let mark = mu.mark(stream).unwrap();
                 if !mark {
                     // GcMark(env, ptr)
                     // GcMark(env, car(ptr));

@@ -153,11 +153,10 @@ impl Core for Symbol {
     fn gc_mark(mu: &Mu, symbol: Tag) {
         match symbol {
             Tag::Direct(_) => (), // keyword
-            Tag::Indirect(indir) => {
-                let heap_ref = block_on(mu.heap.read());
-                let marked = heap_ref.image_refbit(indir.image_id() as usize).unwrap();
+            Tag::Indirect(_) => {
+                let mark = mu.mark(symbol).unwrap();
 
-                if !marked {
+                if !mark {
                     Mu::gc_mark(mu, Self::name(mu, symbol));
                     Mu::gc_mark(mu, Self::value(mu, symbol));
                 }

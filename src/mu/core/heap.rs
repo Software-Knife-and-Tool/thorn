@@ -105,11 +105,11 @@ impl Core for Mu {
     fn mark(&self, tag: Tag) -> Option<bool> {
         match tag {
             Tag::Direct(_) => None,
-            Tag::Indirect(ind) => {
+            Tag::Indirect(indirect) => {
                 let mut heap_ref = block_on(self.heap.write());
 
-                let mark = heap_ref.get_image_refbit(ind.image_id() as usize);
-                heap_ref.set_image_refbit(ind.image_id() as usize);
+                let mark = heap_ref.get_image_refbit(indirect.image_id() as usize);
+                heap_ref.set_image_refbit(indirect.image_id() as usize);
 
                 mark
             }
@@ -189,6 +189,12 @@ impl MuFunction for Mu {
 
     fn mu_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (page_size, npages) = Self::heap_info(mu);
+
+        {
+            let heap_ref = block_on(mu.heap.read());
+
+            heap_ref.gc_stats()
+        }
 
         let vec = vec![
             Symbol::keyword("bump"),
