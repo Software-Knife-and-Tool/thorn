@@ -38,7 +38,7 @@ impl Cache for Mu {
     type NSIndex = HashMap<u64, (Tag, Self::NSCache)>;
 
     fn gc_ns(mu: &Mu) {
-        let ns_map_ref = block_on(mu.ns_map.read());
+        let ns_map_ref = block_on(mu.ns_index.read());
 
         for cache in (*ns_map_ref).values() {
             let cache_ref = block_on(cache.1.read());
@@ -49,7 +49,7 @@ impl Cache for Mu {
     }
 
     fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
-        let mut ns_ref = block_on(mu.ns_map.write());
+        let mut ns_ref = block_on(mu.ns_index.write());
 
         if ns_ref.contains_key(&ns.as_u64()) {
             return Err(Exception::new(Condition::Type, "make-ns", ns));
@@ -64,7 +64,7 @@ impl Cache for Mu {
     }
 
     fn map_symbol(mu: &Mu, ns: Tag, name: &str) -> Option<Tag> {
-        let ns_ref = block_on(mu.ns_map.read());
+        let ns_ref = block_on(mu.ns_index.read());
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 
@@ -78,7 +78,7 @@ impl Cache for Mu {
     }
 
     fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
-        let ns_ref = block_on(mu.ns_map.read());
+        let ns_ref = block_on(mu.ns_index.read());
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
         let name = Vector::as_string(mu, Symbol::name(mu, symbol));
@@ -92,7 +92,7 @@ impl Cache for Mu {
         match Tag::type_of(tag) {
             Type::Null => Some(tag),
             Type::Keyword => {
-                let ns_ref = block_on(mu.ns_map.read());
+                let ns_ref = block_on(mu.ns_index.read());
 
                 if ns_ref.contains_key(&tag.as_u64()) {
                     Some(tag)
@@ -299,7 +299,7 @@ impl MuFunction for Mu {
 
         fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
-                let ns_ref = block_on(mu.ns_map.read());
+                let ns_ref = block_on(mu.ns_index.read());
 
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
 

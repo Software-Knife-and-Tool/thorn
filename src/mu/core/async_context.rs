@@ -47,7 +47,7 @@ impl Core for AsyncContext {
         let async_id = match Tag::type_of(func) {
             Type::Function => match Tag::type_of(args) {
                 Type::Cons | Type::Null => {
-                    let mut map_ref = block_on(mu.async_map.write());
+                    let mut map_ref = block_on(mu.async_index.write());
                     let mut async_id: u64 = map_ref.len() as u64;
 
                     let mut tag = DirectTag::to_direct(
@@ -112,7 +112,7 @@ impl MuFunction for Mu {
 
         fp.value = match Tag::type_of(async_id) {
             Type::AsyncId => {
-                let map_ref = block_on(mu.async_map.write());
+                let map_ref = block_on(mu.async_index.write());
 
                 match map_ref.get(&async_id.as_u64()) {
                     Some(_future) => Tag::nil(), // async {

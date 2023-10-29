@@ -7,6 +7,7 @@ pub mod backquote;
 pub mod compile;
 pub mod config;
 pub mod direct;
+pub mod dynamic;
 pub mod exception;
 pub mod frame;
 pub mod funcall;

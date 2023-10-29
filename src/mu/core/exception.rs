@@ -149,9 +149,9 @@ impl MuFunction for Exception {
                 Type::Function => {
                     {
                         let dynamic_ref = block_on(mu.dynamic.read());
-                        let mut unwind_ref = block_on(mu.unwind.write());
+                        let mut exception_ref = block_on(mu.exception.write());
 
-                        unwind_ref.push(dynamic_ref.len())
+                        exception_ref.push(dynamic_ref.len())
                     }
 
                     match mu.apply(thunk, Tag::nil()) {
@@ -162,9 +162,9 @@ impl MuFunction for Exception {
                             match mu.apply_(handler, args) {
                                 Ok(value) => {
                                     let mut dynamic_ref = block_on(mu.dynamic.write());
-                                    let mut unwind_ref = block_on(mu.unwind.write());
+                                    let mut exception_ref = block_on(mu.exception.write());
 
-                                    match unwind_ref.pop() {
+                                    match exception_ref.pop() {
                                         Some(len) => {
                                             dynamic_ref.resize(len, (0, 0));
                                             value

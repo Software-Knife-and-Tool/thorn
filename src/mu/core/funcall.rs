@@ -6,6 +6,7 @@ use crate::{
     core::{
         backquote::MuFunction as _,
         compile::MuFunction as _,
+        dynamic::MuFunction as _,
         exception::{self, Condition, Exception, MuFunction as _},
         frame::{Frame, MuFunction as _},
         heap::MuFunction as _,
@@ -68,6 +69,7 @@ lazy_static! {
         ("apply", 2, Mu::mu_apply),
         ("compile", 1, Mu::mu_compile),
         ("eval", 1, Mu::mu_eval),
+        ("frames", 0, Mu::mu_frames),
         ("fix", 2, Mu::mu_fix),
         ("%append", 2, Mu::append_),
         // system
@@ -78,7 +80,6 @@ lazy_static! {
         ("with-ex", 2, Exception::mu_with_ex),
         ("raise", 2, Exception::mu_raise),
         // frames
-        ("frames", 0, Frame::mu_frames),
         ("fr-pop", 1, Frame::mu_fr_pop),
         ("fr-push", 1, Frame::mu_fr_push),
         ("fr-ref", 2, Frame::mu_fr_ref),
