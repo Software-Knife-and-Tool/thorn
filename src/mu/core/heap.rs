@@ -89,6 +89,7 @@ lazy_static! {
 
 pub trait Core {
     fn add_gc_root(&self, _: Tag);
+    fn mark(&self, _: Tag) -> Option<bool>;
     fn heap_size(&self, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
     fn heap_type(_: &Mu, _: Type) -> (u8, usize, usize, usize);
@@ -99,6 +100,20 @@ impl Core for Mu {
         let mut root_ref = block_on(self.gc_root.write());
 
         root_ref.push(tag);
+    }
+
+    fn mark(&self, tag: Tag) -> Option<bool> {
+        match tag {
+            Tag::Direct(_) => None,
+            Tag::Indirect(ind) => {
+                let mut heap_ref = block_on(self.heap.write());
+
+                let mark = heap_ref.get_image_refbit(ind.image_id() as usize);
+                heap_ref.set_image_refbit(ind.image_id() as usize);
+
+                mark
+            }
+        }
     }
 
     fn heap_size(&self, tag: Tag) -> usize {
