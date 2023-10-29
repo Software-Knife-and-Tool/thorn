@@ -23,35 +23,13 @@ use crate::{
 
 use futures::executor::block_on;
 
-// a struct is a vector with an arbitrary type
+// a struct is a vector with an arbitrary type keyword
 pub struct Struct {
     pub stype: Tag,
     pub vector: Tag,
 }
 
 impl Struct {
-    pub fn stype(mu: &Mu, tag: Tag) -> Tag {
-        match Tag::type_of(tag) {
-            Type::Struct => {
-                let r#struct = Self::to_image(mu, tag);
-
-                r#struct.stype
-            }
-            _ => panic!(),
-        }
-    }
-
-    pub fn vector(mu: &Mu, tag: Tag) -> Tag {
-        match Tag::type_of(tag) {
-            Type::Struct => {
-                let r#struct = Self::to_image(mu, tag);
-
-                r#struct.vector
-            }
-            _ => panic!(),
-        }
-    }
-
     pub fn to_image(mu: &Mu, tag: Tag) -> Self {
         match Tag::type_of(tag) {
             Type::Struct => match tag {
@@ -73,6 +51,14 @@ impl Struct {
             },
             _ => panic!(),
         }
+    }
+
+    pub fn stype(mu: &Mu, tag: Tag) -> Tag {
+        Self::to_image(mu, tag).stype
+    }
+
+    pub fn vector(mu: &Mu, tag: Tag) -> Tag {
+        Self::to_image(mu, tag).vector
     }
 
     pub fn to_tag(mu: &Mu, stype: Tag, vec: Vec<Tag>) -> Tag {

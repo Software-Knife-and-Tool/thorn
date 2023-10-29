@@ -67,23 +67,11 @@ impl Map {
     }
 
     fn cache_id(mu: &Mu, map: Tag) -> Tag {
-        match Tag::type_of(map) {
-            Type::Map => match map {
-                Tag::Indirect(_) => Self::to_image(mu, map).cache_id,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
+        Self::to_image(mu, map).cache_id
     }
 
     fn list(mu: &Mu, map: Tag) -> Tag {
-        match Tag::type_of(map) {
-            Type::Map => match map {
-                Tag::Indirect(_) => Self::to_image(mu, map).list,
-                _ => panic!(),
-            },
-            _ => panic!(),
-        }
+        Self::to_image(mu, map).list
     }
 
     fn view(mu: &Mu, map: Tag) -> Tag {
