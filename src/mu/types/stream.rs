@@ -62,19 +62,21 @@ impl Stream {
                     let heap_ref = block_on(mu.heap.read());
                     let image = Stream {
                         stream_id: Tag::from_slice(
-                            heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
+                            heap_ref.image_slice(main.image_id() as usize, 8).unwrap(),
                         ),
                         direction: Tag::from_slice(
-                            heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
+                            heap_ref
+                                .image_slice(main.image_id() as usize + 8, 8)
+                                .unwrap(),
                         ),
                         eof: Tag::from_slice(
                             heap_ref
-                                .of_length(main.image_id() as usize + 16, 8)
+                                .image_slice(main.image_id() as usize + 16, 8)
                                 .unwrap(),
                         ),
                         unch: Tag::from_slice(
                             heap_ref
-                                .of_length(main.image_id() as usize + 24, 8)
+                                .image_slice(main.image_id() as usize + 24, 8)
                                 .unwrap(),
                         ),
                     };

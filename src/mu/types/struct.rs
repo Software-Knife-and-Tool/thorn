@@ -38,11 +38,11 @@ impl Struct {
 
                     Struct {
                         stype: Tag::from_slice(
-                            heap_ref.of_length(image.image_id() as usize, 8).unwrap(),
+                            heap_ref.image_slice(image.image_id() as usize, 8).unwrap(),
                         ),
                         vector: Tag::from_slice(
                             heap_ref
-                                .of_length(image.image_id() as usize + 8, 8)
+                                .image_slice(image.image_id() as usize + 8, 8)
                                 .unwrap(),
                         ),
                     }

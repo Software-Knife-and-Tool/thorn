@@ -180,7 +180,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
-                        .of_length(image.image_id() as usize + Self::IMAGE_NBYTES + index, 1)
+                        .image_slice(image.image_id() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
 
                     Some(Fixnum::as_tag(slice[0] as i64))
@@ -191,7 +191,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
-                        .of_length(image.image_id() as usize + Self::IMAGE_NBYTES + index, 1)
+                        .image_slice(image.image_id() as usize + Self::IMAGE_NBYTES + index, 1)
                         .unwrap();
 
                     Some(Char::as_tag(slice[0] as char))
@@ -204,7 +204,7 @@ impl<'a> IVector for IndirectVector<'a> {
 
                     Some(Tag::from_slice(
                         heap_ref
-                            .of_length(
+                            .image_slice(
                                 image.image_id() as usize + Self::IMAGE_NBYTES + (index * 8),
                                 8,
                             )
@@ -217,7 +217,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
-                        .of_length(
+                        .image_slice(
                             image.image_id() as usize + Self::IMAGE_NBYTES + (index * 8),
                             8,
                         )
@@ -233,7 +233,7 @@ impl<'a> IVector for IndirectVector<'a> {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
                     let slice = heap_ref
-                        .of_length(
+                        .image_slice(
                             image.image_id() as usize + Self::IMAGE_NBYTES + (index * 4),
                             4,
                         )
