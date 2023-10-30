@@ -158,7 +158,21 @@ impl BumpHeap {
         let len_to_8: usize = vdata.len() + (8 - (vdata.len() & 7));
 
         if base + (((ntypes + 1) * 8) as usize) > self.size {
-            panic!();
+            panic!()
+        }
+
+        if let Some(image) = self.valloc_free(id, vdata.len()) {
+            let data = &mut self.mmap;
+            let mut off = image;
+
+            for n in src {
+                data[off..(off + 8)].copy_from_slice(n);
+                off += 8;
+            }
+
+            data[off..(off + vdata.len())].copy_from_slice(vdata);
+
+            image
         } else {
             let data = &mut self.mmap;
             let hinfo = Info::new()
@@ -186,18 +200,76 @@ impl BumpHeap {
         }
     }
 
+    fn alloc_free(&mut self, id: u8) -> Option<usize> {
+        self.free[id as usize].pop()
+    }
+
+    // try first fit
+    fn valloc_free(&mut self, id: u8, size: usize) -> Option<usize> {
+        for (index, off) in self.free[id as usize].iter().enumerate() {
+            match self.image_info(*off) {
+                Some(info) => {
+                    if info.len() >= size as u16 {
+                        return Some(self.free[id as usize].remove(index));
+                    }
+                }
+                None => panic!(),
+            }
+        }
+
+        None
+    }
+
     // rewrite info header
     pub fn write_info(&mut self, info: Info, off: usize) {
         self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
     }
 
-    // rewrite image data
+    // info header from heap tag
+    pub fn image_info(&self, off: usize) -> Option<Info> {
+        if off == 0 || off > self.write_barrier {
+            None
+        } else {
+            let data = &self.mmap;
+            let mut info = 0u64.to_le_bytes();
+
+            info.copy_from_slice(&data[(off - 8)..off]);
+            Some(Info::from_bytes(info))
+        }
+    }
+
+    pub fn image_reloc(&self, off: usize) -> Option<u32> {
+        self.image_info(off).map(|info| info.reloc())
+    }
+
+    pub fn image_length(&self, off: usize) -> Option<usize> {
+        self.image_info(off).map(|info| info.len() as usize)
+    }
+
+    pub fn image_refbit(&self, off: usize) -> Option<bool> {
+        self.image_info(off).map(|info| info.mark())
+    }
+
+    pub fn image_tag_type(&self, off: usize) -> Option<u8> {
+        self.image_info(off).map(|info| info.image_type())
+    }
+
+    // read and write image data
     pub fn write_image(&mut self, image: &[[u8; 8]], offset: usize) {
         let mut index = offset;
 
         for n in image {
             self.mmap[index..(index + 8)].copy_from_slice(n);
             index += 8;
+        }
+    }
+
+    pub fn image_slice(&self, off: usize, len: usize) -> Option<&[u8]> {
+        if off == 0 || off > self.write_barrier {
+            None
+        } else {
+            let data = &self.mmap;
+            Some(&data[off..off + len])
         }
     }
 
@@ -251,48 +323,6 @@ impl BumpHeap {
         }
 
         nfree
-    }
-
-    pub fn alloc_free(&mut self, id: u8) -> Option<usize> {
-        self.free[id as usize].pop()
-    }
-
-    // image header info from heap tag
-    pub fn image_info(&self, off: usize) -> Option<Info> {
-        if off == 0 || off > self.write_barrier {
-            None
-        } else {
-            let data = &self.mmap;
-            let mut info = 0u64.to_le_bytes();
-
-            info.copy_from_slice(&data[(off - 8)..off]);
-            Some(Info::from_bytes(info))
-        }
-    }
-
-    pub fn of_length(&self, off: usize, len: usize) -> Option<&[u8]> {
-        if off == 0 || off > self.write_barrier {
-            None
-        } else {
-            let data = &self.mmap;
-            Some(&data[off..off + len])
-        }
-    }
-
-    pub fn image_reloc(&self, off: usize) -> Option<u32> {
-        self.image_info(off).map(|info| info.reloc())
-    }
-
-    pub fn image_length(&self, off: usize) -> Option<usize> {
-        self.image_info(off).map(|info| info.len() as usize)
-    }
-
-    pub fn image_refbit(&self, off: usize) -> Option<bool> {
-        self.image_info(off).map(|info| info.mark())
-    }
-
-    pub fn image_tag_type(&self, off: usize) -> Option<u8> {
-        self.image_info(off).map(|info| info.image_type())
     }
 }
 

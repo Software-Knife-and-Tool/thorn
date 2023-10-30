@@ -65,14 +65,16 @@ impl Symbol {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
                     namespace: Tag::from_slice(
-                        heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
+                        heap_ref.image_slice(main.image_id() as usize, 8).unwrap(),
                     ),
                     name: Tag::from_slice(
-                        heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
+                        heap_ref
+                            .image_slice(main.image_id() as usize + 8, 8)
+                            .unwrap(),
                     ),
                     value: Tag::from_slice(
                         heap_ref
-                            .of_length(main.image_id() as usize + 16, 8)
+                            .image_slice(main.image_id() as usize + 16, 8)
                             .unwrap(),
                     ),
                 },

@@ -62,11 +62,11 @@ impl Vector {
 
                     VectorImage {
                         vtype: Tag::from_slice(
-                            heap_ref.of_length(image.image_id() as usize, 8).unwrap(),
+                            heap_ref.image_slice(image.image_id() as usize, 8).unwrap(),
                         ),
                         length: Tag::from_slice(
                             heap_ref
-                                .of_length(image.image_id() as usize + 8, 8)
+                                .image_slice(image.image_id() as usize + 8, 8)
                                 .unwrap(),
                         ),
                     }
@@ -187,7 +187,7 @@ impl<'a> Core<'a> for Vector {
 
                     str::from_utf8(
                         heap_ref
-                            .of_length(
+                            .image_slice(
                                 (image.image_id() + 16) as usize,
                                 Fixnum::as_i64(vec.length) as usize,
                             )

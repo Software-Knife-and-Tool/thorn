@@ -53,10 +53,12 @@ impl Map {
 
                     Map {
                         cache_id: Tag::from_slice(
-                            heap_ref.of_length(main.image_id() as usize, 8).unwrap(),
+                            heap_ref.image_slice(main.image_id() as usize, 8).unwrap(),
                         ),
                         list: Tag::from_slice(
-                            heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
+                            heap_ref
+                                .image_slice(main.image_id() as usize + 8, 8)
+                                .unwrap(),
                         ),
                     }
                 }
