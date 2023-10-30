@@ -106,7 +106,7 @@ impl Vector {
     }
 }
 
-/// core
+// core
 pub trait Core<'a> {
     fn as_string(_: &Mu, _: Tag) -> String;
     fn evict(&self, _: &Mu) -> Tag;

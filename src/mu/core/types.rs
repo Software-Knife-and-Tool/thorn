@@ -14,7 +14,14 @@ use {
             mu::Mu,
         },
         types::{
-            fixnum::Fixnum,
+            char::{Char, Core as _},
+            cons::{Cons, Core as _},
+            fixnum::{Core as _, Fixnum},
+            float::{Core as _, Float},
+            function::{Core as _, Function},
+            map::{Core as _, Map},
+            r#struct::{Core as _, Struct},
+            stream::{Core as _, Stream},
             symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},
             vector::{Core as _, Vector},
@@ -212,6 +219,7 @@ pub trait MuFunction {
     fn mu_eq(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_typeof(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_repr(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Tag {
@@ -270,6 +278,25 @@ impl MuFunction for Tag {
         fp.value = match Tag::type_key(Tag::type_of(fp.argv[0])) {
             Some(type_key) => type_key,
             None => panic!(),
+        };
+
+        Ok(())
+    }
+
+    fn mu_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let tag = fp.argv[0];
+
+        fp.value = match Tag::type_of(tag) {
+            Type::Char => Char::view(mu, tag),
+            Type::Cons => Cons::view(mu, tag),
+            Type::Fixnum => Fixnum::view(mu, tag),
+            Type::Float => Float::view(mu, tag),
+            Type::Function => Function::view(mu, tag),
+            Type::Map => Map::view(mu, tag),
+            Type::Stream => Stream::view(mu, tag),
+            Type::Struct => Struct::view(mu, tag),
+            Type::Vector => Vector::view(mu, tag),
+            _ => Symbol::view(mu, tag),
         };
 
         Ok(())

@@ -21,7 +21,7 @@ pub struct BumpHeap {
     pub mmap: Box<memmap::MmapMut>,
     pub alloc_map: RwLock<Vec<AllocMap>>,
     pub page_size: usize,
-    pub unmarked: Vec<Vec<usize>>,
+    pub free: Vec<Vec<usize>>,
     pub npages: usize,
     pub size: usize,
     pub write_barrier: usize,
@@ -73,14 +73,14 @@ impl BumpHeap {
             mmap: Box::new(data),
             page_size: 4096,
             npages: pages,
-            unmarked: Vec::<Vec<usize>>::new(),
+            free: Vec::<Vec<usize>>::new(),
             size: pages * 4096,
             alloc_map: RwLock::new(Vec::new()),
             write_barrier: 0,
         };
 
         for _i in 0..16 {
-            heap.unmarked.push(Vec::<usize>::new())
+            heap.free.push(Vec::<usize>::new())
         }
 
         {
@@ -114,12 +114,20 @@ impl BumpHeap {
         let ntypes = src.len() as u64;
         let base = self.write_barrier;
 
-        if let Some(size) = self.alloc_free(id) {
-            return size;
+        if base + (((ntypes + 1) * 8) as usize) > self.size {
+            panic!("heap exhausted")
         }
 
-        if base + (((ntypes + 1) * 8) as usize) > self.size {
-            panic!("heap exhausted");
+        if let Some(image) = self.alloc_free(id) {
+            let data = &mut self.mmap;
+            let mut off = image;
+
+            for n in src {
+                data[off..(off + 8)].copy_from_slice(n);
+                off += 8;
+            }
+
+            image
         } else {
             let data = &mut self.mmap;
             let hinfo = Info::new()
@@ -223,22 +231,30 @@ impl BumpHeap {
 
         while let Some(info) = self.image_info(off) {
             if !info.mark() {
-                self.unmarked[info.image_type() as usize].push(off)
+                let uvec = &mut self.free[info.image_type() as usize];
+                match uvec.clone().into_iter().find(|&toff| toff == off) {
+                    Some(_) => (),
+                    None => uvec.push(off),
+                }
             }
             off += info.len() as usize
         }
     }
 
-    pub fn gc_stats(&self) {
-        for (index, nmarked) in self.unmarked.iter().enumerate() {
-            if !nmarked.is_empty() {
-                println!("{}: {}", index, nmarked.len())
+    pub fn gc_stats(&self) -> Vec<(u8, usize)> {
+        let mut nfree = Vec::<(u8, usize)>::new();
+
+        for (index, unmarked) in self.free.iter().enumerate() {
+            if !unmarked.is_empty() {
+                nfree.push((index as u8, unmarked.len()))
             }
         }
+
+        nfree
     }
 
-    pub fn alloc_free(&mut self, image_type: u8) -> Option<usize> {
-        self.unmarked[image_type as usize].pop()
+    pub fn alloc_free(&mut self, id: u8) -> Option<usize> {
+        self.free[id as usize].pop()
     }
 
     // image header info from heap tag

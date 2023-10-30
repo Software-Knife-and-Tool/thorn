@@ -148,7 +148,6 @@ pub trait MuFunction {
     fn mu_hp_info(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_hp_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_hp_stat(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_view(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
@@ -190,16 +189,25 @@ impl MuFunction for Mu {
     fn mu_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (page_size, npages) = Self::heap_info(mu);
 
+        let mut freevec = Vec::<Tag>::new();
+
         {
             let heap_ref = block_on(mu.heap.read());
-
-            heap_ref.gc_stats()
+            for (id, size) in heap_ref.gc_stats() {
+                freevec.push(
+                    Cons::new(Fixnum::as_tag(id as i64), Fixnum::as_tag(size as i64)).evict(mu),
+                )
+            }
         }
 
         let vec = vec![
             Symbol::keyword("bump"),
             Fixnum::as_tag(page_size as i64),
             Fixnum::as_tag(npages as i64),
+            TypedVec::<Vec<Tag>> { vec: freevec }
+                .vec
+                .to_vector()
+                .evict(mu),
         ];
 
         fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
@@ -209,25 +217,6 @@ impl MuFunction for Mu {
 
     fn mu_hp_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = Fixnum::as_tag(Self::heap_size(mu, fp.argv[0]) as i64);
-
-        Ok(())
-    }
-
-    fn mu_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let tag = fp.argv[0];
-
-        fp.value = match Tag::type_of(tag) {
-            Type::Char => Char::view(mu, tag),
-            Type::Cons => Cons::view(mu, tag),
-            Type::Fixnum => Fixnum::view(mu, tag),
-            Type::Float => Float::view(mu, tag),
-            Type::Function => Function::view(mu, tag),
-            Type::Map => Map::view(mu, tag),
-            Type::Stream => Stream::view(mu, tag),
-            Type::Struct => Struct::view(mu, tag),
-            Type::Vector => Vector::view(mu, tag),
-            _ => Symbol::view(mu, tag),
-        };
 
         Ok(())
     }
