@@ -21,8 +21,8 @@ use crate::{
     },
 };
 
-#[allow(unused_imports)]
-use {futures::executor::block_on, futures_locks::RwLock};
+// #[allow(unused_imports)]
+use futures::executor::block_on;
 
 pub trait Core {
     fn gc_dynamic_env(&self);
@@ -36,9 +36,8 @@ impl Core for Mu {
         let dynamic_ref = block_on(self.dynamic.write());
         let frame_ref = block_on(self.lexical.read());
 
-        for cache_id in &*dynamic_ref {
-            let (id, offset) = cache_id;
-
+        for frame in &*dynamic_ref {
+            let (id, offset) = frame;
             match frame_ref.get(id) {
                 Some(vec) => {
                     let vec_ref = block_on(vec.read());

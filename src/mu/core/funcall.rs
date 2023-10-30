@@ -42,6 +42,7 @@ lazy_static! {
         ("eq", 2, Tag::mu_eq),
         ("type-of", 1, Tag::mu_typeof),
         ("repr", 2, Tag::mu_repr),
+        ("view", 1, Tag::mu_view),
         // conses and lists
         ("car", 1, Cons::mu_car),
         ("cdr", 1, Cons::mu_cdr),
@@ -64,7 +65,6 @@ lazy_static! {
         ("hp-info", 0, Mu::mu_hp_info),
         ("hp-stat", 0, Mu::mu_hp_stat),
         ("hp-size", 1, Mu::mu_hp_size),
-        ("view", 1, Mu::mu_view),
         // mu
         ("apply", 2, Mu::mu_apply),
         ("compile", 1, Mu::mu_compile),
