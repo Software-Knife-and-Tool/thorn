@@ -16,7 +16,6 @@ use crate::{
     },
     types::{
         cons::{Cons, Core as _},
-        function::Function,
         vecimage::{TypedVec, VecType},
         vector::Core as _,
     },
@@ -94,12 +93,7 @@ impl MuFunction for Mu {
         for (func, offset) in env_ref.iter() {
             let mut argv = Vec::new();
 
-            Frame::frame_stack_ref(
-                mu,
-                Function::id(mu, Tag::from_u64(*func)),
-                *offset,
-                &mut argv,
-            );
+            Frame::frame_stack_ref(mu, Tag::from_u64(*func), *offset, &mut argv);
             let vec = argv.into_iter().map(Tag::from_u64).collect();
             let values = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
 

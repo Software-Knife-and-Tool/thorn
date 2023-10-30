@@ -151,22 +151,29 @@ impl Compiler for Mu {
             _ => return Err(Exception::new(Condition::Syntax, "lambda", args)),
         };
 
-        let id = Symbol::new(mu, Tag::nil(), "lambda", Tag::nil()).evict(mu);
+        let func = Function::new(
+            Fixnum::as_tag(Cons::length(mu, lambda).unwrap() as i64),
+            Tag::nil(),
+        )
+        .evict(mu);
 
         match compile_frame_symbols(mu, lambda) {
             Ok(lexicals) => {
                 let mut lexenv_ref = block_on(mu.compile.write());
 
-                lexenv_ref.push((id, lexicals));
+                lexenv_ref.push((func, lexicals));
             }
             Err(e) => return Err(e),
         };
 
         let form = match Self::compile_list(mu, body) {
-            Ok(form) => match Cons::length(mu, lambda) {
-                Some(len) => Ok(Function::new(Fixnum::as_tag(len as i64), form, id).evict(mu)),
-                None => panic!(":lambda"),
-            },
+            Ok(form) => {
+                let mut function = Function::to_image(mu, func);
+                function.form = form;
+                Function::update(mu, &function, func);
+
+                Ok(func)
+            }
             Err(e) => Err(e),
         };
 

@@ -25,7 +25,7 @@ use crate::{
         r#struct::{MuFunction as _, Struct},
         stream::Stream,
         stream_fns::MuFunction as _,
-        symbol::{Core as _, MuFunction as _, Symbol},
+        symbol::{MuFunction as _, Symbol},
         vector::{MuFunction as _, Vector},
     },
 };
@@ -156,7 +156,6 @@ impl Core for Mu {
                     Some(n) => n as i64,
                     None => panic!(),
                 }),
-                Symbol::new(mu, Tag::nil(), name, Tag::nil()).evict(mu),
             )
             .evict(mu);
 

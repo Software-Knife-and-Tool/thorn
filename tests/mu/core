@@ -29,8 +29,8 @@
 (mu:view #(:t 1 2))	#(:t 2 :t)
 (mu:view #s(:foo 1 2))	#(:t :foo #(:t 1 2))
 (mu:view 'a)	#(:t :nil a :UNBOUND)
-(mu:view 'mu:eq)	#(:t :mu eq #<:function mu:eq [req:2, tag:0]>)
-(mu:view mu:eq)	#(:t 2 0 eq)
+(mu:view 'mu:eq)	#(:t :mu eq #<:function mu: [req:2, tag:0]>)
+(mu:view mu:eq)	#(:t 2 0)
 (mu:view mu:std-in)	#(:t 2147483648 :input :nil :nil)
 (mu:view (mu:make-mp))	#(:t 0 :nil)
 (mu:hp-size ())	8
@@ -44,8 +44,8 @@
 (mu:hp-size "abcdefgh")	26
 (mu:hp-size #(:t 1 2))	34
 (mu:hp-size 'a)	27
-(mu:hp-size 'mu:eq)	54
-(mu:hp-size mu:eq)	27
+(mu:hp-size 'mu:eq)	45
+(mu:hp-size mu:eq)	18
 (mu:hp-size mu:std-in)	36
 (mu:with-ex (:lambda (cond obj) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 1)))	1
 (mu:repr :t (mu:repr () :t))	:t
