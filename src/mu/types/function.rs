@@ -13,9 +13,8 @@ use crate::{
     },
     types::{
         fixnum::Fixnum,
-        symbol::Symbol,
         vecimage::{TypedVec, VecType},
-        vector::{Core as _, Vector},
+        vector::Core as _,
     },
 };
 
@@ -23,22 +22,17 @@ use futures::executor::block_on;
 
 #[derive(Copy, Clone)]
 pub struct Function {
-    id: Tag,    // frame id, nil or a symbol
-    arity: Tag, // fixnum # of required arguments
-    form: Tag,  // cons body or fixnum native table offset
+    pub arity: Tag, // fixnum # of required arguments
+    pub form: Tag,  // list or fixnum native table offset
 }
 
 impl Function {
-    pub fn new(arity: Tag, form: Tag, id: Tag) -> Self {
-        Function { arity, form, id }
+    pub fn new(arity: Tag, form: Tag) -> Self {
+        Function { arity, form }
     }
 
     pub fn evict(&self, mu: &Mu) -> Tag {
-        let image: &[[u8; 8]] = &[
-            self.arity.as_slice(),
-            self.form.as_slice(),
-            self.id.as_slice(),
-        ];
+        let image: &[[u8; 8]] = &[self.arity.as_slice(), self.form.as_slice()];
 
         let mut heap_ref = block_on(mu.heap.write());
         let ind = IndirectTag::new()
@@ -62,11 +56,6 @@ impl Function {
                         form: Tag::from_slice(
                             heap_ref.of_length(main.image_id() as usize + 8, 8).unwrap(),
                         ),
-                        id: Tag::from_slice(
-                            heap_ref
-                                .of_length(main.image_id() as usize + 16, 8)
-                                .unwrap(),
-                        ),
                     }
                 }
                 _ => panic!(),
@@ -75,16 +64,25 @@ impl Function {
         }
     }
 
+    pub fn update(mu: &Mu, image: &Function, func: Tag) {
+        let slices: &[[u8; 8]] = &[image.arity.as_slice(), image.form.as_slice()];
+
+        let offset = match func {
+            Tag::Indirect(heap) => heap.image_id(),
+            _ => panic!(),
+        } as usize;
+
+        let mut heap_ref = block_on(mu.heap.write());
+
+        heap_ref.write_image(slices, offset);
+    }
+
     pub fn arity(mu: &Mu, func: Tag) -> Tag {
         Self::to_image(mu, func).arity
     }
 
     pub fn form(mu: &Mu, func: Tag) -> Tag {
         Self::to_image(mu, func).form
-    }
-
-    pub fn id(mu: &Mu, func: Tag) -> Tag {
-        Self::to_image(mu, func).id
     }
 }
 
@@ -106,11 +104,7 @@ impl Core for Function {
     }
 
     fn view(mu: &Mu, func: Tag) -> Tag {
-        let vec = vec![
-            Self::arity(mu, func),
-            Self::form(mu, func),
-            Self::id(mu, func),
-        ];
+        let vec = vec![Self::arity(mu, func), Self::form(mu, func)];
 
         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
     }
@@ -133,16 +127,8 @@ impl Core for Function {
                     Type::Cons | Type::Null => {
                         (":lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
-                    Type::Fixnum => {
-                        let name = Function::id(mu, func);
-                        (
-                            format!("mu:{}", Vector::as_string(mu, Symbol::name(mu, name))),
-                            form.as_u64().to_string(),
-                        )
-                    }
-                    _ => {
-                        panic!()
-                    }
+                    Type::Fixnum => ("mu:".to_string(), form.as_u64().to_string()),
+                    _ => panic!(),
                 };
 
                 <Mu as stream::Core>::write_string(
@@ -164,7 +150,7 @@ mod tests {
 
     #[test]
     fn as_tag() {
-        match Function::new(Fixnum::as_tag(0), Tag::nil(), Tag::nil()) {
+        match Function::new(Fixnum::as_tag(0), Tag::nil()) {
             _ => assert_eq!(true, true),
         }
     }

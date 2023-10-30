@@ -79,7 +79,7 @@ impl Frame {
 
     // frame stacks
     fn frame_stack_push(self, mu: &Mu) {
-        let id = Function::id(mu, self.func).as_u64();
+        let id = self.func.as_u64();
 
         let mut stack_ref = block_on(mu.lexical.write());
 
@@ -165,8 +165,7 @@ impl Frame {
                     }
 
                     let mut value = Tag::nil();
-                    let offset =
-                        Self::frame_stack_len(mu, Function::id(mu, self.func)).unwrap_or(0);
+                    let offset = Self::frame_stack_len(mu, self.func).unwrap_or(0);
 
                     mu.dynamic_push(self.func, offset);
                     self.frame_stack_push(mu);
@@ -178,7 +177,7 @@ impl Frame {
                         };
                     }
 
-                    Self::frame_stack_pop(mu, Function::id(mu, func));
+                    Self::frame_stack_pop(mu, func);
                     mu.dynamic_pop();
 
                     Ok(value)
