@@ -290,7 +290,7 @@ impl Core for Mu {
 
         {
             let mut heap_ref = block_on(self.heap.write());
-            heap_ref.sweep();
+            heap_ref.gc_sweep();
         }
 
         Ok(true)
