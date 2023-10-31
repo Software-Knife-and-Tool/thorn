@@ -77,6 +77,22 @@ impl Frame {
         }
     }
 
+    pub fn gc_lexical(mu: &Mu) {
+        let lexical_ref = block_on(mu.lexical.read());
+        for frame_vec in (*lexical_ref).values() {
+            let frame_vec_ref = block_on(frame_vec.read());
+            for frame in frame_vec_ref.iter() {
+                Mu::gc_mark(mu, frame.func);
+
+                for arg in &frame.argv {
+                    Mu::gc_mark(mu, *arg)
+                }
+
+                Mu::gc_mark(mu, frame.value);
+            }
+        }
+    }
+
     // frame stacks
     fn frame_stack_push(self, mu: &Mu) {
         let id = self.func.as_u64();

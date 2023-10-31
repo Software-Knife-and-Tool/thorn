@@ -11,7 +11,7 @@ use crate::{
     core::{
         exception::{self},
         frame::Frame,
-        mu::{Core as _, Mu},
+        mu::Mu,
         types::Tag,
     },
     types::{
@@ -25,38 +25,12 @@ use crate::{
 use futures::executor::block_on;
 
 pub trait Core {
-    fn gc_dynamic_env(&self);
     fn dynamic_push(&self, _: Tag, _: usize);
     fn dynamic_pop(&self);
     fn dynamic_ref(&self, _: usize) -> (Tag, usize);
 }
 
 impl Core for Mu {
-    fn gc_dynamic_env(&self) {
-        let dynamic_ref = block_on(self.dynamic.write());
-        let frame_ref = block_on(self.lexical.read());
-
-        for frame in &*dynamic_ref {
-            let (id, offset) = frame;
-            match frame_ref.get(id) {
-                Some(vec) => {
-                    let vec_ref = block_on(vec.read());
-                    let frame = &vec_ref[*offset];
-
-                    Mu::gc_mark(self, frame.func);
-                    Mu::gc_mark(self, frame.value);
-
-                    for arg in &frame.argv {
-                        Mu::gc_mark(self, *arg)
-                    }
-                }
-                None => {
-                    println!("frame with function id {} not found in cache", id)
-                }
-            }
-        }
-    }
-
     fn dynamic_push(&self, func: Tag, offset: usize) {
         let mut dynamic_ref = block_on(self.dynamic.write());
 

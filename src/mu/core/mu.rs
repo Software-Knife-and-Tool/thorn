@@ -8,7 +8,6 @@ use {
         core::{
             async_context::AsyncContext,
             config::Config,
-            dynamic::Core as _,
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::{Core as _, LibMuFunction},
@@ -273,7 +272,7 @@ impl Core for Mu {
 
         {
             let mut heap_ref = block_on(self.heap.write());
-            heap_ref.clear_refbits();
+            heap_ref.gc_clear();
         }
 
         // cache indices
@@ -282,10 +281,10 @@ impl Core for Mu {
         // Mu::gc_async(self);
 
         // environments
-        Mu::gc_dynamic_env(self);
-        // Mu::gc_lexical(self);
+        // Mu::gc_dynamic_env(self);
+        Frame::gc_lexical(self);
 
-        for tag in &*root_ref {
+        for tag in root_ref.iter() {
             self.gc_mark(*tag)
         }
 

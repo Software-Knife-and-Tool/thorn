@@ -201,7 +201,15 @@ impl BumpHeap {
     }
 
     fn alloc_free(&mut self, id: u8) -> Option<usize> {
+        // let nfree = self.free[id as usize].len();
+        // if id == 3 && nfree > 245610 {
+        // if nfree != 0 {
+        //   print!("{}:{}", id, self.free[id as usize].len());
+        // }
         self.free[id as usize].pop()
+        // } else {
+        //    None
+        // }
     }
 
     // try first fit
@@ -274,13 +282,17 @@ impl BumpHeap {
     }
 
     // gc
-    pub fn clear_refbits(&mut self) {
+    pub fn gc_clear(&mut self) {
         let mut off: usize = 8;
 
         while let Some(mut info) = self.image_info(off) {
             info.set_mark(false);
             self.write_info(info, off);
             off += info.len() as usize
+        }
+
+        for free in self.free.iter_mut() {
+            free.clear()
         }
     }
 
@@ -303,11 +315,7 @@ impl BumpHeap {
 
         while let Some(info) = self.image_info(off) {
             if !info.mark() {
-                let uvec = &mut self.free[info.image_type() as usize];
-                match uvec.clone().into_iter().find(|&toff| toff == off) {
-                    Some(_) => (),
-                    None => uvec.push(off),
-                }
+                self.free[info.image_type() as usize].push(off)
             }
             off += info.len() as usize
         }

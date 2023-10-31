@@ -198,11 +198,11 @@ impl Tag {
         }
     }
 
-    pub fn type_key(ttype: Type) -> Option<Tag> {
+    pub fn type_key(r#type: Type) -> Option<Tag> {
         TYPEKEYMAP
             .iter()
             .copied()
-            .find(|map| ttype == map.0)
+            .find(|map| r#type == map.0)
             .map(|map| map.1)
     }
 

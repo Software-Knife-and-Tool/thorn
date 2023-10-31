@@ -39,11 +39,10 @@ impl Cache for Mu {
 
     fn gc_ns(mu: &Mu) {
         let ns_map_ref = block_on(mu.ns_index.read());
-
         for cache in (*ns_map_ref).values() {
             let cache_ref = block_on(cache.1.read());
             for symbol in (*cache_ref).values() {
-                Mu::gc_mark(mu, *symbol)
+                mu.gc_mark(*symbol)
             }
         }
     }
