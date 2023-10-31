@@ -13,15 +13,15 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
-// (type, total-size, alloc, in-use)
-type AllocMap = (u8, usize, usize, usize);
+// (total-size, ntotal, nfree)
+type TypeAllocMap = (usize, usize, usize);
 
 #[derive(Debug)]
 pub struct BumpHeap {
     pub mmap: Box<memmap::MmapMut>,
-    pub alloc_map: RwLock<Vec<AllocMap>>,
+    pub alloc_map: RwLock<Vec<RwLock<TypeAllocMap>>>,
+    pub free_map: Vec<Vec<usize>>,
     pub page_size: usize,
-    pub free: Vec<Vec<usize>>,
     pub npages: usize,
     pub size: usize,
     pub write_barrier: usize,
@@ -73,40 +73,41 @@ impl BumpHeap {
             mmap: Box::new(data),
             page_size: 4096,
             npages: pages,
-            free: Vec::<Vec<usize>>::new(),
             size: pages * 4096,
             alloc_map: RwLock::new(Vec::new()),
+            free_map: Vec::new(),
             write_barrier: 0,
         };
 
         for _i in 0..16 {
-            heap.free.push(Vec::<usize>::new())
+            heap.free_map.push(Vec::<usize>::new())
         }
 
         {
             let mut alloc_ref = block_on(heap.alloc_map.write());
 
-            for id in 0..256 {
-                alloc_ref.push((id as u8, 0, 0, 0))
+            for _ in 0..16 {
+                alloc_ref.push(RwLock::new((0, 0, 0)))
             }
         }
 
         heap
     }
 
-    // allocation statistics
-    pub fn alloc_id(&self, id: u8) -> (usize, usize, usize) {
+    // allocation metrics
+    fn alloc_id(&self, id: u8) -> (usize, usize, usize) {
         let alloc_ref = block_on(self.alloc_map.read());
+        let alloc_type = block_on(alloc_ref[id as usize].read());
 
-        let (_, total_size, alloc, in_use) = alloc_ref[id as usize];
-        (total_size, alloc, in_use)
+        *alloc_type
     }
 
     fn alloc_map(&self, id: u8, size: usize) {
-        let mut alloc_ref = block_on(self.alloc_map.write());
+        let alloc_ref = block_on(self.alloc_map.write());
+        let mut alloc_type = block_on(alloc_ref[id as usize].write());
 
-        let (_, total_size, alloc, in_use) = alloc_ref[id as usize];
-        alloc_ref[id as usize] = (id, total_size + size, alloc + 1, in_use + 1);
+        alloc_type.0 += size;
+        alloc_type.1 += 1;
     }
 
     // allocate
@@ -201,24 +202,31 @@ impl BumpHeap {
     }
 
     fn alloc_free(&mut self, id: u8) -> Option<usize> {
-        // let nfree = self.free[id as usize].len();
-        // if id == 3 && nfree > 245610 {
-        // if nfree != 0 {
-        //   print!("{}:{}", id, self.free[id as usize].len());
-        // }
-        self.free[id as usize].pop()
-        // } else {
-        //    None
-        // }
+        match self.free_map[id as usize].pop() {
+            Some(tag) => {
+                let alloc_ref = block_on(self.alloc_map.read());
+                let mut alloc_type = block_on(alloc_ref[id as usize].write());
+
+                alloc_type.2 -= 1;
+
+                Some(tag)
+            }
+            None => None,
+        }
     }
 
     // try first fit
     fn valloc_free(&mut self, id: u8, size: usize) -> Option<usize> {
-        for (index, off) in self.free[id as usize].iter().enumerate() {
+        for (index, off) in self.free_map[id as usize].iter().enumerate() {
             match self.image_info(*off) {
                 Some(info) => {
                     if info.len() >= size as u16 {
-                        return Some(self.free[id as usize].remove(index));
+                        let alloc_ref = block_on(self.alloc_map.read());
+                        let mut alloc_type = block_on(alloc_ref[id as usize].write());
+
+                        alloc_type.2 -= 1;
+
+                        return Some(self.free_map[id as usize].remove(index));
                     }
                 }
                 None => panic!(),
@@ -284,6 +292,7 @@ impl BumpHeap {
     // gc
     pub fn gc_clear(&mut self) {
         let mut off: usize = 8;
+        let alloc_ref = block_on(self.alloc_map.read());
 
         while let Some(mut info) = self.image_info(off) {
             info.set_mark(false);
@@ -291,8 +300,30 @@ impl BumpHeap {
             off += info.len() as usize
         }
 
-        for free in self.free.iter_mut() {
+        for (id, _) in alloc_ref.iter().enumerate() {
+            let mut alloc_type = block_on(alloc_ref[id].write());
+
+            alloc_type.2 = 0;
+        }
+
+        for free in self.free_map.iter_mut() {
             free.clear()
+        }
+    }
+
+    pub fn gc_sweep(&mut self) {
+        let mut off: usize = 8;
+        let alloc_ref = block_on(self.alloc_map.write());
+
+        while let Some(info) = self.image_info(off) {
+            if !info.mark() {
+                let id = info.image_type() as usize;
+                let mut alloc_type = block_on(alloc_ref[id].write());
+
+                alloc_type.2 += 1;
+                self.free_map[id].push(off);
+            }
+            off += info.len() as usize
         }
     }
 
@@ -308,29 +339,6 @@ impl BumpHeap {
 
     pub fn get_image_refbit(&self, off: usize) -> Option<bool> {
         self.image_info(off).map(|info| info.mark())
-    }
-
-    pub fn sweep(&mut self) {
-        let mut off: usize = 8;
-
-        while let Some(info) = self.image_info(off) {
-            if !info.mark() {
-                self.free[info.image_type() as usize].push(off)
-            }
-            off += info.len() as usize
-        }
-    }
-
-    pub fn gc_stats(&self) -> Vec<(u8, usize)> {
-        let mut nfree = Vec::<(u8, usize)>::new();
-
-        for (index, unmarked) in self.free.iter().enumerate() {
-            if !unmarked.is_empty() {
-                nfree.push((index as u8, unmarked.len()))
-            }
-        }
-
-        nfree
     }
 }
 

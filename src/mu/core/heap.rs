@@ -45,8 +45,8 @@ pub enum GcMode {
     Demand,
 }
 
-// (type, total-size, alloc, in-use)
-type AllocMap = (u8, usize, usize, usize);
+// (total-size, alloc, in-use)
+type AllocMap = (usize, usize, usize);
 
 #[bitfield]
 #[repr(align(8))]
@@ -93,7 +93,7 @@ pub trait Core {
     fn mark(&self, _: Tag) -> Option<bool>;
     fn heap_size(&self, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
-    fn heap_type(_: &Mu, _: Type) -> (u8, usize, usize, usize);
+    fn heap_type(_: &Mu, _: Type) -> (usize, usize, usize);
 }
 
 impl Core for Mu {
@@ -136,11 +136,12 @@ impl Core for Mu {
         (heap_ref.page_size, heap_ref.npages)
     }
 
-    fn heap_type(mu: &Mu, htype: Type) -> (u8, usize, usize, usize) {
+    fn heap_type(mu: &Mu, htype: Type) -> (usize, usize, usize) {
         let heap_ref = block_on(mu.heap.read());
         let alloc_ref = block_on(heap_ref.alloc_map.read());
+        let alloc_type = block_on(alloc_ref[htype as usize].read());
 
-        alloc_ref[htype as usize]
+        *alloc_type
     }
 }
 
@@ -165,22 +166,22 @@ impl MuFunction for Mu {
         let (pagesz, npages) = Self::heap_info(mu);
 
         let mut vec = vec![
-            Symbol::keyword("t"),
+            Symbol::keyword("heap"),
             Fixnum::as_tag((pagesz * npages) as i64),
             Fixnum::as_tag(npages as i64),
-            Fixnum::as_tag(npages as i64),
+            Fixnum::as_tag(0_i64),
         ];
 
         for htype in INFOTYPE.iter() {
-            let (_, size, alloc, in_use) = Self::heap_type(
+            let (size, total, free) = Self::heap_type(
                 mu,
                 <IndirectTag as indirect::Core>::to_indirect_type(*htype).unwrap(),
             );
 
             vec.push(*htype);
             vec.push(Fixnum::as_tag(size as i64));
-            vec.push(Fixnum::as_tag(alloc as i64));
-            vec.push(Fixnum::as_tag(in_use as i64));
+            vec.push(Fixnum::as_tag(total as i64));
+            vec.push(Fixnum::as_tag(free as i64));
         }
 
         fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
@@ -190,35 +191,13 @@ impl MuFunction for Mu {
     fn mu_hp_info(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let (page_size, npages) = Self::heap_info(mu);
 
-        let mut freevec = Vec::<Tag>::new();
-
-        {
-            let heap_ref = block_on(mu.heap.read());
-            for (id, size) in heap_ref.gc_stats() {
-                freevec.push(
-                    Cons::new(Fixnum::as_tag(id as i64), Fixnum::as_tag(size as i64)).evict(mu),
-                )
-
-                /*
-                    freevec.push(Cons::new(Tag::type_key(Type::try_from(id).unwrap()).unwrap(),
-                                           Fixnum::as_tag(size as i64)).evict(mu),
-                )
-                    */
-            }
-        }
-
         let vec = vec![
             Symbol::keyword("bump"),
             Fixnum::as_tag(page_size as i64),
             Fixnum::as_tag(npages as i64),
-            TypedVec::<Vec<Tag>> { vec: freevec }
-                .vec
-                .to_vector()
-                .evict(mu),
         ];
 
         fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
-
         Ok(())
     }
 
