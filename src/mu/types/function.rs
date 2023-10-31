@@ -100,7 +100,6 @@ impl Core for Function {
         let mark = mu.mark(function).unwrap();
 
         if !mark {
-            Mu::gc_mark(mu, function);
             Mu::gc_mark(mu, Self::form(mu, function))
         }
     }

@@ -32,6 +32,7 @@ use {
     },
     memmap,
     modular_bitfield::specifiers::{B11, B4},
+    num_enum::TryFromPrimitive,
 };
 
 // locking protocols
@@ -197,6 +198,12 @@ impl MuFunction for Mu {
                 freevec.push(
                     Cons::new(Fixnum::as_tag(id as i64), Fixnum::as_tag(size as i64)).evict(mu),
                 )
+
+                /*
+                    freevec.push(Cons::new(Tag::type_key(Type::try_from(id).unwrap()).unwrap(),
+                                           Fixnum::as_tag(size as i64)).evict(mu),
+                )
+                    */
             }
         }
 
