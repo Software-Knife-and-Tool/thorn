@@ -3,8 +3,8 @@
 
 //! mu heap
 use {
+    crate::core::heap::{AllocImageInfo, AllocTypeInfo /* HeapAllocator */},
     memmap,
-    modular_bitfield::specifiers::{B11, B4},
     std::{
         fs::{remove_file, OpenOptions},
         io::{Seek, SeekFrom, Write},
@@ -13,13 +13,10 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
-// (total-size, ntotal, nfree)
-type TypeAllocMap = (usize, usize, usize);
-
 #[derive(Debug)]
-pub struct BumpHeap {
+pub struct BumpAllocator {
     pub mmap: Box<memmap::MmapMut>,
-    pub alloc_map: RwLock<Vec<RwLock<TypeAllocMap>>>,
+    pub alloc_map: RwLock<Vec<RwLock<AllocTypeInfo>>>,
     pub free_map: Vec<Vec<usize>>,
     pub page_size: usize,
     pub npages: usize,
@@ -27,25 +24,29 @@ pub struct BumpHeap {
     pub write_barrier: usize,
 }
 
-#[bitfield]
-#[repr(align(8))]
-#[derive(Debug, Copy, Clone)]
-pub struct Info {
-    pub reloc: u32, // relocation
-    #[skip]
-    __: B11, // expansion
-    pub mark: bool, // reference counting
-    pub len: u16,   // in bytes
-    pub image_type: B4, // image type
-}
+impl BumpAllocator {
+    /*
+        pub fn allocator(npages: usize) -> HeapAllocator<'static> {
 
-impl BumpHeap {
-    pub fn iter(&self) -> BumpHeapIterator {
-        BumpHeapIterator {
-            heap: self,
-            offset: 8,
-        }
+            let bump_allocator = Self::new(npages);
+
+            HeapAllocator {
+                mmap: &bump_allocator.mmap,
+                alloc: Self::alloc,
+                valloc: Self::valloc,
+                // begin_gc: fn(u8, u16) -> u32,
+
+                /*
+                info_iter: &'a dyn Iterator<Item = AllocImageInfo>,
+                image_iter: &'a dyn Iterator<Item = AllocImageInfo>,
+                 */
+
+                freelist: bump_allocator.free_map,
+                page_size: bump_allocator.page_size,
+                npages,
+            }
     }
+        */
 
     pub fn new(pages: usize) -> Self {
         let path = "/var/tmp/thorn.heap";
@@ -69,7 +70,7 @@ impl BumpHeap {
                 .expect("Could not access data from memory mapped file")
         };
 
-        let mut heap = BumpHeap {
+        let mut heap = BumpAllocator {
             mmap: Box::new(data),
             page_size: 4096,
             npages: pages,
@@ -87,15 +88,26 @@ impl BumpHeap {
             let mut alloc_ref = block_on(heap.alloc_map.write());
 
             for _ in 0..16 {
-                alloc_ref.push(RwLock::new((0, 0, 0)))
+                alloc_ref.push(RwLock::new(AllocTypeInfo {
+                    size: 0,
+                    total: 0,
+                    free: 0,
+                }))
             }
         }
 
         heap
     }
 
+    pub fn iter(&self) -> BumpAllocatorIterator {
+        BumpAllocatorIterator {
+            heap: self,
+            offset: 8,
+        }
+    }
+
     // allocation metrics
-    fn alloc_id(&self, id: u8) -> (usize, usize, usize) {
+    fn alloc_id(&self, id: u8) -> AllocTypeInfo {
         let alloc_ref = block_on(self.alloc_map.read());
         let alloc_type = block_on(alloc_ref[id as usize].read());
 
@@ -106,8 +118,8 @@ impl BumpHeap {
         let alloc_ref = block_on(self.alloc_map.write());
         let mut alloc_type = block_on(alloc_ref[id as usize].write());
 
-        alloc_type.0 += size;
-        alloc_type.1 += 1;
+        alloc_type.size += size;
+        alloc_type.total += 1;
     }
 
     // allocate
@@ -131,7 +143,7 @@ impl BumpHeap {
             image
         } else {
             let data = &mut self.mmap;
-            let hinfo = Info::new()
+            let hinfo = AllocImageInfo::new()
                 .with_reloc(0)
                 .with_len(((ntypes + 1) * 8) as u16)
                 .with_mark(false)
@@ -176,7 +188,7 @@ impl BumpHeap {
             image
         } else {
             let data = &mut self.mmap;
-            let hinfo = Info::new()
+            let hinfo = AllocImageInfo::new()
                 .with_reloc(0)
                 .with_len((((ntypes + 1) * 8) + (len_to_8 as u64)) as u16)
                 .with_mark(false)
@@ -207,7 +219,7 @@ impl BumpHeap {
                 let alloc_ref = block_on(self.alloc_map.read());
                 let mut alloc_type = block_on(alloc_ref[id as usize].write());
 
-                alloc_type.2 -= 1;
+                alloc_type.free -= 1;
 
                 Some(tag)
             }
@@ -224,7 +236,7 @@ impl BumpHeap {
                         let alloc_ref = block_on(self.alloc_map.read());
                         let mut alloc_type = block_on(alloc_ref[id as usize].write());
 
-                        alloc_type.2 -= 1;
+                        alloc_type.free -= 1;
 
                         return Some(self.free_map[id as usize].remove(index));
                     }
@@ -237,12 +249,12 @@ impl BumpHeap {
     }
 
     // rewrite info header
-    pub fn write_info(&mut self, info: Info, off: usize) {
+    pub fn write_info(&mut self, info: AllocImageInfo, off: usize) {
         self.mmap[(off - 8)..off].copy_from_slice(&(info.into_bytes()))
     }
 
     // info header from heap tag
-    pub fn image_info(&self, off: usize) -> Option<Info> {
+    pub fn image_info(&self, off: usize) -> Option<AllocImageInfo> {
         if off == 0 || off > self.write_barrier {
             None
         } else {
@@ -250,7 +262,7 @@ impl BumpHeap {
             let mut info = 0u64.to_le_bytes();
 
             info.copy_from_slice(&data[(off - 8)..off]);
-            Some(Info::from_bytes(info))
+            Some(AllocImageInfo::from_bytes(info))
         }
     }
 
@@ -303,7 +315,7 @@ impl BumpHeap {
         for (id, _) in alloc_ref.iter().enumerate() {
             let mut alloc_type = block_on(alloc_ref[id].write());
 
-            alloc_type.2 = 0;
+            alloc_type.free = 0;
         }
 
         for free in self.free_map.iter_mut() {
@@ -320,7 +332,7 @@ impl BumpHeap {
                 let id = info.image_type() as usize;
                 let mut alloc_type = block_on(alloc_ref[id].write());
 
-                alloc_type.2 += 1;
+                alloc_type.free += 1;
                 self.free_map[id].push(off);
             }
             off += info.len() as usize
@@ -343,19 +355,19 @@ impl BumpHeap {
 }
 
 // iterators
-pub struct BumpHeapIterator<'a> {
-    pub heap: &'a BumpHeap,
+pub struct BumpAllocatorIterator<'a> {
+    pub heap: &'a BumpAllocator,
     pub offset: usize,
 }
 
-impl<'a> BumpHeapIterator<'a> {
-    pub fn new(heap: &'a BumpHeap) -> Self {
+impl<'a> BumpAllocatorIterator<'a> {
+    pub fn new(heap: &'a BumpAllocator) -> Self {
         Self { heap, offset: 8 }
     }
 }
 
-impl<'a> Iterator for BumpHeapIterator<'a> {
-    type Item = (Info, usize);
+impl<'a> Iterator for BumpAllocatorIterator<'a> {
+    type Item = (AllocImageInfo, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.heap.image_info(self.offset) {
