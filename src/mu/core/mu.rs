@@ -5,6 +5,7 @@
 //!    Mu
 use {
     crate::{
+        allocators::bump_allocator::BumpAllocator,
         core::{
             async_context::AsyncContext,
             config::Config,
@@ -15,7 +16,6 @@ use {
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
-        heap::bump_heap::BumpHeap,
         system::sys as system,
         types::{
             cons::{Cons, ConsIter, Core as _},
@@ -41,7 +41,7 @@ pub struct Mu {
     pub version: Tag,
 
     // heap
-    pub heap: RwLock<BumpHeap>,
+    pub heap: RwLock<BumpAllocator>,
     pub gc_root: RwLock<Vec<Tag>>,
 
     // compiler
@@ -104,7 +104,7 @@ impl Core for Mu {
             version: Tag::nil(),
 
             // heap
-            heap: RwLock::new(BumpHeap::new(config.npages)),
+            heap: RwLock::new(BumpAllocator::new(config.npages)),
             gc_root: RwLock::new(Vec::<Tag>::new()),
 
             // compiler

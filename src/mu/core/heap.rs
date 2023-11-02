@@ -6,6 +6,7 @@
 #[allow(unused_imports)]
 use {
     crate::{
+        allocators::bump_allocator::BumpAllocator,
         core::{
             config::Config,
             direct::DirectTag,
@@ -15,7 +16,6 @@ use {
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },
-        heap::bump_heap::BumpHeap,
         types::{
             char::{Char, Core as _},
             cons::{Cons, Core as _},
@@ -36,22 +36,19 @@ use {
 };
 
 // locking protocols
-use {futures::executor::block_on, futures_locks::RwLock};
+use futures::executor::block_on;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum GcMode {
     None,
     Auto,
     Demand,
 }
 
-// (total-size, alloc, in-use)
-type AllocMap = (usize, usize, usize);
-
 #[bitfield]
 #[repr(align(8))]
 #[derive(Debug, Copy, Clone)]
-pub struct Info {
+pub struct AllocImageInfo {
     pub reloc: u32, // relocation
     #[skip]
     __: B11, // expansion
@@ -60,20 +57,51 @@ pub struct Info {
     pub image_type: B4, // tag type
 }
 
-pub struct HeapInterface<'a> {
+pub struct HeapAllocator<'a> {
     mmap: &'a memmap::MmapMut,
-    alloc: Box<dyn Fn(u8, u16) -> u32>,
-    begin_gc: Box<dyn Fn(u8, u16) -> u32>,
-    info_iter: Box<dyn Iterator<Item = Info>>,
-    image_iter: Box<dyn Iterator<Item = Info>>,
+
+    alloc: fn(&HeapAllocator, &[[u8; 8]], u8) -> usize,
+    #[allow(clippy::type_complexity)]
+    valloc: fn(&HeapAllocator, &[[u8; 8]], &[u8], u8) -> usize,
+    // begin_gc: fn(u8, u16) -> u32,
+
+    /*
+    info_iter: &'a dyn Iterator<Item = AllocImageInfo>,
+    image_iter: &'a dyn Iterator<Item = AllocImageInfo>,
+     */
+    freelist: [Vec<Tag>; 16],
     page_size: usize,
     npages: usize,
 }
 
-pub struct Heap {
-    heap: HeapInterface<'static>,
-    alloc_map: RwLock<Vec<AllocMap>>,
-    freelist: [Vec<Tag>; 16],
+pub enum AllocatorTypes {
+    Bump(BumpAllocator),
+}
+
+pub struct HeapPlus<'a> {
+    allocator: HeapAllocator<'a>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub struct AllocTypeInfo {
+    pub size: usize,
+    pub total: usize,
+    pub free: usize,
+}
+
+pub trait Allocator {
+    fn alloc(&mut self, _: &[[u8; 8]], _: Type) -> usize;
+    fn valloc(&mut self, _: &[[u8; 8]], _: &[u8], _: Type) -> usize;
+}
+
+impl Allocator for HeapPlus<'_> {
+    fn alloc(&mut self, data: &[[u8; 8]], r#type: Type) -> usize {
+        ((self.allocator).alloc)(&self.allocator, data, r#type as u8)
+    }
+
+    fn valloc(&mut self, data: &[[u8; 8]], vdata: &[u8], r#type: Type) -> usize {
+        ((self.allocator).valloc)(&self.allocator, data, vdata, r#type as u8)
+    }
 }
 
 lazy_static! {
@@ -93,7 +121,7 @@ pub trait Core {
     fn mark(&self, _: Tag) -> Option<bool>;
     fn heap_size(&self, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
-    fn heap_type(_: &Mu, _: Type) -> (usize, usize, usize);
+    fn heap_type(_: &Mu, _: Type) -> AllocTypeInfo;
 }
 
 impl Core for Mu {
@@ -136,7 +164,7 @@ impl Core for Mu {
         (heap_ref.page_size, heap_ref.npages)
     }
 
-    fn heap_type(mu: &Mu, htype: Type) -> (usize, usize, usize) {
+    fn heap_type(mu: &Mu, htype: Type) -> AllocTypeInfo {
         let heap_ref = block_on(mu.heap.read());
         let alloc_ref = block_on(heap_ref.alloc_map.read());
         let alloc_type = block_on(alloc_ref[htype as usize].read());
@@ -173,15 +201,15 @@ impl MuFunction for Mu {
         ];
 
         for htype in INFOTYPE.iter() {
-            let (size, total, free) = Self::heap_type(
+            let type_map = Self::heap_type(
                 mu,
                 <IndirectTag as indirect::Core>::to_indirect_type(*htype).unwrap(),
             );
 
             vec.push(*htype);
-            vec.push(Fixnum::as_tag(size as i64));
-            vec.push(Fixnum::as_tag(total as i64));
-            vec.push(Fixnum::as_tag(free as i64));
+            vec.push(Fixnum::as_tag(type_map.size as i64));
+            vec.push(Fixnum::as_tag(type_map.total as i64));
+            vec.push(Fixnum::as_tag(type_map.free as i64));
         }
 
         fp.value = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
