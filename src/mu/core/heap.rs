@@ -118,6 +118,9 @@ lazy_static! {
 
 pub trait Core {
     fn add_gc_root(&self, _: Tag);
+    fn gc_asyncs(_: &Mu);
+    fn gc_maps(_: &Mu);
+    fn gc_namespaces(_: &Mu);
     fn mark(&self, _: Tag) -> Option<bool>;
     fn heap_size(&self, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
@@ -141,6 +144,34 @@ impl Core for Mu {
                 heap_ref.set_image_refbit(indirect.image_id() as usize);
 
                 mark
+            }
+        }
+    }
+
+    fn gc_asyncs(mu: &Mu) {
+        let async_index_ref = block_on(mu.async_index.read());
+        for (_name, _hash) in async_index_ref.iter() {
+            // mu.gc_mark(*context)
+        }
+    }
+
+    fn gc_maps(mu: &Mu) {
+        let map_index_ref = block_on(mu.map_index.read());
+        for (_name, hash) in map_index_ref.iter() {
+            for (_key, map) in hash.iter() {
+                mu.gc_mark(*map)
+            }
+        }
+    }
+
+    fn gc_namespaces(mu: &Mu) {
+        let ns_index_ref = block_on(mu.ns_index.read());
+        for (_name, hash) in ns_index_ref.iter() {
+            // println!("1. marking {} namespace", Vector::as_string(mu, Symbol::name(mu, Tag::from_u64(*name))));
+            let hash_ref = block_on(hash.1.read());
+            for (_name, symbol) in hash_ref.iter() {
+                // println!("    {}", _name);
+                mu.gc_mark(*symbol)
             }
         }
     }
