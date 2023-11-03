@@ -110,18 +110,18 @@ impl Stream {
 
 pub trait Core {
     fn close(_: &Mu, _: Tag);
+    fn gc_mark(_: &Mu, _: Tag);
+    fn get_string(_: &Mu, _: Tag) -> exception::Result<String>;
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn is_eof(_: &Mu, _: Tag) -> bool;
     fn is_open(_: &Mu, _: Tag) -> bool;
-    fn get_string(_: &Mu, _: Tag) -> exception::Result<String>;
     fn read_byte(_: &Mu, _: Tag) -> exception::Result<Option<u8>>;
     fn read_char(_: &Mu, _: Tag) -> exception::Result<Option<char>>;
     fn unread_char(_: &Mu, _: Tag, _: char) -> exception::Result<Option<()>>;
+    fn view(_: &Mu, _: Tag) -> Tag;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
     fn write_byte(_: &Mu, _: Tag, _: u8) -> exception::Result<Option<()>>;
     fn write_char(_: &Mu, _: Tag, _: char) -> exception::Result<Option<()>>;
-    fn gc_mark(_: &Mu, _: Tag);
-    fn view(_: &Mu, _: Tag) -> Tag;
-    fn heap_size(_: &Mu, _: Tag) -> usize;
 }
 
 impl Core for Stream {

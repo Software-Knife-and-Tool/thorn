@@ -33,5 +33,5 @@
 
 (mu:intern :core "log-warn"
    (:lambda (value message env)
-      (core:logf env ";;; warning: ~S ~A~%" `(,value ,messagee))
+      (core:logf env ";;; warning: ~S ~A~%" `(,value ,message))
       value))

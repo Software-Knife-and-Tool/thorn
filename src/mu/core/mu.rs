@@ -12,6 +12,7 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::{Core as _, LibMuFunction},
+            heap::Core as _,
             namespace::{Cache, Core as NSCore},
             reader::{Core as _, Reader},
             types::{Tag, Type},
@@ -56,13 +57,9 @@ pub struct Mu {
     // exception unwind stack
     pub exception: RwLock<Vec<usize>>,
 
-    // async context index
+    // map/ns/async indices
     pub async_index: RwLock<HashMap<u64, AsyncContext>>,
-
-    // map cache index
     pub map_index: RwLock<HashMap<usize, HashMap<u64, Tag>>>,
-
-    // namespace map/symbol caches index
     pub ns_index: RwLock<<Mu as Cache>::NSIndex>,
 
     // functions
@@ -119,13 +116,9 @@ impl Core for Mu {
             // exception unwind stack
             exception: RwLock::new(Vec::new()),
 
-            // async context index
+            // map/ns/async indices
             async_index: RwLock::new(HashMap::new()),
-
-            // map cache index
             map_index: RwLock::new(HashMap::new()),
-
-            // namespace map index
             ns_index: RwLock::new(HashMap::new()),
 
             // functions
@@ -275,13 +268,10 @@ impl Core for Mu {
             heap_ref.gc_clear();
         }
 
-        // cache indices
-        Mu::gc_ns(self);
-        // Mu::gc_map(self);
-        // Mu::gc_async(self);
+        Mu::gc_namespaces(self);
+        Mu::gc_maps(self);
+        Mu::gc_asyncs(self);
 
-        // environments
-        // Mu::gc_dynamic_env(self);
         Frame::gc_lexical(self);
 
         for tag in root_ref.iter() {
