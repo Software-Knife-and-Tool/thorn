@@ -89,6 +89,6 @@
        :except)))
 
 (mu:intern :core "warn"
-  (:lambda (value msg)
+  (:lambda (value message)
      (core:format mu:err-out ";;; warning: ~S ~A~%" `(,value ,message))
     value))
