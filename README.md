@@ -15,7 +15,7 @@
 
 While *thorn* has much in common with Scheme, it is meant to be familiar to traditional LISP programmers.
 
-*thorn* is a 2-Lisp, which gives it flexibility in implementation and subsequent customization. A small native code runtime kernel supports system classes, function application, heap/system image management, and an FFI framework.
+*thorn* is a 2-LISP, which gives it flexibility in implementation and subsequent customization. A small native code runtime kernel supports system classes, function application, heap/system image management, garbage collection, and an FFI framework.
 
 Subsequent layers based on the runtime offer advanced features.
 
@@ -25,13 +25,13 @@ Subsequent layers based on the runtime offer advanced features.
 
 ------
 
-Functional languages bring us closer to a time where we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that their various components are reliable. Modern programming concepts do much to underpin reliability and transparency.
+Functional languages bring us closer to a time when we can automatically prove our programs are correct. As systems get more complex, we'll need increased assurance that their various components are reliable. Modern programming concepts do much to underpin reliability and transparency.
 
 *thorn* attempts to express modern programming concepts with a simple, familiar syntax. The venerable Common Lisp macro system helps the system designer create domain specific languages.
 
-*LISPs* are intentionally dynamic which has selected against them for use in production environments, yet statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few languages in use today have adequate meta-programming facilities. We need systems that can we reason about and can supplement themselves.
+*LISPs* are intentionally dynamic, which has selected against them for use in production environments. Statically-typed languages produce systems that are hard to interact with and impossible to change *in situ*. Few languages in use today have adequate meta-programming facilities. We need systems that can we reason about and can supplement themselves.
 
-Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. An evolving system can have a runtime measured in months or years.
+Current systems tend to be large and resource-hungry. We need lean systems that can do useful work in low resource environments and are flexible enough to evolve to meet new demands. Current systems have runtimes measured in days, if for no other reason than improving them requires a complete reinstall. A dynamic system can have a runtime measured in months or years.
 
 Evolutionary response to change is the only defense a system has against obsolescence.
 
@@ -65,7 +65,7 @@ Most of our core computational frameworks are built on static systems and are fr
 *thorn/mu* should build with rust 1.68 or better. *thorn/mu* builds are targeted to:
 
 - x86-64 and AArch-64 Linux distributions
-- x86-64 and M1 MacOs X
+- x86-64 and M-series MacOs X
 - x86-64 WSL
 - Docker Ubuntu and Alpine containers
 
@@ -83,7 +83,7 @@ Portability, libraries, deployment, documentation, and garbage collection are cu
 
 The *thorn/mu* runtime kernel is written in mostly-safe `rust` (the system image/heap facility *mmaps* a file, which is an inherently unsafe operation.)
 
-The runtime implements 64 bit tagged pointers, is available as a crate, extends a Rust API for embedded applications, and is an evaluator for the *thorn/mu* kernel language. *thorn/mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
+The runtime implements 64 bit tagged pointers, is available as a crate , extends a Rust API for embedded applications, and is an evaluator for the *thorn/mu* kernel language. *thorn/mu* provides the usual fixed-width numeric types, lists, fixed-arity lambdas, simple structs, LISP-1 symbol namespaces, streams, and specialized vectors in a garbage collected environment.
 
 The *thorn* 2-LISP system is organized as a stack of compilers, culminating in the *thorn-eth* native code compiler/system builder.
 
@@ -111,7 +111,7 @@ and will end up in ```doc/rustdoc```. The ``doc/rustdoc/mu``  subdirectory conta
 
 The *thorn* reference documentation is a collection of *markdown* files in `doc/reference`. To generate the documentation, you will need the *pandoc* utility, see *https://pandoc.org*
 
-Once built, the *html* for the *reference* material will be in  *doc/reference/html*, starting with *index.html*.
+Once built, the *html* for the *reference* material is installed in *doc/reference/html*, starting with *index.html*.
 
 
 
