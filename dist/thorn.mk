@@ -22,7 +22,7 @@ CORE = \
 	log.l		\
 	macro.l		\
 	map.l		\
-	package.l	\
+	namespace.l	\
 	parse.l		\
 	read-macro.l	\
 	read.l		\

@@ -82,3 +82,30 @@
            (:if (mu:eq :symbol (mu:type-of function-form))
                 (core:%compile-symbol-call function-form arg-list env)
                 (core:raise function-form 'core:%compile-funcall "illegal function call")))))
+
+;;;
+;;; apply closure to argument list
+;;;
+(mu:intern :core "%funct-apply"
+   (:lambda (funct arg-list)
+      ((:lambda (env)
+        (core:%mapc mu:fr-push env)
+        ((:lambda (value)
+           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
+           value)
+         ((:lambda (mu-fn)
+             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list funct arg-list))))
+          (core:%funct-prop :fn funct))))
+        (core:%funct-prop :env funct))))
+
+(mu:intern :core "%funct-apply-quoted"
+   (:lambda (funct arg-list)
+      ((:lambda (env)
+        (core:%mapc mu:fr-push env)
+        ((:lambda (value)
+           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
+           value)
+         ((:lambda (mu-fn)
+             (mu:apply mu-fn arg-list))
+          (core:%funct-prop :fn funct))))
+        (core:%funct-prop :env funct))))
