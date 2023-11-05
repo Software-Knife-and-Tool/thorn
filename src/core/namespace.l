@@ -2,46 +2,39 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;;  core packages
+;;;  core namespace
 ;;;
 
 ;;;
-;;; namespace components
+;;; namespace functions
 ;;;
-(mu:intern :core "%gen-anon-ns"
-   (:lambda ()
-      (mu:make-ns (core:genkeyword #\%))))
+(mu:intern :core "namespacep"
+   (:lambda (ns)
+      (mu:eq (core:type-of ns) 'namespace)))
 
-;;;
-;;; package functions
-;;;
-(mu:intern :core "packagep"
-   (:lambda (package)
-      (mu:eq (core:type-of package) 'package)))
-
-(mu:intern :core "make-package"
+(mu:intern :core "make-namespace"
    (:lambda (name uses)
       (:if (core:stringp name)
            (:if (core:listp uses)
-                (core:%make-core-type "package"
+                (core:%make-core-type "nmspace"
                   (core:%pair-list
                    `(:name    ,name
-                     :intern  ,(core:%gen-anon-ns)
-                     :extern  ,(core:%gen-anon-ns)
-                     :ch-mac  ,(core:%gen-anon-ns)
-                     :sy-mac  ,(core:%gen-anon-ns)
+                     :intern  ,(mu:make-mp)
+                     :extern  ,(mu:make-mp)
+                     :ch-mac  ,(mu:make-mp)
+                     :sy-mac  ,(mu:make-mp)
                      :uses    ,uses)))
-                (core:raise uses 'make-package "not a uses list"))
-           (core:raise name 'make-package "not a name string"))))
+                (core:raise uses 'make-namespace "not a uses list"))
+           (core:raise name 'make-namespace "not a name string"))))
 
-(mu:intern :core "%package-prop"
-   (:lambda (prop package)
+(mu:intern :core "%namespace-prop"
+   (:lambda (prop namespace)
       (:if (core:findl
             (:lambda (lambda-prop)
                (mu:eq prop lambda-prop))
             '(:name :intern :extern :ch-mac :rd-mac :sy-mac :uses))
-           (core:%core-type-ref prop package)
-           (core:raise prop 'package-prop "not a package property"))))
+           (core:%core-type-ref prop namespace)
+           (core:raise prop 'namespace-prop "not a namespace property"))))
 
 (mu:intern :core "intern"
    (:lambda (symbol value)

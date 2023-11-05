@@ -50,7 +50,7 @@
       ,(mu:cons :listp (:lambda (t) (core:listp t)))
       ,(mu:cons :map (:lambda (t) (mu:eq :map (mu:type-of t))))
       ,(mu:cons :keyword (:lambda (t) (core:keywordp t)))
-      ,(mu:cons :package (:lambda (t) (core:packagep t)))
+      ,(mu:cons :nmspace (:lambda (t) (core:namespacep t)))
       ,(mu:cons :string (:lambda (t) (core:stringp t)))
       ,(mu:cons :struct (:lambda (t) (core:structp t)))
       ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))

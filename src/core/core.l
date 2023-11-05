@@ -33,7 +33,7 @@
             (:env    . :listp)))
 
       ;;; core package
-      (core:define-core-type "package"
+      (core:define-core-type "nmspace"
           '((:name    . :string)
             (:intern  . :keyword)
             (:extern  . :keyword)
@@ -131,28 +131,8 @@
           (core:raise function 'core:apply "not a function designator"))))
 
 ;;;
-;;; apply closure to argument list
+;;; namespace components
 ;;;
-(mu:intern :core "%funct-apply"
-   (:lambda (funct arg-list)
-      ((:lambda (env)
-        (core:%mapc mu:fr-push env)
-        ((:lambda (value)
-           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
-           value)
-         ((:lambda (mu-fn)
-             (mu:apply mu-fn (mu:eval (core:%lambda-arg-list funct arg-list))))
-          (core:%funct-prop :fn funct))))
-        (core:%funct-prop :env funct))))
-
-(mu:intern :core "%funct-apply-quoted"
-   (:lambda (funct arg-list)
-      ((:lambda (env)
-        (core:%mapc mu:fr-push env)
-        ((:lambda (value)
-           (core:%mapc (:lambda (frame) (mu:fr-pop (mu:car frame))) env)
-           value)
-         ((:lambda (mu-fn)
-             (mu:apply mu-fn arg-list))
-          (core:%funct-prop :fn funct))))
-        (core:%funct-prop :env funct))))
+(mu:intern :core "%gen-anon-ns"
+   (:lambda ()
+      (mu:make-ns (core:genkeyword #\%))))
