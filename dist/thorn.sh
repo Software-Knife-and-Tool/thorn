@@ -47,7 +47,8 @@ CORE=(\
 	string.l    	       \
 	symbol-macro.l	       \
 	symbol.l    	       \
-	type.l	               \
+	time.l	               \
+        type.l	               \
 	vector.l               \
     )
 

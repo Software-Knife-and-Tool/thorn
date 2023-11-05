@@ -31,6 +31,7 @@ CORE = \
 	string.l	\
 	symbol-macro.l	\
 	symbol.l	\
+	time.l		\
 	type.l		\
 	vector.l
 
