@@ -175,3 +175,61 @@
                      (mu:cdr loop))))
             list)
            (core:raise list 'core:last "not a list"))))
+
+;;;
+;;; count
+;;;
+(mu:intern :core "count"
+   (:lambda (list item)
+     (:if (core:listp list)
+          (core:foldl          
+           (:lambda (elt acc)
+              (:if (mu:eq elt item)
+                   (core:1+ acc)
+                   acc))
+           0
+           list)
+          (core:raise list 'core:count "not a list"))))
+
+;;;
+;;; misc
+;;;
+(mu:intern :core "%fx-list-max"
+   (:lambda (list)
+      (core:foldl          
+       (:lambda (elt acc)
+         (:if (mu:fx-lt acc elt)
+              elt
+              acc))
+         (mu:car list)
+         list)))
+
+(mu:intern :core "%fx-list-min"
+   (:lambda (list)
+      (core:foldl
+       (:lambda (elt acc)
+         (:if (mu:fx-lt acc elt)
+              acc
+              elt))
+         (mu:car list)
+         list)))
+
+(mu:intern :core "%fx-max-le"
+   (:lambda (list max)
+      (core:foldl       
+       (:lambda (elt acc)
+         (:if (core:%andf (mu:fx-lt elt max) (mu:fx-lt acc elt))
+              elt
+              acc))
+         (core:%fx-list-min list)
+         list)))
+
+(mu:intern :core "%fx-min-ge"
+   (:lambda (list min)
+      (core:foldl          
+       (:lambda (elt acc)
+         (:if (core:%andf (mu:fx-lt min elt) (mu:fx-lt elt acc))
+              elt
+              acc))
+         (core:%fx-list-max list)
+         list)))

@@ -37,7 +37,7 @@
            (core:raise prop 'namespace-prop "not a namespace property"))))
 
 (mu:intern :core "intern"
-   (:lambda (symbol value)
+   (:lambda (symbol value)          
       (:if (core:uninternedp symbol)
            ((:lambda (sym)
                (:if sym
