@@ -98,7 +98,7 @@ impl Mu {
 
     /// config
     pub fn config(config_string: &String) -> Option<Config> {
-        <Config as core::config::Core>::config(config_string.to_string())
+        core::mu::Mu::config(config_string.to_string())
     }
 
     /// constructor
@@ -211,7 +211,7 @@ impl System {
     }
 
     pub fn config(conf: &String) -> Option<Config> {
-        <Config as core::config::Core>::config(conf.to_string())
+        Mu::config(&conf.to_string())
     }
 
     pub fn mu(&self) -> &Mu {

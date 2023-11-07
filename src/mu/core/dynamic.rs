@@ -24,27 +24,29 @@ use crate::{
 // #[allow(unused_imports)]
 use futures::executor::block_on;
 
+/*
 pub trait Core {
     fn dynamic_push(&self, _: Tag, _: usize);
     fn dynamic_pop(&self);
     fn dynamic_ref(&self, _: usize) -> (Tag, usize);
 }
+*/
 
-impl Core for Mu {
-    fn dynamic_push(&self, func: Tag, offset: usize) {
+impl Mu {
+    pub fn dynamic_push(&self, func: Tag, offset: usize) {
         let mut dynamic_ref = block_on(self.dynamic.write());
 
         dynamic_ref.push((func.as_u64(), offset));
     }
 
-    fn dynamic_pop(&self) {
+    pub fn dynamic_pop(&self) {
         let mut dynamic_ref = block_on(self.dynamic.write());
 
         dynamic_ref.pop();
     }
 
     #[allow(dead_code)]
-    fn dynamic_ref(&self, index: usize) -> (Tag, usize) {
+    pub fn dynamic_ref(&self, index: usize) -> (Tag, usize) {
         let dynamic_ref = block_on(self.dynamic.read());
 
         let (func, offset) = dynamic_ref[index];

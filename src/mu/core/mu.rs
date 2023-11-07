@@ -11,7 +11,7 @@ use {
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::{Core as _, LibMuFunction},
+            funcall::LibMuFunction,
             heap::Core as _,
             namespace::{Cache, Core as NSCore},
             reader::{Core as _, Reader},

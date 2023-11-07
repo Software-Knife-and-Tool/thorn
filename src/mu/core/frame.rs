@@ -9,7 +9,6 @@
 //!    frame_ref
 use crate::{
     core::{
-        dynamic::Core as _,
         exception::{self, Condition, Exception},
         mu::{Core as _, Mu},
         types::{Tag, Type},
