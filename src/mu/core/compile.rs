@@ -321,14 +321,13 @@ impl MuFunction for Mu {
 mod tests {
     use crate::core::{
         compile::Compiler,
-        config::{self, Config},
         mu::{Core, Mu},
         types::{Tag, Type},
     };
 
     #[test]
     fn compile_test() {
-        let config = match <Config as config::Core>::config("".to_string()) {
+        let config = match Mu::config("".to_string()) {
             Some(config) => config,
             None => return assert!(false),
         };

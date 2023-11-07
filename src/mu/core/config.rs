@@ -6,6 +6,7 @@
 use crate::{
     core::heap::GcMode,
     core::types::{Tag, TagType, Type},
+    mu::Mu,
     types::symbol::{Core as _, Symbol},
 };
 
@@ -15,12 +16,8 @@ pub struct Config {
     pub gcmode: GcMode,
 }
 
-pub trait Core {
-    fn config(_: String) -> Option<Config>;
-}
-
-impl Core for Config {
-    fn config(conf: String) -> Option<Config> {
+impl Mu {
+    pub fn config(conf: String) -> Option<Config> {
         let mut config = Config {
             npages: 1024,
             gcmode: GcMode::Auto,

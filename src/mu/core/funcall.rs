@@ -139,12 +139,8 @@ lazy_static! {
     ];
 }
 
-pub trait Core {
-    fn install_lib_functions(_: &Mu) -> Vec<LibMuFunction>;
-}
-
-impl Core for Mu {
-    fn install_lib_functions<'a>(mu: &Mu) -> Vec<LibMuFunction> {
+impl Mu {
+    pub fn install_lib_functions(mu: &Mu) -> Vec<LibMuFunction> {
         let mut funcv = Vec::new();
 
         for (id, fnmap) in SYMBOLMAP.iter().enumerate() {
