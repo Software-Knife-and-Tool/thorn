@@ -27,6 +27,7 @@ CORE = \
 	read-macro.l	\
 	read.l		\
 	sequence.l	\
+	sort.l		\
 	stream.l	\
 	string.l	\
 	symbol-macro.l	\

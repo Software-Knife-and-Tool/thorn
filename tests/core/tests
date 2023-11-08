@@ -14,5 +14,6 @@ sequence
 stream
 string
 symbol
+sort
 types
 vector

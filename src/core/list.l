@@ -215,21 +215,29 @@
          list)))
 
 (mu:intern :core "%fx-max-le"
-   (:lambda (list max)
-      (core:foldl       
-       (:lambda (elt acc)
-         (:if (core:%andf (mu:fx-lt elt max) (mu:fx-lt acc elt))
-              elt
-              acc))
-         (core:%fx-list-min list)
-         list)))
+   (:lambda (max list)
+      ((:lambda (min)
+          (:if (mu:fx-lt max min)
+               max
+               (core:foldl     
+                (:lambda (elt acc)
+                  (:if (core:%andf (mu:fx-lt elt max) (mu:fx-lt acc elt))
+                       elt
+                       acc))
+                min
+                list)))
+       (core:%fx-list-min list))))
 
 (mu:intern :core "%fx-min-ge"
-   (:lambda (list min)
-      (core:foldl          
-       (:lambda (elt acc)
-         (:if (core:%andf (mu:fx-lt min elt) (mu:fx-lt elt acc))
-              elt
-              acc))
-         (core:%fx-list-max list)
-         list)))
+   (:lambda (min list)
+      ((:lambda (max)
+          (:if (mu:fx-lt max min)
+               min
+               (core:foldl          
+                (:lambda (elt acc)
+                  (:if (core:%andf (mu:fx-lt min elt) (mu:fx-lt elt acc))
+                       elt
+                       acc))
+                max
+                list)))
+         (core:%fx-list-max list))))

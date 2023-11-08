@@ -1,0 +1,6 @@
+(mu:type-of core:sort-list-ascending)	:func
+(mu:type-of core:sort-list-descending)	:func
+(core:sort-list-ascending '(1 3 4 2 5))	(1 2 3 4 5)
+(core:sort-list-ascending '(5 3 4 2 1))	(1 2 3 4 5)
+(core:sort-list-ascending '(3 1 4 2 5))	(1 2 3 4 5)
+(core:sort-list-descending '(1 3 4 2 5))	(5 4 3 2 1)
