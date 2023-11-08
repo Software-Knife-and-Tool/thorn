@@ -21,35 +21,36 @@ OPTIONS=""
 SOURCES=""
 
 # core.l needs to be first
-CORE=(\
-        core.l	     	       \
-	backquote.l            \    
-	compile.l    	       \
-	debug.l                \
-	environment.l 	       \
-	exception.l 	       \
-	fasl.l                 \
-	fixnum.l               \
-	format.l     	       \
-	funcall.l              \
-	function.l             \
-	lambda.l     	       \
-	list.l      	       \
-        log.l      	       \
-	macro.l      	       \
-	map.l    	       \
-        namespace.l            \
-	parse.l      	       \
-	read-macro.l           \
-	read.l       	       \
-	sequence.l  	       \
-	stream.l    	       \
-	string.l    	       \
-	symbol-macro.l	       \
-	symbol.l    	       \
-	time.l	               \
-        type.l	               \
-	vector.l               \
+CORE=(			\
+      core.l		\
+      backquote.l	\    
+      compile.l		\
+      debug.l		\
+      environment.l	\
+      exception.l	\
+      fasl.l		\
+      fixnum.l		\
+      format.l		\
+      funcall.l		\
+      function.l	\
+      lambda.l		\
+      list.l		\
+      log.l		\
+      macro.l		\
+      map.l		\
+      namespace.l	\
+      parse.l		\
+      read-macro.l	\
+      read.l		\
+      sequence.l	\
+      sort.l		\
+      stream.l		\
+      string.l		\
+      symbol-macro.l	\
+      symbol.l		\
+      time.l		\
+      type.l		\
+      vector.l		\
     )
 
 for src in ${CORE[@]}; do

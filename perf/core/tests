@@ -10,6 +10,7 @@ list
 macro
 reader
 sequence
+sort
 stream
 string
 vector
