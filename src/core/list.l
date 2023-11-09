@@ -180,7 +180,7 @@
 ;;; count
 ;;;
 (mu:intern :core "count"
-   (:lambda (list item)
+   (:lambda (item list)
      (:if (core:listp list)
           (core:foldl          
            (:lambda (elt acc)
