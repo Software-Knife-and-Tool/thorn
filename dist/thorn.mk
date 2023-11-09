@@ -8,6 +8,7 @@ SRC = ../src
 CORE = \
 	core.l		\
 	backquote.l	\
+	boole.l		\
 	compile.l	\
 	debug.l		\
 	environment.l	\

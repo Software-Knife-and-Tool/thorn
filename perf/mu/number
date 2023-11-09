@@ -3,6 +3,7 @@
 (mu:fl-lt 5.0 2.0)
 (mu:fl-mul 1.0 2.0)
 (mu:fl-sub 2.0 1.0)
+(mu:fx-ash 1 5)
 (mu:fx-add -1 2)
 (mu:fx-div -5 2)
 (mu:fx-lt -1 2)

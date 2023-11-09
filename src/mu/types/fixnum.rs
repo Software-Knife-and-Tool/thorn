@@ -27,7 +27,7 @@ pub enum Fixnum {
 impl Fixnum {
     // range checking
     pub fn is_i56(u56: u64) -> bool {
-        match u56 & (1 << 55) {
+        match u56 & (1 << 56) {
             0 => (u56 >> 56) == 0,
             _ => ((u56 as i64) >> 56) == -1,
         }
@@ -74,6 +74,7 @@ impl Core for Fixnum {
 
 pub trait MuFunction {
     fn mu_fxadd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_fxash(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxor(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxand(_: &Mu, _: &mut Frame) -> exception::Result<()>;
@@ -83,6 +84,39 @@ pub trait MuFunction {
 }
 
 impl MuFunction for Fixnum {
+    fn mu_fxash(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let fx0 = fp.argv[0];
+        let fx1 = fp.argv[1];
+
+        fp.value = match Tag::type_of(fx0) {
+            Type::Fixnum => match Tag::type_of(fx1) {
+                Type::Fixnum => {
+                    let value = Self::as_i64(fx0);
+                    let shift = Self::as_i64(fx1);
+
+                    let result = if shift < 0 {
+                        value >> shift.abs()
+                    } else {
+                        value << shift
+                    };
+
+                    /*
+                        if Self::is_i56(result as u64) {
+                                Self::as_tag(result)
+                            } else {
+                                return Err(Exception::new(Condition::Over, "fx-ash", fx0));
+                    }
+                         */
+                    Self::as_tag(result)
+                }
+                _ => return Err(Exception::new(Condition::Type, "fx-ash", fx1)),
+            },
+            _ => return Err(Exception::new(Condition::Type, "fx-ash", fx0)),
+        };
+
+        Ok(())
+    }
+
     fn mu_fxadd(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
@@ -94,14 +128,14 @@ impl MuFunction for Fixnum {
                         if Self::is_i56(sum as u64) {
                             Self::as_tag(sum)
                         } else {
-                            return Err(Exception::new(Condition::Over, "fx-add", fx1));
+                            return Err(Exception::new(Condition::Over, "fx-add", fx0));
                         }
                     }
                     None => return Err(Exception::new(Condition::Over, "fx-add", fx1)),
                 },
                 _ => return Err(Exception::new(Condition::Type, "fx-add", fx1)),
             },
-            _ => return Err(Exception::new(Condition::Type, "fx-add", fx1)),
+            _ => return Err(Exception::new(Condition::Type, "fx-add", fx0)),
         };
 
         Ok(())

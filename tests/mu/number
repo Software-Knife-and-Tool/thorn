@@ -8,6 +8,7 @@
 (mu:fl-mul 5.0 2.0)	10.0000
 (mu:fl-sub 2.0 0.0)	2.0000
 (mu:fl-sub 2.0 1.0)	1.0000
+(mu:fx-ash 1 5)	32
 (mu:fx-add -1 2)	1
 (mu:fx-add -3 2)	-1
 (mu:fx-add 0 2)	2
