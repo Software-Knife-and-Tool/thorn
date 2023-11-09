@@ -33,8 +33,6 @@
              `(,@(core:%list-n-of next (core:count next list)) ,@(core:%min-le next list))))
       (core:%fx-min-ge root list))))
 
-
-
 (mu:intern :core "sort-list-ascending"
    (:lambda (list)
      (:if (core:listp list)
@@ -54,28 +52,6 @@
            (core:%fx-list-max list)
            (core:%fx-list-min list))
           (core:raise list 'core:sort-list-ascending "not a list"))))
-
-#|
-(mu:intern :core "sort-list-ascending"
-   (:lambda (list)
-     (:if (core:listp list)
-          ((:lambda (root max min)
-             (:if (mu:eq root min)
-                  `(,root
-                    ,@(core:%min-le root list)
-                    ,@(core:%max-le root list))
-                  (:if (mu:eq root max)
-                       `(,@(core:reverse (core:%min-le root list))
-                           ,@(core:reverse (core:%max-le root list))
-                           ,root)
-                       `(,@(core:reverse (core:%max-le root list))
-                           ,root
-                           ,@(core:%min-le root list)))))
-           (mu:car list)
-           (core:%fx-list-max list)
-           (core:%fx-list-min list))
-(core:raise list 'core:sort-list-ascending "not a list"))))
-|#
 
 (mu:intern :core "sort-list-descending"
    (:lambda (list)
