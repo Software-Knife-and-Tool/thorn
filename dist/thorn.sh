@@ -23,7 +23,8 @@ SOURCES=""
 # core.l needs to be first
 CORE=(			\
       core.l		\
-      backquote.l	\    
+      backquote.l	\
+      boole.l		\
       compile.l		\
       debug.l		\
       environment.l	\

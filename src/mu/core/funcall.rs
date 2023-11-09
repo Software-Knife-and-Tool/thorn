@@ -84,6 +84,7 @@ lazy_static! {
         ("fr-push", 1, Frame::mu_fr_push),
         ("fr-ref", 2, Frame::mu_fr_ref),
         // fixnums
+        ("fx-ash", 2, Fixnum::mu_fxash),
         ("fx-add", 2, Fixnum::mu_fxadd),
         ("fx-sub", 2, Fixnum::mu_fxsub),
         ("fx-lt", 2, Fixnum::mu_fxlt),
