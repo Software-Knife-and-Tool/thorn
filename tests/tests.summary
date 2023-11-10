@@ -20,6 +20,7 @@ mu         passed: 264    total: 264      failed: 0        exceptions: 0
 Namespace Test Summary:
 -----------------------
 core       backquote      total: 20       passed: 15       failed: 4        exceptions: 1       
+core       boole          total: 16       passed: 16       failed: 0        exceptions: 0       
 core       closure        total: 1        passed: 1        failed: 0        exceptions: 0       
 core       compile        total: 22       passed: 22       failed: 0        exceptions: 0       
 core       core           total: 19       passed: 19       failed: 0        exceptions: 0       
@@ -39,5 +40,5 @@ core       sort           total: 14       passed: 14       failed: 0        exce
 core       types          total: 6        passed: 6        failed: 0        exceptions: 0       
 core       vector         total: 17       passed: 17       failed: 0        exceptions: 0       
 -----------------------
-core       passed: 363    total: 368      failed: 4        exceptions: 1         
+core       passed: 379    total: 384      failed: 4        exceptions: 1         
 
