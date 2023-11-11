@@ -8,7 +8,11 @@
    (:lambda (string)
       (:if (mu:eq (mu:type-of string) :vector)
            (mu:eq :char (mu:sv-type string))
-           ())))
+           (:if (core:core-type-p string)
+                (:if (mu:eq "vector" (mu:sv-ref (mu:st-vec string) 0))
+                     (mu:eq :char (mu:sv-type (core:%vector-prop :base string)))
+                     ())
+                ()))))
 
 (mu:intern :core "get-output-stream-string"
    (:lambda (stream)
@@ -42,6 +46,28 @@
                           ()))
                 (core:raise str-2 'core:string= "not a string"))
            (core:raise str-1 'core:string= "not a string"))))
+
+(mu:intern :core "%string-write"
+   (:lambda (string escape stream)
+      (:if (mu:eq :vector (mu:type-of string))
+           (mu:write string escape stream)
+           ((:lambda (length)
+               (:if escape
+                    (mu:write #\" () stream)
+                    ())
+               (mu:fix
+                (:lambda (index)
+                   (:if (mu:fx-lt index length)
+                        ((:lambda ()
+                            (core:write (core:vector-ref string index) () stream)
+                            (core:1+ index)))
+                        index))
+                0)
+               (:if escape
+                    (mu:write #\" () stream)
+                    ()))
+            (core:%vector-prop :length string)))
+      ()))
 
 ;;;
 ;;; string-position
@@ -147,6 +173,18 @@
                     (core:raise end 'core:substr "end is not a fixnum"))
                (core:raise str 'core:substr "is not a string"))
           (core:raise start 'core:substr "start is not a fixnum"))))
+
+#|
+(mu:intern :core "substr-"
+  (:lambda (str start end)
+     (:if (core:stringp str)
+          (:if (core:fixnump start)
+               (:if (core:fixnump end)
+                    (core:slice str start end)
+                    (core:raise end 'core:substr "is not a fixnum"))
+               (core:raise str 'core:substr "is not a string"))
+          (core:raise start 'core:substr "is not a fixnum"))))
+|#
 
 ;;;
 ;;; read line
