@@ -32,7 +32,7 @@
             (:reason . :string)
             (:env    . :listp)))
 
-      ;;; core package
+      ;;; core namespace
       (core:define-core-type "nmspace"
           '((:name    . :string)
             (:intern  . :keyword)
