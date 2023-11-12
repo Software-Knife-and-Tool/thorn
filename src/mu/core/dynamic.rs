@@ -21,16 +21,7 @@ use crate::{
     },
 };
 
-// #[allow(unused_imports)]
 use futures::executor::block_on;
-
-/*
-pub trait Core {
-    fn dynamic_push(&self, _: Tag, _: usize);
-    fn dynamic_pop(&self);
-    fn dynamic_ref(&self, _: usize) -> (Tag, usize);
-}
-*/
 
 impl Mu {
     pub fn dynamic_push(&self, func: Tag, offset: usize) {

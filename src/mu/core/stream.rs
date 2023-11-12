@@ -8,6 +8,7 @@ use crate::{
         backquote::Backquote,
         exception::{self, Condition, Exception},
         frame::Frame,
+        funcall::Core as _,
         mu::Mu,
         reader::{Core as _, Reader},
         readtable::{map_char_syntax, SyntaxType},
@@ -176,16 +177,15 @@ impl MuFunction for Mu {
         let eofp = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        match Tag::type_of(stream) {
-            Type::Stream => match Self::read(mu, stream, !eofp.null_(), eof_value, false) {
-                Ok(tag) => {
-                    fp.value = tag;
-                    Ok(())
-                }
-                Err(e) => Err(e),
+        fp.value = match mu.fp_argv_check("read".to_string(), &[Type::Stream], fp) {
+            Ok(_) => match Self::read(mu, stream, !eofp.null_(), eof_value, false) {
+                Ok(tag) => tag,
+                Err(e) => return Err(e),
             },
-            _ => Err(Exception::new(Condition::Type, "read", stream)),
-        }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 
     fn mu_write(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
@@ -193,16 +193,16 @@ impl MuFunction for Mu {
         let escape = fp.argv[1];
         let stream = fp.argv[2];
 
-        match Tag::type_of(stream) {
-            Type::Stream => match mu.write(value, !escape.null_(), stream) {
-                Ok(_) => {
-                    fp.value = value;
-                    Ok(())
-                }
-                Err(e) => Err(e),
-            },
-            _ => Err(Exception::new(Condition::Type, "write", stream)),
-        }
+        fp.value =
+            match mu.fp_argv_check("write".to_string(), &[Type::T, Type::T, Type::Stream], fp) {
+                Ok(_) => match mu.write(value, !escape.null_(), stream) {
+                    Ok(_) => value,
+                    Err(e) => return Err(e),
+                },
+                Err(e) => return Err(e),
+            };
+
+        Ok(())
     }
 }
 

@@ -8,6 +8,7 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             heap::Core as _,
             mu::{Core as _, Mu},
             readtable::{map_char_syntax, SyntaxType},
@@ -569,55 +570,48 @@ impl MuFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        match Tag::type_of(index) {
-            Type::Fixnum => {
+        fp.value = match mu.fp_argv_check("sv-ref".to_string(), &[Type::Vector, Type::Fixnum], fp) {
+            Ok(_) => {
                 let nth = Fixnum::as_i64(index);
 
                 if nth < 0 || nth as usize >= Self::length(mu, vector) {
                     return Err(Exception::new(Condition::Range, "sv-ref", index));
                 }
 
-                match Tag::type_of(vector) {
-                    Type::Vector => {
-                        fp.value = match Self::r#ref(mu, vector, nth as usize) {
-                            Some(ch) => ch,
-                            None => panic!(),
-                        };
-                        Ok(())
-                    }
-                    _ => Err(Exception::new(Condition::Type, "sv-ref", vector)),
+                match Self::r#ref(mu, vector, nth as usize) {
+                    Some(nth) => nth,
+                    None => panic!(),
                 }
             }
-            _ => Err(Exception::new(Condition::Type, "sv-ref", index)),
-        }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 
     fn mu_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        match Tag::type_of(vector) {
-            Type::Vector => {
-                fp.value = match Tag::type_key(Vector::type_of(mu, vector)) {
-                    Some(key) => key,
-                    None => panic!(),
-                };
+        fp.value = match mu.fp_argv_check("sv-type".to_string(), &[Type::Vector], fp) {
+            Ok(_) => match Tag::type_key(Vector::type_of(mu, vector)) {
+                Some(key) => key,
+                None => panic!(),
+            },
+            Err(e) => return Err(e),
+        };
 
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "sv-type", vector)),
-        }
+        Ok(())
     }
 
     fn mu_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        match Tag::type_of(vector) {
-            Type::Vector => {
-                fp.value = Fixnum::as_tag(Self::length(mu, vector) as i64);
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "sv-len", vector)),
-        }
+        fp.value = match mu.fp_argv_check("sv-len".to_string(), &[Type::Vector], fp) {
+            Ok(_) => Fixnum::as_tag(Self::length(mu, vector) as i64),
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 }
 

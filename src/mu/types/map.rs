@@ -7,6 +7,7 @@ use {
         core::{
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             heap::{self, Core as _},
             indirect::IndirectTag,
             mu::{Core as _, Mu},
@@ -218,8 +219,8 @@ impl MuFunction for Mu {
 
         fp.value = Cons::new(key, value).evict(mu);
 
-        match Tag::type_of(map) {
-            Type::Map => {
+        match mu.fp_argv_check("mp-add".to_string(), &[Type::Map, Type::T, Type::T], fp) {
+            Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
                 match Map::map_add(mu, Fixnum::as_i64(cache_id) as usize, key, value) {
@@ -232,7 +233,7 @@ impl MuFunction for Mu {
                     None => return Err(Exception::new(Condition::Range, "mp-add", map)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mp-add", map)),
+            Err(e) => return Err(e),
         }
 
         Ok(())
@@ -242,8 +243,8 @@ impl MuFunction for Mu {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => {
+        fp.value = match mu.fp_argv_check("mp-get".to_string(), &[Type::Map, Type::T], fp) {
+            Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
                 match Map::map_get(mu, Fixnum::as_i64(cache_id) as usize, key) {
@@ -251,7 +252,7 @@ impl MuFunction for Mu {
                     None => return Err(Exception::new(Condition::Range, "mp-get", key)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mp-get", map)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -261,8 +262,8 @@ impl MuFunction for Mu {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => {
+        fp.value = match mu.fp_argv_check("mp-has".to_string(), &[Type::Map, Type::T], fp) {
+            Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
                 match Map::map_get(mu, Fixnum::as_i64(cache_id) as usize, key) {
@@ -270,7 +271,7 @@ impl MuFunction for Mu {
                     None => Tag::nil(),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "map-has", map)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -279,9 +280,9 @@ impl MuFunction for Mu {
     fn mu_map_list(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => Map::list(mu, map),
-            _ => return Err(Exception::new(Condition::Type, "mp-list", map)),
+        fp.value = match mu.fp_argv_check("mp-list".to_string(), &[Type::Map], fp) {
+            Ok(_) => Map::list(mu, map),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -290,8 +291,8 @@ impl MuFunction for Mu {
     fn mu_map_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => {
+        fp.value = match mu.fp_argv_check("mp-size".to_string(), &[Type::Map], fp) {
+            Ok(_) => {
                 let index_ref = block_on(mu.map_index.read());
                 let cache_id = Map::cache_id(mu, map);
 
@@ -300,7 +301,7 @@ impl MuFunction for Mu {
                     None => panic!(),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "map-size", map)),
+            Err(e) => return Err(e),
         };
 
         Ok(())

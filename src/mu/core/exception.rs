@@ -9,6 +9,7 @@ use {
     crate::{
         core::{
             frame::Frame,
+            funcall::Core as _,
             mu::{Core as _, Mu},
             types::{Tag, Type},
         },
@@ -127,16 +128,16 @@ pub trait MuFunction {
 }
 
 impl MuFunction for Exception {
-    fn mu_raise(_: &Mu, fp: &mut Frame) -> Result<()> {
+    fn mu_raise(mu: &Mu, fp: &mut Frame) -> Result<()> {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        match Tag::type_of(condition) {
-            Type::Keyword => match Self::map_condition(condition) {
+        match mu.fp_argv_check("raise".to_string(), &[Type::T, Type::Keyword], fp) {
+            Ok(_) => match Self::map_condition(condition) {
                 Ok(cond) => Err(Self::new(cond, "raise", src)),
                 Err(_) => Err(Self::new(Condition::Type, "raise", condition)),
             },
-            _ => Err(Self::new(Condition::Type, "raise", condition)),
+            Err(e) => Err(e),
         }
     }
 
@@ -144,9 +145,9 @@ impl MuFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        fp.value = match Tag::type_of(thunk) {
-            Type::Function => match Tag::type_of(handler) {
-                Type::Function => {
+        fp.value =
+            match mu.fp_argv_check("with-ex".to_string(), &[Type::Function, Type::Function], fp) {
+                Ok(_) => {
                     {
                         let dynamic_ref = block_on(mu.dynamic.read());
                         let mut exception_ref = block_on(mu.exception.write());
@@ -177,10 +178,8 @@ impl MuFunction for Exception {
                         }
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "with-ex", handler)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "with-ex", thunk)),
-        };
+                Err(e) => return Err(e),
+            };
 
         Ok(())
     }

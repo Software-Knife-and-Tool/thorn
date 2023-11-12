@@ -8,6 +8,7 @@ use {
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             mu::Mu,
             stream,
             types::{Tag, Type},
@@ -83,19 +84,16 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match Tag::type_of(fl0) {
-            Type::Float => match Tag::type_of(fl1) {
-                Type::Float => {
-                    let sum = Self::as_f32(mu, fl0).add(Self::as_f32(mu, fl1));
-                    if sum.is_nan() {
-                        return Err(Exception::new(Condition::Over, "fl-add", fl1));
-                    } else {
-                        Self::as_tag(sum)
-                    }
+        fp.value = match mu.fp_argv_check("fl-add".to_string(), &[Type::Float, Type::Float], fp) {
+            Ok(_) => {
+                let sum = Self::as_f32(mu, fl0).add(Self::as_f32(mu, fl1));
+                if sum.is_nan() {
+                    return Err(Exception::new(Condition::Over, "fl-add", fl1));
+                } else {
+                    Self::as_tag(sum)
                 }
-                _ => return Err(Exception::new(Condition::Type, "fl-add", fl1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fl-add", fl0)),
+            }
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -105,19 +103,16 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match Tag::type_of(fl0) {
-            Type::Float => match Tag::type_of(fl1) {
-                Type::Float => {
-                    let diff = Self::as_f32(mu, fl0).sub(Self::as_f32(mu, fl1));
-                    if diff.is_nan() {
-                        return Err(Exception::new(Condition::Under, "fl-sub", fl1));
-                    } else {
-                        Self::as_tag(diff)
-                    }
+        fp.value = match mu.fp_argv_check("fl-sub".to_string(), &[Type::Float, Type::Float], fp) {
+            Ok(_) => {
+                let diff = Self::as_f32(mu, fl0).sub(Self::as_f32(mu, fl1));
+                if diff.is_nan() {
+                    return Err(Exception::new(Condition::Under, "fl-sub", fl1));
+                } else {
+                    Self::as_tag(diff)
                 }
-                _ => return Err(Exception::new(Condition::Type, "fl-sub", fl1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fl-sub", fl0)),
+            }
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -127,19 +122,17 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match Tag::type_of(fl0) {
-            Type::Float => match Tag::type_of(fl1) {
-                Type::Float => {
-                    let prod = Self::as_f32(mu, fl0).mul(Self::as_f32(mu, fl1));
-                    if prod.is_nan() {
-                        return Err(Exception::new(Condition::Over, "fl-mul", fl1));
-                    } else {
-                        Self::as_tag(prod)
-                    }
+        fp.value = match mu.fp_argv_check("fl-mul".to_string(), &[Type::Float, Type::Float], fp) {
+            Ok(_) => {
+                let prod = Self::as_f32(mu, fl0).mul(Self::as_f32(mu, fl1));
+
+                if prod.is_nan() {
+                    return Err(Exception::new(Condition::Over, "fl-mul", fl1));
+                } else {
+                    Self::as_tag(prod)
                 }
-                _ => return Err(Exception::new(Condition::Type, "fl-mul", fl1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fl-mul", fl0)),
+            }
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -149,23 +142,20 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match Tag::type_of(fl0) {
-            Type::Float => match Tag::type_of(fl1) {
-                Type::Float => {
-                    if Self::as_f32(mu, fl1) == 0.0 {
-                        return Err(Exception::new(Condition::ZeroDivide, "fl-div", fl1));
-                    }
-
-                    let div = Self::as_f32(mu, fl0).div(Self::as_f32(mu, fl1));
-                    if div.is_nan() {
-                        return Err(Exception::new(Condition::Under, "fl-div", fl1));
-                    } else {
-                        Self::as_tag(div)
-                    }
+        fp.value = match mu.fp_argv_check("fl-div".to_string(), &[Type::Float, Type::Float], fp) {
+            Ok(_) => {
+                if Self::as_f32(mu, fl1) == 0.0 {
+                    return Err(Exception::new(Condition::ZeroDivide, "fl-div", fl1));
                 }
-                _ => return Err(Exception::new(Condition::Type, "fl-div", fl1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fl-ediv", fl0)),
+
+                let div = Self::as_f32(mu, fl0).div(Self::as_f32(mu, fl1));
+                if div.is_nan() {
+                    return Err(Exception::new(Condition::Under, "fl-div", fl1));
+                } else {
+                    Self::as_tag(div)
+                }
+            }
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -175,21 +165,18 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        match Tag::type_of(fl0) {
-            Type::Float => match Tag::type_of(fl1) {
-                Type::Float => {
-                    fp.value = if Self::as_f32(mu, fl0) < Self::as_f32(mu, fl1) {
-                        Symbol::keyword("t")
-                    } else {
-                        Tag::nil()
-                    };
-
-                    Ok(())
+        fp.value = match mu.fp_argv_check("fl-lt".to_string(), &[Type::Float, Type::Float], fp) {
+            Ok(_) => {
+                if Self::as_f32(mu, fl0) < Self::as_f32(mu, fl1) {
+                    Symbol::keyword("t")
+                } else {
+                    Tag::nil()
                 }
-                _ => Err(Exception::new(Condition::Type, "fl-lt", fl1)),
-            },
-            _ => Err(Exception::new(Condition::Type, "fl-lt", fl0)),
-        }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 }
 

@@ -10,6 +10,7 @@ use {
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             mu::{Core as _, Mu},
             stream::Core as _,
             types::{Tag, Type},
@@ -110,8 +111,8 @@ impl MuFunction for Mu {
     fn mu_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 
-        fp.value = match Tag::type_of(async_id) {
-            Type::AsyncId => {
+        fp.value = match mu.fp_argv_check("await".to_string(), &[Type::Vector], fp) {
+            Ok(_) => {
                 let map_ref = block_on(mu.async_index.write());
 
                 match map_ref.get(&async_id.as_u64()) {
@@ -119,7 +120,7 @@ impl MuFunction for Mu {
                     _ => return Err(Exception::new(Condition::Range, "await", async_id)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "await", async_id)),
+            Err(e) => return Err(e),
         };
 
         Ok(())

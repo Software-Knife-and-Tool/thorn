@@ -6,6 +6,7 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
+        funcall::Core as _,
         heap::Core as _,
         indirect::IndirectTag,
         mu::{Core as _, Mu},
@@ -201,37 +202,31 @@ impl MuFunction for Struct {
     fn mu_struct_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        match Tag::type_of(tag) {
-            Type::Struct => {
-                let image = Self::to_image(mu, tag);
+        fp.value = match mu.fp_argv_check("st-type".to_string(), &[Type::Struct], fp) {
+            Ok(_) => Self::to_image(mu, tag).stype,
+            Err(e) => return Err(e),
+        };
 
-                fp.value = image.stype;
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "st-type", tag)),
-        }
+        Ok(())
     }
 
     fn mu_struct_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        match Tag::type_of(tag) {
-            Type::Struct => {
-                let image = Self::to_image(mu, tag);
+        fp.value = match mu.fp_argv_check("st-vec".to_string(), &[Type::Struct], fp) {
+            Ok(_) => Self::to_image(mu, tag).vector,
+            Err(e) => return Err(e),
+        };
 
-                fp.value = image.vector;
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "st-vec", tag)),
-        }
+        Ok(())
     }
 
     fn mu_make_struct(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match Tag::type_of(stype) {
-            Type::Keyword => {
+        fp.value = match mu.fp_argv_check("make-st".to_string(), &[Type::Keyword, Type::List], fp) {
+            Ok(_) => {
                 let mut vec = Vec::new();
                 for cons in ConsIter::new(mu, list) {
                     vec.push(Cons::car(mu, cons));
@@ -241,9 +236,7 @@ impl MuFunction for Struct {
 
                 Struct { stype, vector }.evict(mu)
             }
-            _ => {
-                return Err(Exception::new(Condition::Type, "make-st", stype));
-            }
+            Err(e) => return Err(e),
         };
 
         Ok(())
