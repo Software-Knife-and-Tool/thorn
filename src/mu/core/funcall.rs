@@ -55,11 +55,10 @@ lazy_static! {
         ("await", 1, Mu::mu_await),
         ("abort", 1, Mu::mu_abort),
         // maps
-        ("make-mp", 0, Mu::mu_make_map),
-        ("mp-add", 3, Mu::mu_map_add),
-        ("mp-get", 2, Mu::mu_map_get),
+        ("make-mp", 1, Mu::mu_make_map),
         ("mp-has", 2, Mu::mu_map_has),
         ("mp-list", 1, Mu::mu_map_list),
+        ("mp-ref", 2, Mu::mu_map_ref),
         ("mp-size", 1, Mu::mu_map_size),
         // heap
         ("gc", 0, Mu::mu_gc),

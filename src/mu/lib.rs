@@ -24,7 +24,7 @@
 //! - symbol namespaces
 //!
 //! thorn-mu data types:
-//!    58 bit fixnums (immediate)
+//!    56 bit fixnums (immediate)
 //!    Lisp-1 symbols
 //!    character, string, and byte streams
 //!    characters (ASCII immediate)

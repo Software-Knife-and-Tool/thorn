@@ -1,13 +1,10 @@
 (mu:type-of mu:make-mp)	:func
-(mu:type-of mu:mp-add)	:func
-(mu:type-of mu:mp-list)	:func
-(mu:type-of mu:mp-size)	:func
-(mu:type-of mu:mp-get)	:func
 (mu:type-of mu:mp-has)	:func
-(mu:type-of (mu:make-mp))	:map
-(mu:mp-add (mu:make-mp) 1 2)	(1 . 2)
-(mu:mp-size (mu:make-mp))	0
-(mu:mp-has (mu:make-mp) ())	:nil
-(mu:mp-list (mu:make-mp))	:nil
-((:lambda (map) (mu:mp-add map 1 2) (mu:mp-has map 1)) (mu:make-mp))	:t
-((:lambda (map) (mu:mp-add map 1 2) (mu:mp-get map 1)) (mu:make-mp))	2
+(mu:type-of mu:mp-list)	:func
+(mu:type-of mu:mp-ref)	:func
+(mu:type-of mu:mp-size)	:func
+(mu:type-of (mu:make-mp '((1 . 2))))	:map
+(mu:mp-size (mu:make-mp '((1 . 2))))	1
+(mu:mp-ref (mu:make-mp '((1 . 2))) 1)	2
+(mu:mp-has (mu:make-mp '((1 . 2))) 1)	:t
+(mu:mp-list (mu:make-mp '((1 . 2))))	((1 . 2))

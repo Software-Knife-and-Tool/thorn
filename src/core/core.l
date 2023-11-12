@@ -47,10 +47,6 @@
             (:start   . :fixnum)
             (:length  . :fixnum)))
 
-      ;;; core vector
-      (core:define-core-type "env"
-          '((:symbols . :map)))
-
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))
       (mu:intern :core "%macro-ns%" (core:%gen-anon-ns))

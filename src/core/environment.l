@@ -14,6 +14,7 @@
    (:lambda (bindings)
      (:if (core:listp bindings)
           ((:lambda (env)
+             (core:warn env "make-env: env")
              (core:mapc
               (:lambda (pair)
                 ((:lambda (symbol value)
@@ -31,11 +32,13 @@
    (:lambda (env symbol)
      (:if (core:symbolp symbol)
          (:if (core:envp env)
-              ((:lambda (map)
-                 (:if (mu:mp-has map symbol)
-                      (mu:mp-get map symbol)
-                      (core:raise symbol 'core:get-env "symbol not in map")))
-               (core:%env-prop :symbols env))
+              ((:lambda (ns)
+                 ((:lambda (sym)
+                     (:if (core:null sym)
+                          (core:raise symbol 'core:get-env "symbol not in map")
+                          sym))
+                  (mu:ns-find ns (mu:sy-name symbol))))
+                 (core:%env-prop :symbols env))
               (core:raise env 'core:get-env "not an env"))
          (core:raise symbol 'core:get-env "not a symbol"))))
 
@@ -43,21 +46,15 @@
    (:lambda (env symbol value)
      (:if (core:symbolp symbol)
          (:if (core:envp env)
-              ((:lambda (map)
-                 (:if (mu:mp-has map symbol)
-                      (core:raise symbol 'core:add-env "symbol already in map")
-                      (mu:mp-add map symbol value)))
+              ((:lambda (ns)
+                 ((:lambda (sym)
+                     (:if (core:null sym)
+                          (core:raise symbol 'core:add-env "symbol already in map")
+                          (mu:intern ns (mu:sy-name symbol) value)))
+                  (mu:ns-find ns (mu:sy-name symbol))))
                (core:%env-prop :symbols env))
               (core:raise env 'core:add-env "not an env"))
          (core:raise symbol 'core:add-env "not a symbol"))))
-
-(mu:intern :core "env-size"
-   (:lambda (env)
-     (:if (core:envp env)
-          ((:lambda (map)
-             (mu:mp-size map))
-           (core:%env-prop :symbols env))
-          (core:raise env 'core:env-size "not an env"))))
 
 ;;;
 ;;; implementation
@@ -65,9 +62,10 @@
 
 (mu:intern :core "%make-env"
    (:lambda ()
+     (core:warn () "%make-env:")
      (core:%make-core-type "env"
           (core:%pair-list
-           `(:symbols   ,(mu:make-mp))))))
+           `(:symbols ,(mu:make-ns))))))
 
 (mu:intern :core "%env-prop"
    (:lambda (prop env)
