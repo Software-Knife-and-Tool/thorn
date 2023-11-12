@@ -8,10 +8,11 @@ use {
             direct::{DirectInfo, DirectTag, DirectType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             heap::Core as _,
             indirect::IndirectTag,
             mu::{Core as _, Mu},
-            namespace::{Cache, Core as NSCore},
+            namespace::{Core as NSCore, Namespace},
             readtable::{map_char_syntax, SyntaxType},
             stream,
             types::{Tag, TagType, Type},
@@ -243,7 +244,7 @@ impl Core for Symbol {
                     ));
                 }
 
-                match <Mu as Cache>::is_ns(mu, Symbol::keyword(&ns)) {
+                match <Mu as Namespace>::is_ns(mu, Symbol::keyword(&ns)) {
                     Some(ns) => Ok(<Mu as NSCore>::intern_symbol(mu, ns, name, *UNBOUND)),
                     None => Err(Exception::new(
                         Condition::Namespace,
@@ -388,16 +389,18 @@ impl MuFunction for Symbol {
     }
 
     fn mu_symbol(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let symbol = fp.argv[0];
+        let name = fp.argv[0];
 
-        match Tag::type_of(symbol) {
-            Type::Vector => {
-                let str = Vector::as_string(mu, symbol);
-                fp.value = Self::new(mu, Tag::nil(), &str, *UNBOUND).evict(mu);
-                Ok(())
+        fp.value = match mu.fp_argv_check("make-sy".to_string(), &[Type::String], fp) {
+            Ok(_) => {
+                let str = Vector::as_string(mu, name);
+
+                Self::new(mu, Tag::nil(), &str, *UNBOUND).evict(mu)
             }
-            _ => Err(Exception::new(Condition::Type, "make-sy", symbol)),
-        }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 }
 

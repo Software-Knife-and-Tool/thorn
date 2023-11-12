@@ -54,12 +54,15 @@ pub enum Type {
     Keyword,
     Map,
     Namespace,
-    Null,
     Stream,
     Struct,
     Symbol,
-    T,
     Vector,
+    // synthetic
+    T,
+    Null,
+    List,
+    String,
 }
 
 #[derive(BitfieldSpecifier, Copy, Clone, Debug, PartialEq, Eq)]

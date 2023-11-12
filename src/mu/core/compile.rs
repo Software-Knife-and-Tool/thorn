@@ -8,6 +8,7 @@ use crate::{
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
+        funcall::Core as _,
         mu::{Core as _, Mu},
         namespace::Core,
         types::{Tag, Type},
@@ -291,17 +292,16 @@ impl MuFunction for Mu {
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
 
-        fp.value = match Tag::type_of(true_fn) {
-            Type::Function => match Tag::type_of(false_fn) {
-                Type::Function => {
-                    match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
-                        Ok(tag) => tag,
-                        Err(e) => return Err(e),
-                    }
-                }
-                _ => return Err(Exception::new(Condition::Type, "::if", false_fn)),
+        fp.value = match mu.fp_argv_check(
+            "::if".to_string(),
+            &[Type::T, Type::Function, Type::Function],
+            fp,
+        ) {
+            Ok(_) => match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
+                Ok(tag) => tag,
+                Err(e) => return Err(e),
             },
-            _ => return Err(Exception::new(Condition::Type, "::if", true_fn)),
+            Err(e) => return Err(e),
         };
 
         Ok(())

@@ -7,6 +7,7 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType, ExtType},
         exception::{self, Condition, Exception, Result},
         frame::Frame,
+        funcall::Core as _,
         mu::Mu,
         stream,
         types::{Tag, Type},
@@ -76,200 +77,164 @@ pub trait MuFunction {
     fn mu_fxadd(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxash(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxsub(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_fxor(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_fxand(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_logor(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_logand(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxdiv(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxlt(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fxmul(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Fixnum {
-    fn mu_fxash(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_fxash(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match mu.fp_argv_check("fx-ash".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => {
+                let value = Self::as_i64(fp.argv[0]);
+                let shift = Self::as_i64(fp.argv[1]);
+
+                let result = if shift < 0 {
+                    value >> shift.abs()
+                } else {
+                    value << shift
+                };
+
+                Self::as_tag(result)
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_fxadd(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => {
-                    let value = Self::as_i64(fx0);
-                    let shift = Self::as_i64(fx1);
-
-                    let result = if shift < 0 {
-                        value >> shift.abs()
+        fp.value = match mu.fp_argv_check("fx-add".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
+                Some(sum) => {
+                    if Self::is_i56(sum as u64) {
+                        Self::as_tag(sum)
                     } else {
-                        value << shift
-                    };
-
-                    /*
-                        if Self::is_i56(result as u64) {
-                                Self::as_tag(result)
-                            } else {
-                                return Err(Exception::new(Condition::Over, "fx-ash", fx0));
-                    }
-                         */
-                    Self::as_tag(result)
-                }
-                _ => return Err(Exception::new(Condition::Type, "fx-ash", fx1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fx-ash", fx0)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_fxadd(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let fx0 = fp.argv[0];
-        let fx1 = fp.argv[1];
-
-        fp.value = match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
-                    Some(sum) => {
-                        if Self::is_i56(sum as u64) {
-                            Self::as_tag(sum)
-                        } else {
-                            return Err(Exception::new(Condition::Over, "fx-add", fx0));
-                        }
-                    }
-                    None => return Err(Exception::new(Condition::Over, "fx-add", fx1)),
-                },
-                _ => return Err(Exception::new(Condition::Type, "fx-add", fx1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fx-add", fx0)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_fxsub(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let fx0 = fp.argv[0];
-        let fx1 = fp.argv[1];
-
-        fp.value = match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
-                    Some(sum) => {
-                        if Self::is_i56(sum as u64) {
-                            Self::as_tag(sum)
-                        } else {
-                            return Err(Exception::new(Condition::Over, "fx-sub", fx1));
-                        }
-                    }
-                    None => return Err(Exception::new(Condition::Over, "fx-sub", fx1)),
-                },
-                _ => return Err(Exception::new(Condition::Type, "fx-sub", fx1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fx-sub", fx1)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_fxmul(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let fx0 = fp.argv[0];
-        let fx1 = fp.argv[1];
-
-        fp.value = match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
-                    Some(sum) => {
-                        if Self::is_i56(sum as u64) {
-                            Self::as_tag(sum)
-                        } else {
-                            return Err(Exception::new(Condition::Over, "fx-mul", fx1));
-                        }
-                    }
-                    None => return Err(Exception::new(Condition::Over, "fx-mul", fx1)),
-                },
-                _ => return Err(Exception::new(Condition::Type, "fx-mul", fx1)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "fx-mul", fx1)),
-        };
-
-        Ok(())
-    }
-
-    fn mu_fxdiv(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let fx0 = fp.argv[0];
-        let fx1 = fp.argv[1];
-
-        fp.value = match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => {
-                    if Self::as_i64(fx1) == 0 {
-                        return Err(Exception::new(Condition::ZeroDivide, "fx-div", fx0));
-                    }
-
-                    match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
-                        Some(sum) => {
-                            if Self::is_i56(sum as u64) {
-                                Self::as_tag(sum)
-                            } else {
-                                return Err(Exception::new(Condition::Over, "fx-div", fx1));
-                            }
-                        }
-                        None => return Err(Exception::new(Condition::Over, "fx-div", fx1)),
+                        return Err(Exception::new(Condition::Over, "fx-add", fx0));
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "fx-div", fx1)),
+                None => return Err(Exception::new(Condition::Over, "fx-add", fx1)),
             },
-            _ => return Err(Exception::new(Condition::Type, "fx-div", fx1)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
     }
 
-    fn mu_fxand(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_fxsub(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => {
-                    fp.value = Self::as_tag(Self::as_i64(fx0) & Self::as_i64(fx1));
-                    Ok(())
-                }
-                _ => Err(Exception::new(Condition::Type, "logand", fx1)),
-            },
-            _ => Err(Exception::new(Condition::Type, "logand", fx0)),
-        }
-    }
-
-    fn mu_fxor(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let fx0 = fp.argv[0];
-        let fx1 = fp.argv[1];
-
-        match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => {
-                    fp.value = Self::as_tag(Self::as_i64(fx0) | Self::as_i64(fx1));
-                    Ok(())
-                }
-                _ => Err(Exception::new(Condition::Type, "logor", fx1)),
-            },
-            _ => Err(Exception::new(Condition::Type, "logor", fx0)),
-        }
-    }
-
-    fn mu_fxlt(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let fx0 = fp.argv[0];
-        let fx1 = fp.argv[1];
-
-        match Tag::type_of(fx0) {
-            Type::Fixnum => match Tag::type_of(fx1) {
-                Type::Fixnum => {
-                    fp.value = if Self::as_i64(fx0) < Self::as_i64(fx1) {
-                        Symbol::keyword("t")
+        fp.value = match mu.fp_argv_check("fx-sub".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
+                Some(diff) => {
+                    if Self::is_i56(diff as u64) {
+                        Self::as_tag(diff)
                     } else {
-                        Tag::nil()
-                    };
-
-                    Ok(())
+                        return Err(Exception::new(Condition::Over, "fx-sub", fx1));
+                    }
                 }
-                _ => Err(Exception::new(Condition::Type, "fx-lt", fx1)),
+                None => return Err(Exception::new(Condition::Over, "fx-sub", fx1)),
             },
-            _ => Err(Exception::new(Condition::Type, "fx-lt", fx0)),
-        }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_fxmul(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let fx0 = fp.argv[0];
+        let fx1 = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("fx-mul".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
+                Some(prod) => {
+                    if Self::is_i56(prod as u64) {
+                        Self::as_tag(prod)
+                    } else {
+                        return Err(Exception::new(Condition::Over, "fx-mul", fx1));
+                    }
+                }
+                None => return Err(Exception::new(Condition::Over, "fx-mul", fx1)),
+            },
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_fxdiv(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let fx0 = fp.argv[0];
+        let fx1 = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("fx-div".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => {
+                if Self::as_i64(fx1) == 0 {
+                    return Err(Exception::new(Condition::ZeroDivide, "fx-div", fx0));
+                }
+
+                match Self::as_i64(fx0).checked_div(Self::as_i64(fx1)) {
+                    Some(div) => {
+                        if Self::is_i56(div as u64) {
+                            Self::as_tag(div)
+                        } else {
+                            return Err(Exception::new(Condition::Over, "fx-div", fx1));
+                        }
+                    }
+                    None => return Err(Exception::new(Condition::Over, "fx-div", fx1)),
+                }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_logand(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let fx0 = fp.argv[0];
+        let fx1 = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("logand".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => Self::as_tag(Self::as_i64(fx0) & Self::as_i64(fx1)),
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_logor(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let fx0 = fp.argv[0];
+        let fx1 = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("logor".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => Self::as_tag(Self::as_i64(fx0) | Self::as_i64(fx1)),
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_fxlt(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let fx0 = fp.argv[0];
+        let fx1 = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("fx-lt".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => {
+                if Self::as_i64(fx0) < Self::as_i64(fx1) {
+                    Symbol::keyword("t")
+                } else {
+                    Tag::nil()
+                }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 }
 
