@@ -3,7 +3,6 @@ boole
 closure
 compile
 core
-environment
 exception
 fixnum
 format

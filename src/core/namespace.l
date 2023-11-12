@@ -19,10 +19,10 @@
                 (core:%make-core-type "nmspace"
                   (core:%pair-list
                    `(:name    ,name
-                     :intern  ,(mu:make-mp)
-                     :extern  ,(mu:make-mp)
-                     :ch-mac  ,(mu:make-mp)
-                     :sy-mac  ,(mu:make-mp)
+                     :intern  ,(mu:make-ns)
+                     :extern  ,(mu:make-ns)
+                     :ch-mac  ,(mu:make-ns)
+                     :sy-mac  ,(mu:make-ns)
                      :uses    ,uses)))
                 (core:raise uses 'make-namespace "not a uses list"))
            (core:raise name 'make-namespace "not a name string"))))
