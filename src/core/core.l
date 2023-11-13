@@ -32,7 +32,7 @@
             (:reason . :string)
             (:env    . :listp)))
 
-      ;;; core package
+      ;;; core namespace
       (core:define-core-type "nmspace"
           '((:name    . :string)
             (:intern  . :keyword)
@@ -46,10 +46,6 @@
           '((:base    . :vector)
             (:start   . :fixnum)
             (:length  . :fixnum)))
-
-      ;;; core vector
-      (core:define-core-type "env"
-          '((:symbols . :map)))
 
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))

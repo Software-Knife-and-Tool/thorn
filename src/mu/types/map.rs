@@ -7,6 +7,7 @@ use {
         core::{
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             heap::{self, Core as _},
             indirect::IndirectTag,
             mu::{Core as _, Mu},
@@ -14,7 +15,7 @@ use {
             types::{Tag, TagType, Type},
         },
         types::{
-            cons::{Cons, Core as _},
+            cons::{Cons, ConsIter},
             fixnum::Fixnum,
             symbol::{Core as _, Symbol},
             vecimage::{TypedVec, VecType},
@@ -33,15 +34,22 @@ pub struct Map {
 }
 
 impl Map {
-    fn new(mu: &Mu) -> Self {
+    fn new(mu: &Mu, list: Tag) -> Self {
         let mut index_ref = block_on(mu.map_index.write());
         let cache_id = index_ref.len();
+        let mut map = HashMap::<u64, Tag>::new();
 
-        index_ref.insert(cache_id, HashMap::<u64, Tag>::new());
+        for cons in ConsIter::new(mu, list) {
+            let pair = Cons::car(mu, cons);
+
+            map.insert(Tag::as_u64(&Cons::car(mu, pair)), Cons::cdr(mu, pair));
+        }
+
+        index_ref.insert(cache_id, map);
 
         Map {
             cache_id: Fixnum::as_tag(cache_id as i64),
-            list: Tag::nil(),
+            list,
         }
     }
 
@@ -87,28 +95,11 @@ impl Map {
         std::mem::size_of::<Map>()
     }
 
-    // do we need a lock at all?
-    fn map_get(mu: &Mu, cache_id: usize, key: Tag) -> Option<Tag> {
+    fn map_ref(mu: &Mu, cache_id: usize, key: Tag) -> Option<Tag> {
         let index_ref = block_on(mu.map_index.read());
 
         match index_ref.get(&cache_id) {
             Some(hash) => hash.get(&key.as_u64()).copied(),
-            None => None,
-        }
-    }
-
-    fn map_add(mu: &Mu, cache_id: usize, key: Tag, value: Tag) -> Option<()> {
-        let mut index_ref = block_on(mu.map_index.write());
-
-        match index_ref.get_mut(&cache_id) {
-            Some(hash) => {
-                if let std::collections::hash_map::Entry::Vacant(e) = hash.entry(key.as_u64()) {
-                    e.insert(value);
-                    Some(())
-                } else {
-                    None
-                }
-            }
             None => None,
         }
     }
@@ -123,19 +114,6 @@ impl Map {
             .with_tag(TagType::Map);
 
         Tag::Indirect(ind)
-    }
-
-    fn update(mu: &Mu, image: &Map, tag: Tag) {
-        let slices: &[[u8; 8]] = &[image.cache_id.as_slice(), image.list.as_slice()];
-
-        let offset = match tag {
-            Tag::Indirect(heap) => heap.image_id(),
-            _ => panic!(),
-        } as usize;
-
-        let mut heap_ref = block_on(mu.heap.write());
-
-        heap_ref.write_image(slices, offset);
     }
 }
 
@@ -198,60 +176,50 @@ impl Core for Map {
 
 pub trait MuFunction {
     fn mu_make_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_map_add(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_map_get(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_has(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_list(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_map_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
     fn mu_make_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = Map::new(mu).evict(mu);
-        Ok(())
-    }
+        let list = fp.argv[0];
 
-    fn mu_map_add(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let map = fp.argv[0];
-        let key = fp.argv[1];
-        let value = fp.argv[2];
-
-        fp.value = Cons::new(key, value).evict(mu);
-
-        match Tag::type_of(map) {
-            Type::Map => {
-                let cache_id = Map::cache_id(mu, map);
-
-                match Map::map_add(mu, Fixnum::as_i64(cache_id) as usize, key, value) {
-                    Some(_) => {
-                        let mut image = Map::to_image(mu, map);
-
-                        image.list = Cons::new(fp.value, image.list).evict(mu);
-                        Map::update(mu, &image, map);
+        fp.value = match mu.fp_argv_check("mp-get".to_string(), &[Type::List], fp) {
+            Ok(_) => {
+                for cons in ConsIter::new(mu, list) {
+                    if Tag::type_of(Cons::car(mu, cons)) != Type::Cons {
+                        return Err(Exception::new(
+                            Condition::Type,
+                            "make-mp",
+                            Cons::car(mu, cons),
+                        ));
                     }
-                    None => return Err(Exception::new(Condition::Range, "mp-add", map)),
                 }
+
+                Map::new(mu, list).evict(mu)
             }
-            _ => return Err(Exception::new(Condition::Type, "mp-add", map)),
-        }
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
 
-    fn mu_map_get(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_map_ref(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => {
+        fp.value = match mu.fp_argv_check("mp-get".to_string(), &[Type::Map, Type::T], fp) {
+            Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
-                match Map::map_get(mu, Fixnum::as_i64(cache_id) as usize, key) {
+                match Map::map_ref(mu, Fixnum::as_i64(cache_id) as usize, key) {
                     Some(value) => value,
                     None => return Err(Exception::new(Condition::Range, "mp-get", key)),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "mp-get", map)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -261,16 +229,16 @@ impl MuFunction for Mu {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => {
+        fp.value = match mu.fp_argv_check("mp-has".to_string(), &[Type::Map, Type::T], fp) {
+            Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
-                match Map::map_get(mu, Fixnum::as_i64(cache_id) as usize, key) {
+                match Map::map_ref(mu, Fixnum::as_i64(cache_id) as usize, key) {
                     Some(_) => Symbol::keyword("t"),
                     None => Tag::nil(),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "map-has", map)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -279,9 +247,9 @@ impl MuFunction for Mu {
     fn mu_map_list(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => Map::list(mu, map),
-            _ => return Err(Exception::new(Condition::Type, "mp-list", map)),
+        fp.value = match mu.fp_argv_check("mp-list".to_string(), &[Type::Map], fp) {
+            Ok(_) => Map::list(mu, map),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -290,8 +258,8 @@ impl MuFunction for Mu {
     fn mu_map_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
-        fp.value = match Tag::type_of(map) {
-            Type::Map => {
+        fp.value = match mu.fp_argv_check("mp-size".to_string(), &[Type::Map], fp) {
+            Ok(_) => {
                 let index_ref = block_on(mu.map_index.read());
                 let cache_id = Map::cache_id(mu, map);
 
@@ -300,7 +268,7 @@ impl MuFunction for Mu {
                     None => panic!(),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "map-size", map)),
+            Err(e) => return Err(e),
         };
 
         Ok(())

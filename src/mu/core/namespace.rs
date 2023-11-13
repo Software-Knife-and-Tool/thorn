@@ -8,6 +8,7 @@ use {
             direct::DirectTag,
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             mu::Mu,
             types::{Tag, Type},
         },
@@ -22,7 +23,7 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
-pub trait Cache {
+pub trait Namespace {
     type NSCache;
     type NSIndex;
 
@@ -32,7 +33,7 @@ pub trait Cache {
     fn map_symbol(_: &Mu, _: Tag, _: &str) -> Option<Tag>;
 }
 
-impl Cache for Mu {
+impl Namespace for Mu {
     type NSCache = RwLock<HashMap<String, Tag>>;
     type NSIndex = HashMap<u64, (Tag, Self::NSCache)>;
 
@@ -100,7 +101,7 @@ pub trait Core {
 impl Core for Mu {
     fn intern_symbol(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
         match Self::is_ns(mu, ns) {
-            Some(ns) => match <Mu as Cache>::map_symbol(mu, ns, &name) {
+            Some(ns) => match Self::map_symbol(mu, ns, &name) {
                 Some(symbol) => {
                     // if the symbol is unbound, bind it.
                     // otherwise, we ignore the new binding.
@@ -130,7 +131,7 @@ impl Core for Mu {
                 None => {
                     let symbol = Symbol::new(mu, ns, &name, value).evict(mu);
 
-                    <Mu as Cache>::intern(mu, ns, symbol);
+                    Self::intern(mu, ns, symbol);
 
                     symbol
                 }
@@ -153,17 +154,17 @@ impl MuFunction for Mu {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
-        let ns = match Tag::type_of(ns) {
-            Type::Null => mu.null_ns,
-            Type::Keyword => match Self::is_ns(mu, ns) {
-                Some(ns) => ns,
-                _ => return Err(Exception::new(Condition::Type, "untern", ns)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "untern", ns)),
-        };
+        fp.value = match mu.fp_argv_check("untern".to_string(), &[Type::T, Type::String], fp) {
+            Ok(_) => {
+                let ns = match Tag::type_of(ns) {
+                    Type::Null => mu.null_ns,
+                    Type::Keyword => match Self::is_ns(mu, ns) {
+                        Some(ns) => ns,
+                        _ => return Err(Exception::new(Condition::Type, "untern", ns)),
+                    },
+                    _ => return Err(Exception::new(Condition::Type, "untern", ns)),
+                };
 
-        fp.value = match Tag::type_of(name) {
-            Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                 if Vector::length(mu, name) == 0 {
                     return Err(Exception::new(Condition::Syntax, "untern", ns));
                 }
@@ -186,7 +187,7 @@ impl MuFunction for Mu {
                     <Mu as Core>::intern_symbol(mu, ns, name_str, *UNBOUND)
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "untern", ns)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -197,21 +198,17 @@ impl MuFunction for Mu {
         let name = fp.argv[1];
         let value = fp.argv[2];
 
-        let ns = match Tag::type_of(ns_tag) {
-            Type::Null => mu.null_ns,
-            Type::Keyword => match Self::is_ns(mu, ns_tag) {
-                Some(ns) => ns,
-                _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
-        };
-
-        fp.value = match Self::is_ns(mu, ns) {
-            Some(ns) => match Tag::type_of(name) {
-                Type::Vector if Vector::type_of(mu, name) == Type::Char => {
-                    if Vector::length(mu, name) == 0 {
-                        return Err(Exception::new(Condition::Syntax, "intern", ns_tag));
-                    }
+        fp.value =
+            match mu.fp_argv_check("intern".to_string(), &[Type::T, Type::String, Type::T], fp) {
+                Ok(_) => {
+                    let ns = match Tag::type_of(ns_tag) {
+                        Type::Null => mu.null_ns,
+                        Type::Keyword => match Self::is_ns(mu, ns_tag) {
+                            Some(ns) => ns,
+                            _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                        },
+                        _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                    };
 
                     let name_str = Vector::as_string(mu, name);
                     let str = name_str.as_bytes();
@@ -231,10 +228,8 @@ impl MuFunction for Mu {
                         <Mu as Core>::intern_symbol(mu, ns, name_str, value)
                     }
                 }
-                _ => return Err(Exception::new(Condition::Type, "intern", name)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "intern", ns)),
-        };
+                Err(e) => return Err(e),
+            };
 
         Ok(())
     }
@@ -247,7 +242,7 @@ impl MuFunction for Mu {
                 fp.value = ns_tag;
                 match Self::is_ns(mu, ns_tag) {
                     Some(_) => return Err(Exception::new(Condition::Namespace, "make-ns", ns_tag)),
-                    None => <Mu as Cache>::add_ns(mu, fp.value).unwrap(),
+                    None => Self::add_ns(mu, fp.value).unwrap(),
                 };
             }
             _ => return Err(Exception::new(Condition::Type, "make-ns", ns_tag)),
@@ -260,23 +255,23 @@ impl MuFunction for Mu {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
 
-        let ns = match Tag::type_of(ns_tag) {
-            Type::Null => mu.null_ns,
-            Type::Keyword => match Self::is_ns(mu, ns_tag) {
-                Some(_) => ns_tag,
-                _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
-            },
-            _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
-        };
+        fp.value = match mu.fp_argv_check("ns-find".to_string(), &[Type::T, Type::String], fp) {
+            Ok(_) => {
+                match Tag::type_of(ns_tag) {
+                    Type::Null => mu.null_ns,
+                    Type::Keyword => match Self::is_ns(mu, ns_tag) {
+                        Some(_) => ns_tag,
+                        _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                    },
+                    _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                };
 
-        fp.value = match Tag::type_of(name) {
-            Type::Vector if Vector::type_of(mu, name) == Type::Char => {
                 match Self::map_symbol(mu, ns_tag, &Vector::as_string(mu, name)) {
                     Some(sym) => sym,
                     None => Tag::nil(),
                 }
             }
-            _ => return Err(Exception::new(Condition::Type, "ns-find", ns)),
+            Err(e) => return Err(e),
         };
 
         Ok(())
@@ -288,11 +283,8 @@ impl MuFunction for Mu {
         fp.value = match Self::is_ns(mu, ns) {
             Some(_) => {
                 let ns_ref = block_on(mu.ns_index.read());
-
                 let (_, ns_cache) = &ns_ref[&ns.as_u64()];
-
                 let hash = block_on(ns_cache.read());
-
                 let mut vec = vec![];
 
                 for key in hash.keys() {

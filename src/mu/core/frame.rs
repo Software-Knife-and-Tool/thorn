@@ -10,6 +10,7 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
+        funcall::Core as _,
         mu::{Core as _, Mu},
         types::{Tag, Type},
     },
@@ -212,23 +213,25 @@ pub trait MuFunction {
 
 impl MuFunction for Frame {
     fn mu_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = fp.argv[0];
-
-        match Tag::type_of(fp.value) {
-            Type::Function => Self::frame_stack_pop(mu, fp.value),
-            _ => return Err(Exception::new(Condition::Type, "fr-pop", fp.value)),
-        }
+        fp.value = match mu.fp_argv_check("fr-pop".to_string(), &[Type::Function], fp) {
+            Ok(_) => {
+                Self::frame_stack_pop(mu, fp.argv[0]);
+                fp.argv[0]
+            }
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
 
     fn mu_fr_push(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = fp.argv[0];
-
-        match Tag::type_of(fp.value) {
-            Type::Vector => Self::from_tag(mu, fp.value).frame_stack_push(mu),
-            _ => return Err(Exception::new(Condition::Type, "fr-push", fp.value)),
-        }
+        fp.value = match mu.fp_argv_check("fr-push".to_string(), &[Type::Vector], fp) {
+            Ok(_) => {
+                Self::from_tag(mu, fp.value).frame_stack_push(mu);
+                fp.argv[0]
+            }
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
@@ -237,23 +240,19 @@ impl MuFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        match Tag::type_of(frame) {
-            Type::Fixnum => match Tag::type_of(offset) {
-                Type::Fixnum => match Frame::frame_ref(
-                    mu,
-                    Fixnum::as_i64(frame) as u64,
-                    Fixnum::as_i64(offset) as usize,
-                ) {
-                    Some(tag) => {
-                        fp.value = tag;
-                        Ok(())
-                    }
-                    None => Err(Exception::new(Condition::Type, "lex-ref", frame)),
-                },
-                _ => Err(Exception::new(Condition::Type, "lex-ref", offset)),
+        fp.value = match mu.fp_argv_check("fr-ref".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+            Ok(_) => match Frame::frame_ref(
+                mu,
+                Fixnum::as_i64(frame) as u64,
+                Fixnum::as_i64(offset) as usize,
+            ) {
+                Some(tag) => tag,
+                None => return Err(Exception::new(Condition::Type, "fr-ref", frame)),
             },
-            _ => Err(Exception::new(Condition::Type, "lex-ref", frame)),
-        }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
     }
 }
 

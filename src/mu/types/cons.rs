@@ -7,6 +7,7 @@ use crate::{
         direct::{DirectInfo, DirectTag, DirectType},
         exception::{self, Condition, Exception},
         frame::Frame,
+        funcall::Core as _,
         heap::Core as _,
         indirect::IndirectTag,
         mu::{Core as _, Mu},
@@ -369,50 +370,50 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(nth) < 0 {
-            return Err(Exception::new(Condition::Type, "nth", nth));
-        }
+        fp.value = match mu.fp_argv_check("nth".to_string(), &[Type::Fixnum, Type::List], fp) {
+            Ok(_) => {
+                if Fixnum::as_i64(nth) < 0 {
+                    return Err(Exception::new(Condition::Type, "nth", nth));
+                }
 
-        match Tag::type_of(list) {
-            Type::Null => {
-                fp.value = Tag::nil();
-                Ok(())
+                match Tag::type_of(list) {
+                    Type::Null => Tag::nil(),
+                    Type::Cons => match Self::nth(mu, Fixnum::as_i64(nth) as usize, list) {
+                        Some(tag) => tag,
+                        None => return Err(Exception::new(Condition::Type, "nth", list)),
+                    },
+                    _ => panic!(),
+                }
             }
-            Type::Cons => {
-                fp.value = match Self::nth(mu, Fixnum::as_i64(nth) as usize, list) {
-                    Some(tag) => tag,
-                    None => return Err(Exception::new(Condition::Type, "nth", list)),
-                };
+            Err(e) => return Err(e),
+        };
 
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "nth", list)),
-        }
+        Ok(())
     }
 
     fn mu_nthcdr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        if Tag::type_of(nth) != Type::Fixnum || Fixnum::as_i64(nth) < 0 {
-            return Err(Exception::new(Condition::Type, "nthcdr", nth));
-        }
+        fp.value = match mu.fp_argv_check("nthcdr".to_string(), &[Type::Fixnum, Type::List], fp) {
+            Ok(_) => {
+                if Fixnum::as_i64(nth) < 0 {
+                    return Err(Exception::new(Condition::Type, "nth", nth));
+                }
 
-        match Tag::type_of(list) {
-            Type::Null => {
-                fp.value = Tag::nil();
-                Ok(())
+                match Tag::type_of(list) {
+                    Type::Null => Tag::nil(),
+                    Type::Cons => match Self::nthcdr(mu, Fixnum::as_i64(nth) as usize, list) {
+                        Some(tag) => tag,
+                        None => return Err(Exception::new(Condition::Type, "nthcdr", list)),
+                    },
+                    _ => panic!(),
+                }
             }
-            Type::Cons => {
-                fp.value = match Self::nthcdr(mu, Fixnum::as_i64(nth) as usize, list) {
-                    Some(tag) => tag,
-                    None => return Err(Exception::new(Condition::Type, "nth", list)),
-                };
+            Err(e) => return Err(e),
+        };
 
-                Ok(())
-            }
-            _ => Err(Exception::new(Condition::Type, "nthcdr", list)),
-        }
+        Ok(())
     }
 }
 

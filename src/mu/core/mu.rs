@@ -13,7 +13,7 @@ use {
             frame::Frame,
             funcall::LibMuFunction,
             heap::Core as _,
-            namespace::{Cache, Core as NSCore},
+            namespace::{Core as NSCore, Namespace},
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
@@ -60,7 +60,7 @@ pub struct Mu {
     // map/ns/async indices
     pub async_index: RwLock<HashMap<u64, AsyncContext>>,
     pub map_index: RwLock<HashMap<usize, HashMap<u64, Tag>>>,
-    pub ns_index: RwLock<<Mu as Cache>::NSIndex>,
+    pub ns_index: RwLock<<Mu as Namespace>::NSIndex>,
 
     // functions
     pub functions: Vec<LibMuFunction>,
@@ -146,13 +146,13 @@ impl Core for Mu {
         mu.keyword_ns = Symbol::keyword("keyword");
 
         mu.mu_ns = Symbol::keyword("mu");
-        match <Mu as Cache>::add_ns(&mu, mu.mu_ns) {
+        match <Mu as Namespace>::add_ns(&mu, mu.mu_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         mu.null_ns = Tag::nil();
-        match <Mu as Cache>::add_ns(&mu, mu.null_ns) {
+        match <Mu as Namespace>::add_ns(&mu, mu.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };

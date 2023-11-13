@@ -56,6 +56,30 @@
           (core:raise prop 'core:vector-ref "not a vector"))))
 
 ;;;
+;;; write
+;;;
+(mu:intern :core "%vector-write"
+   (:lambda (vector escape stream)
+      (:if (mu:eq :vector (mu:type-of vector))
+           (mu:write vector escape stream)
+           ((:lambda (length)
+               (core:format stream "#(" ())
+               (mu:fix
+                (:lambda (index)
+                   (:if (mu:fx-lt index length)
+                        ((:lambda ()
+                            (core:write (core:vector-ref vector index) escape stream)
+                            (:if (mu:fx-lt index (core:1- length))
+                                 (core:format stream " " ())
+                                 ())
+                            (core:1+ index)))
+                        index))
+                0)
+               (core:format stream ")" ()))
+            (core:%vector-prop :length vector)))
+      ()))
+
+;;;
 ;;; implementation
 ;;;
 (mu:intern :core "%make-vector"
