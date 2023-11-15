@@ -20,10 +20,10 @@
 ;;; typep
 ;;;
 (mu:intern :core "%typespec-map%"
-   `((asyncid (satisfies (:lambda (value) (mu:eq :asyncid (mu:type-of value)))))
+   `((asyncid (satisfies core:asyncidp))
      (char (satisfies core:charp))
      (function (satisfies core:functionp))
-     (map (satisfies (:lambda (map) (mu:eq :map (mu:type-of :map)))))
+     (map (satisfies core:map-p))
      (number (or (satisfies core:floatp) integer))
      (integer (satisfies core:fixnump))
      (sequence (or (satisfies core:vectorp) (satisfies core:stringp) (satisfies core:listp)))
@@ -35,7 +35,13 @@
 (mu:intern :core "%compound-typespec-map%"
    `(,(mu:cons 'satisfies (:lambda (value spec-list)
                              (:if (mu:eq 1 (mu:length spec-list))
-                                  (mu:eq (mu:car spec-list) (mu:type-of value))
+                                  ((:lambda (predicate-symbol)
+                                      (:if (core:symbolp predicate-symbol)
+                                           (:if (mu:boundp predicate-symbol)
+                                                (core:apply (mu:sy-val predicate-symbol) `(,value))
+                                                (core:raise predicate 'core:typep "satisfies typespec format"))
+                                           (core:raise predicate 'core:typep "satisfies typespec format")))
+                                   (mu:car spec-list))
                                   (core:raise spec-list 'core:typep "satisfies typespec format"))))
      ,(mu:cons 'not (:lambda (value spec-list)
                        (:if (mu:eq 1 (mu:length spec-list))
