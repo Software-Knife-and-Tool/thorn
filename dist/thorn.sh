@@ -26,6 +26,7 @@ CORE=(			\
       backquote.l	\
       boole.l		\
       compile.l		\
+      ctype.l		\
       debug.l		\
       environment.l	\
       exception.l	\

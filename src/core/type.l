@@ -4,14 +4,6 @@
 ;;;
 ;;; types
 ;;;
-(mu:intern :core "%core-types" (mu:make-ns :%ctypes))
-
-(mu:intern :core "core-type-p"
-   (:lambda (value)
-      (:if (core:structp value)
-           (mu:eq :<ctype> (mu:st-type value))
-           ())))
-
 (mu:intern :core "type-of"
    (:lambda (value)
       ((:lambda (type)
@@ -25,72 +17,60 @@
        (mu:type-of value))))
 
 ;;;
-;;; ctype struct: #s(:<ctype> #(:t name property-alist))
+;;; typep
 ;;;
-;;; where the property-alist is ((:predicate . :predicate) ...)
-;;;
-(mu:intern :core "define-core-type"
-   (:lambda (name properties)
-      ((:lambda (str)
-          (:if (core:listp properties)
-               ((:lambda (symbol)
-                   (:if (core:null symbol)
-                        (mu:intern core:%core-types str (mu:make-st :<ctype> `(,str ,properties)))
-                        (core:raise symbol 'core:define-core-type "type symbol bound")))
-                (mu:ns-find core:%core-types str))
-               (core:raise properties 'core:define-core-type "not a property list")))
-       (core:string name))))
+(mu:intern :core "%typespec-map%"
+   `((asyncid (satisfies (:lambda (value) (mu:eq :asyncid (mu:type-of value)))))
+     (char (satisfies core:charp))
+     (function (satisfies core:functionp))
+     (map (satisfies (:lambda (map) (mu:eq :map (mu:type-of :map)))))
+     (number (or (satisfies core:floatp) integer))
+     (integer (satisfies core:fixnump))
+     (sequence (or (satisfies core:vectorp) (satisfies core:stringp) (satisfies core:listp)))
+     (stream (satisfies core:streamp))
+     (string (satisfies core:stringp))
+     (struct (satisifes core:structp))
+     (symbol (or (satisfies core:symbolp) (satisfies core:keywordp)))))
 
-(mu:intern :core "%core-type-predicate-map%"
-   `(,(mu:cons :char (:lambda (t) (core:charp t)))
-      ,(mu:cons :cons (:lambda (t) (core:consp t)))
-      ,(mu:cons :fixnum (:lambda (t) (core:fixnump t)))
-      ,(mu:cons :float (:lambda (t) (core:floatp t)))
-      ,(mu:cons :func (:lambda (t) (core:functionp t)))
-      ,(mu:cons :listp (:lambda (t) (core:listp t)))
-      ,(mu:cons :map (:lambda (t) (mu:eq :map (mu:type-of t))))
-      ,(mu:cons :keyword (:lambda (t) (core:keywordp t)))
-      ,(mu:cons :nmspace (:lambda (t) (core:namespacep t)))
-      ,(mu:cons :string (:lambda (t) (core:stringp t)))
-      ,(mu:cons :struct (:lambda (t) (core:structp t)))
-      ,(mu:cons :symbol (:lambda (t) (mu:eq :symbol (mu:type-of t))))
-      ,(mu:cons :symbolp (:lambda (t) (core:symbolp t)))
-      ,(mu:cons :t (:lambda (t) :t))
-      ,(mu:cons :vector (:lambda (t) (core:vectorp t)))))
+(mu:intern :core "%compound-typespec-map%"
+   `(,(mu:cons 'satisfies (:lambda (value spec-list)
+                             (:if (mu:eq 1 (mu:length spec-list))
+                                  (mu:eq (mu:car spec-list) (mu:type-of value))
+                                  (core:raise spec-list 'core:typep "satisfies typespec format"))))
+     ,(mu:cons 'not (:lambda (value spec-list)
+                       (:if (mu:eq 1 (mu:length spec-list))
+                            (core:not (core:typep value (mu:car spec-list)))
+                            (core:raise spec-list 'core:typep "no typespec format"))))
+     ,(mu:cons 'and (:lambda (value spec-list)
+                       (:if (core:null spec-list)
+                            :t
+                            (core:foldl
+                             (:lambda (elt acc)
+                                (core:%andf acc (core:typep value elt)))
+                             :t
+                             spec-list))))
+     ,(mu:cons 'or (:lambda (value spec-list)
+                     (:if (core:null spec-list)
+                          ()
+                          (core:foldl
+                           (:lambda (elt acc)
+                             (core:%andf acc (core:typep value elt)))
+                           :t
+                           spec-list))))))
 
-(mu:intern :core "%core-type-predicate"
-   (:lambda (type value)
-      ((:lambda (predicate)
-          (mu:apply predicate `(,value)))
-       (mu:cdr (core:%assoc type core:%core-type-predicate-map%)))))
-
-(mu:intern :core "%make-core-type"
-    (:lambda (name property-values)
-       ((:lambda (type-symbol)
-           (core:%mapc
-            (:lambda (property-value)
-               (core:findl
-                (:lambda (property-def)
-                   (:if (mu:eq (mu:car property-value) (mu:car property-def))
-                        ((:lambda (type value)
-                            (:if (core:%core-type-predicate type value)
-                                 property-def
-                                 (core:raise property-value '%make-core-type "type mismatch")))
-                         (mu:cdr property-def)
-                         (mu:cdr property-value))
-                        ()))
-                (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1)))
-            property-values))
-        (mu:ns-find core:%core-types name))
-       (mu:make-st :<ctype> `(,name ,property-values))))
-
-;;;
-;;; returns () if not found
-;;;
-(mu:intern :core "%core-type-ref"
-   (:lambda (property-name struct)
-      (:if (core:core-type-p struct)
-           (:if (core:keywordp property-name)
-                (core:%assoc property-name (mu:sv-ref (mu:st-vec struct) 1))
-                (core:raise struct 'core:%core-type-ref "not a core-type"))
-           (core:raise property-name 'core:%core-type-ref "not a property name"))))
+(mu:intern :core "typep"
+   (:lambda (tag typespec)
+     (:if (core:keywordp typespec)
+          (mu:eq typespec (mu:type-of tag))
+          (:if (core:symbolp typespec)
+               (mu:eq typespec (core:type-of tag))
+               (:if (core:consp typespec)
+                    ((:lambda (spec spec-list)
+                       ((:lambda (spec-phrase)
+                          (:if (core:null spec-phrase)
+                               (core:raise typespec 'core:typep "typespec not found")
+                               (mu:apply (mu:cdr spec-phrase) `(,tag ,spec-list))))
+                        (core:assoc spec core:%compound-typespec-map%)))
+                     (mu:car typespec)
+                     (mu:cdr typespec))
+                    (core:raise typespec 'core:typep "typespec format"))))))
