@@ -63,7 +63,7 @@
      (mu:with-ex
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
-              (core:apply handler `(,value))
+              (core:apply handler (mu:cons value ()))
               (core:apply handler `(,(core:make-except
                                       condition
                                       value
@@ -77,7 +77,7 @@
 ;;;
 (mu:intern :core "error"
    (:lambda (format-string value)
-      (core:format mu:err-out format-string `(,value))
+      (core:format mu:err-out format-string (mu:cons value ()))
       (mu:raise
        (core:make-except :error value :error "" (mu:frames))
        :except)))

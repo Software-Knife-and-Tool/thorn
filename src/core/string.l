@@ -127,7 +127,7 @@
          (:if (mu:eq :symbol (mu:type-of designator))
               (mu:sy-name designator)
               (:if (core:charp designator)
-                   (mu:make-sv :char `(,designator))
+                   (mu:make-sv :char (mu:cons designator ()))
                    (core:raise designator 'core:string "not a string designator"))))))
 
 (mu:intern :core "string-append"
