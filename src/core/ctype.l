@@ -49,7 +49,7 @@
 (mu:intern :core "%core-type-predicate"
    (:lambda (type value)
       ((:lambda (predicate)
-          (mu:apply predicate `(,value)))
+          (mu:apply predicate (mu:cons value ())))
        (mu:cdr (core:%assoc type core:%core-type-predicate-map%)))))
 
 (mu:intern :core "%make-core-type"
