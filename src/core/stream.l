@@ -150,7 +150,7 @@
          (:if (core:null writer)
               (mu:write value escape (core:%write-stream-designator designator))
               (mu:apply (mu:cdr writer) `(,value ,escape ,(core:%write-stream-designator)))))
-       (core:assoc (core:type-of value)
+       (core:%assoc (core:type-of value)
         `((mu:cons "except" (:lambda (exception escape stream) (core:%write-exception exception escape stream)))
           (mu:cons "funct" (:lambda (function escape stream) (core:%write-function function escape stream)))
           (mu:cons "lambda" (:lambda (lambda escape stream) (core:%write-lambda lambda escape stream)))

@@ -66,7 +66,7 @@
                           (:if (core:null entry)
                                (core:raise op 'core:boole "not an op")
                                (mu:apply (mu:cdr entry) ())))
-                        (core:assoc op op-table))
+                        (core:%assoc op op-table))
                        (core:raise integer-2 'core:boole "not a fixnum"))
                   (core:raise integer-1 'core:boole "not a fixnum"))
              (core:raise list 'core:boole "not a boole keyword")))
