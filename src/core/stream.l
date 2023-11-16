@@ -79,7 +79,7 @@
                          ((:lambda (stream)
                              (mu:with-ex
                               (:lambda (ex) (mu:close stream) ex)
-                              (:lambda () (core:apply fn `(,stream)))))
+                              (:lambda () (core:apply fn (mu:cons stream ())))))
                           (mu:open type dir specifier))
                          (core:raise dir 'core:with-open-stream "not a direction keyword"))
                     (core:raise type 'core:with-open-stream "not a type keyword"))
