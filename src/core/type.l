@@ -38,7 +38,7 @@
                                   ((:lambda (predicate-symbol)
                                       (:if (core:symbolp predicate-symbol)
                                            (:if (mu:boundp predicate-symbol)
-                                                (core:apply (mu:sy-val predicate-symbol) `(,value))
+                                                (core:apply (mu:sy-val predicate-symbol) (mu:cons value ()))
                                                 (core:raise predicate 'core:typep "satisfies typespec format"))
                                            (core:raise predicate 'core:typep "satisfies typespec format")))
                                    (mu:car spec-list))

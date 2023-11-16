@@ -37,7 +37,7 @@
    (:lambda (arg-list env)
       (core:foldr
        (:lambda (elt acc)
-          (mu:cons 'mu:cons (mu:cons elt `(,acc))))
+          (mu:cons 'mu:cons (mu:cons elt (mu:cons acc ()))))
        ()
        (core:mapcar
         (:lambda (form)
