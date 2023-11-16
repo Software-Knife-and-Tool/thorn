@@ -74,7 +74,7 @@
    (:lambda (function list)
       (core:%foldl
        (:lambda (elt acc)
-          `(,@acc ,(mu:apply function `(,elt))))
+          `(,@acc ,(mu:apply function (mu:cons elt ()))))
        ()
        list)))
 
@@ -94,7 +94,7 @@
                  (:lambda (list)
                     (:if list
                          ((:lambda ()
-                             (core:apply function `(,list))
+                             (core:apply function (mu:cons list ()))
                              (mu:cdr list)))
                          ()))
                  list)
@@ -112,7 +112,7 @@
                      ((:lambda (acc list)
                          (:if list
                               (mu:cons
-                               `(,@acc ,(core:apply function `(,list)))
+                               `(,@acc ,(core:apply function (mu:cons list ())))
                                (mu:cdr list))
                               loop))
                       (mu:car loop)
