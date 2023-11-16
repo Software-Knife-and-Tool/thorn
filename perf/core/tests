@@ -13,4 +13,5 @@ sequence
 sort
 stream
 string
+type
 vector
