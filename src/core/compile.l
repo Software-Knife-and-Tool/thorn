@@ -48,7 +48,7 @@
           (:if (core:symbolp macro-symbol)
                (core:%macro-env macro-symbol (core:%compile-lambda lambda-form env))
                (core:raise macro-symbolsymbol 'core:%compile-defmacro "not a symbol"))
-          `(:quote ,macro-symbol))
+          (core:%list-2 :quote macro-symbol))
        (mu:nth 1 form)
        (mu:nthcdr 1 form))))
 
@@ -95,7 +95,7 @@
                     (:if (mu:eq :symbol (mu:type-of function-form)) ; special form or macro
                          ((:lambda (special)
                              (:if special
-                                  (mu:apply (mu:sy-val special) `(,form ,env))
+                                  (mu:apply (mu:sy-val special) (core:%list-2 form env))
                                   ((:lambda (macro-function)
                                       (:if macro-function
                                            (core:%compile-macro-call function-form arg-list env)

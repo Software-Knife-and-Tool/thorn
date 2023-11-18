@@ -108,12 +108,17 @@
 ;;; syntactic sugar
 ;;;
 (mu:intern :core "%orf"
-  (:lambda (arg arg1)
-    (:if arg arg arg1)))
+   (:lambda (arg arg1)
+     (:if arg arg arg1)))
 
 (mu:intern :core "%andf"
-  (:lambda (arg arg1)
-    (:if arg arg1 ())))
+   (:lambda (arg arg1)
+     (:if arg arg1 ())))
+
+(mu:intern :core "%list-2"
+   (:lambda (value1 value2)
+      (mu:cons value1
+         (mu:cons value2 ()))))        
 
 ;;;
 ;;; apply
