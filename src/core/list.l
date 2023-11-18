@@ -84,7 +84,7 @@
                                    loop
                                    (:if (mu:fx-lt length loop)
                                         ()
-                                        (:if (core:apply function `(,(mu:nth loop list)))
+                                        (:if (core:apply function (mu:cons (mu:nth loop list) ()))
                                              (mu:cons loop ())
                                              (core:1+ loop)))))
                            0)))
@@ -106,7 +106,7 @@
                                loop
                                (:if (mu:fx-lt loop 0)
                                     ()
-                                    (:if (core:apply function `(,(mu:nth loop list)))
+                                    (:if (core:apply function (mu:cons (mu:nth loop list) ()))
                                          (mu:cons loop ())
                                          (core:1- loop)))))
                        (mu:fx-sub (mu:length list) 1))))

@@ -113,7 +113,7 @@
     ((:lambda (dispatch-table)
        (mu:apply
         (mu:sy-val (mu:cdr (core:%assoc (core:%read-char-syntax ch) dispatch-table)))
-        `(,ch ,stream)))
+        (core:%list-2 ch stream)))
      '((:const   . core:%read-atom)
        (:escape  . core:%read-atom)
        (:macro   . core:%read-macro)
@@ -162,7 +162,7 @@
             ()
             ((:lambda (macro)
                (:if macro
-                    (core:apply (mu:car macro) `(,stream ,ch))
+                    (core:apply (mu:car macro) (core:%list-2 stream ch))
                     (core:%read-dispatch ch stream)))
              (core:get-macro-character ch))))
      (core:%read-consume-ws stream))))

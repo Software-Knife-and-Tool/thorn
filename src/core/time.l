@@ -13,7 +13,7 @@
            (core:raise fn 'core:time "is not a function"))
      ((:lambda (start-vec time-value stop-vec)
          ((:lambda (time-delta value type-diffs)
-             (core:format :t "Evaluation consumed ~A usec runtime~%" `(,time-delta))
+             (core:format :t "Evaluation consumed ~A usec runtime~%" (core:%list-2 time-delta))
              (core:format :t "           consed ~A~%" `(,type-diffs))
              value)
             (mu:car time-value)

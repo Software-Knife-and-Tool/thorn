@@ -23,7 +23,7 @@
           (:if (core:listp properties)
                ((:lambda (symbol)
                    (:if (core:null symbol)
-                        (mu:intern core:%core-types str (mu:make-st :<ctype> `(,str ,properties)))
+                        (mu:intern core:%core-types str (mu:make-st :<ctype> (core:%list-2 str properties)))
                         (core:raise symbol 'core:define-core-type "type symbol bound")))
                 (mu:ns-find core:%core-types str))
                (core:raise properties 'core:define-core-type "not a property list")))
