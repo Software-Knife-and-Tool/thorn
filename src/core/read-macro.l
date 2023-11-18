@@ -79,7 +79,7 @@
     ((:lambda (ch sharp-table)
        (mu:apply
         (mu:sy-val (mu:cdr (core:%assoc ch sharp-table)))
-        `(,ch ,stream)))
+        (core:%list-2 ch stream)))
      (core:read-char stream () ())
      '((#\| . core:%read-sharp-comment)
        (#\\ . core:%read-sharp-char)
@@ -145,7 +145,7 @@
 ;;;
 (mu:intern :core "%read-quote"
   (:lambda (ch stream)
-     `(:quote ,(core:%read stream))))
+     (core:%list-2 :quote (core:%read stream))))
 
 ;;;
 ;;; line comment
@@ -171,7 +171,7 @@
      ((:lambda (macro-table)
        (mu:apply
             (mu:sy-val (mu:cdr (core:%assoc ch macro-table)))
-            `(,ch ,stream)))
+            (core:%list-2 ch stream)))
        '((#\" . core:%read-string)
          (#\# . core:%read-sharp)
          (#\' . core:%read-quote)

@@ -81,7 +81,7 @@
                             ((:lambda (spec-phrase)
                                (:if (core:null spec-phrase)
                                     (core:raise typespec 'core:typep "typespec not found")
-                                    (mu:apply (mu:cdr spec-phrase) `(,value ,spec-list))))
+                                    (mu:apply (mu:cdr spec-phrase) (core:%list-2 value spec-list))))
                              (core:%assoc spec core:%compound-typespec-map%)))
                           (mu:car typespec)
                           (mu:cdr typespec))
