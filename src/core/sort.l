@@ -39,7 +39,7 @@
           ((:lambda (root max min)
              (:if (mu:eq root min)
                   `(,@(core:%list-n-of root (core:count root list))
-                    ,@(core:%min-le root list)
+                    ,@(core:%min-ge root list)
                     ,@(core:%max-le root list))
                   (:if (mu:eq root max)
                        `(,@(core:reverse (core:%min-ge root list))
