@@ -35,9 +35,9 @@ core       sequence       total: 2        passed: 2        failed: 0        exce
 core       stream         total: 22       passed: 22       failed: 0        exceptions: 0       
 core       string         total: 20       passed: 20       failed: 0        exceptions: 0       
 core       symbol         total: 3        passed: 3        failed: 0        exceptions: 0       
-core       sort           total: 14       passed: 10       failed: 0        exceptions: 4       
+core       sort           total: 14       passed: 14       failed: 0        exceptions: 0       
 core       types          total: 43       passed: 43       failed: 0        exceptions: 0       
 core       vector         total: 17       passed: 17       failed: 0        exceptions: 0       
 -----------------------
-core       passed: 400    total: 409      failed: 4        exceptions: 5         
+core       passed: 404    total: 409      failed: 4        exceptions: 1         
 
