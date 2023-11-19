@@ -33,7 +33,7 @@
             (:env    . :listp)))
 
       ;;; core namespace
-      (core:define-core-type "nmspace"
+      (core:define-core-type "namespc"
           '((:name    . :string)
             (:intern  . :keyword)
             (:extern  . :keyword)

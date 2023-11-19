@@ -16,7 +16,7 @@
    (:lambda (name uses)
       (:if (core:stringp name)
            (:if (core:listp uses)
-                (core:%make-core-type "nmspace"
+                (core:%make-core-type "namespc"
                   (core:%pair-list
                    `(:name    ,name
                      :intern  ,(mu:make-ns)
