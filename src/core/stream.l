@@ -154,7 +154,7 @@
         `((mu:cons "except" (:lambda (exception escape stream) (core:%write-exception exception escape stream)))
           (mu:cons "funct" (:lambda (function escape stream) (core:%write-function function escape stream)))
           (mu:cons "lambda" (:lambda (lambda escape stream) (core:%write-lambda lambda escape stream)))
-          (mu:cons "nmspace" (:lambda (namespace escape stream) (core:%write-namespace namespace escape stream)))
+          (mu:cons "namespc" (:lambda (namespace escape stream) (core:%write-namespace namespace escape stream)))
           (mu:cons "string" (:lambda (string escape stream) (core:%write-string string escape stream)))
           (mu:cons "vector" (:lambda (vector escape stream) (core:%write-vector vector escape stream))))))))
 

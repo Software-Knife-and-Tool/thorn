@@ -25,12 +25,12 @@
              `(,@(core:%list-n-of next (core:count next list)) ,@(core:%max-le next list))))
       (core:%fx-max-le root list))))
 
-(mu:intern :core "%min-le"
+(mu:intern :core "%min-ge"
    (:lambda (root list)
      ((:lambda (next)
         (:if (mu:eq next root)
              ()
-             `(,@(core:%list-n-of next (core:count next list)) ,@(core:%min-le next list))))
+             `(,@(core:%list-n-of next (core:count next list)) ,@(core:%min-ge next list))))
       (core:%fx-min-ge root list))))
 
 (mu:intern :core "sort-list-ascending"
@@ -42,12 +42,12 @@
                     ,@(core:%min-le root list)
                     ,@(core:%max-le root list))
                   (:if (mu:eq root max)
-                       `(,@(core:reverse (core:%min-le root list))
+                       `(,@(core:reverse (core:%min-ge root list))
                          ,@(core:reverse (core:%max-le root list))
                          ,@(core:%list-n-of root (core:count root list)))
                        `(,@(core:reverse (core:%max-le root list))
                          ,@(core:%list-n-of root (core:count root list))
-                         ,@(core:%min-le root list)))))
+                         ,@(core:%min-ge root list)))))
            (mu:car list)
            (core:%fx-list-max list)
            (core:%fx-list-min list))
