@@ -60,7 +60,7 @@
                           ()
                           (core:foldl
                            (:lambda (elt acc)
-                             (core:%andf acc (core:typep value elt)))
+                             (core:%orf acc (core:typep value elt)))
                            :t
                            spec-list))))))
 
