@@ -49,7 +49,7 @@
                     (:if (mu:eq :vector (mu:type-of vector))
                          (mu:sv-ref vector nth)
                          ((:lambda (base start)
-                            (core:vector-ref base (mu:fx-add start nth)))
+                            (mu:sv-ref base (mu:fx-add start nth)))
                           (core:%vector-prop :base vector)
                           (core:%vector-prop :start vector))))
                (core:raise nth 'core:vector-ref "not a fixnum"))
