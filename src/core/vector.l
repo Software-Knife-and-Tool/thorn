@@ -20,7 +20,7 @@
 
 (mu:intern :core "slice"
    (:lambda (vector start length)
-     (:if (core:vectorp vector)
+     (:if (core:typep vector :vector)
           (:if (core:fixnump start)
                (:if (core:%orf (core:minusp start) (mu:fx-lt (core:vector-length vector) start))
                     (core:raise start 'core:slice "illegal start")
@@ -30,7 +30,7 @@
                               (core:%make-vector vector start length))
                          (core:raise start 'core:slice "not a fixnum")))
                (core:raise length 'core:slice "not a fixnum"))
-          (core:raise vector 'core:slice "not a vector"))))
+          (core:raise vector 'core:slice "not a base vector"))))
 
 (mu:intern :core "vector-length"
    (:lambda (vector)
