@@ -13,9 +13,7 @@
 (mu:intern :core "make-vector"
    (:lambda (list)
      (:if (core:listp list)
-          ((:lambda (vector)
-              (core:%make-vector vector 0 (mu:sv-len vector)))
-           (mu:make-sv (core:%specialized-vector-type list) list))
+          (mu:make-sv (core:%specialized-vector-type list) list)
           (core:raise list 'core:make-vector "not a list"))))
 
 (mu:intern :core "slice"
