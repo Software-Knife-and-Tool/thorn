@@ -44,8 +44,8 @@
       ;;; core vector
       (core:define-core-type "vector"
           '((:base    . :vector)
-            (:start   . :fixnum)
-            (:length  . :fixnum)))
+            (:disp    . :listp)
+            (:bitvec  . :listp)))
 
       (mu:intern :core "%packages%" (core:%gen-anon-ns))
       (mu:intern :core "%char-macro-ns%" (core:%gen-anon-ns))
