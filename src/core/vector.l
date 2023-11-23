@@ -58,7 +58,7 @@
 ;;;
 (mu:intern :core "%vector-write"
    (:lambda (vector escape stream)
-      (:if (core:typep vector :vector)
+       (:if (core:typep vector :vector)
            (mu:write vector escape stream)
            ((:lambda (length)
                (core:format stream "#(" ())
