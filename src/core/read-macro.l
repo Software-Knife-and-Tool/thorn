@@ -71,13 +71,15 @@
    (:lambda (ch stream)
      (mu:fix
        (:lambda (loop)
-         (:if (mu:eq :vector (mu:type-of loop))
+         (:if (core:vectorp loop)
               loop
               ((:lambda (byte-descriptor)
                  (:if (core:consp byte-descriptor)
                       ((:lambda (length byte)
-                         ;;; (core:warn (mu:fx-add length (mu:fx-mul 8 (mu:length loop))) "done: length in bits")
-                         (mu:make-sv :byte (core:reverse (mu:cons byte loop))))
+                         (core:%make-vector
+                          (mu:make-sv :byte (core:reverse (mu:cons byte loop)))
+                          ()
+                          (mu:cons (mu:fx-add length (mu:fx-mul 8 (mu:length loop))) ())))
                        (mu:car byte-descriptor)
                        (mu:cdr byte-descriptor))
                        (mu:cons byte-descriptor loop)))
