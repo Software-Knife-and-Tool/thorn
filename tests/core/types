@@ -41,3 +41,4 @@
 (core:typep mu:std-in 'stream)	:t
 (core:typep :sym 'symbol)	:t
 (core:typep 'sym 'symbol)	:t
+(core:typep (core:read (core:make-string-stream :input "#*1111") () ()) 'bit-vector)	:t

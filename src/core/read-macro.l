@@ -51,10 +51,14 @@
                  loop
                  ((:lambda (ch)                   
                     (:if (mu:eof stream)
-                         (mu:cons 0 (mu:cons (mu:fx-sub 8 nbits) byte))
+                         (mu:cons 0 (mu:cons (mu:fx-sub 8 nbits) (mu:fx-ash byte nbits)))
                          ((:lambda (syntax)
-                            (:if (mu:eq syntax :wspace)
-                                 (mu:cons 0 (mu:cons (mu:fx-sub 8 nbits) (mu:fx-ash byte nbits)))
+                            (:if (core:%orf (mu:eq :tmacro syntax) (mu:eq :wspace syntax))
+                                 ((:lambda ()
+                                    (:if (mu:eq :tmacro syntax)
+                                         (core:unread-char ch stream)
+                                         ())
+                                    (mu:cons 0 (mu:cons (mu:fx-sub 8 nbits) (mu:fx-ash byte nbits)))))
                                  (:if (core:%orf (mu:eq #\0 ch) (mu:eq #\1 ch))
                                       (mu:cons (core:1- nbits)
                                                (mu:logor

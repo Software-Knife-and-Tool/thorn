@@ -10,8 +10,11 @@
 (core:make-vector '(1.0 #\a ()))	#(:t 1.0000 a :nil)
 (core:core-type-p (core:make-vector '(1 2 3)))	:nil
 (core:slice #(:fixnum 1 2 3) 1 2)	#s(:<ctype> vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec)))
-(core:vector-length (core:make-vector '(1 2 3)))	3
 (core:vector-ref (core:make-vector '(1 2 3)) 1)	2
 (core:vectorp (core:make-vector '(1 2 3)))	:t
 (core:vectorp (mu:make-sv :t '(1 2 3)))	:t
 (core:vector-ref (core:slice #(:fixnum 1 2 3) 1 2) 0)	2
+(core:vectorp (core:read (core:make-string-stream :input "#*1111") () ()))	:t
+(core:vector-length (core:read (core:make-string-stream :input "#*1111") () ()))	4
+(core:vector-ref (core:read (core:make-string-stream :input "#*1111") () ()) 0)	1
+(core:vector-ref (core:read (core:make-string-stream :input "#*1000") () ()) 1)	0

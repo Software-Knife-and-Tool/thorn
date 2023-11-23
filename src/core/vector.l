@@ -10,6 +10,14 @@
           :t
           (mu:eq 'vector (core:type-of vector)))))
 
+(mu:intern :core "bit-vector-p"
+   (:lambda (vector)
+     (:if (core:core-type-p vector)
+          (:if (mu:eq 'vector (core:type-of vector))
+               (core:not (core:null (core:%vector-prop :bitvec vector)))
+               ())
+          ())))
+
 (mu:intern :core "make-vector"
    (:lambda (list)
      (:if (core:listp list)
@@ -33,9 +41,11 @@
 (mu:intern :core "vector-length"
    (:lambda (vector)
      (:if (core:vectorp vector)
-          (:if (core:typep vector :vector)
-               (mu:sv-len vector)
-               (mu:cdr (core:%vector-prop :disp vector)))
+          (:if (core:bit-vector-p vector)
+               (mu:car (core:%vector-prop :bitvec vector))
+               (:if (core:typep vector :vector)
+                    (mu:sv-len vector)
+                    (mu:cdr (core:%vector-prop :disp vector))))
           (core:raise vector 'core:vector-length "not a vector"))))
 
 (mu:intern :core "vector-ref"
@@ -44,13 +54,22 @@
           (:if (core:fixnump nth)
                (:if (core:%orf (core:minusp nth) (mu:fx-lt (core:vector-length vector) nth))
                     (core:raise length 'core:vector-ref "illegal index")
-                    (:if (core:typep vector :vector)
-                         (mu:sv-ref vector nth)
-                         ((:lambda (base start)
-                            (mu:sv-ref base (mu:fx-add start nth)))
-                          (core:%vector-prop :base vector)
-                          (mu:car (core:%vector-prop :disp vector)))))
-               (core:raise nth 'core:vector-ref "not a fixnum"))
+                    (:if (core:bit-vector-p vector)
+                         ((:lambda (nth-byte offset)
+                            ((:lambda (byte)
+                               (:if (core:zerop (mu:logand byte (mu:fx-ash 1 (mu:fx-sub 7 offset))))
+                                    0
+                                    1))
+                               (core:vector-ref (core:%vector-prop :base vector) nth-byte)))
+                          (mu:fx-div nth 8)
+                          (mu:fx-sub nth (mu:fx-mul 8 (mu:fx-div nth 8))))
+                         (:if (core:typep vector :vector)
+                              (mu:sv-ref vector nth)
+                              ((:lambda (base start)
+                                 (mu:sv-ref base (mu:fx-add start nth)))
+                               (core:%vector-prop :base vector)
+                               (mu:car (core:%vector-prop :disp vector))))))
+                    (core:raise nth 'core:vector-ref "not a fixnum"))
           (core:raise prop 'core:vector-ref "not a vector"))))
 
 ;;;

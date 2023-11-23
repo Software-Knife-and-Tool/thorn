@@ -21,6 +21,7 @@
 ;;;
 (mu:intern :core "%typespec-map%"
    `((asyncid :asyncid)
+     (bit-vector (satisfies core:bit-vector-p))
      (char (satisfies core:charp))
      (function (satisfies core:functionp))
      (map :map)
