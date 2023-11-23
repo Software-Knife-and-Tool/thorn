@@ -25,7 +25,7 @@
                     (:if (core:fixnump length)
                          (:if (core:%orf (core:minusp length) (mu:fx-lt (core:vector-length vector) length))
                               (core:raise length 'core:slice "illegal length")
-                              (core:%make-vector vector start length))
+                              (core:%make-vector vector (mu:cons start length) ()))
                          (core:raise start 'core:slice "not a fixnum")))
                (core:raise length 'core:slice "not a fixnum"))
           (core:raise vector 'core:slice "not a base vector"))))
@@ -33,10 +33,10 @@
 (mu:intern :core "vector-length"
    (:lambda (vector)
      (:if (core:vectorp vector)
-          (:if (mu:eq :vector (mu:type-of vector))
+          (:if (core:typep vector :vector)
                (mu:sv-len vector)
-               (core:%vector-prop :length vector))
-          (core:raise vector 'core:make-vector "not a vector"))))
+               (mu:cdr (core:%vector-prop :disp vector)))
+          (core:raise vector 'core:vector-length "not a vector"))))
 
 (mu:intern :core "vector-ref"
    (:lambda (vector nth)
@@ -44,12 +44,12 @@
           (:if (core:fixnump nth)
                (:if (core:%orf (core:minusp nth) (mu:fx-lt (core:vector-length vector) nth))
                     (core:raise length 'core:vector-ref "illegal index")
-                    (:if (mu:eq :vector (mu:type-of vector))
+                    (:if (core:typep vector :vector)
                          (mu:sv-ref vector nth)
                          ((:lambda (base start)
                             (mu:sv-ref base (mu:fx-add start nth)))
                           (core:%vector-prop :base vector)
-                          (core:%vector-prop :start vector))))
+                          (mu:car (core:%vector-prop :disp vector)))))
                (core:raise nth 'core:vector-ref "not a fixnum"))
           (core:raise prop 'core:vector-ref "not a vector"))))
 
@@ -58,7 +58,7 @@
 ;;;
 (mu:intern :core "%vector-write"
    (:lambda (vector escape stream)
-      (:if (mu:eq :vector (mu:type-of vector))
+      (:if (core:typep vector :vector)
            (mu:write vector escape stream)
            ((:lambda (length)
                (core:format stream "#(" ())
@@ -74,19 +74,19 @@
                         index))
                 0)
                (core:format stream ")" ()))
-            (core:%vector-prop :length vector)))
+            (core:vector-length vector)))
       ()))
 
 ;;;
-;;; implementation
+;;; implementations
 ;;;
 (mu:intern :core "%make-vector"
-   (:lambda (vector start length)
+   (:lambda (vector displace bitvec)
      (core:%make-core-type "vector"
           (core:%pair-list
            `(:base   ,vector
-             :start  ,start
-             :length ,length)))))
+             :disp   ,displace
+             :bitvec ,bitvec)))))
 
 (mu:intern :core "%specialized-vector-type"
    (:lambda (list)
@@ -118,7 +118,7 @@
 
 (mu:intern :core "%vector-prop"
    (:lambda (prop vector)
-      (:if (core:findl (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :start :length))
+      (:if (core:findl (:lambda (vec-prop) (mu:eq prop vec-prop)) '(:base :disp :bitvec))
            (mu:cdr (core:%core-type-ref prop vector))
            (core:raise prop 'core:%vector-prop "not a vector property"))))
 

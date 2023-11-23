@@ -9,7 +9,7 @@
 (core:make-vector '(1.0 1.0 1.0))	#(:float 1.0000 1.0000 1.0000)
 (core:make-vector '(1.0 #\a ()))	#(:t 1.0000 a :nil)
 (core:core-type-p (core:make-vector '(1 2 3)))	:nil
-(core:slice #(:fixnum 1 2 3) 1 2)	#s(:<ctype> vector ((:base . #(:fixnum 1 2 3)) (:start . 1) (:length . 2)))
+(core:slice #(:fixnum 1 2 3) 1 2)	#s(:<ctype> vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec)))
 (core:vector-length (core:make-vector '(1 2 3)))	3
 (core:vector-ref (core:make-vector '(1 2 3)) 1)	2
 (core:vectorp (core:make-vector '(1 2 3)))	:t

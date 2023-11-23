@@ -41,6 +41,49 @@
                (core:raise type 'core:%read-sharp-vector "not a type keyword")))
           (core:%read stream))))
 
+(mu:intern :core "%read-byte-bits"
+   (:lambda (stream)
+     (mu:cdr
+      (mu:fix
+       (:lambda (loop)
+         ((:lambda (nbits byte)
+            (:if (core:zerop nbits)
+                 loop
+                 ((:lambda (ch)                   
+                    (:if (mu:eof stream)
+                         (mu:cons 0 (mu:cons (mu:fx-sub 8 nbits) byte))
+                         ((:lambda (syntax)
+                            (:if (mu:eq syntax :wspace)
+                                 (mu:cons 0 (mu:cons (mu:fx-sub 8 nbits) (mu:fx-ash byte nbits)))
+                                 (:if (core:%orf (mu:eq #\0 ch) (mu:eq #\1 ch))
+                                      (mu:cons (core:1- nbits)
+                                               (mu:logor
+                                                (:if (mu:eq #\1 ch) 1 0)
+                                                (mu:fx-mul byte 2)))
+                                      (core:raise ch 'core:%read-bit-vector "not a bit designator"))))
+                          (core:%read-char-syntax ch))))
+                  (core:read-char stream () ()))))
+          (mu:car loop)
+          (mu:cdr loop)))
+        (mu:cons 8 0)))))
+             
+(mu:intern :core "%read-bit-vector"
+   (:lambda (ch stream)
+     (mu:fix
+       (:lambda (loop)
+         (:if (mu:eq :vector (mu:type-of loop))
+              loop
+              ((:lambda (byte-descriptor)
+                 (:if (core:consp byte-descriptor)
+                      ((:lambda (length byte)
+                         ;;; (core:warn (mu:fx-add length (mu:fx-mul 8 (mu:length loop))) "done: length in bits")
+                         (mu:make-sv :byte (core:reverse (mu:cons byte loop))))
+                       (mu:car byte-descriptor)
+                       (mu:cdr byte-descriptor))
+                       (mu:cons byte-descriptor loop)))
+               (core:%read-byte-bits stream))))
+       ())))
+
 (mu:intern :core "%read-sharp-symbol"
    (:lambda (ch stream)
      ((:lambda (symbol)
@@ -84,6 +127,7 @@
      '((#\| . core:%read-sharp-comment)
        (#\\ . core:%read-sharp-char)
        (#\( . core:%read-sharp-vector)
+       (#\* . core:%read-bit-vector)
        (#\b . core:%read-sharp-number)
        (#\x . core:%read-sharp-number)
        (#\d . core:%read-sharp-number)
