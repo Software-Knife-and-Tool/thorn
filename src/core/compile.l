@@ -17,7 +17,7 @@
 (mu:intern :core "%compile-lambda"
    (:lambda (form env)
       (:if (mu:eq (mu:length form) 1)
-           (core:raise form 'core:%compile-defmacro "malformed lambda expression")
+           (core:raise form 'core:%compile-lambda "malformed lambda expression")
            ((:lambda (lambda body)
                ((:lambda (lambda-desc)
                    ((:lambda (compiled-function)

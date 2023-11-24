@@ -69,7 +69,7 @@
            ((:lambda (function)
                (:if (core:functionp function)
                     (:if (core:functp function)
-                         `(core:%funct-apply-quoted ,fn ,(core:%compile-lambda-arg-list function arg-list env))
+                         `(core:%funct-apply-quoted ,function ,(core:%compile-lambda-arg-list function arg-list env))
                          `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                     (core:raise function 'core:%compile-symbol-call "illegal function call")))
             (core:symbol-value function-symbol))
