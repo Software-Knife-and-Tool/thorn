@@ -61,7 +61,7 @@
            (:lambda (elt acc)
               (:if (core:consp elt)
                    ((:lambda (function-form)
-                       (:if (core:consp fn)
+                       (:if (core:consp function-form)
                             `(,@(core:%closure-env lambda function-form env) ,@acc)
                             `(,@(core:%closure-env lambda (mu:cdr elt) env) ,@acc)))
                     (mu:car elt))
