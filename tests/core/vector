@@ -3,6 +3,8 @@
 (mu:type-of core:vector-length)	:func
 (mu:type-of core:vector-ref)	:func
 (mu:type-of core:vectorp)	:func
+(mu:type-of core:bit-vector-p)	:func
+(mu:type-of core:vector-displaced-p)	:func
 (core:make-vector '(1 2 3))	#(:byte 1 2 3)
 (core:make-vector '(1024 2 3))	#(:fixnum 1024 2 3)
 (core:make-vector '(#\a #\b #\c))	"abc"

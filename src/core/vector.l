@@ -18,6 +18,14 @@
                ())
           ())))
 
+(mu:intern :core "vector-displaced-p"
+   (:lambda (vector)
+     (:if (core:core-type-p vector)
+          (:if (mu:eq 'vector (core:type-of vector))
+               (core:%vector-prop :disp vector)
+               ())
+          ())))
+
 (mu:intern :core "make-vector"
    (:lambda (list)
      (:if (core:listp list)
