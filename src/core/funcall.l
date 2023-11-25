@@ -30,6 +30,22 @@
             (core:%funct-prop :nargs function))
            (core:%arg-list arg-list))))
 
+
+(mu:intern :core "%quoted-lambda-arg-list"
+  (:lambda (fn args)
+    (:if (core:functp fn)
+         args
+         (:if (core:funct-prop :rest fn)
+              (:if (core:%andf (core:funct-prop :rest fn) (core:zerop (core:funct-prop :arity fn)))
+                   (mu:cons args ())
+                   ((:lambda (reqs rest)
+                      (core:append
+                       reqs
+                       (mu:cons rest ())))
+                    (core:dropr args (mu:fx-sub (mu:length args) (core:funct-prop :arity fn)))
+                    (core:dropl args (core:funct-prop :arity fn))))
+              args))))
+
 ;;;
 ;;; compiled argument lists
 ;;;
@@ -47,6 +63,10 @@
 (mu:intern :core "%compile-lambda-arg-list"
    (:lambda (function arg-list env)
      (core:%lambda-arg-list function (core:%mapcar (:lambda (elt) (core:%compile elt env)) arg-list))))
+
+(mu:intern :core "%compile-quoted-lambda-arg-list"
+   (:lambda (function arg-list env)
+     (core:%compile-lambda-arg-list function (core:%mapcar (:lambda (elt) (core:%compile elt env)) arg-list))))
 
 ;;;
 ;;; compile-funcall

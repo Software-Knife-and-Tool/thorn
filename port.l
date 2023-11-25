@@ -1,6 +1,10 @@
 (mu:intern () "list" (lambda (&rest list) list))
 (mu:intern () "identity" (lambda (obj) obj))
 
+(define-macro a-macro (arg)
+  (core:warn arg "a-macro")
+  `(:quote ,arg))
+
 #|
 (defun funcall (fn &rest args)
   (core::funcall fn args))
