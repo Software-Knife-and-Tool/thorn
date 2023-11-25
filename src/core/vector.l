@@ -56,6 +56,16 @@
                     (mu:cdr (core:%vector-prop :disp vector))))
           (core:raise vector 'core:vector-length "not a vector"))))
 
+(mu:intern :core "vector-type"
+   (:lambda (vector)
+     (:if (core:vectorp vector)
+          (:if (core:bit-vector-p vector)
+               'bit
+               (:if (core:typep vector :vector)
+                    (mu:sv-type vector)
+                    (mu:sv-type (core:%vector-prop :base vector))))
+          (core:raise vector 'core:vector-type "not a vector"))))
+
 (mu:intern :core "vector-ref"
    (:lambda (vector nth)
      (:if (core:vectorp vector)

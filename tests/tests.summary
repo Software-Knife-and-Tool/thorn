@@ -37,7 +37,7 @@ core       string         total: 20       passed: 20       failed: 0        exce
 core       symbol         total: 3        passed: 3        failed: 0        exceptions: 0       
 core       sort           total: 14       passed: 14       failed: 0        exceptions: 0       
 core       types          total: 44       passed: 44       failed: 0        exceptions: 0       
-core       vector         total: 20       passed: 20       failed: 0        exceptions: 0       
+core       vector         total: 25       passed: 25       failed: 0        exceptions: 0       
 -----------------------
-core       passed: 410    total: 415      failed: 4        exceptions: 1         
+core       passed: 415    total: 420      failed: 4        exceptions: 1         
 
