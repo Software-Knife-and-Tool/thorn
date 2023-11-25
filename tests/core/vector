@@ -11,6 +11,9 @@
 (core:make-vector '(1.0 1.0 1.0))	#(:float 1.0000 1.0000 1.0000)
 (core:make-vector '(1.0 #\a ()))	#(:t 1.0000 a :nil)
 (core:core-type-p (core:make-vector '(1 2 3)))	:nil
+(core:vector-type #(:t 1 2 3))	:t
+(core:vector-type (core:read (core:make-string-stream :input "#*11101") () ()))	bit
+(core:vector-type (core:slice #(:fixnum 1 2 3) 1 2))	:fixnum
 (core:slice #(:fixnum 1 2 3) 1 2)	#s(:<ctype> vector ((:base . #(:fixnum 1 2 3)) (:disp 1 . 2) (:bitvec)))
 (core:vector-ref (core:make-vector '(1 2 3)) 1)	2
 (core:vectorp (core:make-vector '(1 2 3)))	:t
