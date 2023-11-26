@@ -71,7 +71,7 @@
           (mu:cdr loop)))
         (mu:cons 8 0)))))
              
-(mu:intern :core "%read-bit-vector"
+(mu:intern :core "%read-sharp-bit-vector"
    (:lambda (ch stream)
      (mu:fix
        (:lambda (loop)
@@ -89,6 +89,10 @@
                        (mu:cons byte-descriptor loop)))
                (core:%read-byte-bits stream))))
        ())))
+
+(mu:intern :core "%read-sharp-dot"
+   (:lambda (ch stream)
+      (mu:eval (core:compile (core:read stream () ())))))
 
 (mu:intern :core "%read-sharp-symbol"
    (:lambda (ch stream)
@@ -131,9 +135,10 @@
         (core:%list-2 ch stream)))
      (core:read-char stream () ())
      '((#\| . core:%read-sharp-comment)
-       (#\\ . core:%read-sharp-char)
        (#\( . core:%read-sharp-vector)
-       (#\* . core:%read-bit-vector)
+       (#\* . core:%read-sharp-bit-vector)
+       (#\. . core:%read-sharp-dot)
+       (#\\ . core:%read-sharp-char)
        (#\b . core:%read-sharp-number)
        (#\x . core:%read-sharp-number)
        (#\d . core:%read-sharp-number)
