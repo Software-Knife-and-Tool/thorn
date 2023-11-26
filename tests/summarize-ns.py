@@ -27,16 +27,16 @@ for group in groups:
         exceptions += 1 if result['exception'] else 0
 
     failed = total - passed - exceptions
-    print(f'{ns:<10} {group_label:<14} total: {total:<8} passed: {passed:<8} failed: {failed:<8} exceptions: {exceptions:<8}')
+    print(f'{ns:<10} {group_label:<14} total: {total:<8} pass: {passed:<8} fail: {failed:<8} exceptions: {exceptions:<8}')
     test_total += total
     test_fails += failed
     test_exceptions += exceptions
 
 test_passes = test_total - (test_fails + test_exceptions)
 print('-----------------------')
-print(f'{ns:<11}', end='')
-print(f'passed: {test_passes:<7}', end='')
+print(f'{ns:<26}', end='')
 print(f'total: {test_total:<9}', end='')
-print(f'failed: {test_fails:<9}', end='')
+print(f'pass: {test_passes:<9}', end='')
+print(f'fail: {test_fails:<9}', end='')
 print(f'exceptions: {test_exceptions:<10}')
 print()
