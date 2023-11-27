@@ -23,6 +23,9 @@
 (core:macroexpand '(b-macro (+ 1 2))) ; (mu:fx-add 1 2)
 (b-macro (+ 1 2))                     ; 3
 
+
+
+
 (define-macro c-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))
                                                          ; c-macro
 (core:macroexpand '(c-macro (mu:fx-add 1 2)) ())         ; ((lambda (&rest rest) rest) (mu:fx-add 1 2))
