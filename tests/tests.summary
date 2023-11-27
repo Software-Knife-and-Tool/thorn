@@ -29,7 +29,7 @@ core       fixnum         total: 19       pass: 19       fail: 0        exceptio
 core       format         total: 15       pass: 15       fail: 0        exceptions: 0       
 core       lambda         total: 23       pass: 23       fail: 0        exceptions: 0       
 core       list           total: 77       pass: 77       fail: 0        exceptions: 0       
-core       macro          total: 10       pass: 10       fail: 0        exceptions: 0       
+core       macro          total: 13       pass: 9        fail: 1        exceptions: 3       
 core       reader         total: 62       pass: 62       fail: 0        exceptions: 0       
 core       sequence       total: 2        pass: 2        fail: 0        exceptions: 0       
 core       stream         total: 22       pass: 22       fail: 0        exceptions: 0       
@@ -39,5 +39,5 @@ core       sort           total: 14       pass: 14       fail: 0        exceptio
 core       types          total: 44       pass: 44       fail: 0        exceptions: 0       
 core       vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-core                      total: 421      pass: 416      fail: 4        exceptions: 1         
+core                      total: 424      pass: 415      fail: 5        exceptions: 4         
 

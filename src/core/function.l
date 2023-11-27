@@ -7,7 +7,7 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern :core "functp"
+(mu:intern :core "core-function-p"
    (:lambda (fn)
       (mu:eq 'funct (core:type-of fn))))
 
@@ -33,7 +33,7 @@
           (core:%make-core-type "funct"
             (core:%pair-list
              `(:lambda ,lambda
-               :nargs  ,nargs
+               :arity  ,nargs
                :fn     ,fn
                :env    ,env))))
        (mu:fx-sub
@@ -42,7 +42,7 @@
 
 (mu:intern :core "%funct-prop"
    (:lambda (prop funct)
-      (:if (core:findl (:lambda (funct-prop) (mu:eq prop funct-prop)) '(:lambda :nargs :fn :env))
+      (:if (core:findl (:lambda (funct-prop) (mu:eq prop funct-prop)) '(:lambda :arity :fn :env))
            ((:lambda (ref)
                ;;; (core:raise-when core:null prop 'core:%function-prop "property not bound")
                (mu:cdr ref))
