@@ -55,14 +55,14 @@
 (mu:intern :core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
        ((:lambda (macro-function)
-          ; (core:warn macro-function "compile-macro-call")
-          ; (core:warn (core:%quoted-lambda-arg-list macro-function arg-list) "macro-call args")
+;          (core:warn macro-function "compile-macro-call")
+;          (core:warn (core:%compile-lambda-arg-list macro-function arg-list env) "macro-call args")
           ((:lambda (expanded-form)
              (core:%compile expanded-form env))
            (:if (core:core-function-p macro-function)
                 (core:%funct-apply-quoted
                  macro-function
-                 (core:%compile-lambda-arg-list macro-function arg-list env))
+                 (mu:eval (core:%compile-lambda-arg-list macro-function arg-list env)))
                 (mu:apply macro-function arg-list))))
       (core:macro-function macro-symbol env))))
 

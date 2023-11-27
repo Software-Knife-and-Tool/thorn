@@ -1,0 +1,33 @@
+#| ;;; these are common lisp
+(defmacro a-macro () ''a-macro)  ; a-macro
+(core:macroexpand '(a-macro))    ; 'a-macro
+(a-macro)                        ; a-macro
+
+(define-macro b-macro (arg) arg)         ; b-macro
+(core:macroexpand '(b-macro (+ 1 2)) ()) ; (+ 1 2)
+(b-macro (+ 1 2))                        ; 3
+
+(defmacro c-macro (&rest args) `((lambda (&rest rest) rest) ,@args))
+(macroexpand '(c-macro (+ 1 2)))         ; (LIST (+ 1 2))
+(c-macro (+ 1 2))                        ; (3)
+(macroexpand '(c-macro (+ 1 2) (+ 3 4))) ; (LIST (+ 1 2) (+ 3 4))
+(c-macro (+ 1 2) (+ 3 4))                ; (3 7)
+|#
+
+#| ; these are core thorn
+(define-macro a-macro () ''a-macro)   ; a-macro
+(core:macroexpand '(a-macro) ())      ; 'a-macro
+(a-macro)                             ; a-macro
+
+(define-macro b-macro (arg) arg)      ; b-macro
+(core:macroexpand '(b-macro (+ 1 2))) ; (mu:fx-add 1 2)
+(b-macro (+ 1 2))                     ; 3
+
+(define-macro c-macro (&rest args) (mu:cons '(lambda (&rest rest) rest) args))
+                                                         ; c-macro
+(core:macroexpand '(c-macro (mu:fx-add 1 2)) ())         ; ((lambda (&rest rest) rest) (mu:fx-add 1 2))
+(c-macro (mu:fx-add 1 2))                                ; (3)
+
+(core:macroexpand '(c-macro (mu:fx-add 1 2) (mu:fx-add 3 4))) ; ((lambda (&rest rest) rest) (mu:fx-add 1 2) (mu:fx-add 3 4))
+(c-macro (mu:fx-add 1 2) (mu:fx-add 3 4))                ; (3 7)
+|#
