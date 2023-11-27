@@ -14,7 +14,7 @@
       ;;; core function
       (core:define-core-type "funct"
           '((:lambda  . :struct)
-            (:nargs   . :fixnum)
+            (:arity   . :fixnum)
             (:fn      . :func)
             (:env     . :listp)))
 
@@ -126,7 +126,7 @@
 (mu:intern :core "apply"
    (:lambda (function arg-list)
      (:if (core:functionp function)
-          (:if (core:functp function)
+          (:if (core:core-function-p function)
                (core:%funct-apply function arg-list)
                (mu:apply function arg-list))
           (core:raise function 'core:apply "not a function designator"))))

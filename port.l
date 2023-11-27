@@ -1,11 +1,13 @@
-(mu:intern () "list" (lambda (&rest list) list))
 (mu:intern () "identity" (lambda (obj) obj))
+(mu:intern () "list" (lambda (&rest list) list))
 
-(define-macro a-macro (arg)
-  (core:warn arg "a-macro")
-  `(:quote ,arg))
+(define-macro when (condition &rest body)
+  (list 'if condition `(list lambda () ,@body)))
 
 #|
+(define-macro when (condition &rest body)
+  `(if ,condition (progn ,@body)))
+
 (defun funcall (fn &rest args)
   (core::funcall fn args))
 

@@ -18,7 +18,7 @@
 
 (mu:intern :core "%lambda-arg-list"
    (:lambda (function arg-list)
-      (:if (core:functp function)
+      (:if (core:core-function-p function)
            ((:lambda (rest nreqs)
                (:if (core:%andf rest (core:zerop nreqs))
                     `(mu:cons ,(core:%arg-list arg-list) ())
@@ -27,24 +27,23 @@
                      (core:dropr arg-list (mu:fx-sub (mu:length arg-list) nreqs))
                      (core:dropl arg-list nreqs))))
             (core:%funct-prop :rest function)
-            (core:%funct-prop :nargs function))
+            (core:%funct-prop :arity function))
            (core:%arg-list arg-list))))
-
 
 (mu:intern :core "%quoted-lambda-arg-list"
   (:lambda (fn args)
-    (:if (core:functp fn)
-         args
-         (:if (core:funct-prop :rest fn)
-              (:if (core:%andf (core:funct-prop :rest fn) (core:zerop (core:funct-prop :arity fn)))
+    (:if (core:core-function-p fn)
+         (:if (core:%funct-prop :rest fn)
+              (:if (core:%andf (core:%funct-prop :rest fn) (core:zerop (core:%funct-prop :arity fn)))
                    (mu:cons args ())
                    ((:lambda (reqs rest)
                       (core:append
                        reqs
                        (mu:cons rest ())))
-                    (core:dropr args (mu:fx-sub (mu:length args) (core:funct-prop :arity fn)))
-                    (core:dropl args (core:funct-prop :arity fn))))
-              args))))
+                    (core:dropr args (mu:fx-sub (mu:length args) (core:%funct-prop :arity fn)))
+                    (core:dropl args (core:%funct-prop :arity fn))))
+              args)
+         args)))
 
 ;;;
 ;;; compiled argument lists
@@ -77,7 +76,7 @@
    (:lambda (lambda-form arg-list env)
       ((:lambda (compiled-function)
         (:if (core:functionp compiled-function)
-             (:if (core:functp compiled-function)
+             (:if (core:core-function-p compiled-function)
                   `(core:%funct-apply-quoted ,compiled-function ,(core:%compile-lambda-arg-list compiled-function arg-list env))
                   `(mu:apply ,compiled-function ,(core:%compile-arg-list arg-list env)))
              (core:raise compiled-function 'core:%compile-lambda-call "illegal function call")))
@@ -88,7 +87,7 @@
       (:if (core:boundp function-symbol)
            ((:lambda (function)
                (:if (core:functionp function)
-                    (:if (core:functp function)
+                    (:if (core:core-function-p function)
                          `(core:%funct-apply-quoted ,function ,(core:%compile-lambda-arg-list function arg-list env))
                          `(mu:apply ,function ,(core:%compile-arg-list arg-list env)))
                     (core:raise function 'core:%compile-symbol-call "illegal function call")))

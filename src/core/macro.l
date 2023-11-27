@@ -54,9 +54,17 @@
 
 (mu:intern :core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
-      (core:%compile
-       (core:macroexpand `(,macro-symbol ,@arg-list) env)
-       env)))
+       ((:lambda (macro-function)
+          ; (core:warn macro-function "compile-macro-call")
+          ; (core:warn (core:%quoted-lambda-arg-list macro-function arg-list) "macro-call args")
+          ((:lambda (expanded-form)
+             (core:%compile expanded-form env))
+           (:if (core:core-function-p macro-function)
+                (core:%funct-apply-quoted
+                 macro-function
+                 (core:%compile-lambda-arg-list macro-function arg-list env))
+                (mu:apply macro-function arg-list))))
+      (core:macro-function macro-symbol env))))
 
 ;;;
 ;;; macroexpand-1 expands a macro call once.
@@ -66,10 +74,12 @@
      (:if (core:consp form)
           ((:lambda (fn-symbol arg-list)
              (:if (mu:eq :symbol (mu:type-of fn-symbol))
-                  ((:lambda (macro-fn)
-                       (:if macro-fn
-                            (core:apply macro-fn (mu:eval (core:%arg-list arg-list)))
-                            form))
+                  ((:lambda (macro-function)
+                     (:if macro-function
+                          (:if (core:core-function-p macro-function)
+                               (core:%funct-apply-quoted macro-function (core:%quoted-lambda-arg-list macro-function arg-list))
+                               (mu:apply macro-function arg-list))
+                          form))
                    (core:macro-function fn-symbol env))
                   form))
            (mu:car form)
