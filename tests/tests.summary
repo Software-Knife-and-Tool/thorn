@@ -12,10 +12,10 @@ mu         reader         total: 41       pass: 41       fail: 0        exceptio
 mu         special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
 mu         stream         total: 10       pass: 10       fail: 0        exceptions: 0       
 mu         struct         total: 7        pass: 7        fail: 0        exceptions: 0       
-mu         symbol         total: 10       pass: 10       fail: 0        exceptions: 0       
+mu         symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 261      pass: 261      fail: 0        exceptions: 0         
+mu                        total: 263      pass: 263      fail: 0        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
