@@ -328,7 +328,7 @@ impl MuFunction for Symbol {
         let symbol = fp.argv[0];
 
         fp.value = match Tag::type_of(symbol) {
-            Type::Symbol | Type::Keyword => Symbol::namespace(mu, symbol),
+            Type::Symbol | Type::Keyword | Type::Null => Symbol::namespace(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "sy:ns", symbol)),
         };
 
