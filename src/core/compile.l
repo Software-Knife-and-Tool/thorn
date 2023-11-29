@@ -46,7 +46,7 @@
    (:lambda (form env)
       ((:lambda (macro-symbol lambda-form)
           (:if (core:symbolp macro-symbol)
-               (core:%macro-env macro-symbol (core:%compile-lambda lambda-form env))
+               (core:%defmacro macro-symbol (core:%compile-lambda lambda-form env))
                (core:raise macro-symbolsymbol 'core:%compile-defmacro "not a symbol"))
           (core:%list-2 :quote macro-symbol))
        (mu:nth 1 form)
@@ -57,7 +57,7 @@
 ;;;
 ;;; returns an application of the if form
 ;;;
-(mu:intern :core "%thunk"
+(mu:intern :core "%make-thunk"
   (:lambda (form env)
     (core:%compile
      `(:lambda () ,form)
@@ -69,13 +69,13 @@
           (:if (core:%orf (mu:eq length 3) (mu:eq length 4))
                ((:lambda (t-arm f-arm)
                   (mu:compile `(:if ,(mu:nth 1 form) ,t-arm ,f-arm)))
-               (:if (core:constantp (mu:nth 2 form))
-                    (mu:nth 2 form)
-                    `(core:apply ,(core:%thunk (mu:nth 2 form) env) ()))
-               (:if (core:constantp (mu:nth 3 form))
-                    (mu:nth 3 form)
-                    `(core:apply ,(core:%thunk (mu:nth 3 form) env) ())))
-              (core:raise form 'core:%compile-if "takes two or three arguments")))
+                (:if (core:constantp (mu:nth 2 form))
+                     (mu:nth 2 form)
+                     `(core:apply ,(core:%make-thunk (mu:nth 2 form) env) ()))
+                (:if (core:constantp (mu:nth 3 form))
+                     (mu:nth 3 form)
+                     `(core:apply ,(core:%make-thunk (mu:nth 3 form) env) ())))
+               (core:raise form 'core:%compile-if "takes two or three arguments")))
        (mu:length form))))
 
 ;;;

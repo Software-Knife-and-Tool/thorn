@@ -30,13 +30,13 @@
           macro-ns)
        (core:%gen-anon-ns))))
 
-(mu:intern :core "%macro-env"
-   (:lambda (symbol macro-fn)
+(mu:intern :core "%defmacro"
+   (:lambda (symbol macro-function)
       ((:lambda (macro-ns symbol-ns)
-          (:if macro-ns
-               (mu:intern macro-ns symbol-ns macro-fn)
-               (mu:intern (core:%make-macro-ns symbol-ns) (mu:sy-name symbol) macro-fn))
-          symbol)
+         (:if macro-ns
+              (mu:intern macro-ns symbol-ns macro-function)
+              (mu:intern (core:%make-macro-ns symbol-ns) (mu:sy-name symbol) macro-function))
+         symbol)
        (core:%map-macro-symbol-ns symbol)
        (mu:sy-ns symbol))))
 
@@ -55,8 +55,6 @@
 (mu:intern :core "%compile-macro-call"
    (:lambda (macro-symbol arg-list env)
        ((:lambda (macro-function)
-;          (core:warn macro-function "compile-macro-call")
-;          (core:warn (core:%compile-lambda-arg-list macro-function arg-list env) "macro-call args")
           ((:lambda (expanded-form)
              (core:%compile expanded-form env))
            (:if (core:core-function-p macro-function)
