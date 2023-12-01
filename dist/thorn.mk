@@ -8,10 +8,11 @@ SRC = ../src
 CORE = \
 	core.l		\
 	backquote.l	\
+	break.l		\
 	boole.l		\
 	compile.l	\
 	ctype.l		\
-	debug.l		\
+	describe.l	\
 	environment.l	\
 	exception.l	\
 	fasl.l		\
@@ -28,6 +29,7 @@ CORE = \
 	parse.l		\
 	read-macro.l	\
 	read.l		\
+	repl.l		\
 	sequence.l	\
 	sort.l		\
 	stream.l	\
