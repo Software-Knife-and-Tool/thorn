@@ -177,7 +177,7 @@ impl Core for Map {
 pub trait MuFunction {
     fn mu_make_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_has(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_map_list(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_map_items(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_ref(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_map_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
@@ -244,7 +244,7 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_map_list(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn mu_map_items(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
         fp.value = match mu.fp_argv_check("mp-list".to_string(), &[Type::Map], fp) {

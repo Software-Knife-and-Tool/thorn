@@ -6,4 +6,5 @@
 (mu:make-ns :core)	:core
 (mu:ns-find :mu "eq")	mu:eq
 (mu:ns-find :mu "foo")	:nil
-(mu:type-of (mu:ns-syms :mu))	:cons
+(mu:type-of (mu:ns-syms :list :mu))	:cons
+(mu:type-of (mu:ns-syms :vector :mu))	:vector

@@ -57,7 +57,7 @@ lazy_static! {
         // maps
         ("make-mp", 1, Mu::mu_make_map),
         ("mp-has", 2, Mu::mu_map_has),
-        ("mp-list", 1, Mu::mu_map_list),
+        ("mp-list", 1, Mu::mu_map_items),
         ("mp-ref", 2, Mu::mu_map_ref),
         ("mp-size", 1, Mu::mu_map_size),
         // heap
@@ -102,8 +102,9 @@ lazy_static! {
         ("untern", 2, Mu::mu_untern),
         ("intern", 3, Mu::mu_intern),
         ("make-ns", 1, Mu::mu_make_ns),
-        ("ns-syms", 1, Mu::mu_ns_symbols),
+        ("ns-syms", 2, Mu::mu_ns_symbols),
         ("ns-find", 2, Mu::mu_ns_find),
+        ("ns-map", 0, Mu::mu_ns_map),
         // read/write
         ("read", 3, Mu::mu_read),
         ("write", 3, Mu::mu_write),
