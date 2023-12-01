@@ -2,7 +2,11 @@
 (mu:intern () "list" (lambda (&rest list) list))
 
 (define-macro when (condition &rest body)
-  (list 'if condition `(list lambda () ,@body)))
+  (list 'if condition (list 'mu:apply (core:append (list '(:lambda ()) body) ()))))
+
+(mu:intern () "whenf"
+   (:lambda (condition &rest body)
+     (mu:cons 'if (mu:cons condition (core:append (list '(lambda ()) body))))))
 
 #|
 (define-macro when (condition &rest body)

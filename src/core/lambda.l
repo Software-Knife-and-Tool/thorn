@@ -39,7 +39,7 @@
 ;;;
 ;;; `%compile-lambda` compiles a core lambda form to a lambda descriptor
 ;;;
-;;; `lambda:` lambda form
+;;; `lambda:` lambda form, with leading symbol
 ;;; `env:`    lexical environment
 ;;;
 ;;; `returns:` lambda descriptor
@@ -47,25 +47,25 @@
 (mu:intern :core "%compile-core-lambda"
    (:lambda (lambda env)
       (:if (core:findl (:lambda (el) (core:null (mu:eq :symbol (mu:type-of el)))) lambda)
-         (core:raise lambda 'core:%compile-lambda "list syntax")
-         ((:lambda (desc)
-            (:if (core:fixnump desc)
-                 (core:%make-lambda lambda () env)
-                 desc))
-          (core:%foldl
-            (:lambda (el acc)
-               (:if (core:%lambdap acc)
-                  acc
-                  (:if (mu:eq '&rest el)
-                     (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
-                          (core:%make-lambda
-                           `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:fx-sub (mu:length lambda) 1)))
-                           (mu:nth (mu:fx-sub (mu:length lambda) 1) lambda)
-                           env)
-                          (core:raise lambda 'core:%compile-lambda "rest botch"))
-                     (mu:fx-add 1 acc))))
-            0
-            lambda)))))
+           (core:raise lambda 'core:%compile-lambda "list syntax")
+           ((:lambda (desc)
+               (:if (core:fixnump desc)
+                    (core:%make-lambda lambda () env)
+                    desc))
+            (core:%foldl
+             (:lambda (el acc)
+                (:if (core:%lambdap acc)
+                     acc
+                     (:if (mu:eq '&rest el)
+                          (:if (mu:eq (mu:length lambda) (mu:fx-add 2 acc))
+                               (core:%make-lambda
+                                `(,@(core:dropr lambda 2) ,@(core:dropl lambda (mu:fx-sub (mu:length lambda) 1)))
+                                (mu:nth (mu:fx-sub (mu:length lambda) 1) lambda)
+                                env)
+                               (core:raise lambda 'core:%compile-lambda "rest botch"))
+                          (mu:fx-add 1 acc))))
+             0
+             lambda)))))
 
 ;;;
 ;;; `%compile-lambda-body` resolves body symbols with `core::compile-symbol`,
