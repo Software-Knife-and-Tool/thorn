@@ -8,7 +8,7 @@
    (:lambda (value)
       (:if (mu:boundp 'core:%debug-core-symbols%)
            ()
-           (mu:intern :core "%debug-core-symbols%" (mu:ns-syms :core)))
+           (mu:intern :core "%debug-core-symbols%" (mu:ns-syms :list :core)))
       (mu:fix
        (:lambda (list)
           (:if (core:consp list)
