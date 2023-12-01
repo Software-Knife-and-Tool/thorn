@@ -10,6 +10,7 @@ use {
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
+            funcall::Core as _,
             indirect::IndirectTag,
             mu::Mu,
         },
@@ -227,41 +228,41 @@ pub trait MuFunction {
 
 impl MuFunction for Tag {
     fn mu_repr(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let conv = fp.argv[0];
+        let type_ = fp.argv[0];
         let arg = fp.argv[1];
 
-        // if conv is (), convert arg tag bits to a byte vector
-        // if not, convert arg byte vector to a tag
+        fp.value = match mu.fp_argv_check("repr".to_string(), &[Type::Keyword, Type::T], fp) {
+            Ok(_) => {
+                if type_.eq_(Symbol::keyword("vector")) {
+                    let slice = arg.as_slice();
 
-        fp.value = match Tag::null_(&conv) {
-            true => {
-                let slice = arg.as_slice();
-
-                TypedVec::<Vec<u8>> {
-                    vec: slice.to_vec(),
-                }
-                .vec
-                .to_vector()
-                .evict(mu)
-            }
-            false => match Tag::type_of(arg) {
-                Type::Vector
-                    if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 =>
-                {
-                    let mut u64_: u64 = 0;
-
-                    for index in (0..8).rev() {
-                        u64_ <<= 8;
-                        u64_ |= match Vector::r#ref(mu, arg, index as usize) {
-                            Some(byte) => Fixnum::as_i64(byte) as u64,
-                            None => panic!(),
-                        }
+                    TypedVec::<Vec<u8>> {
+                        vec: slice.to_vec(),
                     }
+                    .vec
+                    .to_vector()
+                    .evict(mu)
+                } else if type_.eq_(Symbol::keyword("t")) {
+                    if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 {
+                        let mut u64_: u64 = 0;
 
-                    Tag::from_u64(u64_)
+                        for index in (0..8).rev() {
+                            u64_ <<= 8;
+                            u64_ |= match Vector::r#ref(mu, arg, index as usize) {
+                                Some(byte) => Fixnum::as_i64(byte) as u64,
+                                None => panic!(),
+                            }
+                        }
+
+                        Tag::from_u64(u64_)
+                    } else {
+                        return Err(Exception::new(Condition::Type, "repr", arg));
+                    }
+                } else {
+                    return Err(Exception::new(Condition::Type, "repr", type_));
                 }
-                _ => return Err(Exception::new(Condition::Type, "repr", arg)),
-            },
+            }
+            Err(e) => return Err(e),
         };
 
         Ok(())

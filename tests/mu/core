@@ -48,7 +48,7 @@
 (mu:hp-size mu:eq)	18
 (mu:hp-size mu:std-in)	36
 (mu:with-ex (:lambda (cond obj) (mu:write cond () mu:std-out)) (:lambda () (mu:fx-div 1 1)))	1
-(mu:repr :t (mu:repr () :t))	:t
+(mu:repr :t (mu:repr :vector :t))	:t
 (mu:type-of mu:untern)	:func
 (mu:type-of mu:intern)	:func
 (mu:type-of mu:make-ns)	:func
