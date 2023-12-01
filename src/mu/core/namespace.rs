@@ -15,6 +15,7 @@ use {
         types::{
             cons::{Cons, Core as _},
             symbol::{Core as _, Symbol, UNBOUND},
+            vecimage::{TypedVec, VecType},
             vector::{Core as _, Vector},
         },
     },
@@ -146,6 +147,7 @@ pub trait MuFunction {
     fn mu_untern(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_make_ns(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_find(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_ns_map(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
@@ -261,9 +263,9 @@ impl MuFunction for Mu {
                     Type::Null => mu.null_ns,
                     Type::Keyword => match Self::is_ns(mu, ns_tag) {
                         Some(_) => ns_tag,
-                        _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                        _ => return Err(Exception::new(Condition::Type, "ns-find", ns_tag)),
                     },
-                    _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                    _ => return Err(Exception::new(Condition::Type, "ns-find", ns_tag)),
                 };
 
                 match Self::map_symbol(mu, ns_tag, &Vector::as_string(mu, name)) {
@@ -278,23 +280,47 @@ impl MuFunction for Mu {
     }
 
     fn mu_ns_symbols(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let ns = fp.argv[0];
+        let type_ = fp.argv[0];
+        let ns = fp.argv[1];
 
-        fp.value = match Self::is_ns(mu, ns) {
-            Some(_) => {
-                let ns_ref = block_on(mu.ns_index.read());
-                let (_, ns_cache) = &ns_ref[&ns.as_u64()];
-                let hash = block_on(ns_cache.read());
-                let mut vec = vec![];
+        fp.value =
+            match mu.fp_argv_check("ns-syms".to_string(), &[Type::Keyword, Type::Keyword], fp) {
+                Ok(_) => match Self::is_ns(mu, ns) {
+                    Some(_) => {
+                        let ns_ref = block_on(mu.ns_index.read());
+                        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+                        let hash = block_on(ns_cache.read());
+                        let mut vec = vec![];
 
-                for key in hash.keys() {
-                    vec.push(hash[key])
-                }
+                        for key in hash.keys() {
+                            vec.push(hash[key])
+                        }
 
-                Cons::vlist(mu, &vec)
-            }
-            _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
-        };
+                        if type_.eq_(Symbol::keyword("list")) {
+                            Cons::vlist(mu, &vec)
+                        } else if type_.eq_(Symbol::keyword("vector")) {
+                            TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+                        } else {
+                            return Err(Exception::new(Condition::Type, "ns-syms", type_));
+                        }
+                    }
+                    _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
+                },
+                Err(e) => return Err(e),
+            };
+
+        Ok(())
+    }
+
+    fn mu_ns_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let ns_ref = block_on(mu.ns_index.read());
+        let mut vec = vec![];
+
+        for ns in ns_ref.keys() {
+            vec.push(Tag::from_u64(*ns))
+        }
+
+        fp.value = Cons::vlist(mu, &vec);
 
         Ok(())
     }
