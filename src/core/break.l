@@ -49,7 +49,7 @@
                            (core:null loop)))
                        (:if (mu:eq form :d)
                             ((:lambda (value)
-                                (core:describe (mu:cdr value))
+                                (core:describe (mu:cdr value) :t)
                                 (core:null loop))
                              (core:%except-prop :value except))
                             (:if (mu:eq form :x)
