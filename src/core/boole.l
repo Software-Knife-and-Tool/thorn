@@ -39,23 +39,6 @@
              (mu:cdr loop)))
          (mu:cons 0 0)))))
 
-(mu:intern :core "logxor"
-   (:lambda (integer-1 integer-2)
-     (mu:cdr
-      (mu:fix
-       (:lambda (loop)
-         ((:lambda (index xor)
-             (:if (mu:fx-lt index 56)
-                  (mu:cons (core:1+ index)
-                           (:if (mu:eq (mu:logand (mu:fx-ash 1 index) integer-1)
-                                       (mu:logand (mu:fx-ash 1 index) integer-2))
-                                (mu:logor xor (mu:fx-ash 1 index))
-                                xor))
-                  loop))
-             (mu:car loop)
-             (mu:cdr loop)))
-         (mu:cons 0 0)))))
-
 (mu:intern :core "boole"
    (:lambda (op integer-1 integer-2)
      ((:lambda (op-table)
