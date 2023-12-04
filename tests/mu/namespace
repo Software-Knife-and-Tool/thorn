@@ -8,3 +8,7 @@
 (mu:ns-find :mu "foo")	:nil
 (mu:type-of (mu:ns-syms :list :mu))	:cons
 (mu:type-of (mu:ns-syms :vector :mu))	:vector
+(mu:type-of (mu:ns-syms :list :nil))	:null
+(mu:type-of (mu:ns-syms :vector :nil))	:vector
+(mu:type-of (mu:ns-syms :list ()))	:null
+(mu:type-of (mu:ns-syms :vector ()))	:vector
