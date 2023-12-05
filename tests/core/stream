@@ -7,7 +7,6 @@
 (mu:type-of core:read)	:func
 (mu:type-of core:read-byte)	:func
 (mu:type-of core:read-char)	:func
-(mu:type-of core:terpri)	:func
 (mu:type-of core:unread-char)	:func
 (mu:type-of core:write)	:func
 (mu:type-of core:write-byte)	:func

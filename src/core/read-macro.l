@@ -64,7 +64,7 @@
                                                (mu:logor
                                                 (:if (mu:eq #\1 ch) 1 0)
                                                 (mu:fx-mul byte 2)))
-                                      (core:raise ch 'core:%read-bit-vector "not a bit designator"))))
+                                      (core:raise ch 'core:%read-sharp-bit-vector "not a bit designator"))))
                           (core:%read-char-syntax ch))))
                   (core:read-char stream () ()))))
           (mu:car loop)
