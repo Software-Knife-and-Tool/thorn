@@ -110,15 +110,15 @@
       (:if (mu:eq type :half)
            (mu:fx-add
             (core:read-byte stream t ())
-            (core:ash (core:read-byte stream :t ()) 8))
+            (mu:ash (core:read-byte stream :t ()) 8))
            (:if (mu:eq type :word)
                 (mu:fx-add
                  (core:elf64-read :half stream)
-                 (core:ash (core:elf64-read :half stream) 16))
+                 (mu:ash (core:elf64-read :half stream) 16))
                 (:if (mu:eq type :u64)
                      (mu:fx-add
                       (core:elf64-read :word stream)
-                      (core:ash (core:elf64-read :word stream) 32))
+                      (mu:ash (core:elf64-read :word stream) 32))
                      (:if (mu:eq type :tag)
                           (mu:%repr :t (core:elf64-read-bytes 8 stream))
                           (core:raise size 'core:elf64-read "not a legal type")))))))
@@ -129,15 +129,15 @@
            (core:elf64-write-bytes
             stream
             (mu:logand n #xff)
-            (mu:logand (core:ash n -8) #xff))
+            (mu:logand (mu:ash n -8) #xff))
            (:if (mu:eq type :word)
                 ((:lambda ()
                  (core:elf64-write :half n stream)
-                 (core:elf64-write :half (core:ash n -16) stream)))
+                 (core:elf64-write :half (mu:ash n -16) stream)))
                 (:if (mu:eq type :u64)
                      ((:lambda ()
                       (core:elf64-write :half n stream)
-                      (core:elf64-write :half (core:ash n -32) stream)))
+                      (core:elf64-write :half (mu:ash n -32) stream)))
                      (:if (mu:eq type :tag)
                           (core:elf64-write :u64 (mu:tag-of n) stream)
                           (t (core:raise size 'el64-write "not a legal type"))))))))

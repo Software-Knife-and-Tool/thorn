@@ -221,17 +221,19 @@
 ;;; write string
 ;;;
 (mu:intern :core "write-string"
-   (:lambda (str stream)
+   (:lambda (str designator)
       (:if (core:stringp str)
-           (:if (core:streamp stream)
-                (mu:write str () stream)
-                (core:raise str 'core:write-string "is not a stream"))
+           ((:lambda (stream)
+              (mu:write str () stream))
+            (core:%read-stream-designator designator))
            (core:raise str 'core:write-string "is not a string"))))
 
 ;;;
 ;;; write line
 ;;;
 (mu:intern :core "write-line"
-   (:lambda (str stream)
-      (core:write-string str stream)
-      (core:terpri stream)))
+   (:lambda (str designator)
+      ((:lambda (stream)          
+         (core:write-string str stream)
+         (core:write-char #\linefeed stream))
+       (core:%write-stream-designator designator))))

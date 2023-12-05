@@ -146,18 +146,6 @@
 
 (mu:intern :core "write"
    (:lambda (value escape designator)
-      ((:lambda (writer)
-         (:if (core:null writer)
-              (mu:write value escape (core:%write-stream-designator designator))
-              (mu:apply (mu:cdr writer) `(,value ,escape ,(core:%write-stream-designator)))))
-       (core:%assoc (core:type-of value)
-        `((mu:cons "except" (:lambda (exception escape stream) (core:%write-exception exception escape stream)))
-          (mu:cons "funct" (:lambda (function escape stream) (core:%write-function function escape stream)))
-          (mu:cons "lambda" (:lambda (lambda escape stream) (core:%write-lambda lambda escape stream)))
-          (mu:cons "namespc" (:lambda (namespace escape stream) (core:%write-namespace namespace escape stream)))
-          (mu:cons "string" (:lambda (string escape stream) (core:%write-string string escape stream)))
-          (mu:cons "vector" (:lambda (vector escape stream) (core:%write-vector vector escape stream))))))))
-
-(mu:intern :core "terpri"
-   (:lambda (designator)
-      (core:write-char #\linefeed (core:%write-stream-designator designator))))
+      ((:lambda (stream)
+          (mu:write value escape stream))  
+      (core:%read-stream-designator designator))))

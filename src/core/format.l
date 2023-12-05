@@ -16,7 +16,7 @@
 
 (mu:intern :core "%fmt-percent"
   (:lambda (dest arg-list)
-    (core:terpri dest)
+    (core:write-char #\linefeed dest)
     arg-list))
 
 (mu:intern :core "%fmt-bang"
