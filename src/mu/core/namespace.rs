@@ -283,31 +283,30 @@ impl MuFunction for Mu {
         let type_ = fp.argv[0];
         let ns = fp.argv[1];
 
-        fp.value =
-            match mu.fp_argv_check("ns-syms".to_string(), &[Type::Keyword, Type::Keyword], fp) {
-                Ok(_) => match Self::is_ns(mu, ns) {
-                    Some(_) => {
-                        let ns_ref = block_on(mu.ns_index.read());
-                        let (_, ns_cache) = &ns_ref[&ns.as_u64()];
-                        let hash = block_on(ns_cache.read());
-                        let mut vec = vec![];
+        fp.value = match mu.fp_argv_check("ns-syms".to_string(), &[Type::Keyword, Type::T], fp) {
+            Ok(_) => match Self::is_ns(mu, ns) {
+                Some(_) => {
+                    let ns_ref = block_on(mu.ns_index.read());
+                    let (_, ns_cache) = &ns_ref[&ns.as_u64()];
+                    let hash = block_on(ns_cache.read());
+                    let mut vec = vec![];
 
-                        for key in hash.keys() {
-                            vec.push(hash[key])
-                        }
-
-                        if type_.eq_(Symbol::keyword("list")) {
-                            Cons::vlist(mu, &vec)
-                        } else if type_.eq_(Symbol::keyword("vector")) {
-                            TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
-                        } else {
-                            return Err(Exception::new(Condition::Type, "ns-syms", type_));
-                        }
+                    for key in hash.keys() {
+                        vec.push(hash[key])
                     }
-                    _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
-                },
-                Err(e) => return Err(e),
-            };
+
+                    if type_.eq_(Symbol::keyword("list")) {
+                        Cons::vlist(mu, &vec)
+                    } else if type_.eq_(Symbol::keyword("vector")) {
+                        TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
+                    } else {
+                        return Err(Exception::new(Condition::Type, "ns-syms", type_));
+                    }
+                }
+                _ => return Err(Exception::new(Condition::Type, "ns-syms", ns)),
+            },
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }

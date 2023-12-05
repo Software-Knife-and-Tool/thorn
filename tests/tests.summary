@@ -6,7 +6,7 @@ mu         core           total: 57       pass: 57       fail: 0        exceptio
 mu         exception      total: 4        pass: 4        fail: 0        exceptions: 0       
 mu         list           total: 22       pass: 22       fail: 0        exceptions: 0       
 mu         map            total: 10       pass: 10       fail: 0        exceptions: 0       
-mu         namespace      total: 10       pass: 10       fail: 0        exceptions: 0       
+mu         namespace      total: 14       pass: 14       fail: 0        exceptions: 0       
 mu         number         total: 35       pass: 35       fail: 0        exceptions: 0       
 mu         reader         total: 41       pass: 41       fail: 0        exceptions: 0       
 mu         special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
@@ -15,7 +15,7 @@ mu         struct         total: 7        pass: 7        fail: 0        exceptio
 mu         symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 270      pass: 270      fail: 0        exceptions: 0         
+mu                        total: 274      pass: 274      fail: 0        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
