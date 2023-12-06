@@ -39,7 +39,7 @@
           `(,(mu:cons :ns (mu:sv-ref view 0))
             ,(mu:cons :name (mu:sv-ref view 1))
             ,(mu:cons :value (mu:sv-ref view 2)))))
-      (mu:view symbol))))
+      (mu:view obj))))
 
 (mu:intern :core "%inspect-const"
    (:lambda (obj)
