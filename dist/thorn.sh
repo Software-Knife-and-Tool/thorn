@@ -36,6 +36,7 @@ CORE=(			\
       format.l		\
       funcall.l		\
       function.l	\
+      inspect.l		\
       lambda.l		\
       list.l		\
       log.l		\
