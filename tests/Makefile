@@ -1,12 +1,12 @@
 #
 # tests makefile
 #
-.PHONY: help cargo clean commit namespaces tests summary mu core
+.PHONY: help cargo clean commit namespaces tests summary mu prelude
 
 TMPF:=$(shell mktemp)
 NAMESPACES=	\
 	mu	\
-	core
+	prelude
 
 help:
 	@echo "thorn test makefile -----------------"
@@ -32,8 +32,8 @@ list:
 mu:
 	@python3 ./test-ns.py mu .
 
-core:
-	@python3 ./test-ns.py core .	
+prelude:
+	@python3 ./test-ns.py prelude .	
 
 commit:
 	@make summary --no-print-directory > tests.summary

@@ -2,7 +2,7 @@ Cargo.lock
 thorn*.tgz
 dist/mu-shell
 dist/mu-server
-dist/core.l
+dist/prelude.l
 target
 *.out
 doc/rustdoc

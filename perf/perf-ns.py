@@ -21,10 +21,10 @@ def storage(ns, group, line, test):
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
-    if ns == 'core':
+    if ns == 'prelude':
         proc = subprocess.Popen(['../dist/mu-shell',
-                                 '-l../dist/core.l',
-                                 '-q (core:%init-core-ns)',
+                                 '-l../dist/prelude.l',
+                                 '-q (prelude:%init-ns)',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (mu:%sdelta (:lambda ()' + test + ') :nil)'],\
@@ -50,10 +50,10 @@ def timing(ns, test):
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
-    if ns == 'core':
+    if ns == 'prelude':
         proc = subprocess.Popen(['../dist/mu-shell',
-                                 '-l../dist/core.l',
-                                 '-q (core:%init-core-ns)',
+                                 '-l../dist/prelude.l',
+                                 '-q (prelude:%init-ns)',
                                  '-p',
                                  '-l./perf.l',
                                  '-e (mu:%tdelta (:lambda ()' + test + ') :nil)'],\

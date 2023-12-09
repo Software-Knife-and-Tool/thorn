@@ -14,11 +14,10 @@ MU_SERVER = ./mu-server
 dist:
 	@install -d $(BASE)
 	@install -d $(BASE)/thorn
-	@install -d $(BASE)/thorn/core
-	@install -d $(BASE)/thorn/preface
+	@install -d $(BASE)/thorn/prelude
 	@install -d $(BASE)/thorn/mu
 
-	@make -f thorn.mk thorn core
+	@make -f thorn.mk thorn prelude
 
 	@install -d $(BASE)/bin
 	@install -d $(BASE)/$(BASE)

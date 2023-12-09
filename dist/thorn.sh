@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 BASE=${THORN_HOME:=/opt/thorn}
-BASE_CORE=$BASE/thorn/core
+BASE_PRELUDE=$BASE/thorn/prelude
 
 usage () {
     echo "usage: $0 [session options] [runtime options] src-file..." >&2
@@ -16,13 +16,13 @@ usage () {
     exit 2
 }
 
-CORE_FILES=""
+PRELUDE_FILES=""
 OPTIONS=""
 SOURCES=""
 
-# core.l needs to be first
-CORE=(			\
-      core.l		\
+# prelude.l needs to be first
+PRELUDE=(	       	\
+      prelude.l		\
       backquote.l	\
       boole.l		\
       break.l		\
@@ -58,8 +58,8 @@ CORE=(			\
       vector.l		\
     )
 
-for src in ${CORE[@]}; do
-    CORE_FILES+=" -l $BASE_CORE/$src"
+for src in ${PRELUDE[@]}; do
+    PRELUDE_FILES+=" -l $BASE_PRELUDE/$src"
 done
 
 optspec=":h-:"
@@ -121,4 +121,4 @@ len="${#@}"
 for (( i=${OPTIND}; i<="${#@}"; i++ )); do SOURCES+=" \"${!i}\"" ; done
 
 export THORN_LOAD_LIST=SOURCES
-eval $BASE/bin/mu-shell $CORE_FILES -q "\(core:%init-core-ns\)" $OPTIONS # $BASE/thorn/thorn.l ${SOURCES[@]}
+eval $BASE/bin/mu-shell $PRELUDE_FILES -q "\(prelude:%init-ns\)" $OPTIONS # $BASE/thorn/thorn.l ${SOURCES[@]}

@@ -1,0 +1,2 @@
+(mu:type-of prelude:length)	:func
+(mu:type-of prelude:elt)	:func
