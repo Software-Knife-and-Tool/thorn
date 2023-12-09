@@ -4,10 +4,10 @@
 .PHONY: reference clobber
 
 # SRCDIRS = foreward core mu thorn preface system
-SRCDIRS = foreward core/
+SRCDIRS = foreward prelude
 
 # page break <div style="page-break-after: always"></div>
-BOOK= foreward/index.md core/2-1core.md core/2-2reader.md core/2-3compile.md core/2-4lambda.md core/2-5functions.md core/2-6macros.md core/2-7sequences.md core/2-8exceptions.md core/2-9lists.md core/2-10streams.md core/2-11utilities.md core/2-12core-symbols.md
+BOOK= foreward/index.md prelude/2-1.prelude.md prelude/2-2.reader.md prelude/2-3.compile.md prelude/2-4.lambda.md prelude/2-5.functions.md prelude/2-6.macros.md prelude/2-7.sequences.md prelude/2-8.exceptions.md prelude/2-9.lists.md prelude/2-10.streams.md prelude/2-11.utilities.md prelude/2-12.prelude-symbols.md
 
 reference:
 	@for dir in $(SRCDIRS); do		\
