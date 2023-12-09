@@ -1,6 +1,6 @@
 Cargo.lock
 thorn*.tgz
-dist/mu-local
+dist/mu-shell
 dist/mu-server
 dist/core.l
 target

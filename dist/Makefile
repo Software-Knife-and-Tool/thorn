@@ -3,13 +3,13 @@
 #
 .PHONY: dist clean
 
-VERSION = 0.0.22
+VERSION = 0.0.28
 
 BASE = thorn
 DOCS = ../doc
 DIST = ../dist
-LOCAL = ./mu-local
-SERVER = ./mu-server
+MU_SHELL = ./mu-shell
+MU_SERVER = ./mu-server
 
 dist:
 	@install -d $(BASE)
@@ -26,8 +26,8 @@ dist:
 
 	@install -m 644 $(DIST)/thorn.l $(BASE)/$(BASE)
 
-	@install -m 755 $(LOCAL) $(BASE)/bin
-	@install -m 755 $(SERVER) $(BASE)/bin
+	@install -m 755 $(MU_SHELL) $(BASE)/bin
+	@install -m 755 $(MU_SERVER) $(BASE)/bin
 	@install -m 755 ./thorn.sh $(BASE)/bin/thorn
 
 	@install -d $(BASE)/doc/html
@@ -38,4 +38,4 @@ dist:
 	@rm -rf $(BASE)
 
 clean:
-	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(LOCAL) $(SERVER)
+	@rm -rf $(BASE)-$(VERSION).tgz $(BASE) $(MU_SHELL) $(MU_SERVER)

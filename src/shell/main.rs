@@ -83,7 +83,7 @@ fn options(mut argv: Vec<String>) -> Option<Vec<OptDef>> {
 }
 
 fn usage() {
-    println!("mu-local: {}: [-h?pvcelq] [file...]", Mu::VERSION);
+    println!("mu-shell: {}: [-h?pvcelq] [file...]", Mu::VERSION);
     println!("?: usage message");
     println!("h: usage message");
     println!("c: [name:value,...]");

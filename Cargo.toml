@@ -5,12 +5,12 @@ edition = "2021"
 authors = ["me <putnamjm.design@gmail.com>"]
 
 [[bin]]
-name = "mu-local"
-path = "src/runtime/local/main.rs"
+name = "mu-shell"
+path = "src/shell/main.rs"
 
 [[bin]]
 name = "mu-server"
-path = "src/runtime/server/main.rs"
+path = "src/server/main.rs"
 
 [lib]
 name = "mu"

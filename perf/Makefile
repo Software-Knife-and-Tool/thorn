@@ -88,19 +88,19 @@ summary/current:
 memcheck:
 	@valgrind --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=10 \
 		--leak-resolution=med --show-leak-kinds=definite \
-		../dist/mu-local -p      \
+		../dist/mu-shell -p      \
 		    -q $(VALGRIND) > memcheck.report 2>&1 || true
 
 callgrind:
 	@valgrind --tool=callgrind     	\
-		../dist/mu-local -p      \
+		../dist/mu-shell -p      \
 		    -q $(VALGRIND) > callgrind.report 2>&1 || true
 
 	@callgrind_annotate --auto=yes callgrind.out.* >> callgrind.report
 
 cachegrind:
 	@valgrind --tool=cachegrind	\
-		../dist/mu-local -p      \
+		../dist/mu-shell -p      \
 		    -q $(VALGRIND) > cachegrind.report 2>&1 || true
 
 clean:

@@ -91,7 +91,7 @@ while getopts "$optspec" optchar; do
                     usage
                     ;;
                 version)
-                    $BASE/bin/mu-local -v
+                    $BASE/bin/mu-shell -v
                     echo
                     exit 2
                     ;;
@@ -121,4 +121,4 @@ len="${#@}"
 for (( i=${OPTIND}; i<="${#@}"; i++ )); do SOURCES+=" \"${!i}\"" ; done
 
 export THORN_LOAD_LIST=SOURCES
-eval $BASE/bin/mu-local $CORE_FILES -q "\(core:%init-core-ns\)" $OPTIONS # $BASE/thorn/thorn.l ${SOURCES[@]}
+eval $BASE/bin/mu-shell $CORE_FILES -q "\(core:%init-core-ns\)" $OPTIONS # $BASE/thorn/thorn.l ${SOURCES[@]}

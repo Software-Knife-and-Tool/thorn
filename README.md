@@ -258,9 +258,9 @@ The  `perf`  makefile offers some development options.
 The *thorn* binaries, libraries, and source files are installed in `/opt/thorn`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `core` and `preface` library sources.
 
 ```
-mu-local		local runtime binary, minimal listener
+mu-shell		shell runtime binary, stdio listener
 mu-server		server runtime, socket listener
-thorn			shell script for running the core listener with mu-local
+thorn			shell script for running the prelude listener with mu-shell
 ```
 
 
@@ -324,8 +324,8 @@ Usage: (mu-server has similar options)
 
 ```
 
-mu-local -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
-mu-local -c "npages:1024,gcmode:auto"	default configuration
+mu-shell -c "npages:256,gcmode:none"	256 heap pages, garbage collection disabled
+mu-shell -c "npages:1024,gcmode:auto"	default configuration
 
 thorn --config="npages:4096,gcmode:demand"
 										 4096 pages, garbage collection runs on demand
