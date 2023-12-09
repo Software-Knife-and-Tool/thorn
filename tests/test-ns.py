@@ -13,10 +13,10 @@ def runtest(line, group, test, expected):
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
-    if ns == 'core':
+    if ns == 'prelude':
         proc = subprocess.Popen(['../dist/mu-shell',
-                                 '-l../dist/core.l',
-                                 '-q (core:%init-core-ns)',
+                                 '-l../dist/prelude.l',
+                                 '-q (prelude:%init-ns)',
                                  '-p',
                                  '-e' + test],\
                                 stdout=subprocess.PIPE,\

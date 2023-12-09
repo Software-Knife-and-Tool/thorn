@@ -87,12 +87,9 @@ The runtime implements 64 bit tagged pointers, is available as a crate , extends
 
 The *thorn* 2-LISP system is organized as a stack of compilers, culminating in the *thorn-eth* native code compiler/system builder.
 
-The *core* library provides *rest* lambdas, closures, expanded struct types, *defun/defconst/defmacro* and a reader/compiler for those forms.
-
-The *preface* library extends *core* with various lexical binding forms, *cond/and/or/progn*, and a library loading facility.
+The *prelude* library provides *rest* lambdas, closures, expanded struct types, *defun/defmacro* and a reader/compiler for those forms.
 
 Optional libraries provide a variety of enhancements and services, including Common LISP macros and binding special forms.
-
 
 
 #### Viewing the documentation
@@ -185,7 +182,7 @@ The `tests` makefile has additional facilities for development. The `help` targe
     namespaces - list namespaces
     commit - create test summary
     tests - tests in $NS
-    mu core - run all tests in namespace, raw output
+    mu | prelude - run all tests in namespace, raw output
     test - run single test in $NS/$TEST
     summary - run all tests in all namespaces and print summary
     
@@ -201,7 +198,7 @@ Metrics include the average amount of time (in microsconds) taken for an individ
 
 The **NTESTS** environment variable (defaults to 20) controls how many passes are included in a single test run.
 
-On a modern Core I7 CPU at 3+ GHz, the default perf tests take approximately four minutes of elapsed time for both the *mu* and *core* namespaces.
+On a modern Core I7 CPU at 3+ GHz, the default perf tests take approximately four minutes of elapsed time for both the *mu* and *prelude* namespaces.
 
 ```
 % make -C perf base
@@ -255,7 +252,7 @@ The  `perf`  makefile offers some development options.
 
 ------
 
-The *thorn* binaries, libraries, and source files are installed in `/opt/thorn`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `core` and `preface` library sources.
+The *thorn* binaries, libraries, and source files are installed in `/opt/thorn`. The `bin` directory contains the binaries and shell scripts for running the system. A copy of the `mu` crate is included in `/opt/thorn/thorn` along with the `prelude` library sources.
 
 ```
 mu-shell		shell runtime binary, stdio listener
@@ -286,7 +283,7 @@ An interactive session for the extended *thorn* system is invoked by the`thorn` 
 
 ```
 % /opt/thorn/bin/thorn
-core>
+prelude>
 ```
 
 *rlwrap* makes the *thorn* and *runtime* repls much more useful, with command history and line editing.
@@ -301,10 +298,10 @@ Depending on your version of *rlwrap*, *thorn* may exhibit odd echoing behavior.
 set enable-bracketed-paste off
 ```
 
-to your `~/.inputrc` may help. If you want to run the core listener as part of an interactive session:
+to your `~/.inputrc` may help. If you want to run the prelude listener as part of an interactive session:
 
 ```
-alias ,thorn='rlwrap thorn --eval='\''(core:repl)'\'''
+alias ,thorn='rlwrap thorn --eval='\''(prelude:repl)'\'''
 ```
 
 
@@ -332,4 +329,4 @@ thorn --config="npages:4096,gcmode:demand"
   
 ```
 
-Tests shows that currently (as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *core* library and run the *core* listener. Any significant consing will likely run out of heap space in short order.
+Tests shows that currently (as of 0.0.23) 256 4k pages is about the minimum you could expect to load the *preface* library and run the listener. Any significant consing will likely run out of heap space in short order.

@@ -1,3 +1,0 @@
-(mu:type-of (core:keyword "abcd"))	:keyword
-(core:type-of (core:keyword "abcd"))	keyword
-(core:type-of (core:gensym))	symbol
