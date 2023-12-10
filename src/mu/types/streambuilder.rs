@@ -24,6 +24,7 @@ pub struct StreamBuilder {
     pub string: Option<String>,
     pub input: Option<Tag>,
     pub output: Option<Tag>,
+    pub bidir: Option<Tag>,
     pub stdin: Option<()>,
     pub stdout: Option<()>,
     pub errout: Option<()>,
@@ -36,6 +37,7 @@ impl StreamBuilder {
             string: None,
             input: None,
             output: None,
+            bidir: None,
             stdin: None,
             stdout: None,
             errout: None,
@@ -59,6 +61,11 @@ impl StreamBuilder {
 
     pub fn output(&mut self) -> &mut Self {
         self.output = Some(Symbol::keyword("output"));
+        self
+    }
+
+    pub fn bidir(&mut self) -> &mut Self {
+        self.output = Some(Symbol::keyword("bidir"));
         self
     }
 
@@ -91,12 +98,12 @@ impl StreamBuilder {
     pub fn build(&self, mu: &Mu) -> exception::Result<Stream> {
         match &self.file {
             Some(path) => match self.input {
-                Some(input) => match System::open_file(&mu.system, path, true) {
+                Some(input) => match System::open_input_file(&mu.system, path) {
                     Ok(id) => Self::stream(id, input),
                     Err(e) => Err(e),
                 },
                 None => match self.output {
-                    Some(output) => match System::open_file(&mu.system, path, false) {
+                    Some(output) => match System::open_output_file(&mu.system, path) {
                         Ok(id) => Self::stream(id, output),
                         Err(e) => Err(e),
                     },
@@ -105,16 +112,22 @@ impl StreamBuilder {
             },
             None => match &self.string {
                 Some(contents) => match self.input {
-                    Some(input) => match System::open_string(&mu.system, contents, true) {
+                    Some(input) => match System::open_input_string(&mu.system, contents) {
                         Ok(id) => Self::stream(id, input),
                         Err(e) => Err(e),
                     },
                     None => match self.output {
-                        Some(output) => match System::open_string(&mu.system, contents, false) {
+                        Some(output) => match System::open_output_string(&mu.system, contents) {
                             Ok(id) => Self::stream(id, output),
                             Err(e) => Err(e),
                         },
-                        None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
+                        None => match self.bidir {
+                            Some(bidir) => match System::open_bidir_string(&mu.system, contents) {
+                                Ok(id) => Self::stream(id, bidir),
+                                Err(e) => Err(e),
+                            },
+                            None => Err(Exception::new(Condition::Range, "open", Tag::nil())),
+                        },
                     },
                 },
                 None => match self.stdin {
