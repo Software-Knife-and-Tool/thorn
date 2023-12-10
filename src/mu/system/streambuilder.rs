@@ -12,6 +12,7 @@ pub struct StreamBuilder {
     pub string: Option<String>,
     pub input: Option<()>,
     pub output: Option<()>,
+    pub bidir: Option<()>,
 }
 
 impl StreamBuilder {
@@ -21,6 +22,7 @@ impl StreamBuilder {
             string: None,
             input: None,
             output: None,
+            bidir: None,
         }
     }
 
@@ -41,6 +43,11 @@ impl StreamBuilder {
 
     pub fn output(&mut self) -> &mut Self {
         self.output = Some(());
+        self
+    }
+
+    pub fn bidir(&mut self) -> &mut Self {
+        self.bidir = Some(());
         self
     }
 

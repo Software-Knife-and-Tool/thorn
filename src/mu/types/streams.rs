@@ -109,6 +109,8 @@ impl MuFunction for Stream {
                     StreamBuilder::new().string(arg).input().build(mu)
                 } else if st_dir.eq_(Symbol::keyword("output")) {
                     StreamBuilder::new().string(arg).output().build(mu)
+                } else if st_dir.eq_(Symbol::keyword("bidir")) {
+                    StreamBuilder::new().string(arg).bidir().build(mu)
                 } else {
                     return Err(Exception::new(Condition::Type, "open", st_dir));
                 };
