@@ -25,7 +25,7 @@ use crate::{
         map::MuFunction as _,
         r#struct::{MuFunction as _, Struct},
         stream::Stream,
-        stream_fns::MuFunction as _,
+        streams::MuFunction as _,
         symbol::{MuFunction as _, Symbol},
         vector::{MuFunction as _, Vector},
     },

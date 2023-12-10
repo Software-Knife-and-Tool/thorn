@@ -22,6 +22,12 @@ pub enum Stream {
     String(RefCell<VecDeque<u8>>),
 }
 
+pub enum StringDirection {
+    Input,
+    Output,
+    Bidir,
+}
+
 // we cannot possibly ever have this many streams open
 pub const STDIN: usize = 0x80000000;
 pub const STDOUT: usize = 0x80000001;
@@ -34,7 +40,12 @@ pub trait Core {
     fn is_file(system: &System, _: usize) -> Option<bool>;
     fn is_string(system: &System, _: usize) -> Option<bool>;
     fn open_file(_: &System, _: &str, _: bool) -> exception::Result<usize>;
-    fn open_string(_: &System, _: &str, _: bool) -> exception::Result<usize>;
+    fn open_input_file(_: &System, _: &str) -> exception::Result<usize>;
+    fn open_output_file(_: &System, _: &str) -> exception::Result<usize>;
+    fn open_string(_: &System, _: &str, _: StringDirection) -> exception::Result<usize>;
+    fn open_input_string(_: &System, _: &str) -> exception::Result<usize>;
+    fn open_output_string(_: &System, _: &str) -> exception::Result<usize>;
+    fn open_bidir_string(_: &System, _: &str) -> exception::Result<usize>;
     fn read_byte(_: &System, _: usize) -> exception::Result<Option<u8>>;
     fn write_byte(_: &System, _: usize, _: u8) -> exception::Result<Option<()>>;
 }
@@ -135,17 +146,32 @@ impl Core for System {
         Ok(index)
     }
 
-    fn open_string(system: &System, contents: &str, is_input: bool) -> exception::Result<usize> {
-        let stream = if is_input {
-            StreamBuilder::new()
+    fn open_input_file(system: &System, path: &str) -> exception::Result<usize> {
+        Self::open_file(system, path, true)
+    }
+
+    fn open_output_file(system: &System, path: &str) -> exception::Result<usize> {
+        Self::open_file(system, path, false)
+    }
+
+    fn open_string(
+        system: &System,
+        contents: &str,
+        dir: StringDirection,
+    ) -> exception::Result<usize> {
+        let stream = match dir {
+            StringDirection::Input => StreamBuilder::new()
                 .string(contents.to_string())
                 .input()
-                .build()
-        } else {
-            StreamBuilder::new()
+                .build(),
+            StringDirection::Output => StreamBuilder::new()
                 .string(contents.to_string())
                 .output()
-                .build()
+                .build(),
+            StringDirection::Bidir => StreamBuilder::new()
+                .string(contents.to_string())
+                .bidir()
+                .build(),
         };
 
         let string = match stream {
@@ -159,6 +185,18 @@ impl Core for System {
         stream_info_ref.push(Stream::String(string));
 
         Ok(index)
+    }
+
+    fn open_input_string(system: &System, path: &str) -> exception::Result<usize> {
+        Self::open_string(system, path, StringDirection::Input)
+    }
+
+    fn open_output_string(system: &System, path: &str) -> exception::Result<usize> {
+        Self::open_string(system, path, StringDirection::Output)
+    }
+
+    fn open_bidir_string(system: &System, path: &str) -> exception::Result<usize> {
+        Self::open_string(system, path, StringDirection::Bidir)
     }
 
     fn get_string(system: &System, index: usize) -> Option<String> {

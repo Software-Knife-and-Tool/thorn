@@ -31,7 +31,7 @@ use futures::executor::block_on;
 // stream struct
 pub struct Stream {
     pub stream_id: Tag, // system stream id (fixnum)
-    pub direction: Tag, // :input | :output (keyword)
+    pub direction: Tag, // :input | :output | :bidir (keyword)
     pub eof: Tag,       // end of file flag (bool)
     pub unch: Tag,      // pushbask for input streams (() | character tag)
 }
@@ -150,7 +150,10 @@ impl Core for Stream {
         let image = Self::to_image(mu, stream);
 
         match Tag::type_of(image.direction) {
-            Type::Keyword if image.direction.eq_(Symbol::keyword("input")) => {
+            Type::Keyword
+                if image.direction.eq_(Symbol::keyword("input"))
+                    || image.direction.eq_(Symbol::keyword("bidir")) =>
+            {
                 if !image.unch.null_() {
                     false
                 } else {
