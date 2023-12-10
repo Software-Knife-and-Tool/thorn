@@ -60,13 +60,15 @@
 ;;;
 (mu:intern :prelude "%symbol-macro-expand"
    (:lambda (symbol)
-     (:if (prelude:uninternedp symbol)
-          ((:lambda (sym)
-             (:if sym
-                  (mu:eval (prelude:symbol-value sym))
-                  symbol))
-           (prelude:%get-symbol-macro symbol))
-          symbol)))
+     (:if (prelude:%orf (prelude:null symbol) (prelude:keywordp symbol))
+          symbol
+          (:if (prelude:uninternedp symbol)
+               ((:lambda (sym)
+                  (:if sym
+                       (mu:eval (prelude:symbol-value sym))
+                       symbol))
+                (prelude:%get-symbol-macro symbol))
+               symbol))))
 
 (mu:intern :prelude "%get-symbol-macro"
    (:lambda (symbol)
