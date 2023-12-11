@@ -9,17 +9,17 @@
 ;;;
 ;;; [*exception descriptor*] #s(:except cond value source reason env)
 ;;;
-;;; cond:    condition type symbol
+;;; cond:   condition type symbol
 ;;; value:  exception raised on value
-;;; source:  function designator, usually a symbol
-;;; reason:  extended condition, usually a string
-;;; env:     dynamic environment, list of frames
+;;; source: function designator, usually a symbol
+;;; reason: extended condition, usually a string
+;;; env:    dynamic environment, list of frames
 ;;;
 (mu:intern :prelude "exceptp"
    (:lambda (ex)
       (mu:eq (prelude:type-of ex) 'except)))
 
-(mu:intern :prelude "make-except"
+(mu:intern :prelude "%make-except"
    (:lambda (cond value source reason env)
       (prelude:%make-type "except"
         (prelude:%pair-list
@@ -35,7 +35,7 @@
            (prelude:%type-ref prop except)
            (prelude:raise prop 'prelude:%except-prop "not an except property"))))
 
-(mu:intern :prelude "exceptf"
+(mu:intern :prelude "%exceptf"
    (:lambda (stream format-string printenv except)
      ((:lambda (cond value source reason env)
          (:if (prelude:null format-string)
@@ -64,7 +64,7 @@
       (:lambda (value condition source)
          (:if (mu:eq condition :except)
               (prelude:apply handler (mu:cons value ()))
-              (prelude:apply handler `(,(prelude:make-except
+              (prelude:apply handler `(,(prelude:%make-except
                                       condition
                                       value
                                       source
@@ -75,17 +75,19 @@
 ;;;
 ;;; exception flavors
 ;;;
+(mu:intern :prelude "make-exception" prelude:%make-except)
+
 (mu:intern :prelude "error"
    (:lambda (format-string value)
       (prelude:format mu:err-out format-string (mu:cons value ()))
       (mu:raise
-       (prelude:make-except :error value :error "" (mu:frames))
+       (prelude:%make-except :error value :error "" (mu:frames))
        :except)))
 
 (mu:intern :prelude "raise"
    (:lambda (value source reason)
       (mu:raise
-       (prelude:make-except :error value source reason (mu:frames))
+       (prelude:%make-except :error value source reason (mu:frames))
        :except)))
 
 (mu:intern :prelude "warn"
