@@ -46,7 +46,9 @@
                      (mu:open :string :input init)
                      (:if (mu:eq dir :output)
                           (mu:open :string :output init)
-                          (prelude:raise dir 'prelude:make-string-stream "not a direction keyword")))
+                          (:if (mu:eq dir :bidir)
+                               (mu:open :string :bidir init)
+                               (prelude:raise dir 'prelude:make-string-stream "not a direction keyword"))))
                 (prelude:raise dir 'prelude:make-string-stream "not a direction keyword"))
            (prelude:raise init 'prelude:make-string-stream "not a string initializer"))))
 
