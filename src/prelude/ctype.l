@@ -6,7 +6,7 @@
 ;;;
 (mu:intern :prelude "%types-ns" (mu:make-ns :%types))
 
-(mu:intern :prelude "prelude-type-p"
+(mu:intern :prelude "%prelude-type-p"
    (:lambda (value)
       (:if (prelude:structp value)
            (mu:eq :<type> (mu:st-type value))
@@ -77,7 +77,7 @@
 ;;;
 (mu:intern :prelude "%type-ref"
    (:lambda (prop-name struct)
-      (:if (prelude:prelude-type-p struct)
+      (:if (prelude:%prelude-type-p struct)
            (:if (prelude:keywordp prop-name)
                 (prelude:%assoc prop-name (mu:sv-ref (mu:st-vec struct) 1))
                 (prelude:raise struct 'prelude:%type-ref "not a prelude type"))

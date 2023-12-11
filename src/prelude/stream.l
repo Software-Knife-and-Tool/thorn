@@ -147,7 +147,9 @@
       (prelude:%read-stream-designator designator))))
 
 (mu:intern :prelude "write"
-   (:lambda (value escape designator)
+   (:lambda (object escape designator)
       ((:lambda (stream)
-          (mu:write value escape stream))  
+          (:if (prelude:%andf (prelude:vectorp object) (prelude:%prelude-type-p object))
+               (prelude:%vector-write object escape stream)
+               (mu:write object escape stream)))
       (prelude:%read-stream-designator designator))))

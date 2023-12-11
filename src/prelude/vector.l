@@ -12,7 +12,7 @@
 
 (mu:intern :prelude "bit-vector-p"
    (:lambda (vector)
-     (:if (prelude:prelude-type-p vector)
+     (:if (prelude:%prelude-type-p vector)
           (:if (mu:eq 'vector (prelude:type-of vector))
                (prelude:not (prelude:null (prelude:%vector-prop :bitvec vector)))
                ())
@@ -20,7 +20,7 @@
 
 (mu:intern :prelude "vector-displaced-p"
    (:lambda (vector)
-     (:if (prelude:prelude-type-p vector)
+     (:if (prelude:%prelude-type-p vector)
           (:if (mu:eq 'vector (prelude:type-of vector))
                (prelude:%vector-prop :disp vector)
                ())
