@@ -6,26 +6,22 @@
 ;;;
 
 ;;;
-;;; namespace functions
+;;; namespace implementation
 ;;;
 (mu:intern :prelude "namespacep"
    (:lambda (ns)
       (mu:eq (prelude:type-of ns) 'namespace)))
 
-(mu:intern :prelude "make-namespace"
+(mu:intern :prelude "%make-namespc"
    (:lambda (name uses)
-      (:if (prelude:stringp name)
-           (:if (prelude:listp uses)
-                (prelude:%make-type "namespc"
-                  (prelude:%pair-list
-                   `(:name    ,name
-                     :intern  ,(mu:make-ns)
-                     :extern  ,(mu:make-ns)
-                     :ch-mac  ,(mu:make-ns)
-                     :sy-mac  ,(mu:make-ns)
-                     :uses    ,uses)))
-                (prelude:raise uses 'prelude:make-namespace "not a uses list"))
-           (prelude:raise name 'prelude:make-namespace "not a name string"))))
+     (prelude:%make-type "namespc"
+        (prelude:%pair-list
+         `(:name    ,name
+           :intern  ,(mu:make-ns)
+           :extern  ,(mu:make-ns)
+           :ch-mac  ,(mu:make-ns)
+           :sy-mac  ,(mu:make-ns)
+           :uses    ,uses)))))
 
 (mu:intern :prelude "%namespace-prop"
    (:lambda (prop namespace)
@@ -35,6 +31,17 @@
             '(:name :intern :extern :ch-mac :rd-mac :sy-mac :uses))
            (prelude:%type-ref prop namespace)
            (prelude:raise prop 'prelude:%namespace-prop "not a namespace property"))))
+
+;;;
+;;; namespace functions
+;;;
+(mu:intern :prelude "make-namespace"
+   (:lambda (name uses)
+      (:if (prelude:stringp name)
+           (:if (prelude:listp uses)
+                (prelude:%make-namespc name uses)
+                (prelude:raise uses 'prelude:make-namespace "not a uses list"))
+           (prelude:raise name 'prelude:make-namespace "not a name string"))))
 
 (mu:intern :prelude "intern"
    (:lambda (symbol value)          

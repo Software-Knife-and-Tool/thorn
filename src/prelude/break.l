@@ -32,7 +32,7 @@
 (mu:intern :prelude "break"
    (:lambda (except)
      (prelude:format :t ";;; entering break loop with exception~%" ())
-     (prelude:exceptf mu:std-out ";;; ~A on ~A by ~S, ~A~%" () except)
+     (prelude:%exceptf :t ";;; ~A on ~A by ~S, ~A~%" () except)
      (prelude:format :t ";;; :h for commands~%" ())
      (mu:fix
       (:lambda (loop)
@@ -56,7 +56,7 @@
                                  (mu:exit 0)
                                  (:if (mu:eq form :e)
                                       ((:lambda ()
-                                          (prelude:exceptf mu:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
+                                          (prelude:%exceptf mu:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)
                                           (prelude:null loop)))
                                       (:if (mu:eq form :r)
                                            loop
