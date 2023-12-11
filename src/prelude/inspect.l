@@ -8,7 +8,7 @@
    (:lambda (obj)
       ((:lambda (view)
           ((:lambda (tags)
-             (mu:make-st :inspect `(function ,(mu:hp-size obj) ,tags)))
+             (mu:struct :inspect `(function ,(mu:hp-size obj) ,tags)))
            `(,(mu:cons :arity (mu:sv-ref view 0))
              ,(mu:cons :body (mu:sv-ref view 1)))))
        (mu:view obj))))
@@ -17,7 +17,7 @@
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)
-            (mu:make-st :inspect `(:<type> ,(mu:hp-size obj) ,tags)))
+            (mu:struct :inspect `(:<type> ,(mu:hp-size obj) ,tags)))
           `(,(mu:cons :type (mu:sv-ref (mu:st-vec obj) 0))
             ,(mu:cons :values (mu:sv-ref (mu:st-vec obj) 1)))))
       (mu:view obj))))
@@ -26,7 +26,7 @@
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (mu:make-st :inspect `(struct ,(mu:hp-size obj) ,tags)))
+            (mu:struct :inspect `(struct ,(mu:hp-size obj) ,tags)))
           `(,(mu:cons :type (mu:st-type obj))
             ,(mu:cons :values (mu:st-vec obj)))))
       (mu:view obj))))
@@ -35,7 +35,7 @@
    (:lambda (obj)
      ((:lambda (view)
          ((:lambda (tags)  
-            (mu:make-st :inspect `(symbol ,(mu:hp-size obj) ,tags)))
+            (mu:struct :inspect `(symbol ,(mu:hp-size obj) ,tags)))
           `(,(mu:cons :ns (mu:sv-ref view 0))
             ,(mu:cons :name (mu:sv-ref view 1))
             ,(mu:cons :value (mu:sv-ref view 2)))))
@@ -43,19 +43,19 @@
 
 (mu:intern :prelude "%inspect-const"
    (:lambda (obj)
-     (mu:make-st :inspect `(,(prelude:type-of obj) ,(mu:hp-size obj) ()))))
+     (mu:struct :inspect `(,(prelude:type-of obj) ,(mu:hp-size obj) ()))))
 
 (mu:intern :prelude "%inspect-vector"
    (:lambda (obj)
      ((:lambda (tags)          
-         (mu:make-st :inspect `(vector ,(mu:hp-size obj) ,tags)))
+         (mu:struct :inspect `(vector ,(mu:hp-size obj) ,tags)))
       `(,(mu:cons :type (mu:sv-type obj))
         ,(mu:cons :length (mu:sv-len obj))))))
 
 (mu:intern :prelude "%inspect-cons"
    (:lambda (obj)
      ((:lambda (tags)          
-         (mu:make-st :inspect `(cons ,(mu:hp-size obj) ,tags)))
+         (mu:struct :inspect `(cons ,(mu:hp-size obj) ,tags)))
       `(,(mu:cons :car (mu:car obj))
         ,(mu:cons :cdr (mu:cdr obj))))))
 
@@ -66,7 +66,7 @@
           (:if (prelude:structp loop)
                loop
                (:if (prelude:null loop)
-                    (mu:make-st :inspect `(unknown 0 ()))
+                    (mu:struct :inspect `(unknown 0 ()))
                     ((:lambda (predicate fn)
                        (:if (mu:apply predicate `(,value))
                             (mu:apply fn `(,value))

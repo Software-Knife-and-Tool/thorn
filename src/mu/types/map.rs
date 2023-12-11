@@ -186,15 +186,11 @@ impl MuFunction for Mu {
     fn mu_make_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("mp-get".to_string(), &[Type::List], fp) {
+        fp.value = match mu.fp_argv_check("map".to_string(), &[Type::List], fp) {
             Ok(_) => {
                 for cons in ConsIter::new(mu, list) {
                     if Tag::type_of(Cons::car(mu, cons)) != Type::Cons {
-                        return Err(Exception::new(
-                            Condition::Type,
-                            "make-mp",
-                            Cons::car(mu, cons),
-                        ));
+                        return Err(Exception::new(Condition::Type, "map", Cons::car(mu, cons)));
                     }
                 }
 
@@ -210,13 +206,13 @@ impl MuFunction for Mu {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("mp-get".to_string(), &[Type::Map, Type::T], fp) {
+        fp.value = match mu.fp_argv_check("mp-ref".to_string(), &[Type::Map, Type::T], fp) {
             Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
                 match Map::map_ref(mu, Fixnum::as_i64(cache_id) as usize, key) {
                     Some(value) => value,
-                    None => return Err(Exception::new(Condition::Range, "mp-get", key)),
+                    None => return Err(Exception::new(Condition::Range, "mp-ref", key)),
                 }
             }
             Err(e) => return Err(e),

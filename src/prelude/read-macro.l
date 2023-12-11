@@ -37,7 +37,7 @@
    (:lambda (ch stream)
       ((:lambda (type)
           (:if (prelude:keywordp type)
-               (mu:make-sv type (prelude:%read-list #\( stream))
+               (mu:vector type (prelude:%read-list #\( stream))
                (prelude:raise type 'prelude:%read-sharp-vector "not a type keyword")))
           (prelude:%read stream))))
 
@@ -81,7 +81,7 @@
                  (:if (prelude:consp byte-descriptor)
                       ((:lambda (length byte)
                          (prelude:%make-vector
-                          (mu:make-sv :byte (prelude:reverse (mu:cons byte loop)))
+                          (mu:vector :byte (prelude:reverse (mu:cons byte loop)))
                           ()
                           (mu:cons (mu:fx-add length (mu:fx-mul 8 (mu:length loop))) ())))
                        (mu:car byte-descriptor)
@@ -98,7 +98,7 @@
    (:lambda (ch stream)
      ((:lambda (symbol)
           (:if (mu:eq :symbol (mu:type-of symbol))
-               (mu:make-sy (mu:sy-name symbol))
+               (mu:symbol (mu:sy-name symbol))
                (prelude:raise symbol 'prelude:%read-sharp-symbol "not a symbol")))
        (prelude:%read-atom ch stream))))
 
@@ -147,7 +147,7 @@
 ;;;
 ;;; list reader
 ;;;
-(mu:intern :prelude "%read-list-eol%" (mu:make-sy "eol"))
+(mu:intern :prelude "%read-list-eol%" (mu:symbol "eol"))
 
 (mu:intern :prelude "%read-list-eol"
    (:lambda (ch stream)
@@ -245,14 +245,14 @@
               (:if macro-symbol
                    (prelude:symbol-value macro-symbol)
                    ()))
-           (mu:ns-find prelude:%char-macro-ns% (mu:make-sv :char (mu:cons char ()))))
+           (mu:ns-find prelude:%char-macro-ns% (mu:vector :char (mu:cons char ()))))
           (prelude:raise char 'prelude:get-macro-character "not a character"))))
 
 (mu:intern :prelude "set-macro-character"
    (:lambda (char fn non-terminating)
       (:if (prelude:charp char)
          (:if (prelude:functionp fn)
-              (mu:intern prelude:%char-macro-ns% (mu:make-sv :char (mu:cons char ())) (mu:cons fn non-terminating))
+              (mu:intern prelude:%char-macro-ns% (mu:vector :char (mu:cons char ())) (mu:cons fn non-terminating))
               (prelude:raise fn 'prelude:set-macro-character "not a function"))
          (prelude:raise char 'prelude:set-macro-character "not a character"))
       :t))

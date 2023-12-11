@@ -225,7 +225,7 @@ impl MuFunction for Struct {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("make-st".to_string(), &[Type::Keyword, Type::List], fp) {
+        fp.value = match mu.fp_argv_check("struct".to_string(), &[Type::Keyword, Type::List], fp) {
             Ok(_) => {
                 let mut vec = Vec::new();
                 for cons in ConsIter::new(mu, list) {

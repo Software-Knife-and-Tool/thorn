@@ -17,7 +17,7 @@
 (mu:sv-len #(:float 1.0 2.0 -3.0))	3
 (mu:sv-ref #(:float 1.0 2.0 -3.0) 1)	2.0000
 (mu:sv-type #(:float 1.0 2.0 -3.0))	:float
-(mu:make-sv :byte '(1 2 3))	#(:byte 1 2 3)
-(mu:make-sv :t '(1 2 3))	#(:t 1 2 3)
-(mu:make-sv :fixnum '(1 2 3))	#(:fixnum 1 2 3)
-(mu:make-sv :float '(1.0 2.0 -3.0))	#(:float 1.0000 2.0000 -3.0000)
+(mu:vector :byte '(1 2 3))	#(:byte 1 2 3)
+(mu:vector :t '(1 2 3))	#(:t 1 2 3)
+(mu:vector :fixnum '(1 2 3))	#(:fixnum 1 2 3)
+(mu:vector :float '(1.0 2.0 -3.0))	#(:float 1.0000 2.0000 -3.0000)

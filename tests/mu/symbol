@@ -9,4 +9,4 @@
 (mu:sy-ns :nil)	:nil
 (mu:sy-val 'mu:std-in)	#<stream: id: 2147483648>
 (mu:keyword "abcde")	:abcde
-(mu:make-sy "abcde")	abcde
+(mu:symbol "abcde")	abcde
