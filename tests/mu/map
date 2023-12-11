@@ -1,10 +1,10 @@
-(mu:type-of mu:make-mp)	:func
+(mu:type-of mu:map)	:func
 (mu:type-of mu:mp-has)	:func
 (mu:type-of mu:mp-list)	:func
 (mu:type-of mu:mp-ref)	:func
 (mu:type-of mu:mp-size)	:func
-(mu:type-of (mu:make-mp '((1 . 2))))	:map
-(mu:mp-size (mu:make-mp '((1 . 2))))	1
-(mu:mp-ref (mu:make-mp '((1 . 2))) 1)	2
-(mu:mp-has (mu:make-mp '((1 . 2))) 1)	:t
-(mu:mp-list (mu:make-mp '((1 . 2))))	((1 . 2))
+(mu:type-of (mu:map '((1 . 2))))	:map
+(mu:mp-size (mu:map '((1 . 2))))	1
+(mu:mp-ref (mu:map '((1 . 2))) 1)	2
+(mu:mp-has (mu:map '((1 . 2))) 1)	:t
+(mu:mp-list (mu:map '((1 . 2))))	((1 . 2))

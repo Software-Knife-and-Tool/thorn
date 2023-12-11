@@ -13,7 +13,7 @@ pub fn _listener(system: &System, _config: &str) {
         .eval(&"(mu:open :string :output \"\")".to_string())
         .unwrap();
 
-    let eof_value = system.eval(&"(mu:make-sy \"eof\")".to_string()).unwrap();
+    let eof_value = system.eval(&"(mu:symbol \"eof\")".to_string()).unwrap();
 
     loop {
         match mu.read(mu.std_in(), true, eof_value) {

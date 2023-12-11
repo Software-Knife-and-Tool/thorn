@@ -32,7 +32,7 @@
 (mu:view 'mu:eq)	#(:t :mu eq #<:function mu: [req:2, tag:0]>)
 (mu:view mu:eq)	#(:t 2 0)
 (mu:view mu:std-in)	#(:t 2147483648 :input :nil :nil)
-(mu:view (mu:make-mp '((1 . 2))))	#(:t 0 ((1 . 2)))
+(mu:view (mu:map '((1 . 2))))	#(:t 0 ((1 . 2)))
 (mu:hp-size ())	8
 (mu:hp-size :keyword)	8
 (mu:hp-size #\a)	8

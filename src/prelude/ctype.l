@@ -23,7 +23,7 @@
           (:if (prelude:listp properties)
                ((:lambda (symbol)
                    (:if (prelude:null symbol)
-                        (mu:intern :%types str (mu:make-st :<type> (prelude:%list-2 str properties)))
+                        (mu:intern :%types str (mu:struct :<type> (prelude:%list-2 str properties)))
                         (prelude:raise symbol 'prelude:define-type "type symbol bound")))
                 (mu:ns-find :%types str))
                (prelude:raise properties 'prelude:define-type "not a property list")))
@@ -70,7 +70,7 @@
                 (mu:sv-ref (mu:st-vec (mu:sy-val type-symbol)) 1)))
             property-values))
         (mu:ns-find prelude:%types-ns name))
-       (mu:make-st :<type> `(,name ,property-values))))
+       (mu:struct :<type> `(,name ,property-values))))
 
 ;;;
 ;;; returns () if not found
