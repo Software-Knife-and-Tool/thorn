@@ -6,7 +6,7 @@
 ;;;
 (mu:intern :prelude "environmentp"
    (:lambda (env)
-      (:if (prelude:prelude-type-p env)
+      (:if (prelude:%prelude-type-p env)
            (mu:eq 'env (prelude:type-of env))
            ())))
 

@@ -7,7 +7,7 @@
 ;;;
 ;;; predicates
 ;;;
-(mu:intern :prelude "prelude-function-p"
+(mu:intern :prelude "%prelude-function-p"
    (:lambda (fn)
       (mu:eq 'funct (prelude:type-of fn))))
 

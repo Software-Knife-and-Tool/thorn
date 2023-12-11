@@ -23,7 +23,7 @@ prelude    backquote      total: 20       pass: 15       fail: 4        exceptio
 prelude    boole          total: 16       pass: 16       fail: 0        exceptions: 0       
 prelude    closure        total: 1        pass: 1        fail: 0        exceptions: 0       
 prelude    compile        total: 22       pass: 22       fail: 0        exceptions: 0       
-prelude    prelude        total: 19       pass: 19       fail: 0        exceptions: 0       
+prelude    prelude        total: 18       pass: 18       fail: 0        exceptions: 0       
 prelude    exception      total: 7        pass: 7        fail: 0        exceptions: 0       
 prelude    fixnum         total: 19       pass: 19       fail: 0        exceptions: 0       
 prelude    format         total: 15       pass: 15       fail: 0        exceptions: 0       
@@ -37,5 +37,5 @@ prelude    symbol         total: 3        pass: 3        fail: 0        exceptio
 prelude    types          total: 44       pass: 44       fail: 0        exceptions: 0       
 prelude    vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-prelude                   total: 406      pass: 401      fail: 4        exceptions: 1         
+prelude                   total: 405      pass: 400      fail: 4        exceptions: 1         
 

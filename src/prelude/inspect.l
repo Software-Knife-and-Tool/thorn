@@ -73,7 +73,7 @@
                             (mu:cdr loop)))
                      (mu:car (mu:car loop))
                      (mu:cdr (mu:car loop))))))
-       `(,(mu:cons prelude:prelude-type-p prelude:%inspect-type)
+       `(,(mu:cons prelude:%prelude-type-p prelude:%inspect-type)
          ,(mu:cons prelude:charp prelude:%inspect-const)
          ,(mu:cons prelude:consp prelude:%inspect-cons)
          ,(mu:cons prelude:fixnump prelude:%inspect-const)
