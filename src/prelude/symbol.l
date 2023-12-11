@@ -48,24 +48,23 @@
 ;;; utilities
 ;;;
 (mu:intern :prelude "%gensym-counter"
-   (mu:open :string :output "0"))
+   (mu:open :string :bidir "0"))
 
 (mu:intern :prelude "gensym"
    (:lambda ()
       ((:lambda (counter)
           (mu:write (prelude:1+ counter) () prelude:%gensym-counter)
           (mu:make-sy (prelude:format () "g~X" `(,counter))))
-       (prelude:read-string (mu:get-str prelude:%gensym-counter) () ()))))
+       (mu:read prelude:%gensym-counter () ()))))
 
 (mu:intern :prelude "genkeyword"
    (:lambda (prefix)
       (:if (prelude:%orf (prelude:null prefix) (prelude:charp prefix))
            ((:lambda (counter)
               (mu:write (prelude:1+ counter) () prelude:%gensym-counter)
-              ((:lambda (keyword-name)
-                 (mu:read (mu:open :string :input keyword-name) () ()))
+              (mu:keyword
                (:if (prelude:charp prefix)
-                    (prelude:format () ":~A~X" `(,prefix ,counter))
-                    (prelude:format () ":<~X>" `(,counter)))))
-            (prelude:read-string (mu:get-str prelude:%gensym-counter) () ()))
-           (prelude:raise name 'prelude:genkeyword "not a legal name"))))
+                    (prelude:format () "~A~X" `(,prefix ,counter))
+                    (prelude:format () "<~X>" `(,counter)))))
+            (mu:read prelude:%gensym-counter () ()))
+           (prelude:raise name 'prelude:genkeyword "not a legal prefix"))))

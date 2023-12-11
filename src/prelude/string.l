@@ -211,10 +211,13 @@
 ;;;
 ;;; read from string
 ;;;
+(mu:intern :prelude "%read-string%" (mu:open :string :bidir ""))
 (mu:intern :prelude "read-string"
    (:lambda (str eof-error eof-value)
       (:if (prelude:stringp str)
-           (mu:read (mu:open :string :input str) eof-error eof-value)
+           ((:lambda ()
+              (mu:write str () prelude:%read-string%) 
+              (mu:read prelude:%read-string% eof-error eof-value)))
            (prelude:raise str 'prelude:read-string "is not a string"))))
 
 ;;;
