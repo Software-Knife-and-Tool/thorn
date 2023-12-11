@@ -114,6 +114,7 @@ pub trait Core {
     fn get_string(_: &Mu, _: Tag) -> exception::Result<String>;
     fn heap_size(_: &Mu, _: Tag) -> usize;
     fn is_eof(_: &Mu, _: Tag) -> bool;
+    fn clear_eof(mu: &Mu, stream: Tag);
     fn is_open(_: &Mu, _: Tag) -> bool;
     fn read_byte(_: &Mu, _: Tag) -> exception::Result<Option<u8>>;
     fn read_char(_: &Mu, _: Tag) -> exception::Result<Option<char>>;
@@ -162,6 +163,13 @@ impl Core for Stream {
             }
             _ => !image.eof.null_(),
         }
+    }
+
+    fn clear_eof(mu: &Mu, stream: Tag) {
+        let mut image = Self::to_image(mu, stream);
+
+        image.eof = Tag::nil();
+        Self::update(mu, &image, stream);
     }
 
     fn is_open(mu: &Mu, stream: Tag) -> bool {
@@ -339,6 +347,10 @@ impl Core for Stream {
 
         if image.direction.eq_(Symbol::keyword("input")) {
             return Err(Exception::new(Condition::Type, "wr-char", stream));
+        }
+
+        if Self::is_eof(mu, stream) {
+            Self::clear_eof(mu, stream)
         }
 
         match Tag::type_of(image.stream_id) {
