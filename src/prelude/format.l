@@ -99,7 +99,7 @@
     (mu:fix
      (:lambda (loop)
        ((:lambda (nth argl)
-          (:if (mu:eq nth (prelude:length fmt))
+          (:if (mu:eq nth (mu:sv-len fmt))
                loop
                ((:lambda (ch)
                   (:if (mu:eq ch #\~)
@@ -119,7 +119,7 @@
    (:lambda (stream format-string arg-list)
       (:if (prelude:stringp format-string)
            (:if (prelude:listp arg-list)
-                (:if (prelude:zerop (prelude:length format-string))
+                (:if (prelude:zerop (mu:sv-len format-string))
                      (:if stream
                           ""
                           ())

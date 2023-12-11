@@ -76,7 +76,7 @@
   (:lambda (ch str)
     (:if (prelude:charp ch)
          (:if (prelude:stringp str)
-              (:if (prelude:zerop (prelude:length str))
+              (:if (prelude:zerop (mu:sv-len str))
                    ()
                    ((:lambda (len)
                        (mu:fix
@@ -89,7 +89,7 @@
                                           (mu:fx-add 1 loop)))
                                 loop))
                         0))
-                    (prelude:length str)))
+                    (mu:sv-len str)))
               (prelude:raise str 'prelude:string-position "not a string"))
          (prelude:raise ch 'prelude:string-position "not a char"))))
 
@@ -100,7 +100,7 @@
   (:lambda (ch str)
     (:if (prelude:charp ch)
          (:if (prelude:stringp str)
-              (:if (prelude:zerop (prelude:length str))
+              (:if (prelude:zerop (mu:sv-len str))
                    ()
                    ((:lambda (len)
                        (mu:fix
@@ -113,7 +113,7 @@
                                           (mu:fx-add 1 loop)))
                                 loop))
                         0))
-                    (prelude:length str)))
+                    (mu:sv-len str)))
               (prelude:raise str 'prelude:string-find "not a string"))
          (prelude:raise ch 'prelude:string-find "not a char"))))
 
