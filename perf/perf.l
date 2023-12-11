@@ -36,7 +36,7 @@
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 1)) (mu:sv-ref start-vec (mu:fx-add offset 1)))
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 2)) (mu:sv-ref start-vec (mu:fx-add offset 2)))
                            (mu:fx-sub (mu:sv-ref stop-vec (mu:fx-add offset 3)) (mu:sv-ref start-vec (mu:fx-add offset 3))))
-                          (mu:make-sv :t list)))
+                          (mu:vector :t list)))
                          (mu:fx-mul n 4)))
                  (mu:car loop)
                  (mu:cdr loop))))

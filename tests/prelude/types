@@ -6,13 +6,13 @@
 ((:lambda () (prelude:define-type "test" '((:v . :t))) (prelude:%type-ref :v (prelude:%make-type "test" '((:v . 2))))))	(:v . 2)
 (prelude:typep '(1 2) :cons)	:t
 (prelude:typep 1 :fixnum)	:t
-(prelude:typep (mu:make-st :struct ()) :struct)	:t
+(prelude:typep (mu:struct :struct ()) :struct)	:t
 (prelude:typep "abc" :vector)	:t
 (prelude:typep #(:t 1 2 3) :vector)	:t
 (prelude:typep mu:std-in :stream)	:t
 (prelude:typep #\a :char)	:t
 (prelude:typep 1.024e23 :float)	:t
-(prelude:typep (mu:make-mp ()) :map)	:t
+(prelude:typep (mu:map ()) :map)	:t
 (prelude:typep :foo :keyword)	:t
 (prelude:typep 'foo :symbol)	:t
 (prelude:typep () :null)	:t

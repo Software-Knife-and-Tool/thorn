@@ -55,7 +55,7 @@ lazy_static! {
         ("await", 1, Mu::mu_await),
         ("abort", 1, Mu::mu_abort),
         // maps
-        ("make-mp", 1, Mu::mu_make_map),
+        ("map", 1, Mu::mu_make_map),
         ("mp-has", 2, Mu::mu_map_has),
         ("mp-list", 1, Mu::mu_map_items),
         ("mp-ref", 2, Mu::mu_map_ref),
@@ -111,17 +111,17 @@ lazy_static! {
         // symbols
         ("boundp", 1, Symbol::mu_boundp),
         ("keyword", 1, Symbol::mu_keyword),
-        ("make-sy", 1, Symbol::mu_symbol),
+        ("symbol", 1, Symbol::mu_symbol),
         ("sy-name", 1, Symbol::mu_name),
         ("sy-ns", 1, Symbol::mu_ns),
         ("sy-val", 1, Symbol::mu_value),
         // simple vectors
-        ("make-sv", 2, Vector::mu_make_vector),
+        ("vector", 2, Vector::mu_make_vector),
         ("sv-len", 1, Vector::mu_length),
         ("sv-ref", 2, Vector::mu_svref),
         ("sv-type", 1, Vector::mu_type),
         // structs
-        ("make-st", 2, Struct::mu_make_struct),
+        ("struct", 2, Struct::mu_make_struct),
         ("st-type", 1, Struct::mu_struct_type),
         ("st-vec", 1, Struct::mu_struct_vector),
         // streams

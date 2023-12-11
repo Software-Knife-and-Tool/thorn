@@ -29,7 +29,7 @@
 (mu:intern :prelude "make-vector"
    (:lambda (list)
      (:if (prelude:listp list)
-          (mu:make-sv (prelude:%specialized-vector-type list) list)
+          (mu:vector (prelude:%specialized-vector-type list) list)
           (prelude:raise list 'prelude:make-vector "not a list"))))
 
 (mu:intern :prelude "slice"

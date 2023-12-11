@@ -54,7 +54,7 @@
    (:lambda ()
       ((:lambda (counter)
           (mu:write (prelude:1+ counter) () prelude:%gensym-counter)
-          (mu:make-sy (prelude:format () "g~X" `(,counter))))
+          (mu:symbol (prelude:format () "g~X" `(,counter))))
        (mu:read prelude:%gensym-counter () ()))))
 
 (mu:intern :prelude "genkeyword"
