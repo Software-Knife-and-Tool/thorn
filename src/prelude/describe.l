@@ -116,7 +116,7 @@
                (mu:cdr (mu:car list)))))
        `(,(mu:cons prelude:functionp prelude:%describe-function)
          ,(mu:cons prelude:charp prelude:%describe-char)
-         ,(mu:cons prelude:prelude-type-p prelude:%describe-prelude-type)
+         ,(mu:cons prelude:%prelude-type-p prelude:%describe-prelude-type)
          ,(mu:cons prelude:structp prelude:%describe-struct)
          ,(mu:cons prelude:symbolp prelude:%describe-symbol)
          ,(mu:cons prelude:fixnump prelude:%describe-fixnum)

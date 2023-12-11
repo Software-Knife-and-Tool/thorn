@@ -18,7 +18,7 @@
 
 (mu:intern :prelude "%lambda-arg-list"
    (:lambda (function arg-list)
-      (:if (prelude:prelude-function-p function)
+      (:if (prelude:%prelude-function-p function)
            ((:lambda (rest nreqs)
                (:if (prelude:%andf rest (prelude:zerop nreqs))
                     `(mu:cons ,(prelude:%arg-list arg-list) ())
@@ -32,7 +32,7 @@
 
 (mu:intern :prelude "%quoted-lambda-arg-list"
   (:lambda (fn args)
-    (:if (prelude:prelude-function-p fn)
+    (:if (prelude:%prelude-function-p fn)
          (:if (prelude:%funct-prop :rest fn)
               (:if (prelude:%andf (prelude:%funct-prop :rest fn) (prelude:zerop (prelude:%funct-prop :arity fn)))
                    (mu:cons args ())
@@ -76,7 +76,7 @@
    (:lambda (lambda-form arg-list env)
       ((:lambda (compiled-function)
         (:if (prelude:functionp compiled-function)
-             (:if (prelude:prelude-function-p compiled-function)
+             (:if (prelude:%prelude-function-p compiled-function)
                   `(prelude:%funct-apply-quoted ,compiled-function ,(prelude:%compile-lambda-arg-list compiled-function arg-list env))
                   `(mu:apply ,compiled-function ,(prelude:%compile-arg-list arg-list env)))
              (prelude:raise compiled-function 'prelude:%compile-lambda-call "illegal function call")))
@@ -87,7 +87,7 @@
       (:if (prelude:boundp function-symbol)
            ((:lambda (function)
                (:if (prelude:functionp function)
-                    (:if (prelude:prelude-function-p function)
+                    (:if (prelude:%prelude-function-p function)
                          `(prelude:%funct-apply-quoted ,function ,(prelude:%compile-lambda-arg-list function arg-list env))
                          `(mu:apply ,function ,(prelude:%compile-arg-list arg-list env)))
                     (prelude:raise function 'prelude:%compile-symbol-call "illegal function call")))

@@ -125,7 +125,7 @@
 (mu:intern :prelude "apply"
    (:lambda (function arg-list)
      (:if (prelude:functionp function)
-          (:if (prelude:prelude-function-p function)
+          (:if (prelude:%prelude-function-p function)
                (prelude:%funct-apply function arg-list)
                (mu:apply function arg-list))
           (prelude:raise function 'prelude:apply "not a function designator"))))

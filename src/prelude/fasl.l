@@ -22,7 +22,7 @@
                loop
                (prelude:with-exception
                 (:lambda (exception)
-                     (prelude:exceptf mu:err-out "load exception: ~A~%" () exception))
+                     (prelude:%exceptf mu:err-out "load exception: ~A~%" () exception))
                 (:lambda ()
                    ((:lambda (form)
                       (:if (prelude:eof ifs)
@@ -50,7 +50,7 @@
                loop
                (prelude:with-exception
                 (:lambda (ex)
-                   (prelude:exceptf mu:err-out "compile exception: ~A on ~A by ~S ~A~%" () ex)
+                   (prelude:%exceptf mu:err-out "compile exception: ~A on ~A by ~S ~A~%" () ex)
                    loop)
                 (:lambda ()
                    ((:lambda (form)
@@ -176,7 +176,7 @@
    (:lambda (stream)
       (mu:with-ex
        (:lambda (ex)
-          (prelude:exceptf
+          (prelude:%exceptf
            mu:err-out
            "elf64-read-header exception: ~A on ~A by ~S from ~A~%"
            ()

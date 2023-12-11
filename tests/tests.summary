@@ -23,21 +23,19 @@ prelude    backquote      total: 20       pass: 15       fail: 4        exceptio
 prelude    boole          total: 16       pass: 16       fail: 0        exceptions: 0       
 prelude    closure        total: 1        pass: 1        fail: 0        exceptions: 0       
 prelude    compile        total: 22       pass: 22       fail: 0        exceptions: 0       
-prelude    prelude        total: 19       pass: 19       fail: 0        exceptions: 0       
+prelude    prelude        total: 18       pass: 18       fail: 0        exceptions: 0       
 prelude    exception      total: 7        pass: 7        fail: 0        exceptions: 0       
 prelude    fixnum         total: 19       pass: 19       fail: 0        exceptions: 0       
 prelude    format         total: 15       pass: 15       fail: 0        exceptions: 0       
 prelude    lambda         total: 23       pass: 23       fail: 0        exceptions: 0       
-prelude    list           total: 77       pass: 77       fail: 0        exceptions: 0       
+prelude    list           total: 76       pass: 76       fail: 0        exceptions: 0       
 prelude    macro          total: 13       pass: 13       fail: 0        exceptions: 0       
 prelude    reader         total: 62       pass: 62       fail: 0        exceptions: 0       
-prelude    sequence       total: 2        pass: 2        fail: 0        exceptions: 0       
 prelude    stream         total: 21       pass: 21       fail: 0        exceptions: 0       
 prelude    string         total: 20       pass: 20       fail: 0        exceptions: 0       
 prelude    symbol         total: 3        pass: 3        fail: 0        exceptions: 0       
-prelude    sort           total: 14       pass: 14       fail: 0        exceptions: 0       
 prelude    types          total: 44       pass: 44       fail: 0        exceptions: 0       
 prelude    vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-prelude                   total: 423      pass: 418      fail: 4        exceptions: 1         
+prelude                   total: 405      pass: 400      fail: 4        exceptions: 1         
 

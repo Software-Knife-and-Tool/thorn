@@ -1,6 +1,5 @@
 (mu:type-of prelude:boundp)	:func
 (mu:type-of prelude:ceiling)	:func
-(mu:type-of prelude:prelude-function-p)	:func
 (mu:type-of prelude:consp)	:func
 (mu:type-of prelude:dotted-pair-p)	:func
 (mu:type-of prelude:fixnump)	:func
