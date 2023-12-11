@@ -7,7 +7,6 @@
 (mu:type-of prelude:foldl)	:func
 (mu:type-of prelude:foldr)	:func
 (mu:type-of prelude:last)	:func
-(mu:type-of prelude:length)	:func
 (mu:type-of prelude:mapc)	:func
 (mu:type-of prelude:mapcar)	:func
 (mu:type-of prelude:mapl)	:func

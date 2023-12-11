@@ -9,8 +9,6 @@ lambda
 list
 macro
 reader
-sequence
-sort
 stream
 string
 type

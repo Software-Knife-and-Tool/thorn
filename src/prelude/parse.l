@@ -12,7 +12,7 @@
   (:lambda (digits base)
     (:if (prelude:stringp digits)
          (:if (prelude:fixnump base)
-              (:if (prelude:zerop (prelude:length digits))
+              (:if (prelude:zerop (mu:sv-len digits))
                    ()
                    ((:lambda (sign)
                        ((:lambda (integer)
@@ -27,7 +27,7 @@
                              (:if (prelude:null loop)
                                   ()
                                   ((:lambda (index acc)
-                                      (:if (mu:fx-lt (mu:fx-sub (prelude:length digits) 1) index)
+                                      (:if (mu:fx-lt (mu:fx-sub (mu:sv-len digits) 1) index)
                                            loop
                                            ((:lambda (n)
                                                (:if (prelude:null n)

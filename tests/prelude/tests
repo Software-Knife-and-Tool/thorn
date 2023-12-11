@@ -10,10 +10,8 @@ lambda
 list
 macro
 reader
-sequence
 stream
 string
 symbol
-sort
 types
 vector

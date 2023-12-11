@@ -40,8 +40,8 @@
                                (mu:fx-add 2 colon)
                                (mu:fx-add 1 colon))
                           (:if (mu:eq #\: (prelude:schar name (mu:fx-add 1 colon)))
-                               (mu:fx-add colon (mu:fx-sub (prelude:length name) colon))
-                               (mu:fx-add colon (mu:fx-sub (prelude:length name) (mu:fx-add 1 colon)))))))
+                               (mu:fx-add colon (mu:fx-sub (mu:sv-len name) colon))
+                               (mu:fx-add colon (mu:fx-sub (mu:sv-len name) (mu:fx-add 1 colon)))))))
      (prelude:string-position #\: name))))
 
 (mu:intern :prelude "%read-symbol"

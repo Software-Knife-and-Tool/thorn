@@ -31,8 +31,6 @@ PRELUDE = \
 	read-macro.l	\
 	read.l		\
 	repl.l		\
-	sequence.l	\
-	sort.l		\
 	stream.l	\
 	string.l	\
 	symbol-macro.l	\
