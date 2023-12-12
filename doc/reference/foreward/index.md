@@ -14,7 +14,7 @@ Dynamic languages for low overhead environments must be lightweight, but develop
 
 The *thorn/eth* runtime is a native code library that directly interprets *mu* kernel code. A great deal of useful work can be done directly with the limited kernel language, though it lacks the niceties of a more traditional LISP programming environment. More advanced language features require the use of the included *prelude* library. 
 
-The *preface* library provides traditional LISP forms and a collection of functional programming features like pattern matching and monads. *thorn/eth*, *prelude*, and *preface* code are human-readable and can be easily modified and extended.
+The *thorn* library provides traditional LISP forms and a collection of functional programming features like pattern matching and monads. *thorn/eth*, *prelude*, and *preface* code are human-readable and can be easily modified and extended.
 
 Questions? You can contact the author at putnamjm.design@gmail.com.
 
@@ -39,7 +39,7 @@ Questions? You can contact the author at putnamjm.design@gmail.com.
 2.10 *streams* ....................................................................................................... [2.10](2-10.streams.html)</br>
 2.11 *utilities* ......................................................................................................... [2.11](2-11.utilities.html)</br>
 2.12 *prelude symbols* .......................................................................................... [2.12](2-12.prelude-symbols.html)</br>
-**preface** ..............................................................................................................</br>
+**thorn** ................................................................................................................</br>
 **thorn/eth** ..........................................................................................................</br>
 **system** ................................................................................................................</br>
 **Appendices** ........................................................................................................</br>

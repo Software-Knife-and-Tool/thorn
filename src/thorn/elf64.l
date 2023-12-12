@@ -18,7 +18,7 @@
    bytes))
 
 (defun elf64-read (type elf64)
-  (let ((elf64-read (lambda (type stream) (funcall preface:elf64-read type stream))))
+  (let ((elf64-read (lambda (type stream) (funcall thorn:elf64-read type stream))))
     (cond
       ((eq type :half)
        (fixnum+ (read-byte elf64 t ()) (ash (read-byte elf64 t ()) 8)))
@@ -31,7 +31,7 @@
       (t (error size "elf64-read: not a legal type")))))
 
 (defun elf64-write (type n stream)
-  (let ((elf64-write (lambda (type n stream) (funcall preface:elf64-write type n stream))))
+  (let ((elf64-write (lambda (type n stream) (funcall thorn:elf64-write type n stream))))
     (cond
       ((eq type :half)
        (elf64-write-bytes stream

@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;;  metrics: preface  metrics
+;;;  metrics: thorn  metrics
 ;;;
 
 ;;;
@@ -63,7 +63,7 @@
 (defun room (verbosity)
   (if verbosity
       (progn
-        (format t ";;; eko version: ~A~%" preface::eko-version)
+        (format t ";;; eko version: ~A~%" thorn::eko-version)
         (format t ";;; automatic garbage collection is disabled~%")))
   (mapc
    (lambda (desc)
