@@ -78,8 +78,8 @@
 (mu:intern :prelude "make-exception" prelude:%make-except)
 
 (mu:intern :prelude "error"
-   (:lambda (format-string value)
-      (prelude:format mu:err-out format-string (mu:cons value ()))
+   (:lambda (format-string arg-list)
+      (prelude:format mu:err-out format-string arg-list)
       (mu:raise
        (prelude:%make-except :error value :error "" (mu:frames))
        :except)))
