@@ -7,10 +7,10 @@
 ;;; take a type and return a closure.
 ;;;
 (defun state-frame (closure)
-  (errorp-unless symbolp closure "preface::state-frame not a function")
+  (errorp-unless symbolp closure "thorn::state-frame not a function")
   (let* ((desc (core::fn-lambda-desc closure))
          (frame (car (core::lambda-closure desc))))
-    (errorp-unless (lambda (frame) (eq (type-of frame :frame))) "preface:state-frame botch")
+    (errorp-unless (lambda (frame) (eq (type-of frame :frame))) "thorn:state-frame botch")
     frame))
 
 ;;;
@@ -27,14 +27,14 @@
 ;;;       (:t (core:error cmd "unknown cmd"))))
 ;;;
 #|
-(defmacro preface::state (type value)
-  (errorp-unless symbolp type "preface::state not a type")
+(defmacro thorn::state (type value)
+  (errorp-unless symbolp type "thorn::state not a type")
   (flet ((closure (fn &rest args)
                   (let ((state value))
                     (cond
                      ((eq fn :get) state)
-                     ((eq fn :set) (env:set-env (preface::state-frame closure) 0 (car args)))
-                     (t (error fn "preface::state unknown operator"))))))
+                     ((eq fn :set) (env:set-env (thorn::state-frame closure) 0 (car args)))
+                     (t (error fn "thorn::state unknown operator"))))))
         ;;; (errorp-unless (complement fn-unclosedp) closure "is not a closure")
         closure))
 |#

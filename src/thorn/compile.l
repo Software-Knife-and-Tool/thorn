@@ -4,7 +4,7 @@
   (format t "compile-file: ~A~%" form)
   (flet ((parse (form)
                 (if (consp form)
-                    (mapcar preface:compile-form form)
+                    (mapcar thorn:compile-form form)
                     form))
          (const (form)
                 (cond
@@ -12,7 +12,7 @@
                         (boundp form)
                         (not (symbolp (symbol-value form)))
                         (not (consp (symbol-value form))))
-                   (preface:format t ";;; constant propagation: ~A ~A~%" form (symbol-value form))
+                   (thorn:format t ";;; constant propagation: ~A ~A~%" form (symbol-value form))
                    (symbol-value form))
                   (t form)))
          (review (form)
