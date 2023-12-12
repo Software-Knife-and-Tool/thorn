@@ -3,7 +3,7 @@
 #
 .PHONY: dist clean
 
-VERSION = 0.0.28
+VERSION = 0.0.27
 
 BASE = thorn
 DOCS = ../doc
