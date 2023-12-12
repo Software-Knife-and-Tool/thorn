@@ -7,11 +7,11 @@
 ;;;
 
 #|
-(core:load "/opt/thorn/thorn/preface/preface.l" ())
+(core:load "/opt/thorn/thorn/thorn/thorn.l" ())
 
-(mu:eval (core:compile '(defconst preface::require-path "/opt/thorn/lib")))
+(mu:eval (core:compile '(defconst thorn::require-path "/opt/thorn/lib")))
 
-(core:in-namespace (mu:ns "user" (mu:map-ns "preface")))
+(core:in-namespace (mu:ns "user" (mu:map-ns "thorn")))
 
 (:if (core:zerop (system:system "stat ~/.thorn > /dev/null 2>&1"))
      (core:load "~/.thorn" () ())
@@ -21,7 +21,7 @@
  (:lambda (fn) (core:load fn :t ()))
  (mu:read (mu:open :string :input (system:getenv "THORN_LOAD_LIST"))))
 
-(mu:intern (mu:find-ns "preface") :intern "thorn-version" "0.0.1")
+(mu:intern (mu:find-ns "thorn") :intern "thorn-version" "0.0.1")
 
-(preface:repl (mu:find-ns "user"))
+(thorn:repl (mu:find-ns "user"))
 |#

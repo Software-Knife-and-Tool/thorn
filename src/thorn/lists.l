@@ -2,7 +2,7 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;; preface lists
+;;; thorn lists
 ;;;
 (defun zip (list-1 list-2)
   (errorp-unless listp list-1 "zip: not a list")

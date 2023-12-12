@@ -47,14 +47,14 @@
      std-in))
 
 ;;;
-;;; preface repl
+;;; thorn repl
 ;;;
 (defun repl (ns)
   (errorp-unless namespacep ns "repl: not a namespace")
   (flet ((repl (repl)
           (with-ex
               (lambda (ex)  ;; catch exception and break
-                (print-except ex "preface:repl")
+                (print-except ex "thorn:repl")
                 (break ex)
                 (repl repl))
               (lambda ()    ;; main
@@ -80,5 +80,5 @@
                         (loop loop (read t t ()))))
                   (format t "~A> " (ns-name ns))
                   (loop loop (read t t ())))))))
-    (format t ";;; Eko Lisp ~A (preface:repl) :h for help~%" preface::eko-version)
+    (format t ";;; Eko Lisp ~A (thorn:repl) :h for help~%" thorn::eko-version)
     (repl repl)))

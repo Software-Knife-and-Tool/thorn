@@ -2,11 +2,11 @@
 ;;;  SPDX-License-Identifier: MIT
 
 ;;;
-;;;  preface: eko language
+;;;  thorn: eko language
 ;;;
-;;;  preface namespace
+;;;  thorn namespace
 ;;;
-(in-namespace (ns "preface" (find-ns "core")))
+(in-namespace (ns "thorn" (find-ns "core")))
 
 (defun identity (obj) obj)
 
@@ -52,10 +52,10 @@
   (list (list* 'lambda () body)))
 
 (defmacro when (test &rest body)
-  (preface:list 'if test (list* 'progn body)))
+  (thorn:list 'if test (list* 'progn body)))
 
 (defmacro unless (test &rest body)
-  (preface:list 'if test () (list* 'progn body)))
+  (thorn:list 'if test () (list* 'progn body)))
 
 (defmacro let (binds &rest body)
   (errorp-unless core:listp binds "let: not a binding list")
@@ -73,7 +73,7 @@
          (list 'let (list (car binds)) (core::funcall fn (list fn (cdr binds))))
          (list* 'let (list (car binds)) body)))))
 
-(defconst preface::gensym
+(defconst thorn::gensym
   (let ((genstream (make-string-stream :output "0")))
     (lambda () ;;; this becomes a closure
       ((lambda (n)
@@ -82,7 +82,7 @@
        (mu:read (make-string-stream :input (get-output-stream-string genstream)))))))
 
 (defun gensym ()
-  (core::funcall preface::gensym ()))
+  (core::funcall thorn::gensym ()))
 
 (defmacro bind-seq (pattern source &rest body)
   (errorp-unless consp pattern "bind-seq: pattern not a list")
@@ -95,19 +95,19 @@
                       (errorp-unless symbolp sym "bind-seq: not a symbol")
                       (let* ((nth (car acc))
                              (phrases (cdr acc))
-                             (phrase (list sym (preface:list 'elt source-gsym nth))))
+                             (phrase (list sym (thorn:list 'elt source-gsym nth))))
                         (cons (1- nth) (cons phrase phrases))))
                     (cons (1- (length pattern)) ())
                     pattern)))
               (cdr nths)))))
-    (list* 'let* (cons (preface:list source-gsym source) (destruct)) body)))
+    (list* 'let* (cons (thorn:list source-gsym source) (destruct)) body)))
 
 (defmacro cond (&rest clauses)
   (car
     (foldr
       (lambda (clause cond)
         ;;; (form) or (form . body)
-        (errorp-unless consp clause "preface:cond not a cons")
+        (errorp-unless consp clause "thorn:cond not a cons")
         (let ((test (car clause))
               (body (cdr clause)))
           (if body
@@ -185,7 +185,7 @@
 
 ;;; (do let-form (end-test result) . body)
 
-(defun preface::reclose (closure)
+(defun thorn::reclose (closure)
   (errorp-unless functionp closure "reclose: not a function")
   (let ((closed (core::lambda-closure (core::fn-lambda-desc closure))))
     (errorp-unless (lambda (list) (fixnum< 0 (length list))) closed "reclose environment botch")
@@ -199,7 +199,7 @@
                       (list 'let
                             (list (list name (list 'lambda lambda)))
                             (list* 'lambda lambda body))))
-          (list 'preface::reclose gsym))))
+          (list 'thorn::reclose gsym))))
 
 (defmacro letf (binds &rest body)
   (errorp-unless listp binds "letf: not a list")
