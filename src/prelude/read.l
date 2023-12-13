@@ -4,27 +4,27 @@
 ;;;
 ;;; reader
 ;;;
-(mu:intern :prelude "%reader-stream" (mu:open :string :output ""))
-(mu:intern :prelude "%reader-ns-stream" (mu:open :string :output "prelude"))
+(mu:intern :prelude "%reader-stream%" (mu:open :string :output ""))
+(mu:intern :prelude "%reader-current-ns%" (mu:open :string :bidir "prelude"))
 
-(mu:intern :prelude "in-namespace"
+(mu:intern :prelude "%in-namespace"
    (:lambda (ns)
       ((:lambda ()
           (mu:make-ns ns)
-          (prelude:%read-set-ns ns)
+          (prelude:%reader-set-ns ns)
           ns))))
 
-(mu:intern :prelude "%read-get-ns"
+(mu:intern :prelude "%reader-get-ns"
    (:lambda ()
      ((:lambda (ns)
-        (mu:write ns () prelude:%reader-ns-stream)
-        ns)
-      (prelude:get-output-stream-string prelude:%reader-ns-stream))))
+        (mu:write ns () prelude:%reader-current-ns%)
+        (mu:keyword ns))
+      (prelude:get-output-stream-string prelude:%reader-current-ns%))))
 
-(mu:intern :prelude "%read-set-ns"
+(mu:intern :prelude "%reader-set-ns"
    (:lambda (ns)
-      (prelude:get-output-stream-string prelude:%reader-ns-stream)
-      (mu:write ns () prelude:%reader-ns-stream)))
+      (prelude:get-output-stream-string prelude:%reader-current-ns%)
+      (mu:write (mu:sy-name ns) () prelude:%reader-current-ns%)))
 
 ;;;
 ;;; readtable
@@ -76,7 +76,7 @@
 ;;;
 (mu:intern :prelude "%read-atom"
   (:lambda (ch stream)
-    (prelude:write-char ch prelude:%reader-stream)
+    (prelude:write-char ch prelude:%reader-stream%)
     (mu:fix
      (:lambda (loop)
        (:if (prelude:consp loop)
@@ -89,7 +89,7 @@
                          ((:lambda (syntax-type)
                             (:if (mu:eq :const syntax-type)
                                  ((:lambda ()
-                                     (prelude:write-char ch prelude:%reader-stream)
+                                     (prelude:write-char ch prelude:%reader-stream%)
                                      (prelude:null loop)))
                                  ((:lambda ()
                                      (prelude:unread-char ch stream)
@@ -103,7 +103,7 @@
                number
                (prelude:%symbol-macro-expand (prelude:%read-symbol token))))
         (prelude:%read-number token)))
-     (prelude:get-output-stream-string prelude:%reader-stream))))
+     (prelude:get-output-stream-string prelude:%reader-stream%))))
 
 ;;;
 ;;; parser

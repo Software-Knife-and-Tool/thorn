@@ -22,8 +22,10 @@
 
 (mu:intern :prelude "%format-mapped-symbol"
    (:lambda (value)
-      ((:lambda (symbol)
-          (prelude:%orf (mu:nth 0 symbol) (mu:nth 1 symbol)))
+     ((:lambda (symbol)
+        (:if (prelude:null symbol)
+             value
+             symbol))
        (prelude:%debug-map-symbol value))))
 
 ;;;
