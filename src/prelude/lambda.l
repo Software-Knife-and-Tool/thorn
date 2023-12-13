@@ -47,7 +47,7 @@
 (mu:intern :prelude "%compile-lambda-list"
    (:lambda (lambda env)
       (:if (prelude:findl (:lambda (el) (prelude:null (mu:eq :symbol (mu:type-of el)))) lambda)
-           (prelude:raise lambda 'prelude:%compile-lambda-form "list syntax")
+           (prelude:raise lambda 'prelude:%compile-lambda-list "list syntax")
            ((:lambda (desc)
                (:if (prelude:fixnump desc)
                     (prelude:%make-lambda lambda () env)
