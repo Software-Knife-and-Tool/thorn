@@ -1,19 +1,19 @@
 #
 #  tools makefile
 #
-.PHONY: core-xref core-symbols help
+.PHONY: prelude-xref prelude-symbols help
 
 help:
-	@echo "core-xref: core cross reference"
-	@echo "core-symbols: core symbol info"
+	@echo "prelude-xref: prelude cross reference"
+	@echo "prelude-symbols: prelude symbol info"
 
-core-xref:
-	@thorn --pipe --load=./core-xref.l --quiet-eval='(core:xref \"core-xref.out\")'
-	@python3 core-xref.py core-xref.out
+prelude-xref:
+	@thorn --pipe --load=./prelude-xref.l --quiet-eval='(prelude:xref \"prelude-xref.out\")'
+	@python3 prelude-xref.py prelude-xref.out
 
-core-symbols:
-	@thorn --pipe --load=./core-symbols.l --quiet-eval='(core:symbols \"core-symbols.out\")'
-	@python3 core-symbols.py ../dist/core.l core-symbols.out
+prelude-symbols:
+	@thorn --pipe --load=./prelude-symbols.l --quiet-eval='(prelude:symbols \"prelude-symbols.out\")'
+	@python3 prelude-symbols.py ../dist/prelude.l prelude-symbols.out
 
 clean:
-	@rm -f core-xref.out core-symbols.out
+	@rm -f prelude-xref.out prelude-symbols.out

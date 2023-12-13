@@ -115,4 +115,4 @@
             `(:lambda
               ,(prelude:%lambda-prop :bound lambda)
               ,(prelude:%compile-lambda-body lambda (mu:nthcdr 2 form) env)))))
-       (prelude:%compile-lambda-form (mu:nth 1 form) env))))
+       (prelude:%compile-lambda-list (mu:nth 1 form) env))))

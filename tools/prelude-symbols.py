@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 from operator import *
 
-with open(sys.argv[1]) as f: core = f.readlines()
+with open(sys.argv[1]) as f: prelude = f.readlines()
 with open(sys.argv[2]) as f: ns_syms = f.readlines()
 
 date = datetime.now().strftime('%m/%d/%Y %H:%M:%S')
@@ -23,7 +23,7 @@ def symbols_in(line):
         if len(token) != 0 and token[0] != '"' and token[0] != ':':
             symbols.append(token)
 
-for line in core:
+for line in prelude:
     symbols_in(line[:-1])
 
 counts = []
@@ -40,7 +40,7 @@ def map_symbol(symbol):
     return None
 
 print()
-print(f'core symbol counts: {date:<10}')
+print(f'prelude symbol counts: {date:<10}')
 print('-------------------')
 
 by_count = []

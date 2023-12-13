@@ -98,7 +98,7 @@
             `(,(mu:hp-size cons) ,(prelude:type-of cons) ,cons))
            (prelude:format stream
             "cons: (~A bytes) :cons ~A~%    length: ~A~%    value:  ~A~%"
-            `(,(mu:hp-size bytes) ,(prelude:type-of cons) ,(mu:length cons) ,cons)))))
+            `(,(mu:hp-size cons) ,(prelude:type-of cons) ,(mu:length cons) ,cons)))))
 
 (mu:intern :prelude "describe"
    (:lambda (value stream)
