@@ -1,5 +1,3 @@
-(mu:type-of prelude:in-namespace)
-(mu:type-of prelude:read)
 (mu:sy-name (prelude:read (prelude:make-string-stream :input "a") () ()))
 (mu:sy-name (prelude:read (prelude:make-string-stream :input "prelude:a") () ()))
 (prelude:read (prelude:make-string-stream :input "abcdefgh") () ())
