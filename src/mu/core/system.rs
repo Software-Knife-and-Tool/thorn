@@ -14,13 +14,13 @@ use crate::{
 };
 
 pub trait MuFunction {
-    fn mu_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_real_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
-    fn mu_run_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn sys_exit(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn sys_real_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn sys_run_time(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
-    fn mu_real_time(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn sys_real_time(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match System::real_time() {
             Ok(us) => Fixnum::as_tag(us as i64),
             Err(_) => return Err(Exception::new(Condition::Error, "real-us", Tag::nil())),
@@ -29,7 +29,7 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_run_time(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn sys_run_time(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let time = mu.start_time.elapsed();
         let usec = time.as_micros();
 
@@ -38,7 +38,7 @@ impl MuFunction for Mu {
         Ok(())
     }
 
-    fn mu_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
+    fn sys_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
         match Tag::type_of(rc) {

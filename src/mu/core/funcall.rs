@@ -38,7 +38,7 @@ pub type LibMuFunction = fn(&Mu, &mut Frame) -> exception::Result<()>;
 
 // mu function dispatch table
 lazy_static! {
-    static ref SYMBOLMAP: Vec<(&'static str, u16, LibMuFunction)> = vec![
+    static ref MU_SYMBOLS: Vec<(&'static str, u16, LibMuFunction)> = vec![
         // types
         ("eq", 2, Tag::mu_eq),
         ("type-of", 1, Tag::mu_typeof),
@@ -72,10 +72,6 @@ lazy_static! {
         ("frames", 0, Mu::mu_frames),
         ("fix", 2, Mu::mu_fix),
         ("%append", 2, Mu::append_),
-        // system
-        ("exit", 1, Mu::mu_exit),
-        ("real-tm", 0, Mu::mu_real_time),
-        ("run-us", 0, Mu::mu_run_time),
         // exceptions
         ("with-ex", 2, Exception::mu_with_ex),
         ("raise", 2, Exception::mu_raise),
@@ -139,13 +135,20 @@ lazy_static! {
         ("%append", 2, Mu::append_),
         ("%if", 3, Mu::if_),
     ];
+
+    static ref SYS_SYMBOLS: Vec<(&'static str, u16, LibMuFunction)> = vec![
+        // system
+        ("exit", 1, Mu::sys_exit),
+        ("real-tm", 0, Mu::sys_real_time),
+        ("run-us", 0, Mu::sys_run_time),
+    ];
 }
 
 impl Mu {
     pub fn install_lib_functions(mu: &Mu) -> Vec<LibMuFunction> {
         let mut funcv = Vec::new();
 
-        for (id, fnmap) in SYMBOLMAP.iter().enumerate() {
+        for (id, fnmap) in MU_SYMBOLS.iter().enumerate() {
             let (name, nreqs, libfn) = fnmap;
 
             let func = Function::new(
@@ -160,6 +163,24 @@ impl Mu {
             funcv.push(*libfn);
 
             <Mu as NSCore>::intern_symbol(mu, mu.mu_ns, name.to_string(), func);
+        }
+
+        let fn_tab_offset = funcv.len();
+        for (id, fnmap) in SYS_SYMBOLS.iter().enumerate() {
+            let (name, nreqs, libfn) = fnmap;
+
+            let func = Function::new(
+                Fixnum::as_tag(*nreqs as i64),
+                Fixnum::as_tag(match (id + fn_tab_offset).try_into().unwrap() {
+                    Some(n) => n as i64,
+                    None => panic!(),
+                }),
+            )
+            .evict(mu);
+
+            funcv.push(*libfn);
+
+            <Mu as NSCore>::intern_symbol(mu, mu.sys_ns, name.to_string(), func);
         }
 
         funcv

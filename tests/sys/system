@@ -1,0 +1,5 @@
+(mu:type-of sys:run-us)	:func
+(mu:type-of sys:real-tm)	:func
+(mu:type-of sys:exit)	:func
+(mu:type-of (sys:real-tm))	:fixnum
+(mu:type-of (sys:run-us))	:fixnum

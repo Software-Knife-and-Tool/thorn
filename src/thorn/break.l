@@ -127,7 +127,7 @@
                              (core:write ":s - print stack frames" () ()) (core:terpri ())
                              (core:null loop)))
                           (:if (mu:eq form :x)
-                               (mu:exit 0)
+                               (sys:exit 0)
                                (:if (mu:eq form :s)
                                     ((:lambda ()
                                        (core:mapc
