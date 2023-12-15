@@ -5,6 +5,7 @@ from datetime import datetime
 namespaces = [
     'mu:',
     'prelude:',
+    'sys:',
 ]
 
 with open(sys.argv[1]) as f: test_results = f.readlines()

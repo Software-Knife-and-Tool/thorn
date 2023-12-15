@@ -13,6 +13,12 @@ def runtest(line, test, expected):
         proc = subprocess.Popen(['../dist/mu-shell', '-p', '-e' + test],\
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
+
+    if ns == 'sys':
+        proc = subprocess.Popen(['../dist/mu-shell', '-p', '-e' + test],\
+                                stdout=subprocess.PIPE,\
+                                stderr=subprocess.PIPE)
+
     if ns == 'prelude':
         proc = subprocess.Popen(['../dist/mu-shell',
                                  '-l../dist/prelude.l',

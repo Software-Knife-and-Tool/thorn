@@ -55,7 +55,7 @@
                                 (prelude:null loop))
                              (prelude:%except-prop :value except))
                             (:if (mu:eq form :x)
-                                 (mu:exit 0)
+                                 (sys:exit 0)
                                  (:if (mu:eq form :e)
                                       ((:lambda ()
                                           (prelude:%exceptf mu:std-out "exception: ~A on ~A by ~S, ~A~%" :t except)

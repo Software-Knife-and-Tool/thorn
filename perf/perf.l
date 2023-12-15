@@ -9,10 +9,10 @@
   (:lambda (fn args)
     ((:lambda (start stop)
        (mu:fx-sub stop start))
-       (mu:run-us)
+       (sys:run-us)
        ((:lambda ()
           (mu:apply fn args)
-          (mu:run-us))))))
+          (sys:run-us))))))
 
 ;;;
 ;;; return an vector of storage consumed

@@ -4,7 +4,6 @@
 (mu:fix (:lambda (l) (:if l ((:lambda () (mu:cdr l))) ())) '(1 2 3 4))
 (mu:apply mu:eq '(1 2))
 (mu:apply mu:fx-add '(1 2))
-(mu:type-of (mu:real-tm))
 (mu:type-of #\a)
 (mu:type-of '(1 2 3))
 (mu:type-of 'mu:apply)
