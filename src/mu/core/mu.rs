@@ -69,6 +69,7 @@ pub struct Mu {
     pub keyword_ns: Tag,
     pub mu_ns: Tag,
     pub null_ns: Tag,
+    pub sys_ns: Tag,
 
     // reader
     pub reader: Reader,
@@ -128,6 +129,7 @@ impl Core for Mu {
             keyword_ns: Tag::nil(),
             mu_ns: Tag::nil(),
             null_ns: Tag::nil(),
+            sys_ns: Tag::nil(),
 
             // streams
             stdin: Tag::nil(),
@@ -153,6 +155,12 @@ impl Core for Mu {
 
         mu.null_ns = Tag::nil();
         match <Mu as Namespace>::add_ns(&mu, mu.null_ns) {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        };
+
+        mu.sys_ns = Symbol::keyword("sys");
+        match <Mu as Namespace>::add_ns(&mu, mu.sys_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };

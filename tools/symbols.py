@@ -40,7 +40,7 @@ def map_symbol(symbol):
     return None
 
 print()
-print(f'prelude symbol counts: {date:<10}')
+print(f'symbol counts: {date:<10}')
 print('-------------------')
 
 by_count = []

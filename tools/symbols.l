@@ -18,6 +18,10 @@
               (:if (prelude:null (mu:sy-ns symbol))
                    (prelude:format stream "~A~%" `(,(mu:sy-name symbol)))
                    (prelude:format stream "mu:~A~%" `(,(mu:sy-name symbol)))))
-           (mu:ns-syms :list :mu)))
+           (mu:ns-syms :list :mu))
+          (prelude:mapc
+           (:lambda (symbol)
+             (prelude:format stream "sys:~A~%" `(,(mu:sy-name symbol))))
+           (mu:ns-syms :list :sys)))
        (mu:open :file :output file-name))
       :t))
