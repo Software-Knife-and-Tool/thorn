@@ -50,12 +50,12 @@
                (:if sym
                     (:if (prelude:boundp sym)
                          symbol
-                         (mu:intern (prelude:%read-get-ns) (mu:sy-name symbol) value))
-                    (mu:intern (prelude:%read-get-ns) (mu:sy-name symbol) value)))
-            (mu:ns-find (prelude:%read-get-ns) (mu:sy-name symbol)))
+                         (mu:intern (prelude:%reader-get-ns) (mu:sy-name symbol) value))
+                    (mu:intern (prelude:%reader-get-ns) (mu:sy-name symbol) value)))
+            (mu:ns-find (prelude:%reader-get-ns) (mu:sy-name symbol)))
            ((:lambda (name)
                (mu:intern
-                (prelude:%read-get-ns)
+                (prelude:%reader-get-ns)
                 name
                 value))
             (mu:sy-name symbol)))))
