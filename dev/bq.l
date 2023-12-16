@@ -15,7 +15,7 @@
 
 (mu:intern :prelude "%%bq-quote"
    (:lambda (next list)
-     `(:quote ,(mu:cdr next))))
+     `(:quote ,(mu:car next))))
 
 (mu:intern :prelude "%%bq-list"
    (:lambda (next list)
@@ -29,6 +29,7 @@
       (:const prelude:%%bq-self :exit)
       (:dot prelude:%%bq-syntax :exit)
       (:list prelude:%%bq-list :list)
+      (:elist prelude:%%bq-list :exit)
       (:symbol prelude:%%bq-quote :exit))
      (:comma
       (:at prelude:%%bq-syntax :exit)
@@ -37,6 +38,7 @@
       (:const prelude:%%bq-self :exit)
       (:dot prelude:%%bq-syntax :exit)
       (:list prelude:%%bq-list :comma)
+      (:elist prelude:%%bq-list :exit)
       (:symbol prelude:%%bq-quote :comma))
      (:list
       (:at prelude:%%bq-syntax :exit)
@@ -45,6 +47,7 @@
       (:const prelude:%%bq-self :exit)
       (:dot prelude:%%bq-syntax :exit)
       (:list prelude:%%bq-list :comma)
+      (:elist prelude:%%bq-list :exit)
       (:symbol prelude:%%bq-quote :comma))))
 
 (mu:intern :prelude "%bq-next"
@@ -67,7 +70,8 @@
                  `(,(mu:cons #\, :comma)
                    ,(mu:cons #\` :bquote)
                    ,(mu:cons #\@ :at)
-                   ,(mu:cons #\( :list))))))
+                   ,(mu:cons #\( :list)
+                   ,(mu:cons #\) :elist))))))
           (mu:rd-char stream () ()))))
 
 (mu:intern :prelude "%bq-state-machine"
