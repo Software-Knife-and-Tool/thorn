@@ -2,7 +2,7 @@ Namespace Test Summary:
 -----------------------
 mu         backquote      total: 20       pass: 20       fail: 0        exceptions: 0       
 mu         compile        total: 8        pass: 8        fail: 0        exceptions: 0       
-mu         core           total: 57       pass: 57       fail: 0        exceptions: 0       
+mu         core           total: 55       pass: 55       fail: 0        exceptions: 0       
 mu         exception      total: 4        pass: 4        fail: 0        exceptions: 0       
 mu         list           total: 22       pass: 22       fail: 0        exceptions: 0       
 mu         map            total: 10       pass: 10       fail: 0        exceptions: 0       
@@ -15,7 +15,7 @@ mu         struct         total: 7        pass: 7        fail: 0        exceptio
 mu         symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 274      pass: 274      fail: 0        exceptions: 0         
+mu                        total: 272      pass: 272      fail: 0        exceptions: 0         
 
 Namespace Test Summary:
 -----------------------
@@ -30,12 +30,18 @@ prelude    format         total: 15       pass: 15       fail: 0        exceptio
 prelude    lambda         total: 23       pass: 23       fail: 0        exceptions: 0       
 prelude    list           total: 76       pass: 76       fail: 0        exceptions: 0       
 prelude    macro          total: 13       pass: 13       fail: 0        exceptions: 0       
-prelude    reader         total: 62       pass: 62       fail: 0        exceptions: 0       
+prelude    reader         total: 61       pass: 61       fail: 0        exceptions: 0       
 prelude    stream         total: 21       pass: 21       fail: 0        exceptions: 0       
 prelude    string         total: 20       pass: 20       fail: 0        exceptions: 0       
 prelude    symbol         total: 3        pass: 3        fail: 0        exceptions: 0       
 prelude    types          total: 44       pass: 44       fail: 0        exceptions: 0       
 prelude    vector         total: 25       pass: 25       fail: 0        exceptions: 0       
 -----------------------
-prelude                   total: 405      pass: 400      fail: 4        exceptions: 1         
+prelude                   total: 404      pass: 399      fail: 4        exceptions: 1         
+
+Namespace Test Summary:
+-----------------------
+sys        system         total: 5        pass: 5        fail: 0        exceptions: 0       
+-----------------------
+sys                       total: 5        pass: 5        fail: 0        exceptions: 0         
 
