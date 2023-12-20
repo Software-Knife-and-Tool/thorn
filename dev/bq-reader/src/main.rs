@@ -1,9 +1,6 @@
 mod bq_machine;
 
-use std::{
-    io,
-    io::BufRead
-};
+use std::{io, io::BufRead};
 
 use crate::bq_machine::BqMachine;
 
@@ -16,7 +13,7 @@ fn tests() {
 
 fn main() {
     tests();
-    
+
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
         BqMachine::parse(line.unwrap());

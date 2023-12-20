@@ -1,9 +1,8 @@
 #![allow(dead_code)]
 
-use {rust_fsm::*};
+use rust_fsm::*;
 
-pub struct BqMachine {
-}
+pub struct BqMachine {}
 
 #[derive(Debug)]
 pub enum BqType {
@@ -45,15 +44,27 @@ state_machine! {
         At => SyntaxError [ At ],
         Backquote => Backquote,
         Comma => CommaList,
-        Constant => Exit [ Form ],
+        Constant => List [ Form ],
         Dot => SyntaxError [ Dot ],
         EndList => Exit [ EndList ],
         List => List,
-        Symbol => Quote,
+        Symbol => List [ Quote ],
     },
-    
+
     // `,(
     CommaList => {
+        At => SyntaxError [ At ],
+        Backquote => CommaList [ Backquote ],
+        Comma => CommaInList,
+        Constant => CommaList [ Form ],
+        Dot => SyntaxError [ Dot ],
+        EndList => Exit [ EndList ],
+        List => List,
+        Symbol => CommaList [ Quote ],
+    },
+
+    // `,(,
+    CommaInList => {
         At => SyntaxError [ At ],
         Backquote => CommaList [ Backquote ],
         Comma => CommaList,
@@ -63,6 +74,7 @@ state_machine! {
         List => List,
         Symbol => CommaList [ Quote ],
     },
+    
 }
 
 impl BqMachine {
@@ -70,9 +82,9 @@ impl BqMachine {
         println!("parse: entry {}", source);
 
         if !source.starts_with('`') {
-            return None
+            return None;
         }
-                
+
         source.remove(0);
 
         let mut read_char = || -> Option<char> {
@@ -94,62 +106,69 @@ impl BqMachine {
                     '@' => Some((ReaderInput::At, "@".to_string())),
                     _ => {
                         let mut token = String::from(ch);
-                        
+
                         loop {
                             match read_char() {
                                 None => break,
-                                Some(ch) => if ch.is_digit(10) || ch.is_alphabetic() {
-                                    token.push(ch)
-                                } else {
-                                    // unread_char(ch);
-                                    break
+                                Some(ch) => {
+                                    if ch.is_digit(10) || ch.is_alphabetic() {
+                                        token.push(ch)
+                                    } else {
+                                        // unread_char(ch);
+                                        break;
+                                    }
                                 }
                             }
                         }
-                        
+
                         if ch.is_alphabetic() {
                             Some((ReaderInput::Symbol, token))
                         } else {
                             Some((ReaderInput::Constant, token))
                         }
                     }
-                }
+                },
             }
         };
 
         let mut machine: StateMachine<Reader> = StateMachine::new();
-        let mut appends: Vec::<(BqType, String)> = vec![];
-        
+        let mut appends: Vec<(BqType, String)> = vec![];
+
         loop {
             match next_state() {
                 None => {
                     println!("parse: error, unterminated expression.");
-                    break
-                },
+                    break;
+                }
                 Some((state, token)) => {
                     let output = machine.consume(&state);
                     let new_state = machine.state();
-                    
+
                     match new_state {
                         ReaderState::Backquote => {
-                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state)
+                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
+                            // Self::parse(source);
                         },
-                        ReaderState::CommaList => {
-                            match output.unwrap() {
-                                None => (),
-                                Some(qualifier) => { 
-                                    println!("  ( {:?} [ {:?} ] {} ) enters {:?}", state, qualifier, token, new_state);
-                                    match qualifier {
-                                        ReaderOutput::Form => appends.push((BqType::Form, token)),
-                                        ReaderOutput::Quote => appends.push((BqType::Quote, token)),
-                                        _ => (),
-                                    }
-                                },
+                        ReaderState::CommaList => match output.unwrap() {
+                            None => (),
+                            Some(qualifier) => {
+                                println!(
+                                    "  ( {:?} [ {:?} ] {} ) enters {:?}",
+                                    state, qualifier, token, new_state
+                                );
+                                match qualifier {
+                                    ReaderOutput::Form => appends.push((BqType::Form, token)),
+                                    ReaderOutput::Quote => appends.push((BqType::Quote, token)),
+                                    _ => (),
+                                }
                             }
                         },
                         ReaderState::Exit => {
                             let qualifier = output.unwrap().unwrap();
-                            println!("  ( {:?} [ {:?} ] {} ) enters {:?}", state, qualifier, token, new_state);
+                            println!(
+                                "  ( {:?} [ {:?} ] {} ) enters {:?}",
+                                state, qualifier, token, new_state
+                            );
 
                             match qualifier {
                                 ReaderOutput::Quote => appends.push((BqType::Quote, token)),
@@ -159,21 +178,19 @@ impl BqMachine {
                             }
 
                             println!("parse: complete, appends: {:?}", appends);
-                            break
-                        },
-                        ReaderState::Quote => {
-                            println!("  ( {:?} {} ) produces (:quote {}) enters {:?}", state, token, token, new_state)
-                        },
+                            break;
+                        }
                         ReaderState::SyntaxError => {
-                            println!("parse: {:?} syntax error {:?}", machine.state(), output.unwrap().unwrap());
-                            break
-                        },
-                        ReaderState::Comma => {
+                            println!(
+                                "parse: {:?} syntax error {:?}",
+                                machine.state(),
+                                output.unwrap().unwrap()
+                            );
+                            break;
+                        }
+                        _ => {
                             println!("  ( {:?} {} ) enters {:?}", state, token, new_state)
-                        },
-                        ReaderState::List => {
-                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state)
-                        },
+                        }
                     }
                 }
             }
