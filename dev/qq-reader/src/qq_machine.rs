@@ -17,23 +17,18 @@ state_machine! {
 
     // `
     QuasiQuote => {
-        At => SyntaxError [ At ],
         QuasiQuote => QuasiQuote,
         Comma => Comma,
         Constant => Exit [ Form ],
-        Dot => SyntaxError [ Dot ],
-        EndList => SyntaxError [ EndList ],
         List => List,
         Symbol => Exit [ Quote ],
     },
 
     // `,
     Comma => {
-        At => SyntaxError [ At ],
         QuasiQuote => QuasiQuote,
         Comma => Comma,
         Constant => Exit [ Form ],
-        Dot => SyntaxError [ Dot ],
         EndList => Exit [ EndList ],
         List => CommaList,
         Symbol => Exit [ Form ],
@@ -41,10 +36,10 @@ state_machine! {
 
     // `(
     List => {
-        At => SyntaxError [ At ],
         QuasiQuote => QuasiQuote,
         Comma => CommaList,
         Constant => List [ Form ],
+        Dot => List [ Dot ],
         Dot => SyntaxError [ Dot ],
         EndList => Exit [ EndList ],
         List => List,
@@ -53,11 +48,10 @@ state_machine! {
 
     // `,(
     CommaList => {
-        At => SyntaxError [ At ],
+        At => CommaList [ At ],
         QuasiQuote => CommaList [ QuasiQuote ],
         Comma => CommaInList,
         Constant => CommaList [ Form ],
-        Dot => SyntaxError [ Dot ],
         EndList => Exit [ EndList ],
         List => List,
         Symbol => CommaList [ Quote ],
@@ -65,11 +59,9 @@ state_machine! {
 
     // `,(,
     CommaInList => {
-        At => SyntaxError [ At ],
         QuasiQuote => CommaList [ QuasiQuote ],
         Comma => CommaList,
         Constant => CommaList [ Form ],
-        Dot => SyntaxError [ Dot ],
         EndList => Exit [ EndList ],
         List => List,
         Symbol => CommaList [ Quote ],
@@ -141,55 +133,67 @@ impl QqMachine {
                     break;
                 }
                 Some((state, token)) => {
-                    let output = machine.consume(&state);
-                    let new_state = machine.state();
-
-                    match new_state {
-                        ReaderState::QuasiQuote => {
-                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
-                            // Self::parse(source);
+                    match machine.consume(&state) {
+                        Err(_) => {
+                            println!(
+                                "parse: error on token {:?} in state {:?}",
+                                token,
+                                machine.state(),
+                            );
+                            
+                            break;
                         },
-                        ReaderState::CommaList => match output.unwrap() {
-                            None => (),
-                            Some(qualifier) => {
-                                println!(
-                                    "  ( {:?} [ {:?} ] {} ) enters {:?}",
-                                    state, qualifier, token, new_state
-                                );
-                                match qualifier {
-                                    ReaderOutput::Form => appends.push((QqType::Form, token)),
-                                    ReaderOutput::Quote => appends.push((QqType::Quote, token)),
-                                    _ => (),
+                        Ok(output) => {
+                            let new_state = machine.state();
+
+                            match new_state {
+                                ReaderState::QuasiQuote => {
+                                    println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
+                                    // Self::parse(source);
+                                },
+                                ReaderState::CommaList => match output {
+                                    None => (),
+                                    Some(qualifier) => {
+                                        println!(
+                                            "  ( {:?} [ {:?} ] {} ) enters {:?}",
+                                            state, qualifier, token, new_state
+                                        );
+                                        match qualifier {
+                                            ReaderOutput::Form => appends.push((QqType::Form, token)),
+                                            ReaderOutput::Quote => appends.push((QqType::Quote, token)),
+                                            _ => (),
+                                        }
+                                    }
+                                },
+                                ReaderState::Exit => {
+                                    let qualifier = output.unwrap();
+                                    println!(
+                                        "  ( {:?} [ {:?} ] {} ) enters {:?}",
+                                        state, qualifier, token, new_state
+                                    );
+
+                                    match qualifier {
+                                        ReaderOutput::Quote => appends.push((QqType::Quote, token)),
+                                        ReaderOutput::Form => appends.push((QqType::Form, token)),
+                                        ReaderOutput::EndList => (),
+                                        _ => (),
+                                    }
+
+                                    println!("parse: complete, appends: {:?}", appends);
+                                    break;
+                                }
+                                ReaderState::SyntaxError => {
+                                    println!(
+                                        "parse: {:?} syntax error {:?}",
+                                        machine.state(),
+                                        output.unwrap(),
+                                    );
+                                    break;
+                                }
+                                _ => {
+                                    println!("  ( {:?} {} ) enters {:?}", state, token, new_state)
                                 }
                             }
-                        },
-                        ReaderState::Exit => {
-                            let qualifier = output.unwrap().unwrap();
-                            println!(
-                                "  ( {:?} [ {:?} ] {} ) enters {:?}",
-                                state, qualifier, token, new_state
-                            );
-
-                            match qualifier {
-                                ReaderOutput::Quote => appends.push((QqType::Quote, token)),
-                                ReaderOutput::Form => appends.push((QqType::Form, token)),
-                                ReaderOutput::EndList => (),
-                                _ => (),
-                            }
-
-                            println!("parse: complete, appends: {:?}", appends);
-                            break;
-                        }
-                        ReaderState::SyntaxError => {
-                            println!(
-                                "parse: {:?} syntax error {:?}",
-                                machine.state(),
-                                output.unwrap().unwrap()
-                            );
-                            break;
-                        }
-                        _ => {
-                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state)
                         }
                     }
                 }
