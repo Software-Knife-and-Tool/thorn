@@ -2,10 +2,10 @@
 
 use rust_fsm::*;
 
-pub struct BqMachine {}
+pub struct QqMachine {}
 
 #[derive(Debug)]
-pub enum BqType {
+pub enum QqType {
     Form,
     Quote,
 }
@@ -13,12 +13,12 @@ pub enum BqType {
 state_machine! {
     derive(Debug)
     repr_c(true)
-    Reader(Backquote)
+    Reader(QuasiQuote)
 
     // `
-    Backquote => {
+    QuasiQuote => {
         At => SyntaxError [ At ],
-        Backquote => Backquote,
+        QuasiQuote => QuasiQuote,
         Comma => Comma,
         Constant => Exit [ Form ],
         Dot => SyntaxError [ Dot ],
@@ -30,7 +30,7 @@ state_machine! {
     // `,
     Comma => {
         At => SyntaxError [ At ],
-        Backquote => Backquote,
+        QuasiQuote => QuasiQuote,
         Comma => Comma,
         Constant => Exit [ Form ],
         Dot => SyntaxError [ Dot ],
@@ -42,7 +42,7 @@ state_machine! {
     // `(
     List => {
         At => SyntaxError [ At ],
-        Backquote => Backquote,
+        QuasiQuote => QuasiQuote,
         Comma => CommaList,
         Constant => List [ Form ],
         Dot => SyntaxError [ Dot ],
@@ -54,7 +54,7 @@ state_machine! {
     // `,(
     CommaList => {
         At => SyntaxError [ At ],
-        Backquote => CommaList [ Backquote ],
+        QuasiQuote => CommaList [ QuasiQuote ],
         Comma => CommaInList,
         Constant => CommaList [ Form ],
         Dot => SyntaxError [ Dot ],
@@ -66,7 +66,7 @@ state_machine! {
     // `,(,
     CommaInList => {
         At => SyntaxError [ At ],
-        Backquote => CommaList [ Backquote ],
+        QuasiQuote => CommaList [ QuasiQuote ],
         Comma => CommaList,
         Constant => CommaList [ Form ],
         Dot => SyntaxError [ Dot ],
@@ -77,7 +77,7 @@ state_machine! {
     
 }
 
-impl BqMachine {
+impl QqMachine {
     pub fn parse(mut source: String) -> Option<String> {
         println!("parse: entry {}", source);
 
@@ -101,7 +101,7 @@ impl BqMachine {
                 Some(ch) => match ch {
                     '(' => Some((ReaderInput::List, "(".to_string())),
                     ')' => Some((ReaderInput::EndList, ")".to_string())),
-                    '`' => Some((ReaderInput::Backquote, "`".to_string())),
+                    '`' => Some((ReaderInput::QuasiQuote, "`".to_string())),
                     ',' => Some((ReaderInput::Comma, ",".to_string())),
                     '@' => Some((ReaderInput::At, "@".to_string())),
                     _ => {
@@ -132,7 +132,7 @@ impl BqMachine {
         };
 
         let mut machine: StateMachine<Reader> = StateMachine::new();
-        let mut appends: Vec<(BqType, String)> = vec![];
+        let mut appends: Vec<(QqType, String)> = vec![];
 
         loop {
             match next_state() {
@@ -145,7 +145,7 @@ impl BqMachine {
                     let new_state = machine.state();
 
                     match new_state {
-                        ReaderState::Backquote => {
+                        ReaderState::QuasiQuote => {
                             println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
                             // Self::parse(source);
                         },
@@ -157,8 +157,8 @@ impl BqMachine {
                                     state, qualifier, token, new_state
                                 );
                                 match qualifier {
-                                    ReaderOutput::Form => appends.push((BqType::Form, token)),
-                                    ReaderOutput::Quote => appends.push((BqType::Quote, token)),
+                                    ReaderOutput::Form => appends.push((QqType::Form, token)),
+                                    ReaderOutput::Quote => appends.push((QqType::Quote, token)),
                                     _ => (),
                                 }
                             }
@@ -171,8 +171,8 @@ impl BqMachine {
                             );
 
                             match qualifier {
-                                ReaderOutput::Quote => appends.push((BqType::Quote, token)),
-                                ReaderOutput::Form => appends.push((BqType::Form, token)),
+                                ReaderOutput::Quote => appends.push((QqType::Quote, token)),
+                                ReaderOutput::Form => appends.push((QqType::Form, token)),
                                 ReaderOutput::EndList => (),
                                 _ => (),
                             }
