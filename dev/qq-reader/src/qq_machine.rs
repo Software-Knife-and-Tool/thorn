@@ -6,10 +6,10 @@ pub struct QqMachine {}
 
 #[derive(Debug)]
 pub enum QqExpr {
-    Form(String),  // plain form
-    Quote(String), // quoted form
-    Dot(String),   // dotted list
-    // List(QqExpr),      // inner form
+    Form(String),       // plain form
+    Quote(String),      // quoted form
+    Dot(String),        // dotted list
+    List(Box<QqExpr>),  // make list of
     QQuote(Vec<QqExpr>),
 }
 
@@ -67,7 +67,34 @@ state_machine! {
 }
 
 impl QqMachine {
+    pub fn read(source: String) -> Result<String, String> {
+        match Self::parse(source) {
+            Ok(vec) => Ok(Self::compile(vec)),
+            Err(e) => Err(e),
+        }
+    }
+    
+    pub fn compile(list: Vec<QqExpr>) -> String {
+        let mut out = "".to_string();
+        
+        println!("compile: {:?}", list);
+
+        for el in list {
+            match el {
+                QqExpr::Form(expr) => out.push_str(&format!(" {}", &expr)),
+                QqExpr::Quote(expr) => out.push_str(&format!(" (:quote {})", &expr)),
+                QqExpr::Dot(expr) => out.push_str(&format!(" . {}", &expr)),
+                QqExpr::List(expr) => out.push_str(&format!(" (mu:cons {:?} ())", &*expr)),
+                QqExpr::QQuote(exprvec) => out.push_str(&Self::compile(exprvec)),
+            }
+        }
+
+        out
+    }
+    
     pub fn parse(mut source: String) -> Result<Vec<QqExpr>, String> {
+        println!("parse: `{}", source);
+        
         let mut read_char = || -> Option<char> {
             if source.is_empty() {
                 None
@@ -130,18 +157,22 @@ impl QqMachine {
                         Ok(output) => {
                             let new_state = machine.state();
 
-                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
+                            // println!("  [ {:?} {} ] enters {:?}", state, token, new_state);
                             match new_state {
                                 ReaderState::QuasiQuote => {
                                     // Self::parse(source);
                                 }
+                                ReaderState::Comma => {
+                                }
                                 ReaderState::CommaList => match output {
                                     None => (),
                                     Some(qualifier) => {
+                                        /*
                                         println!(
-                                            "  ( {:?} [ {:?} ] {} ) enters {:?}",
+                                            "  [ {:?} {:?} {} ] enters {:?}",
                                             state, qualifier, token, new_state
-                                        );
+                                    );
+                                        */
                                         match qualifier {
                                             ReaderOutput::Form => {
                                                 expansion.push(QqExpr::Form(token))
@@ -149,6 +180,7 @@ impl QqMachine {
                                             ReaderOutput::Quote => {
                                                 expansion.push(QqExpr::Quote(token))
                                             }
+                                            ReaderOutput::EndList => break,
                                             _ => {
                                                 return Err(
                                                     "unimplemented CommaList element".to_string()
@@ -157,21 +189,51 @@ impl QqMachine {
                                         }
                                     }
                                 },
+                                ReaderState::List => match output {
+                                    None => (),
+                                    Some(qualifier) => {
+                                        /*
+                                        println!(
+                                            "  ( [ {:?} {:?} {} ] enters {:?}",
+                                            state, qualifier, token, new_state
+                                    );
+                                        */
+                                        match qualifier {
+                                            ReaderOutput::Form => {
+                                                expansion.push(QqExpr::Form(token))
+                                            }
+                                            ReaderOutput::Quote => {
+                                                expansion.push(QqExpr::Quote(token))
+                                            }
+                                            ReaderOutput::EndList => break,
+                                            _ => {
+                                                return Err(
+                                                    "unimplemented List element".to_string()
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
                                 ReaderState::Exit => {
                                     let qualifier = output.unwrap();
+                                    /*
                                     println!(
-                                        "  ( {:?} [ {:?} ] {} ) enters {:?}",
+                                        "  [ {:?} {:?} {} ] enters {:?}",
                                         state, qualifier, token, new_state
-                                    );
+                                );
+                                    */
 
                                     match qualifier {
                                         ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
                                         ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
+                                        ReaderOutput::EndList => break,
                                         _ => return Err("unimplemented Exit element".to_string()),
                                     }
                                     break;
                                 }
-                                _ => {}
+                                _ => {
+                                    println!("  unimplemented state [ {:?} {} ]", state, token);
+                                }
                             }
                         }
                     }

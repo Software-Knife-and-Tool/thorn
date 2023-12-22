@@ -6,12 +6,12 @@ use {
 };
 
 fn tests() {
-    println!("{:?}", QqMachine::parse(",@".to_string()));
-    println!("{:?}", QqMachine::parse(",foo ".to_string()));
-    println!("{:?}", QqMachine::parse(",(1234 )".to_string()));
+    println!("{:?}", QqMachine::read(",@".to_string()));
+    println!("{:?}", QqMachine::read(",foo ".to_string()));
+    println!("{:?}", QqMachine::read(",(1234 )".to_string()));
     println!(
         "{:?}",
-        QqMachine::parse(",(think 123 thank thunk )".to_string())
+        QqMachine::read(",(think 123 thank thunk )".to_string())
     );
 }
 
@@ -20,6 +20,6 @@ fn main() {
 
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
-        println!("{:?}", QqMachine::parse(line.unwrap()));
+        println!("{:?}", QqMachine::read(line.unwrap()));
     }
 }
