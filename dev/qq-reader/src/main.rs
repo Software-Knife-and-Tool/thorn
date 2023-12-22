@@ -1,14 +1,18 @@
 mod qq_machine;
 
-use std::{io, io::BufRead};
-
-use crate::qq_machine::QqMachine;
+use {
+    crate::qq_machine::QqMachine,
+    std::{io, io::BufRead},
+};
 
 fn tests() {
-    println!("{:?}", QqMachine::parse("`,@".to_string()));
-    println!("{:?}", QqMachine::parse("`,foo ".to_string()));
-    println!("{:?}", QqMachine::parse("`,(1234 )".to_string()));
-    println!("{:?}", QqMachine::parse("`,(think 123 thank thunk )".to_string()));
+    println!("{:?}", QqMachine::parse(",@".to_string()));
+    println!("{:?}", QqMachine::parse(",foo ".to_string()));
+    println!("{:?}", QqMachine::parse(",(1234 )".to_string()));
+    println!(
+        "{:?}",
+        QqMachine::parse(",(think 123 thank thunk )".to_string())
+    );
 }
 
 fn main() {

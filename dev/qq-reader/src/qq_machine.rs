@@ -1,14 +1,14 @@
 #![allow(dead_code)]
 
-use rust_fsm::*;
+use {rust_fsm::*, std::result::Result};
 
 pub struct QqMachine {}
 
 #[derive(Debug)]
 pub enum QqExpr {
-    Form(String),      // plain form
-    Quote(String),     // quoted form
-    Dot(String),       // dotted list
+    Form(String),  // plain form
+    Quote(String), // quoted form
+    Dot(String),   // dotted list
     // List(QqExpr),      // inner form
     QQuote(Vec<QqExpr>),
 }
@@ -16,75 +16,58 @@ pub enum QqExpr {
 state_machine! {
     derive(Debug)
     repr_c(true)
-    Reader(Start)
-
-    // start of parse
-    Start => {
-        QuasiQuote => QuasiQuote
-    },
+    Reader(QuasiQuote)
 
     // `
     QuasiQuote => {
-        QuasiQuote => QuasiQuote,
-        Comma => Comma,
-        Constant => Exit [ Form ],
-        List => List,
-        Symbol => Exit [ Quote ],
+        Comma => Comma,               // `,
+        Constant => Exit [ Form ],    // `basic
+        List => List,                 // `(
+        QuasiQuote => QuasiQuote,     // ``
+        Symbol => Exit [ Quote ],     // `basic
     },
 
     // `,
     Comma => {
-        QuasiQuote => QuasiQuote,
-        Comma => Comma,
-        Constant => Exit [ Form ],
-        EndList => Exit [ EndList ],
-        List => CommaList,
-        Symbol => Exit [ Form ],
+        Constant => Exit [ Form ],    // `,basic
+        List => CommaList,            // `,(
+        QuasiQuote => QuasiQuote,     // `,`
+        Symbol => Exit [ Form ],      // `,basic
     },
 
     // `(
     List => {
-        QuasiQuote => QuasiQuote,
-        Comma => CommaList,
-        Constant => List [ Form ],
-        Dot => List [ Dot ],
-        EndList => Exit [ EndList ],
-        List => List,
-        Symbol => List [ Quote ],
+        Comma => CommaList,           // `(,
+        Constant => List [ Form ],    // `(basic
+        EndList => Exit [ EndList ],  // `()
+        List => List,                 // `((
+        QuasiQuote => QuasiQuote,     // `(`
+        Symbol => List [ Quote ],     // `(basic
     },
 
     // `,(
     CommaList => {
-        At => CommaList [ At ],
-        QuasiQuote => CommaList [ QuasiQuote ],
-        Comma => CommaInList,
-        Constant => CommaList [ Form ],
-        EndList => Exit [ EndList ],
-        List => List,
-        Symbol => CommaList [ Quote ],
+        Constant => CommaList [ Form ],            // `,(basic
+        EndList => Exit [ EndList ],               // `,()
+        List => List,                              // `,((
+        QuasiQuote => CommaList [ QuasiQuote ],    // `,(`
+        Symbol => CommaList [ Quote ],             // `,(basic
     },
 
     // `,(,
     CommaInList => {
-        QuasiQuote => CommaList [ QuasiQuote ],
+        At => CommaInList [ At ] ,
         Comma => CommaList,
         Constant => CommaList [ Form ],
         EndList => Exit [ EndList ],
         List => List,
+        QuasiQuote => CommaList [ QuasiQuote ],
         Symbol => CommaList [ Quote ],
     },
 }
 
 impl QqMachine {
-    pub fn parse(mut source: String) -> Option<Vec<QqExpr>> {
-        let mut expansion: Vec<QqExpr> = vec![];
-
-        println!("parse: entry {}", source);
-
-        if !source.starts_with('`') {
-            return None;
-        }
-
+    pub fn parse(mut source: String) -> Result<Vec<QqExpr>, String> {
         let mut read_char = || -> Option<char> {
             if source.is_empty() {
                 None
@@ -129,25 +112,21 @@ impl QqMachine {
             }
         };
 
+        let mut expansion: Vec<QqExpr> = vec![];
         let mut machine: StateMachine<Reader> = StateMachine::new();
 
         loop {
             match next_state() {
-                None => {
-                    println!("parse: error, unterminated expression.");
-                    break;
-                }
+                None => return Err("unterminated expression.".to_string()),
                 Some((state, token)) => {
                     match machine.consume(&state) {
                         Err(_) => {
-                            println!(
-                                "parse: error on token {:?} in state {:?}",
+                            return Err(format!(
+                                "syntax, token {:?} in state {:?}",
                                 token,
                                 machine.state(),
-                            );
-                            
-                            break;
-                        },
+                            ));
+                        }
                         Ok(output) => {
                             let new_state = machine.state();
 
@@ -155,7 +134,7 @@ impl QqMachine {
                             match new_state {
                                 ReaderState::QuasiQuote => {
                                     // Self::parse(source);
-                                },
+                                }
                                 ReaderState::CommaList => match output {
                                     None => (),
                                     Some(qualifier) => {
@@ -164,9 +143,17 @@ impl QqMachine {
                                             state, qualifier, token, new_state
                                         );
                                         match qualifier {
-                                            ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
-                                            ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
-                                            _ => (),
+                                            ReaderOutput::Form => {
+                                                expansion.push(QqExpr::Form(token))
+                                            }
+                                            ReaderOutput::Quote => {
+                                                expansion.push(QqExpr::Quote(token))
+                                            }
+                                            _ => {
+                                                return Err(
+                                                    "unimplemented CommaList element".to_string()
+                                                )
+                                            }
                                         }
                                     }
                                 },
@@ -180,14 +167,11 @@ impl QqMachine {
                                     match qualifier {
                                         ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
                                         ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
-                                        _ => (),
+                                        _ => return Err("unimplemented Exit element".to_string()),
                                     }
-
-                                    println!("parse: complete");
                                     break;
                                 }
-                                _ => {
-                                }
+                                _ => {}
                             }
                         }
                     }
@@ -195,6 +179,6 @@ impl QqMachine {
             }
         }
 
-        Some(expansion)
+        Ok(expansion)
     }
 }
