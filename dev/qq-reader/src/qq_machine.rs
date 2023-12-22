@@ -5,15 +5,23 @@ use rust_fsm::*;
 pub struct QqMachine {}
 
 #[derive(Debug)]
-pub enum QqType {
-    Form,
-    Quote,
+pub enum QqExpr {
+    Form(String),      // plain form
+    Quote(String),     // quoted form
+    Dot(String),       // dotted list
+    // List(QqExpr),      // inner form
+    QQuote(Vec<QqExpr>),
 }
 
 state_machine! {
     derive(Debug)
     repr_c(true)
-    Reader(QuasiQuote)
+    Reader(Start)
+
+    // start of parse
+    Start => {
+        QuasiQuote => QuasiQuote
+    },
 
     // `
     QuasiQuote => {
@@ -40,7 +48,6 @@ state_machine! {
         Comma => CommaList,
         Constant => List [ Form ],
         Dot => List [ Dot ],
-        Dot => SyntaxError [ Dot ],
         EndList => Exit [ EndList ],
         List => List,
         Symbol => List [ Quote ],
@@ -66,18 +73,17 @@ state_machine! {
         List => List,
         Symbol => CommaList [ Quote ],
     },
-    
 }
 
 impl QqMachine {
-    pub fn parse(mut source: String) -> Option<String> {
+    pub fn parse(mut source: String) -> Option<Vec<QqExpr>> {
+        let mut expansion: Vec<QqExpr> = vec![];
+
         println!("parse: entry {}", source);
 
         if !source.starts_with('`') {
             return None;
         }
-
-        source.remove(0);
 
         let mut read_char = || -> Option<char> {
             if source.is_empty() {
@@ -124,7 +130,6 @@ impl QqMachine {
         };
 
         let mut machine: StateMachine<Reader> = StateMachine::new();
-        let mut appends: Vec<(QqType, String)> = vec![];
 
         loop {
             match next_state() {
@@ -146,9 +151,9 @@ impl QqMachine {
                         Ok(output) => {
                             let new_state = machine.state();
 
+                            println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
                             match new_state {
                                 ReaderState::QuasiQuote => {
-                                    println!("  ( {:?} {} ) enters {:?}", state, token, new_state);
                                     // Self::parse(source);
                                 },
                                 ReaderState::CommaList => match output {
@@ -159,8 +164,8 @@ impl QqMachine {
                                             state, qualifier, token, new_state
                                         );
                                         match qualifier {
-                                            ReaderOutput::Form => appends.push((QqType::Form, token)),
-                                            ReaderOutput::Quote => appends.push((QqType::Quote, token)),
+                                            ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                            ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
                                             _ => (),
                                         }
                                     }
@@ -173,25 +178,15 @@ impl QqMachine {
                                     );
 
                                     match qualifier {
-                                        ReaderOutput::Quote => appends.push((QqType::Quote, token)),
-                                        ReaderOutput::Form => appends.push((QqType::Form, token)),
-                                        ReaderOutput::EndList => (),
+                                        ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                        ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
                                         _ => (),
                                     }
 
-                                    println!("parse: complete, appends: {:?}", appends);
-                                    break;
-                                }
-                                ReaderState::SyntaxError => {
-                                    println!(
-                                        "parse: {:?} syntax error {:?}",
-                                        machine.state(),
-                                        output.unwrap(),
-                                    );
+                                    println!("parse: complete");
                                     break;
                                 }
                                 _ => {
-                                    println!("  ( {:?} {} ) enters {:?}", state, token, new_state)
                                 }
                             }
                         }
@@ -200,6 +195,6 @@ impl QqMachine {
             }
         }
 
-        Some("ace".to_string())
+        Some(expansion)
     }
 }
