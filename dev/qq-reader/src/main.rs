@@ -1,17 +1,17 @@
-mod qq_machine;
+mod qq_reader;
 
 use {
-    crate::qq_machine::QqMachine,
+    crate::qq_reader::QqReader,
     std::{io, io::BufRead},
 };
 
 fn tests() {
-    println!("{:?}", QqMachine::read(",@".to_string()));
-    println!("{:?}", QqMachine::read(",foo ".to_string()));
-    println!("{:?}", QqMachine::read(",(1234 )".to_string()));
+    println!("{:?}", QqReader::new(",@".to_string()).read());
+    println!("{:?}", QqReader::new(",foo ".to_string()).read());
+    println!("{:?}", QqReader::new(",(1234 )".to_string()).read());
     println!(
         "{:?}",
-        QqMachine::read(",(think 123 thank thunk )".to_string())
+        QqReader::new(",(think 123 thank thunk )".to_string()).read()
     );
 }
 
@@ -20,6 +20,6 @@ fn main() {
 
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
-        println!("{:?}", QqMachine::read(line.unwrap()));
+        println!("{:?}", QqReader::new(line.unwrap()).read());
     }
 }

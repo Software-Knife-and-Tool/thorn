@@ -1,8 +1,17 @@
 #![allow(dead_code)]
 
-use {rust_fsm::*, std::result::Result};
+use {
+    rust_fsm::*,
+    std::{
+        result::Result,
+        cell::RefCell
+    },
+};
 
-pub struct QqMachine {}
+pub struct QqReader {
+    source: RefCell<String>,
+    machine: RefCell<StateMachine<Reader>>,
+}
 
 #[derive(Debug)]
 pub enum QqExpr {
@@ -66,9 +75,68 @@ state_machine! {
     },
 }
 
-impl QqMachine {
-    pub fn read(source: String) -> Result<String, String> {
-        match Self::parse(source) {
+impl QqReader {
+    pub fn new(source: String) -> Self {
+        Self {
+            source: RefCell::new(source),
+            machine: RefCell::new(StateMachine::new()),
+        }
+    }
+
+    fn read_char(&self) -> Option<char> {
+        let mut src = self.source.borrow_mut();
+
+        if src.is_empty() {
+            None
+        } else {
+            Some(src.remove(0))
+        }
+    }
+
+    fn unread_char(&self, ch: char) {
+        let mut src = self.source.borrow_mut();
+
+        src.insert(0, ch);
+    }
+
+    fn next_state(&self) -> Option<(ReaderInput, String)> {
+        match self.read_char() {
+            None => return None,
+            Some(ch) => match ch {
+                '(' => Some((ReaderInput::List, "(".to_string())),
+                ')' => Some((ReaderInput::EndList, ")".to_string())),
+                '`' => Some((ReaderInput::QuasiQuote, "`".to_string())),
+                ',' => Some((ReaderInput::Comma, ",".to_string())),
+                    '@' => Some((ReaderInput::At, "@".to_string())),
+                _ => {
+                    let mut token = String::from(ch);
+
+                    loop {
+                        match self.read_char() {
+                            None => break,
+                            Some(ch) => {
+                                if ch.is_digit(10) || ch.is_alphabetic() {
+                                    token.push(ch)
+                                } else {
+                                    self.unread_char(ch);
+                                    break;
+                                }
+                            }
+                        }
+                        }
+                    
+                    if ch.is_alphabetic() {
+                        Some((ReaderInput::Symbol, token))
+                    } else {
+                        Some((ReaderInput::Constant, token))
+                    }
+                }
+            },
+        }
+    }
+    
+    pub fn read(self) -> Result<String, String> {
+        match self.parse() {
             Ok(vec) => Ok(Self::compile(vec)),
             Err(e) => Err(e),
         }
@@ -92,58 +160,12 @@ impl QqMachine {
         out
     }
     
-    pub fn parse(mut source: String) -> Result<Vec<QqExpr>, String> {
-        println!("parse: `{}", source);
-        
-        let mut read_char = || -> Option<char> {
-            if source.is_empty() {
-                None
-            } else {
-                Some(source.remove(0))
-            }
-        };
-
-        let mut next_state = || -> Option<(ReaderInput, String)> {
-            match read_char() {
-                None => return None,
-                Some(ch) => match ch {
-                    '(' => Some((ReaderInput::List, "(".to_string())),
-                    ')' => Some((ReaderInput::EndList, ")".to_string())),
-                    '`' => Some((ReaderInput::QuasiQuote, "`".to_string())),
-                    ',' => Some((ReaderInput::Comma, ",".to_string())),
-                    '@' => Some((ReaderInput::At, "@".to_string())),
-                    _ => {
-                        let mut token = String::from(ch);
-
-                        loop {
-                            match read_char() {
-                                None => break,
-                                Some(ch) => {
-                                    if ch.is_digit(10) || ch.is_alphabetic() {
-                                        token.push(ch)
-                                    } else {
-                                        // unread_char(ch);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ch.is_alphabetic() {
-                            Some((ReaderInput::Symbol, token))
-                        } else {
-                            Some((ReaderInput::Constant, token))
-                        }
-                    }
-                },
-            }
-        };
-
+    pub fn parse(self) -> Result<Vec<QqExpr>, String> {
+        let mut machine = self.machine.borrow_mut();
         let mut expansion: Vec<QqExpr> = vec![];
-        let mut machine: StateMachine<Reader> = StateMachine::new();
 
         loop {
-            match next_state() {
+            match self.next_state() {
                 None => return Err("unterminated expression.".to_string()),
                 Some((state, token)) => {
                     match machine.consume(&state) {
