@@ -1,17 +1,19 @@
-mod qq_reader;
+mod reader;
 
 use {
-    crate::qq_reader::QqReader,
+    crate::reader::QqReader,
     std::{io, io::BufRead},
 };
 
+// verified by ssbcl
 fn tests() {
-    println!("{:?}", QqReader::new(",@".to_string()).read());
-    println!("{:?}", QqReader::new(",foo ".to_string()).read());
-    println!("{:?}", QqReader::new(",(1234 )".to_string()).read());
+    println!("{:?}", QqReader::new("`,@".to_string()).read());
+    println!("{:?}", QqReader::new("`,pi".to_string()).read());
+    println!("{:?}", QqReader::new("`,1234".to_string()).read());
+    println!("{:?}", QqReader::new("`,(+ 1 2)".to_string()).read());
     println!(
         "{:?}",
-        QqReader::new(",(think 123 thank thunk )".to_string()).read()
+        QqReader::new("`,(list 'think 123 'thank 'thunk)".to_string()).read()
     );
 }
 
