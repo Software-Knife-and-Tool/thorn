@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-
+    
 use {
     rust_fsm::*,
     std::{cell::RefCell, result::Result},
@@ -12,79 +12,98 @@ pub struct QqReader {
 
 #[derive(Debug)]
 pub enum QqExpr {
-    Form(String),          // plain form
-    Quote(String),         // quoted form
-    Dot(String),           // dotted list
-    MakeList(Box<QqExpr>), // make list of
-    List(Vec<QqExpr>),     // is a list
+    Dot(String),             // dotted list
+    Form(String),            // plain form
+    List(Vec<QqExpr>),       // list
+    ListOf(Box<QqExpr>),     // make list of
+    ListQuasi(Box<QqExpr>),  // make list of quasi
+    Quote(String),           // quoted form
 }
 
 #[derive(Debug)]
 pub enum QqState {
-    QuasiQuote,
     Comma,
     CommaList,
-    CommaInList,
+    End,
     List,
-    Exit,
+    ListComma,
+    Quasi,
 }
+
+//
+// quasi quote exansion hierarchy
+//
+//    ` /
+//        , /
+//            basic
+//            (
+//        ( /
+//            basic
+//            `
+//            (
+//            , /
+//                basic
+//                (
+//                @ /
+//                   basic
+//                   (
+//
 
 state_machine! {
     derive(Debug)
     repr_c(true)
-    Reader(QuasiQuote)
+    Reader(Quasi)
 
     // `
-    QuasiQuote => {
-        Comma => Comma,               // `,
-        Constant => Exit [ Form ],    // `basic
-        List => List,                 // `(
-        QuasiQuote => QuasiQuote,     // ``
-        Symbol => Exit [ Quote ],     // `basic
+    Quasi => {
+        Comma => Comma,              // ,
+        Constant => End [ Form ],    // basic
+        List => List,                // (
+        Quasi => Quasi,              // `
+        Symbol => End [ Quote ],     // basic
     },
 
     // `,
     Comma => {
-        Constant => Exit [ Form ],    // `,basic
-        List => CommaList,            // `,(
-        QuasiQuote => QuasiQuote,     // `,`
-        Symbol => Exit [ Form ],      // `,basic
-    },
-
-    // `(
-    List => {
-        Comma => CommaList,           // `(,
-        Constant => List [ Form ],    // `(basic
-        EndList => Exit [ EndList ],  // `()
-        List => List,                 // `((
-        QuasiQuote => QuasiQuote,     // `(`
-        Symbol => List [ Quote ],     // `(basic
+        Constant => End [ Form ],    // ,basic
+        List => CommaList,           // ,(
+        Quasi => Quasi,              // ,`
+        Symbol => End [ Form ],      // ,basic
     },
 
     // `,(
     CommaList => {
-        Constant => CommaList [ Form ],            // `,(basic
-        EndList => Exit [ EndList ],               // `,()
-        List => List,                              // `,((
-        QuasiQuote => CommaList [ QuasiQuote ],    // `,(`
-        Symbol => CommaList [ Quote ],             // `,(basic
+        Constant => List [ Form ],     // ,(basic
+        EndList => End [ EndList ],    // ,()
+        List => List,                  // ,((
+        Quasi => CommaList [ Quasi ],  // ,(`
+        Symbol => CommaList [ Quote ], // ,(basic
     },
 
-    // `,(,
-    CommaInList => {
-        At => CommaInList [ At ] ,
-        Comma => CommaList,
-        Constant => CommaList [ Form ],
-        EndList => Exit [ EndList ],
-        List => List,
-        QuasiQuote => CommaList [ QuasiQuote ],
-        Symbol => CommaList [ Quote ],
+    // `(
+    List => {
+        Comma => ListComma,          // (,
+        Constant => List [ Form ],   // (basic
+        EndList => End [ EndList ],  // ()
+        List => List,                // ((
+        Quasi => Quasi,              // (`
+        Symbol => List [ Quote ],    // (basic
+    },
+
+    // `(,
+    ListComma => {
+        Comma => ListComma,               // ,,
+        At => ListComma [ At ],           // ,@
+        Constant => ListComma [ Form ],   // ,basic
+        List => ListComma,                // ,(
+        Quasi => Quasi,                   // ,`
+        Symbol => ListComma [ Quote ],    // ,basic
     },
 }
 
 impl QqReader {
     pub fn new(mut source: String) -> Self {
-
+        println!("reader: {}", source);
         let src = {
             if source.starts_with('`') {
                 source.remove(0);
@@ -122,6 +141,9 @@ impl QqReader {
     }
 
     pub fn compile(list: Vec<QqExpr>) -> String {
+
+        println!("compile: {:?}", list); 
+
         let mut out = "".to_string();
 
         for el in list {
@@ -129,7 +151,7 @@ impl QqReader {
                 QqExpr::Form(expr) => out.push_str(&format!(" {}", &expr)),
                 QqExpr::Quote(expr) => out.push_str(&format!(" (:quote {})", &expr)),
                 QqExpr::Dot(expr) => out.push_str(&format!(" . {}", &expr)),
-                QqExpr::MakeList(expr) => out.push_str(&format!(" (mu:cons {:?} ())", &*expr)),
+                QqExpr::ListOf(expr) => out.push_str(&format!(" (mu:cons {:?} ())", &*expr)),
                 QqExpr::List(vec) => {
                     for expr in vec {
                         out.push_str(" (mu:%cons");
@@ -137,12 +159,14 @@ impl QqReader {
                             QqExpr::Form(expr) => out.push_str(&format!(" {}", &expr)),
                             QqExpr::Quote(expr) => out.push_str(&format!(" (:quote {})", &expr)),
                             QqExpr::Dot(expr) => out.push_str(&format!(" . {}", &expr)),
-                            QqExpr::MakeList(expr) => out.push_str(&format!(" (mu:cons {:?} ())", &*expr)),
+                            QqExpr::ListOf(expr) => out.push_str(&format!(" (mu:cons {:?} ())", &*expr)),
                             QqExpr::List(expr) => out.push_str(&Self::compile(expr)),
+                            QqExpr::ListQuasi(expr) => out.push_str(&format!("(list `{:?})", &*expr)),
                         }
                     }
                     out.push_str(" ())")
                 }
+                QqExpr::ListQuasi(expr) => out.push_str(&format!("(list `{:?})", &*expr)),
             }
         }
 
@@ -155,7 +179,7 @@ impl QqReader {
             Some(ch) => match ch {
                 '(' => Some((ReaderInput::List, "(".to_string())),
                 ')' => Some((ReaderInput::EndList, ")".to_string())),
-                '`' => Some((ReaderInput::QuasiQuote, "`".to_string())),
+                '`' => Some((ReaderInput::Quasi, "`".to_string())),
                 ',' => Some((ReaderInput::Comma, ",".to_string())),
                 '@' => Some((ReaderInput::At, "@".to_string())),
                 _ => {
@@ -191,12 +215,12 @@ impl QqReader {
         let consume = machine.consume(state);
 
         let qqstate = match machine.state() {
-            ReaderState::QuasiQuote => QqState::QuasiQuote,
+            ReaderState::Quasi => QqState::Quasi,
             ReaderState::Comma => QqState::Comma,
             ReaderState::CommaList => QqState::CommaList,
-            ReaderState::CommaInList => QqState::CommaList,
+            ReaderState::ListComma => QqState::ListComma,
             ReaderState::List => QqState::List,
-            ReaderState::Exit => QqState::Exit,
+            ReaderState::End => QqState::End,
         };
 
         match consume {
@@ -220,9 +244,8 @@ impl QqReader {
                             ));
                         }
                         Ok((output, qqstate)) => {
-                            // println!("reader: token {} output {:?} state {:?} qqstate {:?}", token, output, state, qqstate);
                             match qqstate {
-                                QqState::QuasiQuote => {
+                                QqState::Quasi => {
                                     expansion.push(QqExpr::List(self.parse().unwrap()))
                                 }
                                 QqState::Comma => {}
@@ -248,19 +271,26 @@ impl QqReader {
                                         _ => return Err("unimplemented List element".to_string()),
                                     },
                                 },
-                                QqState::Exit => {
+                                QqState::ListComma => match output {
+                                    None => expansion.push(QqExpr::List(self.parse().unwrap())),
+                                    Some(qualifier) => match qualifier {
+                                        ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                        ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
+                                        ReaderOutput::EndList => break,
+                                        _ => {
+                                            return Err(
+                                                "unimplemented CommaList element".to_string()
+                                            )
+                                        }
+                                    },
+                                },
+                                QqState::End => {
                                     match output.unwrap() {
                                         ReaderOutput::Form => expansion.push(QqExpr::Form(token)),
                                         ReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
                                         ReaderOutput::EndList => break,
-                                        _ => return Err("unimplemented Exit element".to_string()),
+                                        _ => return Err("unimplemented End element".to_string()),
                                     }
-                                }
-                                _ => {
-                                    return Err(format!(
-                                        "  unimplemented state [ {:?} {} ]",
-                                        state, token
-                                    ));
                                 }
                             }
                         }
