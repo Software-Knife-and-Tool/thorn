@@ -10,7 +10,7 @@ fn tests() {
     println!("{:?}", QqReader::new("`,@".to_string()).read());
     println!("{:?}", QqReader::new("`,pi".to_string()).read());
     println!("{:?}", QqReader::new("`,1234".to_string()).read());
-    println!("{:?}", QqReader::new("`,(+ 1 2)".to_string()).read());
+    println!("{:?}", QqReader::new("`,(add 1 2)".to_string()).read());
     println!(
         "{:?}",
         QqReader::new("`,(list 'think 123 'thank 'thunk)".to_string()).read()
