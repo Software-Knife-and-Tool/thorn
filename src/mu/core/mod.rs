@@ -15,6 +15,8 @@ pub mod heap;
 pub mod indirect;
 pub mod mu;
 pub mod namespace;
+#[cfg(feature = "qquote")]
+pub mod qquote;
 pub mod reader;
 pub mod readtable;
 pub mod stream;

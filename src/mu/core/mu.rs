@@ -14,6 +14,7 @@ use {
             funcall::LibMuFunction,
             heap::Core as _,
             namespace::{Core as NSCore, Namespace},
+            qquote::QqReader,
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
@@ -73,6 +74,8 @@ pub struct Mu {
 
     // reader
     pub reader: Reader,
+    #[cfg(feature = "qquote")]
+    pub qquote: QqReader,
 
     // standard streams
     pub stdin: Tag,
@@ -138,6 +141,8 @@ impl Core for Mu {
 
             // reader
             reader: Reader::new(),
+            #[cfg(feature = "qquote")]
+            qquote: QqReader::new(),
 
             // system
             start_time: ProcessTime::now(),
