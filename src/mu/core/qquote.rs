@@ -133,16 +133,39 @@ impl QqReader {
 
     pub fn read(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
         match Self::parse(mu, stream) {
-            Ok(vec) => Ok(Self::compile(vec).unwrap()),
+            Ok(vec) => Ok(Self::compile(mu, vec).unwrap()),
             Err(e) => Err(e),
         }
     }
 
-    fn compile(_list: Vec<QqExpr>) -> exception::Result<Tag> {
+    fn print_annotated_tag(mu: &Mu, preface: &str, tag: Tag) {
+        print!("{}: ", preface);
+        mu.write(tag, true, mu.stdout).unwrap();
+        println!()
+    }
+
+    fn compile(mu: &Mu, list: Vec<QqExpr>) -> exception::Result<Tag> {
+        println!("compile:");
+        for expr in list {
+            match expr {
+                QqExpr::Dot(tag) => Self::print_annotated_tag(mu, "    dot", tag),
+                QqExpr::Form(tag) => Self::print_annotated_tag(mu, "    form", tag),
+                QqExpr::List(_vec) => Self::print_annotated_tag(mu, "    list", Tag::nil()),
+                QqExpr::ListOf(_box_tag) => {
+                    Self::print_annotated_tag(mu, "    list-of", Tag::nil())
+                }
+                QqExpr::ListQuasi(_box_tag) => {
+                    Self::print_annotated_tag(mu, "    list-quasi", Tag::nil())
+                }
+                QqExpr::Quote(tag) => Self::print_annotated_tag(mu, "    quote", tag),
+            }
+        }
+
         Ok(Tag::nil())
     }
 
     fn next_input_state(mu: &Mu, stream: Tag) -> exception::Result<Option<(QReaderInput, Tag)>> {
+        Reader::read_ws(mu, stream).unwrap();
         match Stream::read_char(mu, stream) {
             Err(e) => Err(e),
             Ok(None) => return Ok(None),
@@ -158,6 +181,7 @@ impl QqReader {
                     match <mu::Mu as stream::Core>::read(mu, stream, false, Tag::nil(), false) {
                         Err(e) => return Err(e),
                         Ok(form) => match Tag::type_of(form) {
+                            Type::Cons => panic!(),
                             Type::Symbol => Ok(Some((QReaderInput::Symbol, form))),
                             _ => Ok(Some((QReaderInput::Constant, form))),
                         },
@@ -173,7 +197,7 @@ impl QqReader {
         match machine.consume(state) {
             Err(_) => panic!(),
             Ok(output) => {
-                let qqstate = match *machine.state() {
+                let qqstate = match machine.state() {
                     QReaderState::Quasi => QqState::Quasi,
                     QReaderState::Comma => QqState::Comma,
                     QReaderState::CommaList => QqState::CommaList,
@@ -182,7 +206,10 @@ impl QqReader {
                     QReaderState::End => QqState::End,
                 };
 
-                Ok((Some(output.unwrap()), qqstate))
+                match output {
+                    None => Ok((None, qqstate)),
+                    Some(output) => Ok((Some(output), qqstate)),
+                }
             }
         }
     }
@@ -198,47 +225,58 @@ impl QqReader {
                     Err(_qqstate) => {
                         return Err(Exception::new(Condition::Syntax, "qquote", token));
                     }
-                    Ok((output, qqstate)) => match qqstate {
-                        QqState::Quasi => {
-                            expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap()))
-                        }
-                        QqState::Comma => {}
-                        QqState::CommaList => match output {
-                            None => expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap())),
-                            Some(qualifier) => match qualifier {
-                                QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
-                                QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
-                                QReaderOutput::EndList => break,
-                                _ => {
-                                    panic!()
+                    Ok((output, qqstate)) => {
+                        println!("qqstate: {:?}", qqstate);
+                        match qqstate {
+                            QqState::Quasi => {
+                                println!("new quasi");
+                                expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap()))
+                            }
+                            QqState::Comma => {}
+                            QqState::CommaList => match output {
+                                None => {
+                                    expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap()))
                                 }
+                                Some(qualifier) => match qualifier {
+                                    QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                    QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
+                                    QReaderOutput::EndList => break,
+                                    _ => {
+                                        panic!()
+                                    }
+                                },
                             },
-                        },
-                        QqState::List => match output {
-                            None => expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap())),
-                            Some(qualifier) => match qualifier {
+                            QqState::List => match output {
+                                None => {
+                                    println!("new list");
+                                    expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap()))
+                                }
+                                Some(qualifier) => match qualifier {
+                                    QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                    QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
+                                    QReaderOutput::EndList => break,
+                                    _ => panic!(),
+                                },
+                            },
+                            QqState::ListComma => match output {
+                                None => {
+                                    expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap()))
+                                }
+                                Some(qualifier) => match qualifier {
+                                    QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                    QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
+                                    QReaderOutput::EndList => break,
+                                    _ => panic!(),
+                                },
+                            },
+                            QqState::End => match output.unwrap() {
                                 QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
                                 QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
                                 QReaderOutput::EndList => break,
                                 _ => panic!(),
                             },
-                        },
-                        QqState::ListComma => match output {
-                            None => expansion.push(QqExpr::List(Self::parse(mu, stream).unwrap())),
-                            Some(qualifier) => match qualifier {
-                                QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
-                                QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
-                                QReaderOutput::EndList => break,
-                                _ => panic!(),
-                            },
-                        },
-                        QqState::End => match output.unwrap() {
-                            QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
-                            QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
-                            QReaderOutput::EndList => break,
-                            _ => panic!(),
-                        },
-                    },
+                        }
+                    }
                 },
             }
         }
