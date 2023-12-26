@@ -1,7 +1,7 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! mu srteam functions
+//! mu stream functions
 use crate::{
     core::{
         async_context::{AsyncContext, Core as _},

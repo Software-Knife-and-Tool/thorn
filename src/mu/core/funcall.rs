@@ -31,6 +31,9 @@ use crate::{
     },
 };
 
+#[cfg(feature = "qquote")]
+use crate::core::qquote::{MuFunction as _, QqReader};
+
 //
 // native functions
 //
@@ -71,6 +74,8 @@ lazy_static! {
         ("eval", 1, Mu::mu_eval),
         ("frames", 0, Mu::mu_frames),
         ("fix", 2, Mu::mu_fix),
+        #[cfg(feature = "qquote")]
+        ("%qquote", 1, QqReader::mu_qquote),
         ("%append", 2, Mu::append_),
         // exceptions
         ("with-ex", 2, Exception::mu_with_ex),

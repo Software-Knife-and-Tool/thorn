@@ -18,6 +18,10 @@ path = "src/mu/lib.rs"
 crate-type = ["lib"]
 bench = false
 
+[features]
+default = ["qquote"]
+qquote = []
+
 [profile.dev]
 opt-level = 0
 
@@ -25,6 +29,7 @@ opt-level = 0
 opt-level = 3
 
 [dependencies]
+async-std = "1.12.0"
 cpu-time = "1.0.0"
 crossbeam = "0.8"
 futures = "0.3.28"
@@ -35,7 +40,8 @@ memmap = "0.7.0"
 modular-bitfield = "0.11.2"
 num_enum = "0.5.6"
 oports = "1.0.0"
-async-std = "1.12.0"
+rust-fsm = { version = "0.6.1" }
+rust-fsm-dsl = { version = "0.6.1" }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = "0.5.4"
