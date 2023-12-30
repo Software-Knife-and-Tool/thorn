@@ -6,6 +6,7 @@
 (prelude:run-test "`1234")
 (prelude:run-test "`,1234")
 (prelude:run-test "`(1234)")
+(prelude:run-test "`(1234 symbol)")
 (prelude:run-test "``1234")
 (prelude:run-test "`,`1234")
 (prelude:run-test "`,`(1234)")
