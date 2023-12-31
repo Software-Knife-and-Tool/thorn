@@ -12,6 +12,7 @@ use {
             frame::Frame,
             funcall::Core as _,
             mu::{self, Core as _, Mu},
+            namespace::Core,
             reader::{Core as _, Reader},
             readtable::{map_char_syntax, SyntaxType},
             stream::{self, Core as _},
@@ -23,6 +24,7 @@ use {
             fixnum::Fixnum,
             stream::{Core as _, Stream},
             streambuilder::StreamBuilder,
+            symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
         },
     },
@@ -32,16 +34,17 @@ use {
 
 pub struct QqReader {
     machine: RefCell<StateMachine<QReader>>,
+    append_sym: Tag,
 }
 
 enum QqExpr {
-    Comma,               // comma form
-    Dot(Tag),            // dotted list
-    Form(Tag),           // plain form
-    List(Vec<QqExpr>),   // list
-    ListOf(Box<QqExpr>), // make list of
-    Quasi(Box<QqExpr>),  // quasi list
-    Quote(Tag),          // quoted form
+    Comma(Box<QqExpr>), // comma form
+    Dot(Tag),           // dotted list
+    Form(Tag),          // plain form
+    List(Vec<QqExpr>),  // list
+    ListOf(Tag),        // make list of
+    Quasi(Box<QqExpr>), // quasi list
+    Quote(Tag),         // quoted form
 }
 
 #[derive(Debug)]
@@ -97,7 +100,7 @@ state_machine! {
     // `(
     List => {
         Comma => Comma,                  // ,
-        Constant => List [ Form ],       // basic
+        Constant => List [ ListOf ],     // basic
         Dot => List [ Dot ],             // .
         EndList => List [ End ],         // ()
         List => List [ Form ],           // (
@@ -117,24 +120,69 @@ state_machine! {
 }
 
 impl QqReader {
-    pub fn new() -> Self {
+    pub fn new(mu: &Mu) -> Self {
         Self {
             machine: RefCell::new(StateMachine::new()),
+            append_sym: <Mu as Core>::intern_symbol(
+                mu,
+                mu.mu_ns,
+                "%append".to_string(),
+                Tag::nil(),
+            ),
         }
     }
 
     pub fn read(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
-        match Self::parse(&Self::new(), mu, stream) {
-            Ok(vec) => Ok(Self::compile(mu, vec).unwrap()),
+        let parser = Self::new(mu);
+        match Self::parse(&parser, mu, stream) {
+            Ok(vec) => Ok(Self::compile(&parser, mu, vec).unwrap()),
             Err(e) => Err(e),
         }
     }
 
-    fn compile(mu: &Mu, expr: QqExpr) -> exception::Result<Tag> {
-        println!("compile:");
+    fn compile(&self, mu: &Mu, expr: QqExpr) -> exception::Result<Tag> {
+        match expr {
+            QqExpr::Comma(boxed_expr) => Self::compile(self, mu, *boxed_expr),
+            QqExpr::Form(tag) => Ok(tag),
+            QqExpr::ListOf(tag) |
+            QqExpr::Quote(tag) => {  
+                let vlist = vec![
+                    Symbol::keyword("quote"),
+                    Cons::vlist(mu, &vec![tag]),
+                ];
 
-        Self::print_indent(mu, 1, expr);
-        Ok(Tag::nil())
+                Ok(Cons::vlist(mu, &vlist))
+            },
+            QqExpr::List(vec) => {
+                let mut append_chain = Tag::nil();
+
+                for expr in vec.into_iter().rev() {
+                    append_chain = Cons::new(
+                        self.append_sym,
+                        Cons::new(
+                            Self::compile(self, mu, expr).unwrap(),
+                            Cons::new(append_chain, Tag::nil()).evict(mu),
+                        )
+                        .evict(mu),
+                    )
+                    .evict(mu);
+                }
+
+                Ok(append_chain)
+            }
+            _ => Ok(Tag::nil()),
+        }
+
+        /*
+                QqExpr::Dot(tag) => Self::print_annotated_tag(mu, "QqExpr::Dot:", tag),
+
+                QqExpr::Quasi(boxed_expr) => {
+                    println!("QqExpr::Quasi:");
+                    Self::print_indent(mu, indent + 1, *boxed_expr);
+                }
+
+        }
+            */
     }
 
     fn print_state(&self) {
@@ -154,26 +202,32 @@ impl QqReader {
             print!(" ");
         }
         match expr {
-            QqExpr::Comma => println!("QqExpr::Comma"),
-            QqExpr::Dot(tag) => Self::print_annotated_tag(mu, "dot", tag),
-            QqExpr::Form(tag) => Self::print_annotated_tag(mu, "form", tag),
+            QqExpr::Comma(boxed_expr) => {
+                println!("QqExpr::Comma: ");
+                Self::print_indent(mu, 0, *boxed_expr);
+            }
+            QqExpr::Dot(tag) => Self::print_annotated_tag(mu, "QqExpr::Dot:", tag),
+            QqExpr::Form(tag) => Self::print_annotated_tag(mu, "QqExpr::Form:", tag),
             QqExpr::List(vec) => {
-                println!("list: {}", vec.len());
+                println!("QqExpr::List: {}", vec.len());
                 for expr in vec {
                     Self::print_indent(mu, indent + 1, expr);
                 }
             }
-            QqExpr::ListOf(_box_tag) => Self::print_annotated_tag(mu, "list-of", Tag::nil()),
+            QqExpr::ListOf(_box_tag) => Self::print_annotated_tag(mu, "QqExpr::ListOf", Tag::nil()),
             QqExpr::Quasi(boxed_expr) => {
-                println!("quasi:");
+                println!("QqExpr::Quasi:");
                 Self::print_indent(mu, indent + 1, *boxed_expr);
             }
-            QqExpr::Quote(tag) => Self::print_annotated_tag(mu, "quote", tag),
+            QqExpr::Quote(tag) => Self::print_annotated_tag(mu, "QqExpr::Quote", tag),
         }
     }
 
-    fn next_input_state(&self, mu: &Mu, stream: Tag) -> exception::Result<Option<(QReaderInput, Tag)>> {
-
+    fn next_input_state(
+        &self,
+        mu: &Mu,
+        stream: Tag,
+    ) -> exception::Result<Option<(QReaderInput, Tag)>> {
         Reader::read_ws(mu, stream).unwrap();
         match Stream::read_char(mu, stream) {
             Err(e) => Err(e),
@@ -204,11 +258,11 @@ impl QqReader {
         let mut machine = self.machine.borrow_mut();
 
         match machine.consume(state) {
-            Err(_) => {
-                Err(Exception::new(Condition::Syntax,
-                                   "illegal token: type",
-                                   Tag::nil()))
-            },
+            Err(_) => Err(Exception::new(
+                Condition::Syntax,
+                "illegal token: type",
+                Tag::nil(),
+            )),
             Ok(output) => {
                 let qqstate = match machine.state() {
                     QReaderState::Start => QqState::Start,
@@ -229,28 +283,36 @@ impl QqReader {
         let mut expansion: Vec<QqExpr> = vec![];
 
         loop {
+            // Self::print_state(self);
             match Self::next_input_state(self, mu, stream) {
                 Err(e) => return Err(e),
-                Ok(None) => return Err(Exception::new(Condition::Syntax, "incomplete expression", Tag::nil())),
+                Ok(None) => {
+                    return Err(Exception::new(
+                        Condition::Syntax,
+                        "incomplete expression",
+                        Tag::nil(),
+                    ))
+                }
                 Ok(Some((state, token))) => {
-                    // Self::print_state(self);
-                    // print!("next reader state {:?}", state);
-                    // Self::print_annotated_tag(mu, " ", token);
+                    // Self::print_annotated_tag(mu,
+                    //                          &format!("reader state {:?}", state),
+                    //                          token);
                     match self.next(&state) {
                         Err(e) => return Err(e),
                         Ok((output, qqstate)) => match qqstate {
-                            QqState::Start => {},
+                            QqState::Start => {}
                             QqState::Quasi => match output {
-                                None => {},
+                                None => {}
                                 Some(qualifier) => match qualifier {
                                     QReaderOutput::New => expansion.push(QqExpr::Quasi(Box::new(
-                                        Self::parse(&Self::new(), mu, stream).unwrap(),
+                                        self.parse(mu, stream).unwrap(),
                                     ))),
-                                    QReaderOutput::Comma => expansion.push(QqExpr::Comma),
-                                    QReaderOutput::Form => {
-                                        expansion.push(QqExpr::Form(token));
-                                        return Ok(QqExpr::List(expansion))
-                                    },
+                                    QReaderOutput::Comma => {
+                                        return Ok(QqExpr::Comma(Box::new(
+                                            self.parse(mu, stream).unwrap(),
+                                        )))
+                                    }
+                                    QReaderOutput::Form => return Ok(QqExpr::Form(token)),
                                     QReaderOutput::Quote => return Ok(QqExpr::Quote(token)),
                                     _ => {
                                         panic!()
@@ -258,7 +320,11 @@ impl QqReader {
                                 },
                             },
                             QqState::Comma => match output {
-                                None => expansion.push(QqExpr::Comma),
+                                None => {
+                                    return Ok(QqExpr::Comma(Box::new(
+                                        self.parse(mu, stream).unwrap(),
+                                    )))
+                                }
                                 Some(qualifier) => match qualifier {
                                     QReaderOutput::At => return Ok(QqExpr::List(expansion)),
                                     QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
@@ -274,6 +340,7 @@ impl QqReader {
                                     QReaderOutput::Dot => expansion.push(QqExpr::Quote(token)),
                                     QReaderOutput::End => return Ok(QqExpr::List(expansion)),
                                     QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
+                                    QReaderOutput::ListOf => expansion.push(QqExpr::ListOf(token)),
                                     QReaderOutput::Quasi => return Ok(QqExpr::List(expansion)),
                                     QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
                                     _ => panic!(),
