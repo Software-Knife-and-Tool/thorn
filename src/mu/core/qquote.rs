@@ -1,31 +1,24 @@
 //  SPDX-FileCopyrightText: Copyright 2022 James M. Putnam (putnamjm.design@gmail.com)
 //  SPDX-License-Identifier: MIT
 
-//! quasi quote reader
-#![allow(dead_code)]
-#[allow(unused_imports)]
+//! quasiquote reader
 use {
     crate::{
         core::{
-            compile::Compiler,
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::Core as _,
-            mu::{self, Core as _, Mu},
+            mu::{self, Mu},
             namespace::Core,
             reader::{Core as _, Reader},
-            readtable::{map_char_syntax, SyntaxType},
             stream::{self, Core as _},
-            types::{MuFunction as _, Tag, Type},
+            types::{Tag, Type},
         },
         types::{
             char::Char,
-            cons::{Cons, ConsIter, Core as _},
-            fixnum::Fixnum,
+            cons::{Cons, Core as _},
             stream::{Core as _, Stream},
-            streambuilder::StreamBuilder,
             symbol::{Core as _, Symbol},
-            vector::{Core as _, Vector},
         },
     },
     rust_fsm::*,
@@ -51,6 +44,7 @@ enum QqExpr {
 enum QqState {
     Start,
     Quasi,
+    QuasiComma,
     Comma,
     List,
 }
@@ -90,32 +84,37 @@ state_machine! {
 
     // `
     Quasi => {
-        Comma => Quasi [ Comma ],        // ,
+        Comma => QuasiComma,             // ,
         Constant => Quasi [ Form ],      // basic
+        Symbol => Quasi [ Quote ],       // basic
         List => List,                    // (
         Quasi => Quasi [ New ],          // `
-        Symbol => Quasi [ Quote ],       // basic
     },
 
-    // `(
+    QuasiComma => {
+        Constant => QuasiComma [ Form ], // basic
+        Symbol => QuasiComma [ Form ],   // basic
+        List => QuasiComma [  List ],    // (
+        Quasi => QuasiComma [ Quasi ],   // `
+    },
+
     List => {
         Comma => Comma,                  // ,
         Constant => List [ ListOf ],     // basic
+        Symbol => List [ Quote ],        // basic
         Dot => List [ Dot ],             // .
         EndList => List [ End ],         // ()
         List => List [ Form ],           // (
         Quasi => List [ Quasi ],         // `
-        Symbol => List [ Quote ],        // basic
     },
 
-    // `(,
     Comma => {
         Comma => Comma,                  // ,
-        At => Comma [ At ],              // @
-        Constant => Comma [ Form ],      // basic
-        List => Comma [ Form ],          // (
-        Quasi => Quasi [ New ],          // `
-        Symbol => Comma [ Quote ],       // basic
+        At => Comma [ At ],              // ,@
+        Constant => List [ Form ],       // ,basic
+        Symbol => Comma [ Quote ],       // ,basic
+        List => Comma [ Form ],          // ,(
+        Quasi => Quasi [ New ],          // ,`
     },
 }
 
@@ -142,17 +141,18 @@ impl QqReader {
 
     fn compile(&self, mu: &Mu, expr: QqExpr) -> exception::Result<Tag> {
         match expr {
-            QqExpr::Comma(boxed_expr) => Self::compile(self, mu, *boxed_expr),
             QqExpr::Form(tag) => Ok(tag),
-            QqExpr::ListOf(tag) |
-            QqExpr::Quote(tag) => {  
-                let vlist = vec![
-                    Symbol::keyword("quote"),
-                    Cons::vlist(mu, &vec![tag]),
-                ];
+            QqExpr::Comma(boxed_expr) => Self::compile(self, mu, *boxed_expr),
+            QqExpr::ListOf(tag) => {
+                let vlist = vec![Symbol::keyword("quote"), Cons::vlist(mu, &[tag])];
 
                 Ok(Cons::vlist(mu, &vlist))
-            },
+            }
+            QqExpr::Quote(tag) => {
+                let vlist = vec![Symbol::keyword("quote"), tag];
+
+                Ok(Cons::vlist(mu, &vlist))
+            }
             QqExpr::List(vec) => {
                 let mut append_chain = Tag::nil();
 
@@ -267,6 +267,7 @@ impl QqReader {
                 let qqstate = match machine.state() {
                     QReaderState::Start => QqState::Start,
                     QReaderState::Quasi => QqState::Quasi,
+                    QReaderState::QuasiComma => QqState::QuasiComma,
                     QReaderState::Comma => QqState::Comma,
                     QReaderState::List => QqState::List,
                 };
@@ -294,9 +295,11 @@ impl QqReader {
                     ))
                 }
                 Ok(Some((state, token))) => {
-                    // Self::print_annotated_tag(mu,
-                    //                          &format!("reader state {:?}", state),
-                    //                          token);
+                    /*
+                    Self::print_annotated_tag(mu,
+                                              &format!("reader state {:?}", state),
+                    token);
+                    */
                     match self.next(&state) {
                         Err(e) => return Err(e),
                         Ok((output, qqstate)) => match qqstate {
@@ -307,13 +310,19 @@ impl QqReader {
                                     QReaderOutput::New => expansion.push(QqExpr::Quasi(Box::new(
                                         self.parse(mu, stream).unwrap(),
                                     ))),
-                                    QReaderOutput::Comma => {
-                                        return Ok(QqExpr::Comma(Box::new(
-                                            self.parse(mu, stream).unwrap(),
-                                        )))
-                                    }
                                     QReaderOutput::Form => return Ok(QqExpr::Form(token)),
                                     QReaderOutput::Quote => return Ok(QqExpr::Quote(token)),
+                                    _ => {
+                                        panic!()
+                                    }
+                                },
+                            },
+                            QqState::QuasiComma => match output {
+                                None => {}
+                                Some(qualifier) => match qualifier {
+                                    QReaderOutput::Form => return Ok(QqExpr::Form(token)),
+                                    QReaderOutput::List => return Ok(QqExpr::Form(token)),
+                                    QReaderOutput::Quasi => return Ok(QqExpr::Form(token)),
                                     _ => {
                                         panic!()
                                     }
