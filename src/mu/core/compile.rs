@@ -5,6 +5,7 @@
 //!     function calls
 //!     special forms
 use crate::{
+    async_::context::{AsyncContext, Core as _},
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -21,7 +22,6 @@ use crate::{
     },
 };
 
-use crate::core::async_context::{AsyncContext, Core as _};
 use futures::executor::block_on;
 
 // special forms

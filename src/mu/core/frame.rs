@@ -18,7 +18,7 @@ use crate::{
         cons::{Cons, ConsIter},
         fixnum::Fixnum,
         function::Function,
-        r#struct::{Core as _, Struct},
+        struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vecimage::VectorIter,
         vector::{Core as _, Vector},

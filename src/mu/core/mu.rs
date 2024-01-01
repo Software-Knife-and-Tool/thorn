@@ -6,8 +6,8 @@
 use {
     crate::{
         allocators::bump_allocator::BumpAllocator,
+        async_::context::AsyncContext,
         core::{
-            async_context::AsyncContext,
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -22,9 +22,9 @@ use {
             cons::{Cons, ConsIter, Core as _},
             function::{Core as _, Function},
             map::{Core as _, Map},
-            r#struct::{Core as _, Struct},
             stream::{Core as _, Stream},
             streambuilder::StreamBuilder,
+            struct_::{Core as _, Struct},
             symbol::{Core as _, Symbol},
             vector::{Core as _, Vector},
         },

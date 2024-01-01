@@ -19,7 +19,7 @@ use {
             cons::Cons,
             fixnum::Fixnum,
             function::Function,
-            r#struct::Struct,
+            struct_::Struct,
             symbol::{Core as _, Symbol, UNBOUND},
         },
     },
