@@ -6,6 +6,7 @@ list
 map
 namespace
 number
+qquote
 reader
 special-form
 stream
