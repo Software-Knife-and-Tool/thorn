@@ -8,6 +8,7 @@ mu         list           total: 22       pass: 22       fail: 0        exceptio
 mu         map            total: 10       pass: 10       fail: 0        exceptions: 0       
 mu         namespace      total: 14       pass: 14       fail: 0        exceptions: 0       
 mu         number         total: 35       pass: 35       fail: 0        exceptions: 0       
+mu         qquote         total: 12       pass: 6        fail: 5        exceptions: 1       
 mu         reader         total: 41       pass: 41       fail: 0        exceptions: 0       
 mu         special-form   total: 11       pass: 11       fail: 0        exceptions: 0       
 mu         stream         total: 10       pass: 10       fail: 0        exceptions: 0       
@@ -15,7 +16,7 @@ mu         struct         total: 7        pass: 7        fail: 0        exceptio
 mu         symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 272      pass: 272      fail: 0        exceptions: 0         
+mu                        total: 284      pass: 278      fail: 5        exceptions: 1         
 
 Namespace Test Summary:
 -----------------------

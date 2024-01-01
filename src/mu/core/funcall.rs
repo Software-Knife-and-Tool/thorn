@@ -3,8 +3,8 @@
 
 //! mu functions
 use crate::{
+    async_::context::MuFunction as _,
     core::{
-        async_context::MuFunction as _,
         backquote::MuFunction as _,
         compile::MuFunction as _,
         dynamic::MuFunction as _,
@@ -23,9 +23,9 @@ use crate::{
         float::{Float, MuFunction as _},
         function::Function,
         map::MuFunction as _,
-        r#struct::{MuFunction as _, Struct},
         stream::Stream,
         streams::MuFunction as _,
+        struct_::{MuFunction as _, Struct},
         symbol::{MuFunction as _, Symbol},
         vector::{MuFunction as _, Vector},
     },

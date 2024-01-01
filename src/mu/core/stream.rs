@@ -3,8 +3,8 @@
 
 //! mu stream functions
 use crate::{
+    async_::context::{AsyncContext, Core as _},
     core::{
-        async_context::{AsyncContext, Core as _},
         backquote::Backquote,
         exception::{self, Condition, Exception},
         frame::Frame,
@@ -21,8 +21,8 @@ use crate::{
         float::{Core as _, Float},
         function::{Core as _, Function},
         map::{Core as _, Map},
-        r#struct::{Core as _, Struct},
         stream::{Core as _, Stream},
+        struct_::{Core as _, Struct},
         symbol::{Core as _, Symbol},
         vector::{Core as _, Vector},
     },

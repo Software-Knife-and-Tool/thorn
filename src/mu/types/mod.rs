@@ -11,7 +11,7 @@ pub mod map;
 pub mod stream;
 pub mod streambuilder;
 pub mod streams;
-pub mod r#struct;
+pub mod struct_;
 pub mod symbol;
 pub mod vecimage;
 pub mod vector;
