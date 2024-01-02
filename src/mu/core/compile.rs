@@ -292,11 +292,7 @@ impl MuFunction for Mu {
         let true_fn = fp.argv[1];
         let false_fn = fp.argv[2];
 
-        fp.value = match mu.fp_argv_check(
-            "::if".to_string(),
-            &[Type::T, Type::Function, Type::Function],
-            fp,
-        ) {
+        fp.value = match mu.fp_argv_check("::if", &[Type::T, Type::Function, Type::Function], fp) {
             Ok(_) => match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
                 Ok(tag) => tag,
                 Err(e) => return Err(e),

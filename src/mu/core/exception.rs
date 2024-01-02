@@ -132,7 +132,7 @@ impl MuFunction for Exception {
         let src = fp.argv[0];
         let condition = fp.argv[1];
 
-        match mu.fp_argv_check("raise".to_string(), &[Type::T, Type::Keyword], fp) {
+        match mu.fp_argv_check("raise", &[Type::T, Type::Keyword], fp) {
             Ok(_) => match Self::map_condition(condition) {
                 Ok(cond) => Err(Self::new(cond, "raise", src)),
                 Err(_) => Err(Self::new(Condition::Type, "raise", condition)),
@@ -145,41 +145,40 @@ impl MuFunction for Exception {
         let handler = fp.argv[0];
         let thunk = fp.argv[1];
 
-        fp.value =
-            match mu.fp_argv_check("with-ex".to_string(), &[Type::Function, Type::Function], fp) {
-                Ok(_) => {
-                    {
-                        let dynamic_ref = block_on(mu.dynamic.read());
-                        let mut exception_ref = block_on(mu.exception.write());
+        fp.value = match mu.fp_argv_check("with-ex", &[Type::Function, Type::Function], fp) {
+            Ok(_) => {
+                {
+                    let dynamic_ref = block_on(mu.dynamic.read());
+                    let mut exception_ref = block_on(mu.exception.write());
 
-                        exception_ref.push(dynamic_ref.len())
-                    }
+                    exception_ref.push(dynamic_ref.len())
+                }
 
-                    match mu.apply(thunk, Tag::nil()) {
-                        Ok(value) => value,
-                        Err(e) => {
-                            let args =
-                                vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
-                            match mu.apply_(handler, args) {
-                                Ok(value) => {
-                                    let mut dynamic_ref = block_on(mu.dynamic.write());
-                                    let mut exception_ref = block_on(mu.exception.write());
+                match mu.apply(thunk, Tag::nil()) {
+                    Ok(value) => value,
+                    Err(e) => {
+                        let args =
+                            vec![e.object, Self::map_condkey(e.condition).unwrap(), e.source];
+                        match mu.apply_(handler, args) {
+                            Ok(value) => {
+                                let mut dynamic_ref = block_on(mu.dynamic.write());
+                                let mut exception_ref = block_on(mu.exception.write());
 
-                                    match exception_ref.pop() {
-                                        Some(len) => {
-                                            dynamic_ref.resize(len, (0, 0));
-                                            value
-                                        }
-                                        None => panic!("dynamic stack underflow"),
+                                match exception_ref.pop() {
+                                    Some(len) => {
+                                        dynamic_ref.resize(len, (0, 0));
+                                        value
                                     }
+                                    None => panic!("dynamic stack underflow"),
                                 }
-                                Err(e) => return Err(e),
                             }
+                            Err(e) => return Err(e),
                         }
                     }
                 }
-                Err(e) => return Err(e),
-            };
+            }
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }

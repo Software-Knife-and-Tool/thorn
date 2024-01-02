@@ -213,7 +213,7 @@ pub trait MuFunction {
 
 impl MuFunction for Frame {
     fn mu_fr_pop(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.fp_argv_check("fr-pop".to_string(), &[Type::Function], fp) {
+        fp.value = match mu.fp_argv_check("fr-pop", &[Type::Function], fp) {
             Ok(_) => {
                 Self::frame_stack_pop(mu, fp.argv[0]);
                 fp.argv[0]
@@ -225,7 +225,7 @@ impl MuFunction for Frame {
     }
 
     fn mu_fr_push(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.fp_argv_check("fr-push".to_string(), &[Type::Vector], fp) {
+        fp.value = match mu.fp_argv_check("fr-push", &[Type::Vector], fp) {
             Ok(_) => {
                 Self::from_tag(mu, fp.value).frame_stack_push(mu);
                 fp.argv[0]
@@ -240,7 +240,7 @@ impl MuFunction for Frame {
         let frame = fp.argv[0];
         let offset = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fr-ref".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fr-ref", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Frame::frame_ref(
                 mu,
                 Fixnum::as_i64(frame) as u64,

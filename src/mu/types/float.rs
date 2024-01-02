@@ -84,7 +84,7 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fl-add".to_string(), &[Type::Float, Type::Float], fp) {
+        fp.value = match mu.fp_argv_check("fl-add", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 let sum = Self::as_f32(mu, fl0).add(Self::as_f32(mu, fl1));
                 if sum.is_nan() {
@@ -103,7 +103,7 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fl-sub".to_string(), &[Type::Float, Type::Float], fp) {
+        fp.value = match mu.fp_argv_check("fl-sub", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 let diff = Self::as_f32(mu, fl0).sub(Self::as_f32(mu, fl1));
                 if diff.is_nan() {
@@ -122,7 +122,7 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fl-mul".to_string(), &[Type::Float, Type::Float], fp) {
+        fp.value = match mu.fp_argv_check("fl-mul", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 let prod = Self::as_f32(mu, fl0).mul(Self::as_f32(mu, fl1));
 
@@ -142,7 +142,7 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fl-div".to_string(), &[Type::Float, Type::Float], fp) {
+        fp.value = match mu.fp_argv_check("fl-div", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 if Self::as_f32(mu, fl1) == 0.0 {
                     return Err(Exception::new(Condition::ZeroDivide, "fl-div", fl1));
@@ -165,7 +165,7 @@ impl MuFunction for Float {
         let fl0 = fp.argv[0];
         let fl1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fl-lt".to_string(), &[Type::Float, Type::Float], fp) {
+        fp.value = match mu.fp_argv_check("fl-lt", &[Type::Float, Type::Float], fp) {
             Ok(_) => {
                 if Self::as_f32(mu, fl0) < Self::as_f32(mu, fl1) {
                     Symbol::keyword("t")

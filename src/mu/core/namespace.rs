@@ -156,7 +156,7 @@ impl MuFunction for Mu {
         let ns = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("untern".to_string(), &[Type::T, Type::String], fp) {
+        fp.value = match mu.fp_argv_check("untern", &[Type::T, Type::String], fp) {
             Ok(_) => {
                 let ns = match Tag::type_of(ns) {
                     Type::Null => mu.null_ns,
@@ -200,38 +200,37 @@ impl MuFunction for Mu {
         let name = fp.argv[1];
         let value = fp.argv[2];
 
-        fp.value =
-            match mu.fp_argv_check("intern".to_string(), &[Type::T, Type::String, Type::T], fp) {
-                Ok(_) => {
-                    let ns = match Tag::type_of(ns_tag) {
-                        Type::Null => mu.null_ns,
-                        Type::Keyword => match Self::is_ns(mu, ns_tag) {
-                            Some(ns) => ns,
-                            _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
-                        },
+        fp.value = match mu.fp_argv_check("intern", &[Type::T, Type::String, Type::T], fp) {
+            Ok(_) => {
+                let ns = match Tag::type_of(ns_tag) {
+                    Type::Null => mu.null_ns,
+                    Type::Keyword => match Self::is_ns(mu, ns_tag) {
+                        Some(ns) => ns,
                         _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
-                    };
+                    },
+                    _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
+                };
 
-                    let name_str = Vector::as_string(mu, name);
-                    let str = name_str.as_bytes();
-                    let len = str.len();
+                let name_str = Vector::as_string(mu, name);
+                let str = name_str.as_bytes();
+                let len = str.len();
 
-                    if len == 0 {
+                if len == 0 {
+                    return Err(Exception::new(Condition::Syntax, "intern", name));
+                }
+
+                if ns.eq_(mu.keyword_ns) {
+                    if len > DirectTag::DIRECT_STR_MAX {
                         return Err(Exception::new(Condition::Syntax, "intern", name));
                     }
 
-                    if ns.eq_(mu.keyword_ns) {
-                        if len > DirectTag::DIRECT_STR_MAX {
-                            return Err(Exception::new(Condition::Syntax, "intern", name));
-                        }
-
-                        Symbol::keyword(&name_str)
-                    } else {
-                        <Mu as Core>::intern_symbol(mu, ns, name_str, value)
-                    }
+                    Symbol::keyword(&name_str)
+                } else {
+                    <Mu as Core>::intern_symbol(mu, ns, name_str, value)
                 }
-                Err(e) => return Err(e),
-            };
+            }
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
@@ -257,7 +256,7 @@ impl MuFunction for Mu {
         let ns_tag = fp.argv[0];
         let name = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("ns-find".to_string(), &[Type::T, Type::String], fp) {
+        fp.value = match mu.fp_argv_check("ns-find", &[Type::T, Type::String], fp) {
             Ok(_) => {
                 match Tag::type_of(ns_tag) {
                     Type::Null => mu.null_ns,
@@ -283,7 +282,7 @@ impl MuFunction for Mu {
         let type_ = fp.argv[0];
         let ns = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("ns-syms".to_string(), &[Type::Keyword, Type::T], fp) {
+        fp.value = match mu.fp_argv_check("ns-syms", &[Type::Keyword, Type::T], fp) {
             Ok(_) => match Self::is_ns(mu, ns) {
                 Some(_) => {
                     let ns_ref = block_on(mu.ns_index.read());

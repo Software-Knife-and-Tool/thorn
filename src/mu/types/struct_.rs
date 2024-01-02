@@ -202,7 +202,7 @@ impl MuFunction for Struct {
     fn mu_struct_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("st-type".to_string(), &[Type::Struct], fp) {
+        fp.value = match mu.fp_argv_check("st-type", &[Type::Struct], fp) {
             Ok(_) => Self::to_image(mu, tag).stype,
             Err(e) => return Err(e),
         };
@@ -213,7 +213,7 @@ impl MuFunction for Struct {
     fn mu_struct_vector(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("st-vec".to_string(), &[Type::Struct], fp) {
+        fp.value = match mu.fp_argv_check("st-vec", &[Type::Struct], fp) {
             Ok(_) => Self::to_image(mu, tag).vector,
             Err(e) => return Err(e),
         };
@@ -225,7 +225,7 @@ impl MuFunction for Struct {
         let stype = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("struct".to_string(), &[Type::Keyword, Type::List], fp) {
+        fp.value = match mu.fp_argv_check("struct", &[Type::Keyword, Type::List], fp) {
             Ok(_) => {
                 let mut vec = Vec::new();
                 for cons in ConsIter::new(mu, list) {

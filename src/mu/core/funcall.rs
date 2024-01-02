@@ -193,11 +193,11 @@ impl Mu {
 }
 
 pub trait Core {
-    fn fp_argv_check(&self, _: String, _: &[Type], _: &Frame) -> exception::Result<()>;
+    fn fp_argv_check(&self, _: &str, _: &[Type], _: &Frame) -> exception::Result<()>;
 }
 
 impl Core for Mu {
-    fn fp_argv_check(&self, fn_name: String, types: &[Type], fp: &Frame) -> exception::Result<()> {
+    fn fp_argv_check(&self, fn_name: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
         for (index, arg_type) in types.iter().enumerate() {
             let fp_arg_type = Tag::type_of(fp.argv[index]);
             let fp_arg = fp.argv[index];
@@ -208,27 +208,27 @@ impl Core for Mu {
                         let n = Fixnum::as_i64(fp_arg);
 
                         if !(0..=255).contains(&n) {
-                            return Err(Exception::new(Condition::Type, &fn_name, fp_arg));
+                            return Err(Exception::new(Condition::Type, fn_name, fp_arg));
                         }
                     }
-                    _ => return Err(Exception::new(Condition::Type, &fn_name, fp_arg)),
+                    _ => return Err(Exception::new(Condition::Type, fn_name, fp_arg)),
                 },
                 Type::List => match fp_arg_type {
                     Type::Cons | Type::Null => (),
-                    _ => return Err(Exception::new(Condition::Type, &fn_name, fp_arg)),
+                    _ => return Err(Exception::new(Condition::Type, fn_name, fp_arg)),
                 },
                 Type::String => match fp_arg_type {
                     Type::Vector => {
                         if Vector::type_of(self, fp.argv[index]) != Type::Char {
-                            return Err(Exception::new(Condition::Type, &fn_name, fp_arg));
+                            return Err(Exception::new(Condition::Type, fn_name, fp_arg));
                         }
                     }
-                    _ => return Err(Exception::new(Condition::Type, &fn_name, fp_arg)),
+                    _ => return Err(Exception::new(Condition::Type, fn_name, fp_arg)),
                 },
                 Type::T => (),
                 _ => {
                     if fp_arg_type != *arg_type {
-                        return Err(Exception::new(Condition::Type, &fn_name, fp_arg));
+                        return Err(Exception::new(Condition::Type, fn_name, fp_arg));
                     }
                 }
             }
@@ -258,7 +258,7 @@ impl MuFunction for Mu {
         let func = fp.argv[0];
         let args = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("apply".to_string(), &[Type::Function, Type::List], fp) {
+        fp.value = match mu.fp_argv_check("apply", &[Type::Function, Type::List], fp) {
             Ok(_) => {
                 let value = Tag::nil();
                 let mut argv = Vec::new();
