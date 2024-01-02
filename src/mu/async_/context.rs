@@ -98,7 +98,10 @@ impl Core for AsyncContext {
     }
 
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        mu.write_string(format!("#<:asyncid [id:{}]>", Tag::data(&tag, mu)), stream)
+        mu.write_string(
+            format!("#<:asyncid [id:{}]>", Tag::data(&tag, mu)).as_str(),
+            stream,
+        )
     }
 }
 

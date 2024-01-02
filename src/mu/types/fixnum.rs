@@ -63,7 +63,7 @@ pub trait Core {
 
 impl Core for Fixnum {
     fn write(mu: &Mu, tag: Tag, _escape: bool, stream: Tag) -> Result<()> {
-        <Mu as stream::Core>::write_string(mu, Self::as_i64(tag).to_string(), stream)
+        <Mu as stream::Core>::write_string(mu, &Self::as_i64(tag).to_string(), stream)
     }
 
     fn view(mu: &Mu, fx: Tag) -> Tag {

@@ -134,7 +134,7 @@ impl Core for Function {
 
                 <Mu as stream::Core>::write_string(
                     mu,
-                    format!("#<:function {} [req:{nreq}, tag:{}]>", desc.0, desc.1),
+                    format!("#<:function {} [req:{nreq}, tag:{}]>", desc.0, desc.1).as_str(),
                     stream,
                 )
             }

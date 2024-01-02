@@ -67,7 +67,11 @@ impl Core for Float {
     }
 
     fn write(mu: &Mu, tag: Tag, _escape: bool, stream: Tag) -> exception::Result<()> {
-        <Mu as stream::Core>::write_string(mu, format!("{:.4}", Self::as_f32(mu, tag)), stream)
+        <Mu as stream::Core>::write_string(
+            mu,
+            format!("{:.4}", Self::as_f32(mu, tag)).as_str(),
+            stream,
+        )
     }
 }
 

@@ -153,7 +153,7 @@ impl Core for Map {
 
                 <Mu as stream::Core>::write_string(
                     mu,
-                    format!("#<:map [size:{size}, tag:{}]>", cache_id),
+                    format!("#<:map [size:{size}, tag:{}]>", cache_id).as_str(),
                     stream,
                 )
             }
