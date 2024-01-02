@@ -177,7 +177,7 @@ impl MuFunction for Mu {
         let eofp = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value = match mu.fp_argv_check("read".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("read", &[Type::Stream], fp) {
             Ok(_) => match Self::read(mu, stream, !eofp.null_(), eof_value, false) {
                 Ok(tag) => tag,
                 Err(e) => return Err(e),
@@ -193,14 +193,13 @@ impl MuFunction for Mu {
         let escape = fp.argv[1];
         let stream = fp.argv[2];
 
-        fp.value =
-            match mu.fp_argv_check("write".to_string(), &[Type::T, Type::T, Type::Stream], fp) {
-                Ok(_) => match mu.write(value, !escape.null_(), stream) {
-                    Ok(_) => value,
-                    Err(e) => return Err(e),
-                },
+        fp.value = match mu.fp_argv_check("write", &[Type::T, Type::T, Type::Stream], fp) {
+            Ok(_) => match mu.write(value, !escape.null_(), stream) {
+                Ok(_) => value,
                 Err(e) => return Err(e),
-            };
+            },
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }

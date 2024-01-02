@@ -369,7 +369,7 @@ pub trait MuFunction {
 
 impl MuFunction for QqReader {
     fn mu_qquote(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.fp_argv_check("%qquote".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("%qquote", &[Type::Stream], fp) {
             Ok(_) => match Self::read(mu, fp.argv[0]) {
                 Ok(tag) => tag,
                 Err(e) => return Err(e),

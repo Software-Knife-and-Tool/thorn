@@ -370,7 +370,7 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("nth".to_string(), &[Type::Fixnum, Type::List], fp) {
+        fp.value = match mu.fp_argv_check("nth", &[Type::Fixnum, Type::List], fp) {
             Ok(_) => {
                 if Fixnum::as_i64(nth) < 0 {
                     return Err(Exception::new(Condition::Type, "nth", nth));
@@ -395,7 +395,7 @@ impl MuFunction for Cons {
         let nth = fp.argv[0];
         let list = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("nthcdr".to_string(), &[Type::Fixnum, Type::List], fp) {
+        fp.value = match mu.fp_argv_check("nthcdr", &[Type::Fixnum, Type::List], fp) {
             Ok(_) => {
                 if Fixnum::as_i64(nth) < 0 {
                     return Err(Exception::new(Condition::Type, "nth", nth));

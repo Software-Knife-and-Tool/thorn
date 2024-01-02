@@ -570,7 +570,7 @@ impl MuFunction for Vector {
         let vector = fp.argv[0];
         let index = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("sv-ref".to_string(), &[Type::Vector, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("sv-ref", &[Type::Vector, Type::Fixnum], fp) {
             Ok(_) => {
                 let nth = Fixnum::as_i64(index);
 
@@ -592,7 +592,7 @@ impl MuFunction for Vector {
     fn mu_type(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("sv-type".to_string(), &[Type::Vector], fp) {
+        fp.value = match mu.fp_argv_check("sv-type", &[Type::Vector], fp) {
             Ok(_) => match Tag::type_key(Vector::type_of(mu, vector)) {
                 Some(key) => key,
                 None => panic!(),
@@ -606,7 +606,7 @@ impl MuFunction for Vector {
     fn mu_length(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let vector = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("sv-len".to_string(), &[Type::Vector], fp) {
+        fp.value = match mu.fp_argv_check("sv-len", &[Type::Vector], fp) {
             Ok(_) => Fixnum::as_tag(Self::length(mu, vector) as i64),
             Err(e) => return Err(e),
         };

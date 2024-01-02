@@ -391,7 +391,7 @@ impl MuFunction for Symbol {
     fn mu_symbol(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let name = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("symbol".to_string(), &[Type::String], fp) {
+        fp.value = match mu.fp_argv_check("symbol", &[Type::String], fp) {
             Ok(_) => {
                 let str = Vector::as_string(mu, name);
 

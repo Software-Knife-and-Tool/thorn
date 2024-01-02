@@ -111,7 +111,7 @@ impl MuFunction for Mu {
     fn mu_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("await".to_string(), &[Type::Vector], fp) {
+        fp.value = match mu.fp_argv_check("await", &[Type::Vector], fp) {
             Ok(_) => {
                 let map_ref = block_on(mu.async_index.write());
 

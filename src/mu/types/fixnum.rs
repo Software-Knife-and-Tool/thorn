@@ -86,7 +86,7 @@ pub trait MuFunction {
 
 impl MuFunction for Fixnum {
     fn mu_fxash(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match mu.fp_argv_check("fx-ash".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fx-ash", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 let value = Self::as_i64(fp.argv[0]);
                 let shift = Self::as_i64(fp.argv[1]);
@@ -109,7 +109,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fx-add".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fx-add", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Self::as_i64(fx0).checked_add(Self::as_i64(fx1)) {
                 Some(sum) => {
                     if Self::is_i56(sum as u64) {
@@ -130,7 +130,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fx-sub".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fx-sub", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Self::as_i64(fx0).checked_sub(Self::as_i64(fx1)) {
                 Some(diff) => {
                     if Self::is_i56(diff as u64) {
@@ -151,7 +151,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fx-mul".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fx-mul", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => match Self::as_i64(fx0).checked_mul(Self::as_i64(fx1)) {
                 Some(prod) => {
                     if Self::is_i56(prod as u64) {
@@ -172,7 +172,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fx-div".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fx-div", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 if Self::as_i64(fx1) == 0 {
                     return Err(Exception::new(Condition::ZeroDivide, "fx-div", fx0));
@@ -199,7 +199,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("logand".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("logand", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => Self::as_tag(Self::as_i64(fx0) & Self::as_i64(fx1)),
             Err(e) => return Err(e),
         };
@@ -211,7 +211,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("logor".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("logor", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => Self::as_tag(Self::as_i64(fx0) | Self::as_i64(fx1)),
             Err(e) => return Err(e),
         };
@@ -223,7 +223,7 @@ impl MuFunction for Fixnum {
         let fx0 = fp.argv[0];
         let fx1 = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("fx-lt".to_string(), &[Type::Fixnum, Type::Fixnum], fp) {
+        fp.value = match mu.fp_argv_check("fx-lt", &[Type::Fixnum, Type::Fixnum], fp) {
             Ok(_) => {
                 if Self::as_i64(fx0) < Self::as_i64(fx1) {
                     Symbol::keyword("t")

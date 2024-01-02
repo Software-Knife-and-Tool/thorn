@@ -231,7 +231,7 @@ impl MuFunction for Tag {
         let type_ = fp.argv[0];
         let arg = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("repr".to_string(), &[Type::Keyword, Type::T], fp) {
+        fp.value = match mu.fp_argv_check("repr", &[Type::Keyword, Type::T], fp) {
             Ok(_) => {
                 if type_.eq_(Symbol::keyword("vector")) {
                     let slice = arg.as_slice();

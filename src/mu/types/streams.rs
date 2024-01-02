@@ -44,7 +44,7 @@ impl MuFunction for Stream {
     fn mu_close(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("close".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("close", &[Type::Stream], fp) {
             Ok(_) => {
                 if Self::is_open(mu, stream) {
                     Self::close(mu, stream);
@@ -62,7 +62,7 @@ impl MuFunction for Stream {
     fn mu_openp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("openp".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("openp", &[Type::Stream], fp) {
             Ok(_) => {
                 if Self::is_open(mu, stream) {
                     stream
@@ -81,11 +81,8 @@ impl MuFunction for Stream {
         let st_dir = fp.argv[1];
         let st_arg = fp.argv[2];
 
-        fp.value = match mu.fp_argv_check(
-            "open".to_string(),
-            &[Type::Keyword, Type::Keyword, Type::String],
-            fp,
-        ) {
+        fp.value = match mu.fp_argv_check("open", &[Type::Keyword, Type::Keyword, Type::String], fp)
+        {
             Ok(_) if st_type.eq_(Symbol::keyword("file")) => {
                 let arg = Vector::as_string(mu, st_arg);
 
@@ -130,7 +127,7 @@ impl MuFunction for Stream {
     fn mu_flush(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("flush".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("flush", &[Type::Stream], fp) {
             Ok(_) => {
                 if Self::is_open(mu, stream) {
                     let image = Self::to_image(mu, stream);
@@ -154,7 +151,7 @@ impl MuFunction for Stream {
     fn mu_eof(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("eof".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("eof", &[Type::Stream], fp) {
             Ok(_) => {
                 if Self::is_eof(mu, stream) {
                     Symbol::keyword("t")
@@ -171,7 +168,7 @@ impl MuFunction for Stream {
     fn mu_get_string(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let stream = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("get-str".to_string(), &[Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("get-str", &[Type::Stream], fp) {
             Ok(_) => match Self::get_string(mu, stream) {
                 Ok(string) => Vector::from_string(&string).evict(mu),
                 Err(e) => return Err(e),
@@ -187,16 +184,15 @@ impl MuFunction for Stream {
         let eoferrp = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value =
-            match mu.fp_argv_check("rd-char".to_string(), &[Type::Stream, Type::T, Type::T], fp) {
-                Ok(_) => match Self::read_char(mu, stream) {
-                    Ok(Some(ch)) => Char::as_tag(ch),
-                    Ok(None) if eoferrp.null_() => eof_value,
-                    Ok(None) => return Err(Exception::new(Condition::Eof, "rd-char", stream)),
-                    Err(e) => return Err(e),
-                },
+        fp.value = match mu.fp_argv_check("rd-char", &[Type::Stream, Type::T, Type::T], fp) {
+            Ok(_) => match Self::read_char(mu, stream) {
+                Ok(Some(ch)) => Char::as_tag(ch),
+                Ok(None) if eoferrp.null_() => eof_value,
+                Ok(None) => return Err(Exception::new(Condition::Eof, "rd-char", stream)),
                 Err(e) => return Err(e),
-            };
+            },
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
@@ -206,16 +202,15 @@ impl MuFunction for Stream {
         let erreofp = fp.argv[1];
         let eof_value = fp.argv[2];
 
-        fp.value =
-            match mu.fp_argv_check("rd-byte".to_string(), &[Type::Stream, Type::T, Type::T], fp) {
-                Ok(_) => match Self::read_byte(mu, stream) {
-                    Ok(Some(byte)) => Fixnum::as_tag(byte as i64),
-                    Ok(None) if erreofp.null_() => eof_value,
-                    Ok(None) => return Err(Exception::new(Condition::Eof, "rd-byte", stream)),
-                    Err(e) => return Err(e),
-                },
+        fp.value = match mu.fp_argv_check("rd-byte", &[Type::Stream, Type::T, Type::T], fp) {
+            Ok(_) => match Self::read_byte(mu, stream) {
+                Ok(Some(byte)) => Fixnum::as_tag(byte as i64),
+                Ok(None) if erreofp.null_() => eof_value,
+                Ok(None) => return Err(Exception::new(Condition::Eof, "rd-byte", stream)),
                 Err(e) => return Err(e),
-            };
+            },
+            Err(e) => return Err(e),
+        };
 
         Ok(())
     }
@@ -224,7 +219,7 @@ impl MuFunction for Stream {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("un-char".to_string(), &[Type::Char, Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("un-char", &[Type::Char, Type::Stream], fp) {
             Ok(_) => match Self::unread_char(mu, stream, Char::as_char(mu, ch)) {
                 Ok(Some(_)) => panic!(),
                 Ok(None) => ch,
@@ -240,7 +235,7 @@ impl MuFunction for Stream {
         let ch = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("wr-char".to_string(), &[Type::Char, Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("wr-char", &[Type::Char, Type::Stream], fp) {
             Ok(_) => match Self::write_char(mu, stream, Char::as_char(mu, ch)) {
                 Ok(_) => ch,
                 Err(e) => return Err(e),
@@ -255,7 +250,7 @@ impl MuFunction for Stream {
         let byte = fp.argv[0];
         let stream = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("wr-byte".to_string(), &[Type::Byte, Type::Stream], fp) {
+        fp.value = match mu.fp_argv_check("wr-byte", &[Type::Byte, Type::Stream], fp) {
             Ok(_) => match Self::write_byte(mu, stream, Fixnum::as_i64(byte) as u8) {
                 Ok(_) => byte,
                 Err(e) => return Err(e),

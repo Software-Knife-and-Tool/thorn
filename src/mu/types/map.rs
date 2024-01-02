@@ -186,7 +186,7 @@ impl MuFunction for Mu {
     fn mu_make_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("map".to_string(), &[Type::List], fp) {
+        fp.value = match mu.fp_argv_check("map", &[Type::List], fp) {
             Ok(_) => {
                 for cons in ConsIter::new(mu, list) {
                     if Tag::type_of(Cons::car(mu, cons)) != Type::Cons {
@@ -206,7 +206,7 @@ impl MuFunction for Mu {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("mp-ref".to_string(), &[Type::Map, Type::T], fp) {
+        fp.value = match mu.fp_argv_check("mp-ref", &[Type::Map, Type::T], fp) {
             Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
@@ -225,7 +225,7 @@ impl MuFunction for Mu {
         let map = fp.argv[0];
         let key = fp.argv[1];
 
-        fp.value = match mu.fp_argv_check("mp-has".to_string(), &[Type::Map, Type::T], fp) {
+        fp.value = match mu.fp_argv_check("mp-has", &[Type::Map, Type::T], fp) {
             Ok(_) => {
                 let cache_id = Map::cache_id(mu, map);
 
@@ -243,7 +243,7 @@ impl MuFunction for Mu {
     fn mu_map_items(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("mp-list".to_string(), &[Type::Map], fp) {
+        fp.value = match mu.fp_argv_check("mp-list", &[Type::Map], fp) {
             Ok(_) => Map::list(mu, map),
             Err(e) => return Err(e),
         };
@@ -254,7 +254,7 @@ impl MuFunction for Mu {
     fn mu_map_size(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let map = fp.argv[0];
 
-        fp.value = match mu.fp_argv_check("mp-size".to_string(), &[Type::Map], fp) {
+        fp.value = match mu.fp_argv_check("mp-size", &[Type::Map], fp) {
             Ok(_) => {
                 let index_ref = block_on(mu.map_index.read());
                 let cache_id = Map::cache_id(mu, map);
