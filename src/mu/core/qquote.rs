@@ -85,16 +85,19 @@ state_machine! {
     // `
     Quasi => {
         Comma => QuasiComma,             // ,
+        List => Quasi [ List ],          // (
+        EndList => Quasi [ End ],        // )
         Constant => Quasi [ Form ],      // basic
         Symbol => Quasi [ Quote ],       // basic
-        List => List,                    // (
         Quasi => Quasi [ New ],          // `
     },
 
     QuasiComma => {
+        Comma => QuasiComma [ Error ],   // comma not in qquote
+        List => QuasiComma [ List ],     // (
+        EndList => QuasiComma [ End ],   //
         Constant => QuasiComma [ Form ], // basic
         Symbol => QuasiComma [ Form ],   // basic
-        List => QuasiComma [  List ],    // (
         Quasi => QuasiComma [ Quasi ],   // `
     },
 
@@ -103,7 +106,7 @@ state_machine! {
         Constant => List [ ListOf ],     // basic
         Symbol => List [ Quote ],        // basic
         Dot => List [ Dot ],             // .
-        EndList => List [ End ],         // ()
+        EndList => List [ End ],         // )
         List => List [ Form ],           // (
         Quasi => List [ Quasi ],         // `
     },
@@ -258,11 +261,7 @@ impl QqReader {
         let mut machine = self.machine.borrow_mut();
 
         match machine.consume(state) {
-            Err(_) => Err(Exception::new(
-                Condition::Syntax,
-                "illegal token: type",
-                Tag::nil(),
-            )),
+            Err(_) => Err(Exception::new(Condition::Syntax, "qquote", Tag::nil())),
             Ok(output) => {
                 let qqstate = match machine.state() {
                     QReaderState::Start => QqState::Start,
@@ -287,19 +286,9 @@ impl QqReader {
             // Self::print_state(self);
             match Self::next_input_state(self, mu, stream) {
                 Err(e) => return Err(e),
-                Ok(None) => {
-                    return Err(Exception::new(
-                        Condition::Syntax,
-                        "incomplete expression",
-                        Tag::nil(),
-                    ))
-                }
+                Ok(None) => return Err(Exception::new(Condition::Syntax, "qquote", Tag::nil())),
                 Ok(Some((state, token))) => {
-                    /*
-                    Self::print_annotated_tag(mu,
-                                              &format!("reader state {:?}", state),
-                    token);
-                    */
+                    // Self::print_annotated_tag(mu, &format!("reader state {:?}", state), token);
                     match self.next(&state) {
                         Err(e) => return Err(e),
                         Ok((output, qqstate)) => match qqstate {
@@ -307,11 +296,26 @@ impl QqReader {
                             QqState::Quasi => match output {
                                 None => {}
                                 Some(qualifier) => match qualifier {
-                                    QReaderOutput::New => expansion.push(QqExpr::Quasi(Box::new(
-                                        self.parse(mu, stream).unwrap(),
-                                    ))),
+                                    QReaderOutput::New => match self.parse(mu, stream) {
+                                        Err(e) => return Err(e),
+                                        Ok(expr) => expansion.push(QqExpr::Quasi(Box::new(expr))),
+                                    },
                                     QReaderOutput::Form => return Ok(QqExpr::Form(token)),
                                     QReaderOutput::Quote => return Ok(QqExpr::Quote(token)),
+                                    QReaderOutput::List => {
+                                        Stream::unread_char(mu, stream, '(').unwrap();
+                                        match <mu::Mu as stream::Core>::read(
+                                            mu,
+                                            stream,
+                                            false,
+                                            Tag::nil(),
+                                            false,
+                                        ) {
+                                            Err(e) => return Err(e),
+                                            Ok(form) => return Ok(QqExpr::Quote(form)),
+                                        }
+                                    }
+                                    QReaderOutput::End => return Ok(QqExpr::Form(token)),
                                     _ => {
                                         panic!()
                                     }
@@ -321,19 +325,37 @@ impl QqReader {
                                 None => {}
                                 Some(qualifier) => match qualifier {
                                     QReaderOutput::Form => return Ok(QqExpr::Form(token)),
-                                    QReaderOutput::List => return Ok(QqExpr::Form(token)),
+                                    QReaderOutput::List => {
+                                        Stream::unread_char(mu, stream, '(').unwrap();
+                                        return Ok(QqExpr::Form(
+                                            <mu::Mu as stream::Core>::read(
+                                                mu,
+                                                stream,
+                                                false,
+                                                Tag::nil(),
+                                                false,
+                                            )
+                                            .unwrap(),
+                                        ));
+                                    }
                                     QReaderOutput::Quasi => return Ok(QqExpr::Form(token)),
+                                    QReaderOutput::Error => {
+                                        return Err(Exception::new(
+                                            Condition::Syntax,
+                                            "qquote",
+                                            Tag::nil(),
+                                        ))
+                                    }
                                     _ => {
                                         panic!()
                                     }
                                 },
                             },
                             QqState::Comma => match output {
-                                None => {
-                                    return Ok(QqExpr::Comma(Box::new(
-                                        self.parse(mu, stream).unwrap(),
-                                    )))
-                                }
+                                None => match self.parse(mu, stream) {
+                                    Err(e) => return Err(e),
+                                    Ok(expr) => return Ok(QqExpr::Quasi(Box::new(expr))),
+                                },
                                 Some(qualifier) => match qualifier {
                                     QReaderOutput::At => return Ok(QqExpr::List(expansion)),
                                     QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
@@ -344,7 +366,10 @@ impl QqReader {
                                 },
                             },
                             QqState::List => match output {
-                                None => return Ok(self.parse(mu, stream).unwrap()),
+                                None => match self.parse(mu, stream) {
+                                    Err(e) => return Err(e),
+                                    Ok(expr) => return Ok(QqExpr::List(vec![expr])),
+                                },
                                 Some(qualifier) => match qualifier {
                                     QReaderOutput::Dot => expansion.push(QqExpr::Quote(token)),
                                     QReaderOutput::End => return Ok(QqExpr::List(expansion)),
