@@ -43,18 +43,20 @@ impl Core for Char {
         let ch: u8 = (chr.data(mu) & 0xff) as u8;
 
         if escape {
-            match <Mu as stream::Core>::write_string(mu, "#\\".to_string(), stream) {
+            match <Mu as stream::Core>::write_string(mu, "#\\", stream) {
                 Ok(_) => (),
                 Err(e) => return Err(e),
             }
 
+            let mut tmp = [0; 4];
+
             let phrase = match ch {
-                0x20 => "space".to_string(),
-                0x9 => "tab".to_string(),
-                0xa => "linefeed".to_string(),
-                0xc => "page".to_string(),
-                0xd => "return".to_string(),
-                _ => (ch as char).to_string(),
+                0x20 => "space",
+                0x9 => "tab",
+                0xa => "linefeed",
+                0xc => "page",
+                0xd => "return",
+                _ => (ch as char).encode_utf8(&mut tmp),
             };
 
             match <Mu as stream::Core>::write_string(mu, phrase, stream) {

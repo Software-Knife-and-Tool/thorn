@@ -114,7 +114,7 @@ impl<'a> Core<'a> for Struct {
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
         match tag {
             Tag::Indirect(_) => {
-                match <Mu as stream::Core>::write_string(mu, "#s(".to_string(), stream) {
+                match <Mu as stream::Core>::write_string(mu, "#s(", stream) {
                     Ok(_) => (),
                     Err(e) => return Err(e),
                 }
@@ -125,7 +125,7 @@ impl<'a> Core<'a> for Struct {
                 }
 
                 for tag in VectorIter::new(mu, Self::to_image(mu, tag).vector) {
-                    match <Mu as stream::Core>::write_string(mu, " ".to_string(), stream) {
+                    match <Mu as stream::Core>::write_string(mu, " ", stream) {
                         Ok(_) => (),
                         Err(e) => return Err(e),
                     }
@@ -136,7 +136,7 @@ impl<'a> Core<'a> for Struct {
                     }
                 }
 
-                <Mu as stream::Core>::write_string(mu, ")".to_string(), stream)
+                <Mu as stream::Core>::write_string(mu, ")", stream)
             }
             _ => panic!(),
         }

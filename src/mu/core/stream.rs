@@ -31,7 +31,7 @@ use crate::{
 pub trait Core {
     fn read(_: &Mu, _: Tag, _: bool, _: Tag, _: bool) -> exception::Result<Tag>;
     fn write(&self, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn write_string(&self, _: String, _: Tag) -> exception::Result<()>;
+    fn write_string(&self, _: &str, _: Tag) -> exception::Result<()>;
 }
 
 impl Core for Mu {
@@ -151,10 +151,11 @@ impl Core for Mu {
         }
     }
 
-    fn write_string(&self, str: String, stream: Tag) -> exception::Result<()> {
+    fn write_string(&self, str: &str, stream: Tag) -> exception::Result<()> {
         if Tag::type_of(stream) != Type::Stream {
             panic!("{:?}", Tag::type_of(stream))
         }
+
         for ch in str.chars() {
             match Stream::write_char(self, stream, ch) {
                 Ok(_) => (),

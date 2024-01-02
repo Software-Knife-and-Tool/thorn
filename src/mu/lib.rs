@@ -157,7 +157,7 @@ impl Mu {
     }
 
     /// write a rust String to a mu stream
-    pub fn write_string(&self, str: String, stream: Tag) -> exception::Result<()> {
+    pub fn write_string(&self, str: &str, stream: Tag) -> exception::Result<()> {
         self.0.write_string(str, stream)
     }
 

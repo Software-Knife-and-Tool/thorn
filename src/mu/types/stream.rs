@@ -202,21 +202,17 @@ impl Core for Stream {
             Type::Stream => {
                 let image = Self::to_image(mu, tag);
                 match Tag::type_of(image.stream_id) {
-                    Type::Keyword => <Mu as stream::Core>::write_string(
-                        mu,
-                        "#<stream: closed>".to_string(),
-                        stream,
-                    ),
+                    Type::Keyword => {
+                        <Mu as stream::Core>::write_string(mu, "#<stream: closed>", stream)
+                    }
                     Type::Fixnum => <Mu as stream::Core>::write_string(
                         mu,
-                        format!("#<stream: id: {}>", Fixnum::as_i64(image.stream_id)),
+                        format!("#<stream: id: {}>", Fixnum::as_i64(image.stream_id)).as_str(),
                         stream,
                     ),
-                    Type::Null | Type::Cons | Type::Vector => <Mu as stream::Core>::write_string(
-                        mu,
-                        "#<stream: string>".to_string(),
-                        stream,
-                    ),
+                    Type::Null | Type::Cons | Type::Vector => {
+                        <Mu as stream::Core>::write_string(mu, "#<stream: string>", stream)
+                    }
                     _ => panic!(
                         "internal: stream type inconsistency {:?}",
                         Tag::type_of(image.stream_id)

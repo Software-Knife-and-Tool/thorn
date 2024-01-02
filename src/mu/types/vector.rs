@@ -224,7 +224,7 @@ impl<'a> Core<'a> for Vector {
             Tag::Direct(_) => match str::from_utf8(&vector.data(mu).to_le_bytes()) {
                 Ok(s) => {
                     if escape {
-                        <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream).unwrap()
+                        <Mu as stream::Core>::write_string(mu, "\"", stream).unwrap()
                     }
 
                     for nth in 0..DirectTag::length(vector) {
@@ -235,7 +235,7 @@ impl<'a> Core<'a> for Vector {
                     }
 
                     if escape {
-                        <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream).unwrap()
+                        <Mu as stream::Core>::write_string(mu, "\"", stream).unwrap()
                     }
 
                     Ok(())
@@ -245,7 +245,7 @@ impl<'a> Core<'a> for Vector {
             Tag::Indirect(_) => match Self::type_of(mu, vector) {
                 Type::Char => {
                     if escape {
-                        match <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, "\"", stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
@@ -259,7 +259,7 @@ impl<'a> Core<'a> for Vector {
                     }
 
                     if escape {
-                        match <Mu as stream::Core>::write_string(mu, "\"".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, "\"", stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
@@ -268,7 +268,7 @@ impl<'a> Core<'a> for Vector {
                     Ok(())
                 }
                 _ => {
-                    match <Mu as stream::Core>::write_string(mu, "#(".to_string(), stream) {
+                    match <Mu as stream::Core>::write_string(mu, "#(", stream) {
                         Ok(_) => (),
                         Err(e) => return Err(e),
                     }
@@ -283,7 +283,7 @@ impl<'a> Core<'a> for Vector {
                     }
 
                     for tag in VectorIter::new(mu, vector) {
-                        match <Mu as stream::Core>::write_string(mu, " ".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, " ", stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
@@ -294,7 +294,7 @@ impl<'a> Core<'a> for Vector {
                         }
                     }
 
-                    <Mu as stream::Core>::write_string(mu, ")".to_string(), stream)
+                    <Mu as stream::Core>::write_string(mu, ")", stream)
                 }
             },
         }

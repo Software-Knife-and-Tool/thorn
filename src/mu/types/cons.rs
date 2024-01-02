@@ -215,7 +215,7 @@ impl Core for Cons {
     fn write(mu: &Mu, cons: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
         let car = Self::car(mu, cons);
 
-        <Mu as stream::Core>::write_string(mu, "(".to_string(), stream).unwrap();
+        <Mu as stream::Core>::write_string(mu, "(", stream).unwrap();
         <Mu as stream::Core>::write(mu, car, escape, stream).unwrap();
 
         let mut tail = Self::cdr(mu, cons);
@@ -224,20 +224,20 @@ impl Core for Cons {
         loop {
             match Tag::type_of(tail) {
                 Type::Cons => {
-                    <Mu as stream::Core>::write_string(mu, " ".to_string(), stream).unwrap();
+                    <Mu as stream::Core>::write_string(mu, " ", stream).unwrap();
                     <Mu as stream::Core>::write(mu, Self::car(mu, tail), escape, stream).unwrap();
                     tail = Self::cdr(mu, tail);
                 }
                 _ if tail.null_() => break,
                 _ => {
-                    <Mu as stream::Core>::write_string(mu, " . ".to_string(), stream).unwrap();
+                    <Mu as stream::Core>::write_string(mu, " . ", stream).unwrap();
                     <Mu as stream::Core>::write(mu, tail, escape, stream).unwrap();
                     break;
                 }
             }
         }
 
-        <Mu as stream::Core>::write_string(mu, ")".to_string(), stream)
+        <Mu as stream::Core>::write_string(mu, ")", stream)
     }
 
     fn vlist(mu: &Mu, vec: &[Tag]) -> Tag {

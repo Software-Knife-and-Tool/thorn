@@ -286,7 +286,7 @@ impl Core for Symbol {
                             Err(e) => return Err(e),
                         }
 
-                        match <Mu as stream::Core>::write_string(mu, ":".to_string(), stream) {
+                        match <Mu as stream::Core>::write_string(mu, ":", stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
                         }
