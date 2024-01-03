@@ -2,7 +2,7 @@ Namespace Test Summary:
 -----------------------
 mu         backquote      total: 20       pass: 20       fail: 0        exceptions: 0       
 mu         compile        total: 8        pass: 8        fail: 0        exceptions: 0       
-mu         core           total: 55       pass: 54       fail: 1        exceptions: 0       
+mu         core           total: 55       pass: 55       fail: 0        exceptions: 0       
 mu         exception      total: 4        pass: 4        fail: 0        exceptions: 0       
 mu         list           total: 22       pass: 22       fail: 0        exceptions: 0       
 mu         map            total: 10       pass: 10       fail: 0        exceptions: 0       
@@ -16,7 +16,7 @@ mu         struct         total: 7        pass: 7        fail: 0        exceptio
 mu         symbol         total: 12       pass: 12       fail: 0        exceptions: 0       
 mu         vector         total: 23       pass: 23       fail: 0        exceptions: 0       
 -----------------------
-mu                        total: 303      pass: 276      fail: 19       exceptions: 8         
+mu                        total: 303      pass: 277      fail: 18       exceptions: 8         
 
 Namespace Test Summary:
 -----------------------
