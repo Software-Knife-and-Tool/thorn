@@ -70,12 +70,7 @@ impl Core for Reader {
                 .build(mu)
                 .unwrap()
                 .evict(mu),
-            bq_append: <Mu as NSCore>::intern_symbol(
-                mu,
-                mu.mu_ns,
-                "%append".to_string(),
-                Tag::nil(),
-            ),
+            bq_append: mu.append_,
         }
     }
 
