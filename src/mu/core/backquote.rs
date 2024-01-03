@@ -265,35 +265,6 @@ impl Backquote for Mu {
     }
 }
 
-pub trait MuFunction {
-    fn append_(_: &Mu, fp: &mut Frame) -> exception::Result<()>;
-}
-
-impl MuFunction for Mu {
-    fn append_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let list1 = fp.argv[0];
-        let list2 = fp.argv[1];
-
-        let mut append = Vec::new();
-
-        match Tag::type_of(list1) {
-            Type::Null | Type::Cons => {
-                for elt in ConsIter::new(mu, list1) {
-                    append.push(Cons::car(mu, elt))
-                }
-            }
-            _ => {
-                fp.value = list1;
-                return Ok(());
-            }
-        };
-
-        fp.value = Cons::vappend(mu, &append, list2);
-
-        Ok(())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     #[test]

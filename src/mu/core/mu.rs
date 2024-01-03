@@ -20,6 +20,7 @@ use {
         system::sys as system,
         types::{
             cons::{Cons, ConsIter, Core as _},
+            fixnum::Fixnum,
             function::{Core as _, Function},
             map::{Core as _, Map},
             stream::{Core as _, Stream},
@@ -47,6 +48,7 @@ pub struct Mu {
 
     // compiler
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
+    pub if_: Tag,
 
     // frame cache
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
@@ -73,6 +75,7 @@ pub struct Mu {
 
     // reader
     pub reader: Reader,
+    pub append_: Tag,
 
     // standard streams
     pub stdin: Tag,
@@ -85,7 +88,7 @@ pub struct Mu {
 }
 
 pub trait Core {
-    const VERSION: &'static str = "0.0.27";
+    const VERSION: &'static str = "0.0.29";
 
     fn new(config: &Config) -> Self;
     fn apply(&self, _: Tag, _: Tag) -> exception::Result<Tag>;
@@ -107,6 +110,7 @@ impl Core for Mu {
 
             // compiler
             compile: RwLock::new(Vec::new()),
+            if_: Tag::nil(),
 
             // frame cache
             lexical: RwLock::new(HashMap::new()),
@@ -138,6 +142,7 @@ impl Core for Mu {
 
             // reader
             reader: Reader::new(),
+            append_: Tag::nil(),
 
             // system
             start_time: ProcessTime::now(),
@@ -186,7 +191,13 @@ impl Core for Mu {
             Ok(errout) => errout.evict(&mu),
             Err(_) => panic!(),
         };
+
         <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
+
+        // internals
+        mu.if_ = Function::new(Fixnum::as_tag(3), Fixnum::as_tag(0)).evict(&mu);
+
+        mu.append_ = Function::new(Fixnum::as_tag(2), Fixnum::as_tag(1)).evict(&mu);
 
         // mu functions
         mu.functions = Self::install_lib_functions(&mu);

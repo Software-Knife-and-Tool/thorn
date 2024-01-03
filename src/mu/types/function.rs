@@ -128,7 +128,7 @@ impl Core for Function {
                     Type::Cons | Type::Null => {
                         (":lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
-                    Type::Fixnum => ("mu:".to_string(), form.as_u64().to_string()),
+                    Type::Fixnum => (":native".to_string(), format!("{}", Fixnum::as_i64(form))),
                     _ => panic!(),
                 };
 

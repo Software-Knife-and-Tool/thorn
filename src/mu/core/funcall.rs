@@ -5,7 +5,6 @@
 use crate::{
     async_::context::MuFunction as _,
     core::{
-        backquote::MuFunction as _,
         compile::MuFunction as _,
         dynamic::MuFunction as _,
         exception::{self, Condition, Exception, MuFunction as _},
@@ -18,7 +17,7 @@ use crate::{
         types::{MuFunction as _, Tag, Type},
     },
     types::{
-        cons::{Cons, ConsIter, MuFunction as _},
+        cons::{Cons, ConsIter, Core as _, MuFunction as _},
         fixnum::{Fixnum, MuFunction as _},
         float::{Float, MuFunction as _},
         function::Function,
@@ -76,7 +75,6 @@ lazy_static! {
         ("fix", 2, Mu::mu_fix),
         #[cfg(feature = "qquote")]
         ("%qquote", 1, QqReader::mu_qquote),
-        ("%append", 2, Mu::append_),
         // exceptions
         ("with-ex", 2, Exception::mu_with_ex),
         ("raise", 2, Exception::mu_raise),
@@ -137,12 +135,9 @@ lazy_static! {
         ("un-char", 2, Stream::mu_unread_char),
         ("wr-byte", 2, Stream::mu_write_byte),
         ("wr-char", 2, Stream::mu_write_char),
-        ("%append", 2, Mu::append_),
-        ("%if", 3, Mu::if_),
     ];
 
     static ref SYS_SYMBOLS: Vec<(&'static str, u16, LibMuFunction)> = vec![
-        // system
         ("exit", 1, Mu::sys_exit),
         ("real-tm", 0, Mu::sys_real_time),
         ("run-us", 0, Mu::sys_run_time),
@@ -151,7 +146,10 @@ lazy_static! {
 
 impl Mu {
     pub fn install_lib_functions(mu: &Mu) -> Vec<LibMuFunction> {
-        let mut funcv = Vec::new();
+        let mut funcv = Vec::<LibMuFunction>::new();
+
+        funcv.push(Mu::if_);
+        funcv.push(Mu::append_);
 
         for (id, fnmap) in MU_SYMBOLS.iter().enumerate() {
             let (name, nreqs, libfn) = fnmap;
@@ -159,7 +157,7 @@ impl Mu {
             let func = Function::new(
                 Fixnum::as_tag(*nreqs as i64),
                 Fixnum::as_tag(match id.try_into().unwrap() {
-                    Some(n) => n as i64,
+                    Some(n) => (n + 2) as i64,
                     None => panic!(),
                 }),
             )
@@ -242,9 +240,50 @@ pub trait MuFunction {
     fn mu_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
     fn mu_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn append_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
 impl MuFunction for Mu {
+    fn append_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let list1 = fp.argv[0];
+        let list2 = fp.argv[1];
+
+        let mut append = Vec::new();
+
+        match Tag::type_of(list1) {
+            Type::Null | Type::Cons => {
+                for elt in ConsIter::new(mu, list1) {
+                    append.push(Cons::car(mu, elt))
+                }
+            }
+            _ => {
+                fp.value = list1;
+                return Ok(());
+            }
+        };
+
+        fp.value = Cons::vappend(mu, &append, list2);
+
+        Ok(())
+    }
+
+    fn if_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let test = fp.argv[0];
+        let true_fn = fp.argv[1];
+        let false_fn = fp.argv[2];
+
+        fp.value = match mu.fp_argv_check("::if", &[Type::T, Type::Function, Type::Function], fp) {
+            Ok(_) => match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
+                Ok(tag) => tag,
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
     fn mu_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.eval(fp.argv[0]) {
             Ok(tag) => tag,

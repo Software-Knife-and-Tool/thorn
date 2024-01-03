@@ -9,7 +9,6 @@ use {
             frame::Frame,
             funcall::Core as _,
             mu::{self, Mu},
-            namespace::Core,
             reader::{Core as _, Reader},
             stream::{self, Core as _},
             types::{Tag, Type},
@@ -125,12 +124,7 @@ impl QqReader {
     pub fn new(mu: &Mu) -> Self {
         Self {
             machine: RefCell::new(StateMachine::new()),
-            append_sym: <Mu as Core>::intern_symbol(
-                mu,
-                mu.mu_ns,
-                "%append".to_string(),
-                Tag::nil(),
-            ),
+            append_sym: mu.append_,
         }
     }
 
