@@ -45,8 +45,8 @@ enum QqState {
     Start,
     Quasi,
     QuasiComma,
-    Comma,
-    List,
+    QuasiList,
+    QuasiListComma,
 }
 
 //
@@ -84,40 +84,40 @@ state_machine! {
 
     // `
     Quasi => {
-        Comma => QuasiComma,             // ,
-        List => Quasi [ List ],          // (
-        EndList => Quasi [ End ],        // )
-        Constant => Quasi [ Form ],      // basic
-        Symbol => Quasi [ Quote ],       // basic
-        Quasi => Quasi [ New ],          // `
+        Comma => QuasiComma,                 // ,
+        List => Quasi [ List ],              // (
+        EndList => Quasi [ End ],            // )
+        Constant => Quasi [ Form ],          // basic
+        Symbol => Quasi [ Quote ],           // basic
+        Quasi => Quasi [ New ],              // `
     },
 
     QuasiComma => {
-        Comma => QuasiComma [ Error ],   // comma not in qquote
-        List => QuasiComma [ List ],     // (
-        EndList => QuasiComma [ End ],   //
-        Constant => QuasiComma [ Form ], // basic
-        Symbol => QuasiComma [ Form ],   // basic
-        Quasi => QuasiComma [ Quasi ],   // `
+        Comma => QuasiComma [ Error ],       // comma not in qquote
+        List => QuasiComma [ List ],         // (
+        EndList => QuasiComma [ End ],       //
+        Constant => QuasiComma [ Form ],     // basic
+        Symbol => QuasiComma [ Form ],       // basic
+        Quasi => QuasiComma [ Quasi ],       // `
     },
 
-    List => {
-        Comma => Comma,                  // ,
-        Constant => List [ ListOf ],     // basic
-        Symbol => List [ Quote ],        // basic
-        Dot => List [ Dot ],             // .
-        EndList => List [ End ],         // )
-        List => List [ Form ],           // (
-        Quasi => List [ Quasi ],         // `
+    QuasiList => {
+        Comma => QuasiListComma,             // ,
+        Constant => QuasiList [ ListOf ],    // basic
+        Symbol => QuasiList [ ListOfQuote ], // basic
+        Dot => QuasiList [ Dot ],            // .
+        EndList => QuasiList [ End ],        // )
+        List => QuasiList [ ListOfQuasi ],   // (
+        Quasi => QuasiList [ ListOfQuasi ],  // `
     },
 
-    Comma => {
-        Comma => Comma,                  // ,
-        At => Comma [ At ],              // ,@
-        Constant => List [ Form ],       // ,basic
-        Symbol => Comma [ Quote ],       // ,basic
-        List => Comma [ Form ],          // ,(
-        Quasi => Quasi [ New ],          // ,`
+    QuasiListComma => {
+        Comma => QuasiListComma,             // ,
+        At => QuasiListComma [ At ],         // ,@
+        Constant => QuasiList [ Form ],      // ,basic
+        Symbol => QuasiListComma [ Quote ],  // ,basic
+        List => QuasiComma [ Form ],         // ,(
+        Quasi => Quasi [ New ],              // ,`
     },
 }
 
@@ -267,8 +267,8 @@ impl QqReader {
                     QReaderState::Start => QqState::Start,
                     QReaderState::Quasi => QqState::Quasi,
                     QReaderState::QuasiComma => QqState::QuasiComma,
-                    QReaderState::Comma => QqState::Comma,
-                    QReaderState::List => QqState::List,
+                    QReaderState::QuasiList => QqState::QuasiList,
+                    QReaderState::QuasiListComma => QqState::QuasiListComma,
                 };
 
                 match output {
@@ -351,7 +351,7 @@ impl QqReader {
                                     }
                                 },
                             },
-                            QqState::Comma => match output {
+                            QqState::QuasiListComma => match output {
                                 None => match self.parse(mu, stream) {
                                     Err(e) => return Err(e),
                                     Ok(expr) => return Ok(QqExpr::Quasi(Box::new(expr))),
@@ -365,7 +365,7 @@ impl QqReader {
                                     }
                                 },
                             },
-                            QqState::List => match output {
+                            QqState::QuasiList => match output {
                                 None => match self.parse(mu, stream) {
                                     Err(e) => return Err(e),
                                     Ok(expr) => return Ok(QqExpr::List(vec![expr])),
@@ -375,8 +375,12 @@ impl QqReader {
                                     QReaderOutput::End => return Ok(QqExpr::List(expansion)),
                                     QReaderOutput::Form => expansion.push(QqExpr::Form(token)),
                                     QReaderOutput::ListOf => expansion.push(QqExpr::ListOf(token)),
-                                    QReaderOutput::Quasi => return Ok(QqExpr::List(expansion)),
-                                    QReaderOutput::Quote => expansion.push(QqExpr::Quote(token)),
+                                    QReaderOutput::ListOfQuote => {
+                                        expansion.push(QqExpr::ListOf(token))
+                                    }
+                                    QReaderOutput::ListOfQuasi => {
+                                        return Ok(QqExpr::List(expansion))
+                                    }
                                     _ => panic!(),
                                 },
                             },
