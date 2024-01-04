@@ -1,31 +1,32 @@
-(mu:%qquote (mu:open :string :input "`#(:t 1 2 3)"))	#(:t 1 2 3)
-(mu:%qquote (mu:open :string :input "`#\\a"))	#\a
-(mu:%qquote (mu:open :string :input "`(#(:t 1 2 3))"))	(#(:t 1 2 3))
-(mu:%qquote (mu:open :string :input "`(#\\a)"))	(#\a)
-(mu:%qquote (mu:open :string :input "`(())"))	(:nil)
-(mu:%qquote (mu:open :string :input "`((1234) 1234 symbol)"))	((1234) 1234 symbol)
-(mu:%qquote (mu:open :string :input "`((a b) c)"))	((a b) c)
-(mu:%qquote (mu:open :string :input "`()"))	:nil
-(mu:%qquote (mu:open :string :input "`(,(mu:fx-add 1 2))"))	(3)
-(mu:%qquote (mu:open :string :input "`(,1 (2) 3)"))	(1 (2) 3)
-(mu:%qquote (mu:open :string :input "`(,1234)"))	(1234)
-(mu:%qquote (mu:open :string :input "`(,@(:quote (a b c)))"))	(a b c)
-(mu:%qquote (mu:open :string :input "`(,@(mu:fx-add 1 2))"))	3
-(mu:%qquote (mu:open :string :input "`(0 ,@(:quote (a b c)) 1)"))	(0 a b c 1)
-(mu:%qquote (mu:open :string :input "`(1 2 ,@3)"))	(1 2 . 3)
-(mu:%qquote (mu:open :string :input "`(1.0 b (2))"))	(1.0000 b (2))
-(mu:%qquote (mu:open :string :input "`(1234 symbol)"))	(1234 symbol)
-(mu:%qquote (mu:open :string :input "`(1234)"))	(1234)
-(mu:%qquote (mu:open :string :input "`(\"abc\")"))	("abc")
-(mu:%qquote (mu:open :string :input "`(a b c)"))	(a b c)
-(mu:%qquote (mu:open :string :input "`,(mu:fx-add 1 2)"))	3
-(mu:%qquote (mu:open :string :input "`,(mu:type-of 'symbol)"))	:symbol
-(mu:%qquote (mu:open :string :input "`,1234")))	1234
-(mu:%qquote (mu:open :string :input "`,`(1234)"))	(1234)
-(mu:%qquote (mu:open :string :input "`,`1234"))	1234
-(mu:%qquote (mu:open :string :input "`1234"))	1234
-(mu:%qquote (mu:open :string :input "`\"abc\""))	"abc"
-(mu:%qquote (mu:open :string :input "``1234"))	`1234
-(mu:%qquote (mu:open :string :input "`symbol"))	symbol
-(mu:type-of (mu:%qquote (mu:open :string :input "`,mu:fx-add"))))	:func
-(mu:type-of (mu:%qquote (mu:open :string :input "`,mu:version"))))	:vector
+(mu:eval (mu:%qquote (mu:open :string :input "`#(:t 1 2 3)")))	#(:t 1 2 3)
+(mu:eval (mu:%qquote (mu:open :string :input "`#\\a")))	#\a
+(mu:eval (mu:%qquote (mu:open :string :input "`(1 2 3)")))	(1 2 3)
+(mu:eval (mu:%qquote (mu:open :string :input "`(#(:t 1 2 3))")))	(#(:t 1 2 3))
+(mu:eval (mu:%qquote (mu:open :string :input "`(#\\a)")))	(#\a)
+(mu:eval (mu:%qquote (mu:open :string :input "`(())")))	(:nil)
+(mu:eval (mu:%qquote (mu:open :string :input "`((1234) 1234 symbol)")))	((1234) 1234 symbol)
+(mu:eval (mu:%qquote (mu:open :string :input "`((a b) c)")))	((a b) c)
+(mu:eval (mu:%qquote (mu:open :string :input "`()")))	:nil
+(mu:eval (mu:%qquote (mu:open :string :input "`(,(mu:fx-add 1 2))")))	(3)
+(mu:eval (mu:%qquote (mu:open :string :input "`(,1 (2) 3)")))	(1 (2) 3)
+(mu:eval (mu:%qquote (mu:open :string :input "`(,1234)")))	(1234)
+(mu:eval (mu:%qquote (mu:open :string :input "`(,@(:quote (a b c)))")))	(a b c)
+(mu:eval (mu:%qquote (mu:open :string :input "`(,@(mu:fx-add 1 2))")))	3
+(mu:eval (mu:%qquote (mu:open :string :input "`(0 ,@(:quote (a b c)) 1)")))	(0 a b c 1)
+(mu:eval (mu:%qquote (mu:open :string :input "`(1 2 ,@3)")))	(1 2 . 3)
+(mu:eval (mu:%qquote (mu:open :string :input "`(1.0 b (2))")))	(1.0000 b (2))
+(mu:eval (mu:%qquote (mu:open :string :input "`(1234 symbol)")))	(1234 symbol)
+(mu:eval (mu:%qquote (mu:open :string :input "`(1234)")))	(1234)
+(mu:eval (mu:%qquote (mu:open :string :input "`(\"abc\")")))	("abc")
+(mu:eval (mu:%qquote (mu:open :string :input "`(a b c)")))	(a b c)
+(mu:eval (mu:%qquote (mu:open :string :input "`,(mu:fx-add 1 2)")))	3
+(mu:eval (mu:%qquote (mu:open :string :input "`,(mu:type-of 'symbol)")))	:symbol
+(mu:eval (mu:%qquote (mu:open :string :input "`,1234"))))	1234
+(mu:eval (mu:%qquote (mu:open :string :input "`,`(1234)")))	(1234)
+(mu:eval (mu:%qquote (mu:open :string :input "`,`1234")))	1234
+(mu:eval (mu:%qquote (mu:open :string :input "`1234")))	1234
+(mu:eval (mu:%qquote (mu:open :string :input "`\"abc\"")))	"abc"
+(mu:eval (mu:%qquote (mu:open :string :input "``1234")))	`1234
+(mu:eval (mu:%qquote (mu:open :string :input "`symbol")))	symbol
+(mu:type-of (mu:eval (mu:%qquote (mu:open :string :input "`,mu:fx-add")))))	:func
+(mu:type-of (mu:eval (mu:%qquote (mu:open :string :input "`,mu:version")))))	:vector
