@@ -21,6 +21,14 @@ def storage(ns, group, line, test):
                                 stdout=subprocess.PIPE,\
                                 stderr=subprocess.PIPE)
 
+    if ns == 'frequent':
+        proc = subprocess.Popen(['../dist/mu-shell',
+                                 '-p',
+                                 '-l./perf.l',
+                                 '-e (mu:%sdelta (:lambda ()' + test + ') :nil)'],\
+                                stdout=subprocess.PIPE,\
+                                stderr=subprocess.PIPE)
+
     if ns == 'prelude':
         proc = subprocess.Popen(['../dist/mu-shell',
                                  '-l../dist/prelude.l',
@@ -43,6 +51,14 @@ def storage(ns, group, line, test):
 
 def timing(ns, test):
     if ns == 'mu':
+        proc = subprocess.Popen(['../dist/mu-shell',
+                                 '-p',
+                                 '-l./perf.l',
+                                 '-e (mu:%tdelta (:lambda ()' + test + ') :nil)'],\
+                                stdout=subprocess.PIPE,\
+                                stderr=subprocess.PIPE)
+
+    if ns == 'frequent':
         proc = subprocess.Popen(['../dist/mu-shell',
                                  '-p',
                                  '-l./perf.l',

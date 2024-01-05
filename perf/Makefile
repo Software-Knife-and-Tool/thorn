@@ -1,12 +1,13 @@
 #
 # perf makefile
 #
-.PHONY: help base clean commit current diff summary metrics mu prelude
+.PHONY: help base clean commit current diff frequent summary metrics mu prelude
 
 NTESTS ?= 20
 TMPF:=$(shell mktemp)
 NAMESPACES=\
-	mu	\
+	mu	 \
+	frequent \
 	prelude
 
 VALGRIND='((:lambda (g) (mu:apply g (mu:cons g (mu:cons 101010101 (mu:cons 11011 ()))))) (:lambda (g a b) (:if (mu:eq 0 b) a (mu:apply g (mu:cons g (mu:cons b (mu:cons (mu:fx-sub a (mu:fx-mul b (mu:fx-div a b))) ()))))))) '
@@ -49,6 +50,9 @@ commit:
 
 mu:
 	@python3 ./perf-ns.py mu . $(NTESTS)
+
+frequent:
+	@python3 ./perf-ns.py frequent . $(NTESTS)	
 
 prelude:
 	@python3 ./perf-ns.py prelude . $(NTESTS)	
