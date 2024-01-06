@@ -299,14 +299,19 @@ impl MuFunction for Mu {
 
         fp.value = match mu.fp_argv_check("apply", &[Type::Function, Type::List], fp) {
             Ok(_) => {
-                let value = Tag::nil();
                 let mut argv = Vec::new();
 
                 for cons in ConsIter::new(mu, args) {
                     argv.push(Cons::car(mu, cons))
                 }
 
-                match (Frame { func, argv, value }).apply(mu, func) {
+                match (Frame {
+                    func,
+                    argv,
+                    value: Tag::nil(),
+                })
+                .apply(mu, func)
+                {
                     Ok(value) => value,
                     Err(e) => return Err(e),
                 }
