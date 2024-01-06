@@ -242,7 +242,15 @@ impl Compiler for Mu {
             }
         }
 
-        Ok(symbol)
+        if Symbol::is_unbound(mu, symbol) {
+            Ok(symbol)
+        } else {
+            let value = Symbol::value(mu, symbol);
+            match Tag::type_of(value) {
+                Type::Cons | Type::Symbol => Ok(symbol),
+                _ => Ok(value),
+            }
+        }
     }
 
     fn compile(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
@@ -256,9 +264,22 @@ impl Compiler for Mu {
                         Ok(form) => Ok(form),
                         Err(e) => Err(e),
                     },
-                    Type::Symbol | Type::Function => match Self::compile_list(mu, args) {
-                        Ok(arglist) => Ok(Cons::new(func, arglist).evict(mu)),
-
+                    Type::Symbol => match Self::compile_list(mu, args) {
+                        Ok(args) => {
+                            if Symbol::is_unbound(mu, func) {
+                                Ok(Cons::new(func, args).evict(mu))
+                            } else {
+                                let fn_ = Symbol::value(mu, func);
+                                match Tag::type_of(fn_) {
+                                    Type::Function => Ok(Cons::new(fn_, args).evict(mu)),
+                                    _ => Err(Exception::new(Condition::Type, "compile", func)),
+                                }
+                            }
+                        }
+                        Err(e) => Err(e),
+                    },
+                    Type::Function => match Self::compile_list(mu, args) {
+                        Ok(args) => Ok(Cons::new(func, args).evict(mu)),
                         Err(e) => Err(e),
                     },
                     Type::Cons => match Self::compile_list(mu, args) {
