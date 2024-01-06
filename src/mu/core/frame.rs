@@ -156,7 +156,7 @@ impl Frame {
             }
             Type::Function => match Tag::type_of(Function::form(mu, func)) {
                 Type::Null => Ok(Tag::nil()),
-                Type::Fixnum => {
+                Type::Keyword => {
                     let nreqs = Fixnum::as_i64(Function::arity(mu, func)) as usize;
                     let nargs = self.argv.len();
 
@@ -164,10 +164,10 @@ impl Frame {
                         return Err(Exception::new(Condition::Arity, "apply", func));
                     }
 
-                    let fn_off = Fixnum::as_i64(Function::form(mu, func)) as usize;
-                    let fnc = mu.functions[fn_off];
+                    let fn_key = Function::form(mu, func);
+                    let fn_ = mu.native_map[&Tag::as_u64(&fn_key)];
 
-                    match fnc(mu, &mut self) {
+                    match fn_(mu, &mut self) {
                         Ok(_) => Ok(self.value),
                         Err(e) => Err(e),
                     }

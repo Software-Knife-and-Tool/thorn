@@ -13,8 +13,10 @@ use crate::{
     },
     types::{
         fixnum::Fixnum,
+        symbol::Symbol,
         vecimage::{TypedVec, VecType},
         vector::Core as _,
+        vector::Vector,
     },
 };
 
@@ -23,7 +25,7 @@ use futures::executor::block_on;
 #[derive(Copy, Clone)]
 pub struct Function {
     pub arity: Tag, // fixnum # of required arguments
-    pub form: Tag,  // list or fixnum native table offset
+    pub form: Tag,  // list or native keyword
 }
 
 impl Function {
@@ -113,7 +115,7 @@ impl Core for Function {
     fn heap_size(mu: &Mu, fn_: Tag) -> usize {
         match Tag::type_of(Self::form(mu, fn_)) {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
-            Type::Fixnum => std::mem::size_of::<Function>(),
+            Type::Keyword => std::mem::size_of::<Function>(),
             _ => panic!(),
         }
     }
@@ -128,13 +130,16 @@ impl Core for Function {
                     Type::Cons | Type::Null => {
                         (":lambda".to_string(), format!("{:x}", form.as_u64()))
                     }
-                    Type::Fixnum => (":native".to_string(), format!("{}", Fixnum::as_i64(form))),
+                    Type::Keyword => (
+                        ":native".to_string(),
+                        Vector::as_string(mu, Symbol::name(mu, form)).to_string(),
+                    ),
                     _ => panic!(),
                 };
 
                 <Mu as stream::Core>::write_string(
                     mu,
-                    format!("#<:function {} [req:{nreq}, tag:{}]>", desc.0, desc.1).as_str(),
+                    format!("#<:function {} [req:{nreq}, form:{}]>", desc.0, desc.1).as_str(),
                     stream,
                 )
             }
