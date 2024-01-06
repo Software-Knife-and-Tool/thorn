@@ -2,32 +2,35 @@
 //  SPDX-License-Identifier: MIT
 
 //! mu functions
-use crate::{
-    async_::context::MuFunction as _,
-    core::{
-        compile::MuFunction as _,
-        dynamic::MuFunction as _,
-        exception::{self, Condition, Exception, MuFunction as _},
-        frame::{Frame, MuFunction as _},
-        heap::MuFunction as _,
-        mu::{Core as _, Mu},
-        namespace::{Core as NSCore, MuFunction as _},
-        stream::MuFunction as _,
-        system::MuFunction as _,
-        types::{MuFunction as _, Tag, Type},
+use {
+    crate::{
+        async_::context::MuFunction as _,
+        core::{
+            compile::MuFunction as _,
+            dynamic::MuFunction as _,
+            exception::{self, Condition, Exception, MuFunction as _},
+            frame::{Frame, MuFunction as _},
+            heap::MuFunction as _,
+            mu::{Core as _, Mu},
+            namespace::{Core as NSCore, MuFunction as _},
+            stream::MuFunction as _,
+            system::MuFunction as _,
+            types::{MuFunction as _, Tag, Type},
+        },
+        types::{
+            cons::{Cons, ConsIter, Core as _, MuFunction as _},
+            fixnum::{Fixnum, MuFunction as _},
+            float::{Float, MuFunction as _},
+            function::Function,
+            map::MuFunction as _,
+            stream::Stream,
+            streams::MuFunction as _,
+            struct_::{MuFunction as _, Struct},
+            symbol::{Core as _, MuFunction as _, Symbol},
+            vector::{MuFunction as _, Vector},
+        },
     },
-    types::{
-        cons::{Cons, ConsIter, Core as _, MuFunction as _},
-        fixnum::{Fixnum, MuFunction as _},
-        float::{Float, MuFunction as _},
-        function::Function,
-        map::MuFunction as _,
-        stream::Stream,
-        streams::MuFunction as _,
-        struct_::{MuFunction as _, Struct},
-        symbol::{MuFunction as _, Symbol},
-        vector::{MuFunction as _, Vector},
-    },
+    std::collections::HashMap,
 };
 
 #[cfg(feature = "qquote")]
@@ -145,48 +148,35 @@ lazy_static! {
 }
 
 impl Mu {
-    pub fn install_lib_functions(mu: &Mu) -> Vec<LibMuFunction> {
-        let mut funcv = Vec::<LibMuFunction>::new();
+    pub fn install_lib_functions(mu: &Mu) -> HashMap<u64, LibMuFunction> {
+        let mut fn_map = HashMap::<u64, LibMuFunction>::new();
 
-        funcv.push(Mu::if_);
-        funcv.push(Mu::append_);
+        fn_map.insert(Tag::as_u64(&Symbol::keyword("if")), Mu::if_);
+        fn_map.insert(Tag::as_u64(&Symbol::keyword("append")), Mu::append_);
 
-        for (id, fnmap) in MU_SYMBOLS.iter().enumerate() {
+        for fnmap in MU_SYMBOLS.iter() {
             let (name, nreqs, libfn) = fnmap;
+            let fn_key = Symbol::keyword(name);
 
-            let func = Function::new(
-                Fixnum::as_tag(*nreqs as i64),
-                Fixnum::as_tag(match id.try_into().unwrap() {
-                    Some(n) => (n + 2) as i64,
-                    None => panic!(),
-                }),
-            )
-            .evict(mu);
+            let func = Function::new(Fixnum::as_tag(*nreqs as i64), fn_key).evict(mu);
 
-            funcv.push(*libfn);
+            fn_map.insert(Tag::as_u64(&fn_key), *libfn);
 
             <Mu as NSCore>::intern_symbol(mu, mu.mu_ns, name.to_string(), func);
         }
 
-        let fn_tab_offset = funcv.len();
-        for (id, fnmap) in SYS_SYMBOLS.iter().enumerate() {
+        for fnmap in SYS_SYMBOLS.iter() {
             let (name, nreqs, libfn) = fnmap;
+            let fn_key = Symbol::keyword(name);
 
-            let func = Function::new(
-                Fixnum::as_tag(*nreqs as i64),
-                Fixnum::as_tag(match (id + fn_tab_offset).try_into().unwrap() {
-                    Some(n) => n as i64,
-                    None => panic!(),
-                }),
-            )
-            .evict(mu);
+            let func = Function::new(Fixnum::as_tag(*nreqs as i64), fn_key).evict(mu);
 
-            funcv.push(*libfn);
+            fn_map.insert(Tag::as_u64(&fn_key), *libfn);
 
             <Mu as NSCore>::intern_symbol(mu, mu.sys_ns, name.to_string(), func);
         }
 
-        funcv
+        fn_map
     }
 }
 

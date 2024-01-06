@@ -48,7 +48,6 @@ pub struct Mu {
 
     // compiler
     pub compile: RwLock<Vec<(Tag, Vec<Tag>)>>,
-    pub if_: Tag,
 
     // frame cache
     pub lexical: RwLock<HashMap<u64, RwLock<Vec<Frame>>>>,
@@ -64,8 +63,10 @@ pub struct Mu {
     pub map_index: RwLock<HashMap<usize, HashMap<u64, Tag>>>,
     pub ns_index: RwLock<<Mu as Namespace>::NSIndex>,
 
-    // functions
-    pub functions: Vec<LibMuFunction>,
+    // native function map
+    pub native_map: HashMap<u64, LibMuFunction>,
+    pub append_: Tag,
+    pub if_: Tag,
 
     // namespaces
     pub keyword_ns: Tag,
@@ -75,7 +76,6 @@ pub struct Mu {
 
     // reader
     pub reader: Reader,
-    pub append_: Tag,
 
     // standard streams
     pub stdin: Tag,
@@ -101,52 +101,30 @@ pub trait Core {
 impl Core for Mu {
     fn new(config: &Config) -> Self {
         let mut mu = Mu {
-            config: *config,
-            version: Tag::nil(),
-
-            // heap
-            heap: RwLock::new(BumpAllocator::new(config.npages)),
-            gc_root: RwLock::new(Vec::<Tag>::new()),
-
-            // compiler
-            compile: RwLock::new(Vec::new()),
+            append_: Tag::nil(),
             if_: Tag::nil(),
-
-            // frame cache
-            lexical: RwLock::new(HashMap::new()),
-
-            // dynamic environment
-            dynamic: RwLock::new(Vec::new()),
-
-            // exception unwind stack
-            exception: RwLock::new(Vec::new()),
-
-            // map/ns/async indices
             async_index: RwLock::new(HashMap::new()),
-            map_index: RwLock::new(HashMap::new()),
-            ns_index: RwLock::new(HashMap::new()),
-
-            // functions
-            functions: Vec::new(),
-
-            // namespaces
+            compile: RwLock::new(Vec::new()),
+            config: *config,
+            dynamic: RwLock::new(Vec::new()),
+            errout: Tag::nil(),
+            exception: RwLock::new(Vec::new()),
+            gc_root: RwLock::new(Vec::<Tag>::new()),
+            heap: RwLock::new(BumpAllocator::new(config.npages)),
             keyword_ns: Tag::nil(),
+            lexical: RwLock::new(HashMap::new()),
+            map_index: RwLock::new(HashMap::new()),
             mu_ns: Tag::nil(),
+            native_map: HashMap::new(),
+            ns_index: RwLock::new(HashMap::new()),
             null_ns: Tag::nil(),
-            sys_ns: Tag::nil(),
-
-            // streams
+            reader: Reader::new(),
+            start_time: ProcessTime::now(),
             stdin: Tag::nil(),
             stdout: Tag::nil(),
-            errout: Tag::nil(),
-
-            // reader
-            reader: Reader::new(),
-            append_: Tag::nil(),
-
-            // system
-            start_time: ProcessTime::now(),
+            sys_ns: Tag::nil(),
             system: system::System::new(),
+            version: Tag::nil(),
         };
 
         // establish the namespaces first
@@ -194,13 +172,12 @@ impl Core for Mu {
 
         <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
 
-        // internals
-        mu.if_ = Function::new(Fixnum::as_tag(3), Fixnum::as_tag(0)).evict(&mu);
-
-        mu.append_ = Function::new(Fixnum::as_tag(2), Fixnum::as_tag(1)).evict(&mu);
-
         // mu functions
-        mu.functions = Self::install_lib_functions(&mu);
+        mu.native_map = Self::install_lib_functions(&mu);
+
+        // internal functions
+        mu.append_ = Function::new(Fixnum::as_tag(2), Symbol::keyword("append")).evict(&mu);
+        mu.if_ = Function::new(Fixnum::as_tag(3), Symbol::keyword("if")).evict(&mu);
 
         // the reader, has to be last
         mu.reader = mu.reader.build(&mu);
