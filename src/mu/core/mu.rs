@@ -65,6 +65,8 @@ pub struct Mu {
 
     // native function map
     pub native_map: HashMap<u64, LibMuFunction>,
+
+    // internal functions
     pub append_: Tag,
     pub if_: Tag,
 
