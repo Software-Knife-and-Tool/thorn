@@ -79,7 +79,7 @@ impl Namespace for Mu {
     }
 
     fn is_ns(mu: &Mu, tag: Tag) -> Option<Tag> {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Null => Some(tag),
             Type::Keyword => {
                 let ns_ref = block_on(mu.ns_index.read());
@@ -158,7 +158,7 @@ impl MuFunction for Mu {
 
         fp.value = match mu.fp_argv_check("untern", &[Type::T, Type::String], fp) {
             Ok(_) => {
-                let ns = match Tag::type_of(ns) {
+                let ns = match ns.type_of() {
                     Type::Null => mu.null_ns,
                     Type::Keyword => match Self::is_ns(mu, ns) {
                         Some(ns) => ns,
@@ -179,7 +179,7 @@ impl MuFunction for Mu {
                     return Err(Exception::new(Condition::Syntax, "untern", name));
                 }
 
-                if ns.eq_(mu.keyword_ns) {
+                if ns.eq_(&mu.keyword_ns) {
                     if len > DirectTag::DIRECT_STR_MAX {
                         return Err(Exception::new(Condition::Syntax, "untern", name));
                     }
@@ -202,7 +202,7 @@ impl MuFunction for Mu {
 
         fp.value = match mu.fp_argv_check("intern", &[Type::T, Type::String, Type::T], fp) {
             Ok(_) => {
-                let ns = match Tag::type_of(ns_tag) {
+                let ns = match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
                     Type::Keyword => match Self::is_ns(mu, ns_tag) {
                         Some(ns) => ns,
@@ -219,7 +219,7 @@ impl MuFunction for Mu {
                     return Err(Exception::new(Condition::Syntax, "intern", name));
                 }
 
-                if ns.eq_(mu.keyword_ns) {
+                if ns.eq_(&mu.keyword_ns) {
                     if len > DirectTag::DIRECT_STR_MAX {
                         return Err(Exception::new(Condition::Syntax, "intern", name));
                     }
@@ -238,7 +238,7 @@ impl MuFunction for Mu {
     fn mu_make_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns_tag = fp.argv[0];
 
-        match Tag::type_of(ns_tag) {
+        match ns_tag.type_of() {
             Type::Keyword => {
                 fp.value = ns_tag;
                 match Self::is_ns(mu, ns_tag) {
@@ -258,7 +258,7 @@ impl MuFunction for Mu {
 
         fp.value = match mu.fp_argv_check("ns-find", &[Type::T, Type::String], fp) {
             Ok(_) => {
-                match Tag::type_of(ns_tag) {
+                match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
                     Type::Keyword => match Self::is_ns(mu, ns_tag) {
                         Some(_) => ns_tag,
@@ -294,9 +294,9 @@ impl MuFunction for Mu {
                         vec.push(hash[key])
                     }
 
-                    if type_.eq_(Symbol::keyword("list")) {
+                    if type_.eq_(&Symbol::keyword("list")) {
                         Cons::vlist(mu, &vec)
-                    } else if type_.eq_(Symbol::keyword("vector")) {
+                    } else if type_.eq_(&Symbol::keyword("vector")) {
                         TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu)
                     } else {
                         return Err(Exception::new(Condition::Type, "ns-syms", type_));

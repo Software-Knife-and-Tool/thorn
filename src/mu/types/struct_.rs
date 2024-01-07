@@ -32,7 +32,7 @@ pub struct Struct {
 
 impl Struct {
     pub fn to_image(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Struct => match tag {
                 Tag::Indirect(image) => {
                     let heap_ref = block_on(mu.heap.read());
@@ -63,7 +63,7 @@ impl Struct {
     }
 
     pub fn to_tag(mu: &Mu, stype: Tag, vec: Vec<Tag>) -> Tag {
-        match Tag::type_of(stype) {
+        match stype.type_of() {
             Type::Keyword => {
                 let vector = TypedVec::<Vec<Tag>> { vec }.vec.to_vector().evict(mu);
                 Struct { stype, vector }.evict(mu)
@@ -159,7 +159,7 @@ impl<'a> Core<'a> for Struct {
                     };
 
                     let stype = Cons::car(mu, vec_list);
-                    match Tag::type_of(stype) {
+                    match stype.type_of() {
                         Type::Keyword => {
                             let mut vec = Vec::new();
                             for cons in ConsIter::new(mu, Cons::cdr(mu, vec_list)) {

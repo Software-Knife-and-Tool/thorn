@@ -54,14 +54,13 @@ pub enum Type {
     Function,
     Keyword,
     Map,
-    Namespace,
+    Null,
     Stream,
     Struct,
     Symbol,
     Vector,
     // synthetic
     T,
-    Null,
     List,
     String,
 }
@@ -136,12 +135,12 @@ impl Tag {
         }
     }
 
-    pub fn eq_(&self, tag: Tag) -> bool {
+    pub fn eq_(&self, tag: &Tag) -> bool {
         self.as_u64() == tag.as_u64()
     }
 
     pub fn null_(&self) -> bool {
-        self.eq_(Self::nil())
+        self.eq_(&Self::nil())
     }
 
     pub fn nil() -> Tag {
@@ -163,19 +162,19 @@ impl Tag {
         }
 
         let tag: u8 = (u64::from_le_bytes(data) & 0x7) as u8;
-        let _u64: u64 = u64::from_le_bytes(data);
+        let u64_: u64 = u64::from_le_bytes(data);
 
         match tag {
-            tag if tag == TagType::Direct as u8 => Tag::Direct(DirectTag::from(_u64)),
-            _ => Tag::Indirect(IndirectTag::from(_u64)),
+            tag if tag == TagType::Direct as u8 => Tag::Direct(DirectTag::from(u64_)),
+            _ => Tag::Indirect(IndirectTag::from(u64_)),
         }
     }
 
-    pub fn type_of(tag: Tag) -> Type {
-        if tag.null_() {
+    pub fn type_of(&self) -> Type {
+        if self.null_() {
             Type::Null
         } else {
-            match tag {
+            match self {
                 Tag::Direct(direct) => match direct.dtype() {
                     DirectType::Byte => Type::Vector,
                     DirectType::Char => Type::Char,
@@ -185,7 +184,7 @@ impl Tag {
                         Ok(ExtType::Cons) => Type::Cons,
                         Ok(ExtType::Fixnum) => Type::Fixnum,
                         Ok(ExtType::Float) => Type::Float,
-                        _ => panic!("direct type botch {:x}", tag.as_u64()),
+                        _ => panic!("direct type botch {:x}", self.as_u64()),
                     },
                 },
                 Tag::Indirect(indirect) => match indirect.tag() {
@@ -196,7 +195,7 @@ impl Tag {
                     TagType::Struct => Type::Struct,
                     TagType::Symbol => Type::Symbol,
                     TagType::Vector => Type::Vector,
-                    _ => panic!("indirect type botch {:x}", tag.as_u64()),
+                    _ => panic!("indirect type botch {:x}", self.as_u64()),
                 },
             }
         }
@@ -214,7 +213,7 @@ impl Tag {
         TYPEKEYMAP
             .iter()
             .copied()
-            .find(|map| tag.eq_(map.1))
+            .find(|map| tag.eq_(&map.1))
             .map(|map| map.0)
     }
 }
@@ -233,7 +232,7 @@ impl MuFunction for Tag {
 
         fp.value = match mu.fp_argv_check("repr", &[Type::Keyword, Type::T], fp) {
             Ok(_) => {
-                if type_.eq_(Symbol::keyword("vector")) {
+                if type_.eq_(&Symbol::keyword("vector")) {
                     let slice = arg.as_slice();
 
                     TypedVec::<Vec<u8>> {
@@ -242,7 +241,7 @@ impl MuFunction for Tag {
                     .vec
                     .to_vector()
                     .evict(mu)
-                } else if type_.eq_(Symbol::keyword("t")) {
+                } else if type_.eq_(&Symbol::keyword("t")) {
                     if Vector::type_of(mu, arg) == Type::Byte && Vector::length(mu, arg) == 8 {
                         let mut u64_: u64 = 0;
 
@@ -269,7 +268,7 @@ impl MuFunction for Tag {
     }
 
     fn mu_eq(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = if fp.argv[0].eq_(fp.argv[1]) {
+        fp.value = if fp.argv[0].eq_(&fp.argv[1]) {
             Symbol::keyword("t")
         } else {
             Tag::nil()
@@ -279,7 +278,7 @@ impl MuFunction for Tag {
     }
 
     fn mu_typeof(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match Tag::type_key(Tag::type_of(fp.argv[0])) {
+        fp.value = match Tag::type_key(fp.argv[0].type_of()) {
             Some(type_key) => type_key,
             None => panic!(),
         };
@@ -290,7 +289,7 @@ impl MuFunction for Tag {
     fn mu_view(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let tag = fp.argv[0];
 
-        fp.value = match Tag::type_of(tag) {
+        fp.value = match tag.type_of() {
             Type::Char => Char::view(mu, tag),
             Type::Cons => Cons::view(mu, tag),
             Type::Fixnum => Fixnum::view(mu, tag),

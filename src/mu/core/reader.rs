@@ -307,7 +307,7 @@ impl Core for Reader {
             Ok(Some(ch)) => match ch {
                 ':' => match Stream::read_char(mu, stream) {
                     Ok(Some(ch)) => match Self::read_atom(mu, ch, stream) {
-                        Ok(atom) => match Tag::type_of(atom) {
+                        Ok(atom) => match atom.type_of() {
                             Type::Symbol => Ok(Some(atom)),
                             _ => Err(Exception::new(Condition::Type, "read:#", stream)),
                         },

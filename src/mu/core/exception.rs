@@ -96,7 +96,7 @@ impl Exception {
         let condmap = CONDMAP
             .to_vec()
             .into_iter()
-            .find(|cond| keyword.eq_(cond.0));
+            .find(|cond| keyword.eq_(&cond.0));
 
         match condmap {
             Some(entry) => Ok(entry.1),

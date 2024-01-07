@@ -129,11 +129,11 @@ impl Core for Mu {
     }
 
     fn write(&self, tag: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        if Tag::type_of(stream) != Type::Stream {
-            panic!("{:?}", Tag::type_of(stream))
+        if stream.type_of() != Type::Stream {
+            panic!("{:?}", stream.type_of())
         }
 
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::AsyncId => AsyncContext::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),
@@ -152,8 +152,8 @@ impl Core for Mu {
     }
 
     fn write_string(&self, str: &str, stream: Tag) -> exception::Result<()> {
-        if Tag::type_of(stream) != Type::Stream {
-            panic!("{:?}", Tag::type_of(stream))
+        if stream.type_of() != Type::Stream {
+            panic!("{:?}", stream.type_of())
         }
 
         for ch in str.chars() {

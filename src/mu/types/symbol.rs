@@ -62,7 +62,7 @@ impl Symbol {
     pub fn to_image(mu: &Mu, tag: Tag) -> SymbolImage {
         let heap_ref = block_on(mu.heap.read());
 
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Symbol => match tag {
                 Tag::Indirect(main) => SymbolImage {
                     namespace: Tag::from_slice(
@@ -86,7 +86,7 @@ impl Symbol {
     }
 
     pub fn namespace(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(symbol) {
+        match symbol.type_of() {
             Type::Null => mu.null_ns,
             Type::Keyword => mu.keyword_ns,
             Type::Symbol => Self::to_image(mu, symbol).namespace,
@@ -95,7 +95,7 @@ impl Symbol {
     }
 
     pub fn name(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(symbol) {
+        match symbol.type_of() {
             Type::Null | Type::Keyword => match symbol {
                 Tag::Direct(dir) => DirectTag::to_direct(
                     dir.data(),
@@ -110,7 +110,7 @@ impl Symbol {
     }
 
     pub fn value(mu: &Mu, symbol: Tag) -> Tag {
-        match Tag::type_of(symbol) {
+        match symbol.type_of() {
             Type::Null | Type::Keyword => symbol,
             Type::Symbol => Self::to_image(mu, symbol).value,
             _ => panic!(),
@@ -260,7 +260,7 @@ impl Core for Symbol {
     }
 
     fn write(mu: &Mu, symbol: Tag, escape: bool, stream: Tag) -> exception::Result<()> {
-        match Tag::type_of(symbol) {
+        match symbol.type_of() {
             Type::Null | Type::Keyword => match str::from_utf8(&symbol.data(mu).to_le_bytes()) {
                 Ok(s) => {
                     Stream::write_char(mu, stream, ':').unwrap();
@@ -280,7 +280,7 @@ impl Core for Symbol {
                 if escape {
                     let ns = Self::namespace(mu, symbol);
 
-                    if !Tag::null_(&ns) && !mu.null_ns.eq_(ns) {
+                    if !Tag::null_(&ns) && !mu.null_ns.eq_(&ns) {
                         match <Mu as stream::Core>::write(mu, Symbol::name(mu, ns), false, stream) {
                             Ok(_) => (),
                             Err(e) => return Err(e),
@@ -299,7 +299,7 @@ impl Core for Symbol {
     }
 
     fn is_unbound(mu: &Mu, symbol: Tag) -> bool {
-        Self::value(mu, symbol).eq_(*UNBOUND)
+        Self::value(mu, symbol).eq_(&UNBOUND)
     }
 }
 
@@ -316,7 +316,7 @@ impl MuFunction for Symbol {
     fn mu_name(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(symbol) {
+        fp.value = match symbol.type_of() {
             Type::Null | Type::Keyword | Type::Symbol => Symbol::name(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "sy:name", symbol)),
         };
@@ -327,7 +327,7 @@ impl MuFunction for Symbol {
     fn mu_ns(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(symbol) {
+        fp.value = match symbol.type_of() {
             Type::Symbol | Type::Keyword | Type::Null => Symbol::namespace(mu, symbol),
             _ => return Err(Exception::new(Condition::Type, "sy:ns", symbol)),
         };
@@ -338,7 +338,7 @@ impl MuFunction for Symbol {
     fn mu_value(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(symbol) {
+        fp.value = match symbol.type_of() {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, symbol) {
                     return Err(Exception::new(Condition::Type, "sy-val", symbol));
@@ -356,7 +356,7 @@ impl MuFunction for Symbol {
     fn mu_boundp(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        fp.value = match Tag::type_of(symbol) {
+        fp.value = match symbol.type_of() {
             Type::Keyword => symbol,
             Type::Symbol => {
                 if Self::is_unbound(mu, symbol) {
@@ -374,7 +374,7 @@ impl MuFunction for Symbol {
     fn mu_keyword(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let symbol = fp.argv[0];
 
-        match Tag::type_of(symbol) {
+        match symbol.type_of() {
             Type::Keyword => {
                 fp.value = symbol;
                 Ok(())

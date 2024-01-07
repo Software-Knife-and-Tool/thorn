@@ -83,12 +83,12 @@ impl MuFunction for Stream {
 
         fp.value = match mu.fp_argv_check("open", &[Type::Keyword, Type::Keyword, Type::String], fp)
         {
-            Ok(_) if st_type.eq_(Symbol::keyword("file")) => {
+            Ok(_) if st_type.eq_(&Symbol::keyword("file")) => {
                 let arg = Vector::as_string(mu, st_arg);
 
-                let stream = if st_dir.eq_(Symbol::keyword("input")) {
+                let stream = if st_dir.eq_(&Symbol::keyword("input")) {
                     StreamBuilder::new().file(arg).input().build(mu)
-                } else if st_dir.eq_(Symbol::keyword("output")) {
+                } else if st_dir.eq_(&Symbol::keyword("output")) {
                     StreamBuilder::new().file(arg).output().build(mu)
                 } else {
                     return Err(Exception::new(Condition::Type, "open", st_dir));
@@ -99,14 +99,14 @@ impl MuFunction for Stream {
                     Ok(stream) => stream.evict(mu),
                 }
             }
-            Ok(_) if st_type.eq_(Symbol::keyword("string")) => {
+            Ok(_) if st_type.eq_(&Symbol::keyword("string")) => {
                 let arg = Vector::as_string(mu, st_arg);
 
-                let stream = if st_dir.eq_(Symbol::keyword("input")) {
+                let stream = if st_dir.eq_(&Symbol::keyword("input")) {
                     StreamBuilder::new().string(arg).input().build(mu)
-                } else if st_dir.eq_(Symbol::keyword("output")) {
+                } else if st_dir.eq_(&Symbol::keyword("output")) {
                     StreamBuilder::new().string(arg).output().build(mu)
-                } else if st_dir.eq_(Symbol::keyword("bidir")) {
+                } else if st_dir.eq_(&Symbol::keyword("bidir")) {
                     StreamBuilder::new().string(arg).bidir().build(mu)
                 } else {
                     return Err(Exception::new(Condition::Type, "open", st_dir));
@@ -132,8 +132,8 @@ impl MuFunction for Stream {
                 if Self::is_open(mu, stream) {
                     let image = Self::to_image(mu, stream);
 
-                    if image.direction.eq_(Symbol::keyword("output"))
-                        && Tag::type_of(image.stream_id) == Type::Fixnum
+                    if image.direction.eq_(&Symbol::keyword("output"))
+                        && image.stream_id.type_of() == Type::Fixnum
                     {
                         let stream_id = Fixnum::as_i64(image.stream_id) as usize;
                         System::flush(&mu.system, stream_id).unwrap()

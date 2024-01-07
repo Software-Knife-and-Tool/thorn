@@ -46,7 +46,7 @@ impl Function {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Function => match tag {
                 Tag::Indirect(main) => {
                     let heap_ref = block_on(mu.heap.read());
@@ -113,7 +113,7 @@ impl Core for Function {
     }
 
     fn heap_size(mu: &Mu, fn_: Tag) -> usize {
-        match Tag::type_of(Self::form(mu, fn_)) {
+        match Self::form(mu, fn_).type_of() {
             Type::Null | Type::Cons => std::mem::size_of::<Function>(),
             Type::Keyword => std::mem::size_of::<Function>(),
             _ => panic!(),
@@ -121,12 +121,12 @@ impl Core for Function {
     }
 
     fn write(mu: &Mu, func: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        match Tag::type_of(func) {
+        match func.type_of() {
             Type::Function => {
                 let nreq = Fixnum::as_i64(Function::arity(mu, func));
                 let form = Function::form(mu, func);
 
-                let desc = match Tag::type_of(form) {
+                let desc = match form.type_of() {
                     Type::Cons | Type::Null => {
                         (":lambda".to_string(), format!("{:x}", form.as_u64()))
                     }

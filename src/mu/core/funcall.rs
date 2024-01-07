@@ -187,7 +187,7 @@ pub trait Core {
 impl Core for Mu {
     fn fp_argv_check(&self, fn_name: &str, types: &[Type], fp: &Frame) -> exception::Result<()> {
         for (index, arg_type) in types.iter().enumerate() {
-            let fp_arg_type = Tag::type_of(fp.argv[index]);
+            let fp_arg_type = fp.argv[index].type_of();
             let fp_arg = fp.argv[index];
 
             match *arg_type {
@@ -241,7 +241,7 @@ impl MuFunction for Mu {
 
         let mut append = Vec::new();
 
-        match Tag::type_of(list1) {
+        match list1.type_of() {
             Type::Null | Type::Cons => {
                 for elt in ConsIter::new(mu, list1) {
                     append.push(Cons::car(mu, elt))
@@ -317,7 +317,7 @@ impl MuFunction for Mu {
 
         fp.value = fp.argv[1];
 
-        match Tag::type_of(func) {
+        match func.type_of() {
             Type::Function => {
                 loop {
                     let value = Tag::nil();
@@ -326,7 +326,7 @@ impl MuFunction for Mu {
 
                     fp.value = match result {
                         Ok(value) => {
-                            if value.eq_(fp.value) {
+                            if value.eq_(&fp.value) {
                                 break;
                             }
 

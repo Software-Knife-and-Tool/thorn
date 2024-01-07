@@ -97,7 +97,7 @@ impl Compiler for Mu {
     }
 
     fn compile_special_form(mu: &Mu, name: Tag, args: Tag) -> exception::Result<Tag> {
-        match SPECMAP.iter().copied().find(|spec| name.eq_(spec.0)) {
+        match SPECMAP.iter().copied().find(|spec| name.eq_(&spec.0)) {
             Some(spec) => spec.1(mu, args),
             None => Err(Exception::new(Condition::Syntax, "specf", args)),
         }
@@ -123,8 +123,8 @@ impl Compiler for Mu {
 
             for cons in ConsIter::new(mu, lambda) {
                 let symbol = Cons::car(mu, cons);
-                if Tag::type_of(symbol) == Type::Symbol {
-                    match symvec.iter().rev().position(|lex| symbol.eq_(*lex)) {
+                if symbol.type_of() == Type::Symbol {
+                    match symvec.iter().rev().position(|lex| symbol.eq_(lex)) {
                         Some(_) => {
                             return Err(Exception::new(Condition::Syntax, "lexical", symbol))
                         }
@@ -138,11 +138,11 @@ impl Compiler for Mu {
             Ok(symvec)
         }
 
-        let (lambda, body) = match Tag::type_of(args) {
+        let (lambda, body) = match args.type_of() {
             Type::Cons => {
                 let lambda = Cons::car(mu, args);
 
-                match Tag::type_of(lambda) {
+                match lambda.type_of() {
                     Type::Null | Type::Cons => (lambda, Cons::cdr(mu, args)),
                     _ => return Err(Exception::new(Condition::Type, "lambda", args)),
                 }
@@ -184,14 +184,14 @@ impl Compiler for Mu {
     }
 
     fn compile_async(mu: &Mu, args: Tag) -> exception::Result<Tag> {
-        let (func, arg_list) = match Tag::type_of(args) {
+        let (func, arg_list) = match args.type_of() {
             Type::Cons => {
                 let fn_arg = match Self::compile(mu, Cons::car(mu, args)) {
-                    Ok(fn_) => match Tag::type_of(fn_) {
+                    Ok(fn_) => match fn_.type_of() {
                         Type::Function => fn_,
                         Type::Symbol => {
                             let sym_val = Symbol::value(mu, fn_);
-                            match Tag::type_of(sym_val) {
+                            match sym_val.type_of() {
                                 Type::Function => sym_val,
                                 _ => return Err(Exception::new(Condition::Type, "async", sym_val)),
                             }
@@ -228,7 +228,7 @@ impl Compiler for Mu {
         for frame in lexenv_ref.iter().rev() {
             let (tag, symbols) = frame;
 
-            if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(*lex)) {
+            if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
                     <Mu as Core>::intern_symbol(mu, mu.mu_ns, "fr-ref".to_string(), Tag::nil()),
                     Fixnum::as_tag(tag.as_u64() as i64),
@@ -246,7 +246,7 @@ impl Compiler for Mu {
             Ok(symbol)
         } else {
             let value = Symbol::value(mu, symbol);
-            match Tag::type_of(value) {
+            match value.type_of() {
                 Type::Cons | Type::Symbol => Ok(symbol),
                 _ => Ok(value),
             }
@@ -254,12 +254,12 @@ impl Compiler for Mu {
     }
 
     fn compile(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
-        match Tag::type_of(expr) {
+        match expr.type_of() {
             Type::Symbol => Self::compile_lexical(mu, expr),
             Type::Cons => {
                 let func = Cons::car(mu, expr);
                 let args = Cons::cdr(mu, expr);
-                match Tag::type_of(func) {
+                match func.type_of() {
                     Type::Keyword => match Self::compile_special_form(mu, func, args) {
                         Ok(form) => Ok(form),
                         Err(e) => Err(e),
@@ -270,7 +270,7 @@ impl Compiler for Mu {
                                 Ok(Cons::new(func, args).evict(mu))
                             } else {
                                 let fn_ = Symbol::value(mu, func);
-                                match Tag::type_of(fn_) {
+                                match fn_.type_of() {
                                     Type::Function => Ok(Cons::new(fn_, args).evict(mu)),
                                     _ => Err(Exception::new(Condition::Type, "compile", func)),
                                 }
@@ -284,8 +284,8 @@ impl Compiler for Mu {
                     },
                     Type::Cons => match Self::compile_list(mu, args) {
                         Ok(arglist) => match Self::compile(mu, func) {
-                            Ok(fnc) => match Tag::type_of(fnc) {
-                                Type::Function => Ok(Cons::new(fnc, arglist).evict(mu)),
+                            Ok(fn_) => match fn_.type_of() {
+                                Type::Function => Ok(Cons::new(fn_, arglist).evict(mu)),
                                 _ => Err(Exception::new(Condition::Type, "compile", func)),
                             },
                             Err(e) => Err(e),
@@ -333,14 +333,14 @@ mod tests {
         let mu: &Mu = &Core::new(&config);
 
         match <Mu as Compiler>::compile(mu, Tag::nil()) {
-            Ok(form) => match Tag::type_of(form) {
+            Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),
             },
             _ => assert!(false),
         }
         match <Mu as Compiler>::compile_list(mu, Tag::nil()) {
-            Ok(form) => match Tag::type_of(form) {
+            Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),
             },

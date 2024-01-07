@@ -41,7 +41,7 @@ impl MuFunction for Mu {
     fn sys_exit(_: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let rc = fp.argv[0];
 
-        match Tag::type_of(rc) {
+        match rc.type_of() {
             Type::Fixnum => std::process::exit(Fixnum::as_i64(rc) as i32),
             _ => Err(Exception::new(Condition::Type, "exit", rc)),
         }

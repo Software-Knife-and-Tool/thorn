@@ -39,7 +39,7 @@ impl Float {
     }
 
     pub fn as_f32(mu: &Mu, tag: Tag) -> f32 {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Float => {
                 let data = tag.data(mu).to_le_bytes();
                 let mut fl = 0.0f32.to_le_bytes();

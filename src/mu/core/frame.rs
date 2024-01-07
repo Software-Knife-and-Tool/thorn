@@ -45,16 +45,16 @@ impl Frame {
     }
 
     fn from_tag(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Struct => {
                 let stype = Struct::stype(mu, tag);
                 let frame = Struct::vector(mu, tag);
 
                 let func = Vector::r#ref(mu, frame, 0).unwrap();
 
-                match Tag::type_of(func) {
+                match func.type_of() {
                     Type::Function => {
-                        if !stype.eq_(Symbol::keyword("frame")) {
+                        if !stype.eq_(&Symbol::keyword("frame")) {
                             panic!()
                         }
 
@@ -146,7 +146,7 @@ impl Frame {
 
     // apply
     pub fn apply(mut self, mu: &Mu, func: Tag) -> exception::Result<Tag> {
-        match Tag::type_of(func) {
+        match func.type_of() {
             Type::Symbol => {
                 if Symbol::is_unbound(mu, func) {
                     Err(Exception::new(Condition::Unbound, "apply", func))
@@ -154,7 +154,7 @@ impl Frame {
                     self.apply(mu, Symbol::value(mu, func))
                 }
             }
-            Type::Function => match Tag::type_of(Function::form(mu, func)) {
+            Type::Function => match Function::form(mu, func).type_of() {
                 Type::Null => Ok(Tag::nil()),
                 Type::Keyword => {
                     let nreqs = Fixnum::as_i64(Function::arity(mu, func)) as usize;

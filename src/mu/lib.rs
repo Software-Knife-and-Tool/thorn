@@ -114,7 +114,7 @@ impl Mu {
 
     /// test tagged s-expressions for strict equality
     pub fn eq(&self, tag: Tag, tag1: Tag) -> bool {
-        tag.eq_(tag1)
+        tag.eq_(&tag1)
     }
 
     /// evaluate a tagged s-expression
