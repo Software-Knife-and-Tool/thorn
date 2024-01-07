@@ -54,7 +54,7 @@ impl Map {
     }
 
     fn to_image(mu: &Mu, tag: Tag) -> Self {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Map => match tag {
                 Tag::Indirect(main) => {
                     let heap_ref = block_on(mu.heap.read());
@@ -145,7 +145,7 @@ impl Core for Map {
     }
 
     fn write(mu: &Mu, map: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        match Tag::type_of(map) {
+        match map.type_of() {
             Type::Map => {
                 let cache_id = Fixnum::as_i64(Self::cache_id(mu, map));
                 let index_ref = block_on(mu.map_index.write());
@@ -189,7 +189,7 @@ impl MuFunction for Mu {
         fp.value = match mu.fp_argv_check("map", &[Type::List], fp) {
             Ok(_) => {
                 for cons in ConsIter::new(mu, list) {
-                    if Tag::type_of(Cons::car(mu, cons)) != Type::Cons {
+                    if Cons::car(mu, cons).type_of() != Type::Cons {
                         return Err(Exception::new(Condition::Type, "map", Cons::car(mu, cons)));
                     }
                 }

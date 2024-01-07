@@ -45,8 +45,8 @@ impl Core for AsyncContext {
     type AsyncFuture = BoxFuture<'static, Result<Tag, Exception>>;
 
     fn async_context(mu: &Mu, func: Tag, args: Tag) -> exception::Result<Tag> {
-        let async_id = match Tag::type_of(func) {
-            Type::Function => match Tag::type_of(args) {
+        let async_id = match func.type_of() {
+            Type::Function => match args.type_of() {
                 Type::Cons | Type::Null => {
                     let mut map_ref = block_on(mu.async_index.write());
                     let mut async_id: u64 = map_ref.len() as u64;

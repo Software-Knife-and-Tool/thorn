@@ -44,7 +44,7 @@ impl Core for IndirectTag {
         TYPEMAP
             .iter()
             .copied()
-            .find(|tab| keyword.eq_(tab.0))
+            .find(|tab| keyword.eq_(&tab.0))
             .map(|tab| tab.1)
     }
 }

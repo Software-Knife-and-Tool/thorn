@@ -49,7 +49,7 @@ impl Fixnum {
 
     // untag fixnum
     pub fn as_i64(tag: Tag) -> i64 {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Fixnum => (tag.as_u64() as i64) >> 8,
             _ => panic!(),
         }

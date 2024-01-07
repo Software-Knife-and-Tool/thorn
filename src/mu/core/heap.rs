@@ -177,7 +177,7 @@ impl Core for Mu {
     }
 
     fn heap_size(&self, tag: Tag) -> usize {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Cons => Cons::heap_size(self, tag),
             Type::Function => Function::heap_size(self, tag),
             Type::Map => Map::heap_size(self, tag),

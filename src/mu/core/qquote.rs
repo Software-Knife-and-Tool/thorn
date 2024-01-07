@@ -238,7 +238,7 @@ impl QqReader {
 
                     match <mu::Mu as stream::Core>::read(mu, stream, false, Tag::nil(), false) {
                         Err(e) => Err(e),
-                        Ok(form) => match Tag::type_of(form) {
+                        Ok(form) => match form.type_of() {
                             Type::Cons => panic!(),
                             Type::Symbol => Ok(Some((QReaderInput::Symbol, form))),
                             _ => Ok(Some((QReaderInput::Constant, form))),

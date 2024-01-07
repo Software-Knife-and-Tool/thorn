@@ -56,7 +56,7 @@ impl Stream {
     }
 
     pub fn to_image(mu: &Mu, tag: Tag) -> Stream {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Stream => match tag {
                 Tag::Indirect(main) => {
                     let heap_ref = block_on(mu.heap.read());
@@ -85,7 +85,7 @@ impl Stream {
                 }
                 _ => panic!(),
             },
-            _ => panic!("stream type botch {:?}", Tag::type_of(tag)),
+            _ => panic!("stream type botch {:?}", tag.type_of()),
         }
     }
 
@@ -150,10 +150,10 @@ impl Core for Stream {
     fn is_eof(mu: &Mu, stream: Tag) -> bool {
         let image = Self::to_image(mu, stream);
 
-        match Tag::type_of(image.direction) {
+        match image.direction.type_of() {
             Type::Keyword
-                if image.direction.eq_(Symbol::keyword("input"))
-                    || image.direction.eq_(Symbol::keyword("bidir")) =>
+                if image.direction.eq_(&Symbol::keyword("input"))
+                    || image.direction.eq_(&Symbol::keyword("bidir")) =>
             {
                 if !image.unch.null_() {
                     false
@@ -175,7 +175,7 @@ impl Core for Stream {
     fn is_open(mu: &Mu, stream: Tag) -> bool {
         let image = Self::to_image(mu, stream);
 
-        !image.stream_id.eq_(Symbol::keyword("t"))
+        !image.stream_id.eq_(&Symbol::keyword("t"))
     }
 
     fn close(mu: &Mu, stream: Tag) {
@@ -198,10 +198,10 @@ impl Core for Stream {
     }
 
     fn write(mu: &Mu, tag: Tag, _: bool, stream: Tag) -> exception::Result<()> {
-        match Tag::type_of(tag) {
+        match tag.type_of() {
             Type::Stream => {
                 let image = Self::to_image(mu, tag);
-                match Tag::type_of(image.stream_id) {
+                match image.stream_id.type_of() {
                     Type::Keyword => {
                         <Mu as stream::Core>::write_string(mu, "#<stream: closed>", stream)
                     }
@@ -215,7 +215,7 @@ impl Core for Stream {
                     }
                     _ => panic!(
                         "internal: stream type inconsistency {:?}",
-                        Tag::type_of(image.stream_id)
+                        image.stream_id.type_of()
                     ),
                 }
             }
@@ -230,7 +230,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "rd-char", stream));
         }
 
-        if image.direction.eq_(Symbol::keyword("output")) {
+        if image.direction.eq_(&Symbol::keyword("output")) {
             return Err(Exception::new(Condition::Stream, "rd-char", stream));
         }
 
@@ -238,7 +238,7 @@ impl Core for Stream {
             return Ok(None);
         }
 
-        match Tag::type_of(image.stream_id) {
+        match image.stream_id.type_of() {
             Type::Fixnum => {
                 let stream_id = Fixnum::as_i64(image.stream_id) as usize;
                 let unch = image.unch;
@@ -273,7 +273,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "rd-byte", stream));
         }
 
-        if image.direction.eq_(Symbol::keyword("output")) {
+        if image.direction.eq_(&Symbol::keyword("output")) {
             return Err(Exception::new(Condition::Stream, "rd-byte", stream));
         }
 
@@ -281,7 +281,7 @@ impl Core for Stream {
             return Ok(None);
         }
 
-        match Tag::type_of(image.stream_id) {
+        match image.stream_id.type_of() {
             Type::Fixnum => {
                 let stream_id = Fixnum::as_i64(image.stream_id) as usize;
                 let unch = image.unch;
@@ -316,7 +316,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "un-char", stream));
         }
 
-        if image.direction.eq_(Symbol::keyword("output")) {
+        if image.direction.eq_(&Symbol::keyword("output")) {
             return Err(Exception::new(Condition::Type, "un-char", stream));
         }
 
@@ -341,7 +341,7 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "wr-char", stream));
         }
 
-        if image.direction.eq_(Symbol::keyword("input")) {
+        if image.direction.eq_(&Symbol::keyword("input")) {
             return Err(Exception::new(Condition::Type, "wr-char", stream));
         }
 
@@ -349,7 +349,7 @@ impl Core for Stream {
             Self::clear_eof(mu, stream)
         }
 
-        match Tag::type_of(image.stream_id) {
+        match image.stream_id.type_of() {
             Type::Fixnum => {
                 let stream_id = Fixnum::as_i64(image.stream_id) as usize;
                 System::write_byte(&mu.system, stream_id, ch as u8)
@@ -365,18 +365,18 @@ impl Core for Stream {
             return Err(Exception::new(Condition::Open, "wr-byte", stream));
         }
 
-        if image.direction.eq_(Symbol::keyword("input")) {
+        if image.direction.eq_(&Symbol::keyword("input")) {
             return Err(Exception::new(Condition::Type, "wr-byte", stream));
         }
 
-        match Tag::type_of(image.stream_id) {
+        match image.stream_id.type_of() {
             Type::Fixnum => {
                 let stream_id = Fixnum::as_i64(image.stream_id) as usize;
                 System::write_byte(&mu.system, stream_id, byte)
             }
             _ => panic!(
                 "internal: {:?} stream state inconsistency",
-                Tag::type_of(image.stream_id)
+                image.stream_id.type_of()
             ),
         }
     }

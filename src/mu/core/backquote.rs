@@ -91,7 +91,7 @@ impl Backquote for Mu {
         match Stream::get_string(mu, mu.reader.bq_str) {
             Ok(string) => match StreamBuilder::new().string(string).input().build(mu) {
                 Ok(stream) => match Self::bq_read(mu, false, stream.evict(mu), false) {
-                    Ok(expr) => match Tag::type_of(expr) {
+                    Ok(expr) => match expr.type_of() {
                         Type::Cons | Type::Symbol => {
                             Ok(Cons::vlist(mu, &[mu.reader.cons, expr, Tag::nil()]))
                         }
@@ -117,7 +117,7 @@ impl Backquote for Mu {
     //
     fn bq_list(mu: &Mu, stream: Tag) -> exception::Result<Tag> {
         match Self::bq_read(mu, true, stream, true) {
-            Ok(expr) if mu.reader.eol.eq_(expr) => Ok(Tag::nil()),
+            Ok(expr) if mu.reader.eol.eq_(&expr) => Ok(Tag::nil()),
             Ok(expr) => Ok(Cons::vlist(
                 mu,
                 &[
@@ -155,7 +155,7 @@ impl Backquote for Mu {
                             if in_list {
                                 Self::bq_list_element(mu, expr)
                             } else {
-                                match Tag::type_of(expr) {
+                                match expr.type_of() {
                                     Type::Symbol => Mu::compile_quoted_list(
                                         mu,
                                         Cons::new(expr, Tag::nil()).evict(mu),

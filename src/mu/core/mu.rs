@@ -206,21 +206,21 @@ impl Core for Mu {
     }
 
     fn eval(&self, expr: Tag) -> exception::Result<Tag> {
-        match Tag::type_of(expr) {
+        match expr.type_of() {
             Type::Cons => {
                 let func = Cons::car(self, expr);
                 let args = Cons::cdr(self, expr);
-                match Tag::type_of(func) {
-                    Type::Keyword if func.eq_(Symbol::keyword("quote")) => {
+                match func.type_of() {
+                    Type::Keyword if func.eq_(&Symbol::keyword("quote")) => {
                         Ok(Cons::car(self, args))
                     }
                     Type::Symbol => {
                         if Symbol::is_unbound(self, func) {
                             Err(Exception::new(Condition::Unbound, "eval", func))
                         } else {
-                            let fnc = Symbol::value(self, func);
-                            match Tag::type_of(fnc) {
-                                Type::Function => self.apply(fnc, args),
+                            let fn_ = Symbol::value(self, func);
+                            match fn_.type_of() {
+                                Type::Function => self.apply(fn_, args),
                                 _ => Err(Exception::new(Condition::Type, "eval", func)),
                             }
                         }
@@ -243,7 +243,7 @@ impl Core for Mu {
     fn gc_mark(&self, tag: Tag) {
         match tag {
             Tag::Direct(_) => (),
-            Tag::Indirect(_) => match Tag::type_of(tag) {
+            Tag::Indirect(_) => match tag.type_of() {
                 Type::Cons => Cons::gc_mark(self, tag),
                 Type::Function => Function::gc_mark(self, tag),
                 Type::Map => Map::gc_mark(self, tag),
