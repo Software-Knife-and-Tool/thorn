@@ -5,12 +5,12 @@
 //!     function calls
 //!     special forms
 use crate::{
-    async_::context::{AsyncContext, Core as _},
+    async_::context::{Context, Core as _},
     core::{
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::Mu,
-        namespace::Core,
+        namespace::Namespace,
         types::{Tag, Type},
     },
     types::{
@@ -29,26 +29,17 @@ type SpecMap = (Tag, SpecFn);
 
 lazy_static! {
     static ref SPECMAP: Vec<SpecMap> = vec![
-        (Symbol::keyword("async"), Mu::compile_async),
-        (Symbol::keyword("if"), Mu::compile_if),
-        (Symbol::keyword("lambda"), Mu::compile_lambda),
-        (Symbol::keyword("quote"), Mu::compile_quoted_list),
+        (Symbol::keyword("async"), Compiler::async_),
+        (Symbol::keyword("if"), Compiler::if_),
+        (Symbol::keyword("lambda"), Compiler::lambda),
+        (Symbol::keyword("quote"), Compiler::quoted_list),
     ];
 }
 
-pub trait Compiler {
-    fn compile(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_async(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_if(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_lambda(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_lexical(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_quoted_list(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn compile_special_form(_: &Mu, _: Tag, args: Tag) -> exception::Result<Tag>;
-}
+pub struct Compiler {}
 
-impl Compiler for Mu {
-    fn compile_if(mu: &Mu, args: Tag) -> exception::Result<Tag> {
+impl Compiler {
+    pub fn if_(mu: &Mu, args: Tag) -> exception::Result<Tag> {
         if Cons::length(mu, args) != Some(3) {
             return Err(Exception::new(Condition::Syntax, ":if", args));
         }
@@ -88,7 +79,7 @@ impl Compiler for Mu {
         Self::compile(mu, Cons::vlist(mu, &if_vec))
     }
 
-    fn compile_quoted_list(mu: &Mu, list: Tag) -> exception::Result<Tag> {
+    pub fn quoted_list(mu: &Mu, list: Tag) -> exception::Result<Tag> {
         if Cons::length(mu, list) != Some(1) {
             return Err(Exception::new(Condition::Syntax, ":quote", list));
         }
@@ -96,7 +87,7 @@ impl Compiler for Mu {
         Ok(Cons::new(Symbol::keyword("quote"), list).evict(mu))
     }
 
-    fn compile_special_form(mu: &Mu, name: Tag, args: Tag) -> exception::Result<Tag> {
+    pub fn special_form(mu: &Mu, name: Tag, args: Tag) -> exception::Result<Tag> {
         match SPECMAP.iter().copied().find(|spec| name.eq_(&spec.0)) {
             Some(spec) => spec.1(mu, args),
             None => Err(Exception::new(Condition::Syntax, "specf", args)),
@@ -104,7 +95,7 @@ impl Compiler for Mu {
     }
 
     // utilities
-    fn compile_list(mu: &Mu, body: Tag) -> exception::Result<Tag> {
+    pub fn list(mu: &Mu, body: Tag) -> exception::Result<Tag> {
         let mut body_vec = Vec::new();
 
         for cons in ConsIter::new(mu, body) {
@@ -117,7 +108,7 @@ impl Compiler for Mu {
         Ok(Cons::vlist(mu, &body_vec))
     }
 
-    fn compile_lambda(mu: &Mu, args: Tag) -> exception::Result<Tag> {
+    pub fn lambda(mu: &Mu, args: Tag) -> exception::Result<Tag> {
         fn compile_frame_symbols(mu: &Mu, lambda: Tag) -> exception::Result<Vec<Tag>> {
             let mut symvec = Vec::new();
 
@@ -165,7 +156,7 @@ impl Compiler for Mu {
             Err(e) => return Err(e),
         };
 
-        let form = match Self::compile_list(mu, body) {
+        let form = match Self::list(mu, body) {
             Ok(form) => {
                 let mut function = Function::to_image(mu, func);
                 function.form = form;
@@ -183,7 +174,7 @@ impl Compiler for Mu {
         form
     }
 
-    fn compile_async(mu: &Mu, args: Tag) -> exception::Result<Tag> {
+    pub fn async_(mu: &Mu, args: Tag) -> exception::Result<Tag> {
         let (func, arg_list) = match args.type_of() {
             Type::Cons => {
                 let fn_arg = match Self::compile(mu, Cons::car(mu, args)) {
@@ -201,7 +192,7 @@ impl Compiler for Mu {
                     Err(e) => return Err(e),
                 };
 
-                let async_args = match Self::compile_list(mu, Cons::cdr(mu, args)) {
+                let async_args = match Self::list(mu, Cons::cdr(mu, args)) {
                     Ok(list) => list,
                     Err(e) => return Err(e),
                 };
@@ -216,13 +207,13 @@ impl Compiler for Mu {
             _ => return Err(Exception::new(Condition::Syntax, "async", args)),
         };
 
-        match AsyncContext::async_context(mu, func, arg_list) {
+        match Context::context(mu, func, arg_list) {
             Ok(asyncid) => Ok(asyncid),
             Err(e) => Err(e),
         }
     }
 
-    fn compile_lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
+    pub fn lexical(mu: &Mu, symbol: Tag) -> exception::Result<Tag> {
         let lexenv_ref = block_on(mu.compile.read());
 
         for frame in lexenv_ref.iter().rev() {
@@ -230,7 +221,7 @@ impl Compiler for Mu {
 
             if let Some(nth) = symbols.iter().position(|lex| symbol.eq_(lex)) {
                 let lex_ref = vec![
-                    <Mu as Core>::intern_symbol(mu, mu.mu_ns, "fr-ref".to_string(), Tag::nil()),
+                    Namespace::intern_symbol(mu, mu.mu_ns, "fr-ref".to_string(), Tag::nil()),
                     Fixnum::as_tag(tag.as_u64() as i64),
                     Fixnum::as_tag(nth as i64),
                 ];
@@ -253,18 +244,18 @@ impl Compiler for Mu {
         }
     }
 
-    fn compile(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
+    pub fn compile(mu: &Mu, expr: Tag) -> exception::Result<Tag> {
         match expr.type_of() {
-            Type::Symbol => Self::compile_lexical(mu, expr),
+            Type::Symbol => Self::lexical(mu, expr),
             Type::Cons => {
                 let func = Cons::car(mu, expr);
                 let args = Cons::cdr(mu, expr);
                 match func.type_of() {
-                    Type::Keyword => match Self::compile_special_form(mu, func, args) {
+                    Type::Keyword => match Self::special_form(mu, func, args) {
                         Ok(form) => Ok(form),
                         Err(e) => Err(e),
                     },
-                    Type::Symbol => match Self::compile_list(mu, args) {
+                    Type::Symbol => match Self::list(mu, args) {
                         Ok(args) => {
                             if Symbol::is_unbound(mu, func) {
                                 Ok(Cons::new(func, args).evict(mu))
@@ -278,11 +269,11 @@ impl Compiler for Mu {
                         }
                         Err(e) => Err(e),
                     },
-                    Type::Function => match Self::compile_list(mu, args) {
+                    Type::Function => match Self::list(mu, args) {
                         Ok(args) => Ok(Cons::new(func, args).evict(mu)),
                         Err(e) => Err(e),
                     },
-                    Type::Cons => match Self::compile_list(mu, args) {
+                    Type::Cons => match Self::list(mu, args) {
                         Ok(arglist) => match Self::compile(mu, func) {
                             Ok(fn_) => match fn_.type_of() {
                                 Type::Function => Ok(Cons::new(fn_, arglist).evict(mu)),
@@ -304,9 +295,9 @@ pub trait MuFunction {
     fn mu_compile(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl MuFunction for Compiler {
     fn mu_compile(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        fp.value = match <Mu as Compiler>::compile(mu, fp.argv[0]) {
+        fp.value = match Compiler::compile(mu, fp.argv[0]) {
             Ok(tag) => tag,
             Err(e) => return Err(e),
         };
@@ -318,7 +309,7 @@ impl MuFunction for Mu {
 #[cfg(test)]
 mod tests {
     use crate::core::{
-        compile::Compiler,
+        compiler::Compiler,
         mu::{Core, Mu},
         types::{Tag, Type},
     };
@@ -332,14 +323,14 @@ mod tests {
 
         let mu: &Mu = &Core::new(&config);
 
-        match <Mu as Compiler>::compile(mu, Tag::nil()) {
+        match Compiler::compile(mu, Tag::nil()) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),
             },
             _ => assert!(false),
         }
-        match <Mu as Compiler>::compile_list(mu, Tag::nil()) {
+        match Compiler::list(mu, Tag::nil()) {
             Ok(form) => match form.type_of() {
                 Type::Null => assert!(true),
                 _ => assert!(false),

@@ -6,7 +6,7 @@
 use {
     crate::{
         core::{
-            compile::Compiler as _,
+            compiler::Compiler as _,
             direct::{DirectInfo, DirectTag, DirectType, ExtType},
             exception::{self, Condition, Exception},
             frame::Frame,
@@ -28,23 +28,23 @@ use {
     std::assert,
 };
 
-pub struct AsyncContext {
+pub struct Context {
     pub func: Tag,
     pub args: Tag,
-    pub context: <AsyncContext as Core>::AsyncFuture,
+    pub context: <Context as Core>::Future,
 }
 
 pub trait Core {
-    type AsyncFuture;
+    type Future;
 
+    fn context(_: &Mu, _: Tag, _: Tag) -> exception::Result<Tag>;
     fn write(_: &Mu, _: Tag, _: bool, _: Tag) -> exception::Result<()>;
-    fn async_context(_: &Mu, _: Tag, _: Tag) -> exception::Result<Tag>;
 }
 
-impl Core for AsyncContext {
-    type AsyncFuture = BoxFuture<'static, Result<Tag, Exception>>;
+impl Core for Context {
+    type Future = BoxFuture<'static, Result<Tag, Exception>>;
 
-    fn async_context(mu: &Mu, func: Tag, args: Tag) -> exception::Result<Tag> {
+    fn context(mu: &Mu, func: Tag, args: Tag) -> exception::Result<Tag> {
         let async_id = match func.type_of() {
             Type::Function => match args.type_of() {
                 Type::Cons | Type::Null => {
@@ -57,7 +57,7 @@ impl Core for AsyncContext {
                         DirectType::Ext,
                     );
 
-                    let future: <AsyncContext as Core>::AsyncFuture = Box::pin(async {
+                    let future: <Context as Core>::Future = Box::pin(async {
                         // mu.apply(func, args)
                         Ok(Tag::nil())
                     });
@@ -76,7 +76,7 @@ impl Core for AsyncContext {
                             None => {
                                 map_ref.insert(
                                     tag.as_u64(),
-                                    AsyncContext {
+                                    Context {
                                         func,
                                         args,
                                         context: future,
@@ -110,7 +110,7 @@ pub trait MuFunction {
     fn mu_abort(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl MuFunction for Context {
     fn mu_await(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let async_id = fp.argv[0];
 

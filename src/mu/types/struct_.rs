@@ -7,7 +7,7 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         funcall::Core as _,
-        heap::Core as _,
+        heap::{Core as _, Heap},
         indirect::IndirectTag,
         mu::{Core as _, Mu},
         stream,
@@ -92,11 +92,11 @@ impl<'a> Core<'a> for Struct {
         }
     }
 
-    fn gc_mark(mu: &Mu, r#struct: Tag) {
-        let mark = mu.mark(r#struct).unwrap();
+    fn gc_mark(mu: &Mu, struct_: Tag) {
+        let mark = Heap::mark(mu, struct_).unwrap();
 
         if !mark {
-            Mu::gc_mark(mu, Self::vector(mu, r#struct))
+            Mu::gc_mark(mu, Self::vector(mu, struct_))
         }
     }
 

@@ -9,10 +9,10 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::Core as _,
-            heap::Core as _,
+            heap::{Core as _, Heap},
             indirect::IndirectTag,
             mu::{Core as _, Mu},
-            namespace::{Core as NSCore, Namespace},
+            namespace::Namespace,
             readtable::{map_char_syntax, SyntaxType},
             stream,
             types::{Tag, TagType, Type},
@@ -145,8 +145,8 @@ impl Core for Symbol {
     }
 
     fn heap_size(mu: &Mu, symbol: Tag) -> usize {
-        let name_sz = Mu::heap_size(mu, Self::name(mu, symbol));
-        let value_sz = Mu::heap_size(mu, Self::value(mu, symbol));
+        let name_sz = Heap::heap_size(mu, Self::name(mu, symbol));
+        let value_sz = Heap::heap_size(mu, Self::value(mu, symbol));
 
         std::mem::size_of::<Symbol>()
             + if name_sz > 8 { name_sz } else { 0 }
@@ -157,7 +157,7 @@ impl Core for Symbol {
         match symbol {
             Tag::Direct(_) => (), // keyword
             Tag::Indirect(_) => {
-                let mark = mu.mark(symbol).unwrap();
+                let mark = Heap::mark(mu, symbol).unwrap();
 
                 if !mark {
                     Mu::gc_mark(mu, Self::name(mu, symbol));
@@ -244,8 +244,8 @@ impl Core for Symbol {
                     ));
                 }
 
-                match <Mu as Namespace>::is_ns(mu, Symbol::keyword(&ns)) {
-                    Some(ns) => Ok(<Mu as NSCore>::intern_symbol(mu, ns, name, *UNBOUND)),
+                match Namespace::is_ns(mu, Symbol::keyword(&ns)) {
+                    Some(ns) => Ok(Namespace::intern_symbol(mu, ns, name, *UNBOUND)),
                     None => Err(Exception::new(
                         Condition::Namespace,
                         "read:sy",
@@ -253,9 +253,7 @@ impl Core for Symbol {
                     )),
                 }
             }
-            None => Ok(<Mu as NSCore>::intern_symbol(
-                mu, mu.null_ns, token, *UNBOUND,
-            )),
+            None => Ok(Namespace::intern_symbol(mu, mu.null_ns, token, *UNBOUND)),
         }
     }
 

@@ -97,14 +97,13 @@ state_machine! {
     QuasiComma => {
         Comma => QuasiComma [ Error ],       // comma not in qquote
         List => QuasiComma [ List ],         // (
-        EndList => QuasiComma [ End ],       //
         Form => QuasiComma [ Form ],         // form
         Quasi => QuasiComma [ Quasi ],       // `
     },
 
     QuasiList => {
         Comma => QuasiListComma,             // ,
-        Form => QuasiList [ Form ],      // form
+        Form => QuasiList [ Form ],          // form
         Dot => QuasiList [ Dot ],            // .
         EndList => QuasiList [ End ],        // )
         List => QuasiList [ ListOfQuasi ],   // (
@@ -295,11 +294,11 @@ impl QqReader {
                     return Err(Exception::new(
                         Condition::Syntax,
                         "qquote",
-                        Symbol::keyword("input"),
+                        Symbol::keyword("eof"),
                     ))
                 }
                 Ok(Some(state)) => {
-                    // Self::print_annotated_tag(mu, &format!("reader state {:?}", state), token);
+                    // println!("reader state {:?}", state);
                     match self.next(&state) {
                         Err(e) => return Err(e),
                         Ok((output, next_state)) => {

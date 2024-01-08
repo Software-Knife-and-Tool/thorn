@@ -8,7 +8,7 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::Core as _,
-            heap::{self, Core as _},
+            heap::{Core as _, Heap},
             indirect::IndirectTag,
             mu::{Core as _, Mu},
             stream,
@@ -127,7 +127,7 @@ pub trait Core {
 
 impl Core for Map {
     fn gc_mark(mu: &Mu, map: Tag) {
-        let mark = mu.mark(map).unwrap();
+        let mark = Heap::mark(mu, map).unwrap();
 
         if !mark {
             mu.gc_mark(Self::list(mu, map))
@@ -141,7 +141,7 @@ impl Core for Map {
     }
 
     fn heap_size(mu: &Mu, symbol: Tag) -> usize {
-        std::mem::size_of::<Map>() + heap::Core::heap_size(mu, Self::list(mu, symbol))
+        std::mem::size_of::<Map>() + Heap::heap_size(mu, Self::list(mu, symbol))
     }
 
     fn write(mu: &Mu, map: Tag, _: bool, stream: Tag) -> exception::Result<()> {
@@ -182,7 +182,7 @@ pub trait MuFunction {
     fn mu_map_size(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl MuFunction for Map {
     fn mu_make_map(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let list = fp.argv[0];
 

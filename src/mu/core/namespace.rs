@@ -24,21 +24,10 @@ use {
 
 use {futures::executor::block_on, futures_locks::RwLock};
 
-pub trait Namespace {
-    type NSCache;
-    type NSIndex;
+pub struct Namespace {}
 
-    fn add_ns(_: &Mu, _: Tag) -> exception::Result<Tag>;
-    fn intern(_: &Mu, _: Tag, _: Tag);
-    fn is_ns(_: &Mu, _: Tag) -> Option<Tag>;
-    fn map_symbol(_: &Mu, _: Tag, _: &str) -> Option<Tag>;
-}
-
-impl Namespace for Mu {
-    type NSCache = RwLock<HashMap<String, Tag>>;
-    type NSIndex = HashMap<u64, (Tag, Self::NSCache)>;
-
-    fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
+impl Namespace {
+    pub fn add_ns(mu: &Mu, ns: Tag) -> exception::Result<Tag> {
         let mut ns_ref = block_on(mu.ns_index.write());
 
         if ns_ref.contains_key(&ns.as_u64()) {
@@ -67,7 +56,7 @@ impl Namespace for Mu {
         }
     }
 
-    fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
+    pub fn intern(mu: &Mu, ns: Tag, symbol: Tag) {
         let ns_ref = block_on(mu.ns_index.read());
 
         let (_, ns_cache) = &ns_ref[&ns.as_u64()];
@@ -78,7 +67,7 @@ impl Namespace for Mu {
         hash.insert(name, symbol);
     }
 
-    fn is_ns(mu: &Mu, tag: Tag) -> Option<Tag> {
+    pub fn is_ns(mu: &Mu, tag: Tag) -> Option<Tag> {
         match tag.type_of() {
             Type::Null => Some(tag),
             Type::Keyword => {
@@ -93,16 +82,10 @@ impl Namespace for Mu {
             _ => None,
         }
     }
-}
 
-pub trait Core {
-    fn intern_symbol(_: &Mu, _: Tag, _: String, _: Tag) -> Tag;
-}
-
-impl Core for Mu {
-    fn intern_symbol(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
-        match Self::is_ns(mu, ns) {
-            Some(ns) => match Self::map_symbol(mu, ns, &name) {
+    pub fn intern_symbol(mu: &Mu, ns: Tag, name: String, value: Tag) -> Tag {
+        match Namespace::is_ns(mu, ns) {
+            Some(ns) => match Namespace::map_symbol(mu, ns, &name) {
                 Some(symbol) => {
                     // if the symbol is unbound, bind it.
                     // otherwise, we ignore the new binding.
@@ -132,7 +115,7 @@ impl Core for Mu {
                 None => {
                     let symbol = Symbol::new(mu, ns, &name, value).evict(mu);
 
-                    Self::intern(mu, ns, symbol);
+                    Namespace::intern(mu, ns, symbol);
 
                     symbol
                 }
@@ -151,7 +134,7 @@ pub trait MuFunction {
     fn mu_ns_symbols(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl MuFunction for Namespace {
     fn mu_untern(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         let ns = fp.argv[0];
         let name = fp.argv[1];
@@ -160,7 +143,7 @@ impl MuFunction for Mu {
             Ok(_) => {
                 let ns = match ns.type_of() {
                     Type::Null => mu.null_ns,
-                    Type::Keyword => match Self::is_ns(mu, ns) {
+                    Type::Keyword => match Namespace::is_ns(mu, ns) {
                         Some(ns) => ns,
                         _ => return Err(Exception::new(Condition::Type, "untern", ns)),
                     },
@@ -186,7 +169,7 @@ impl MuFunction for Mu {
 
                     Symbol::keyword(&name_str)
                 } else {
-                    <Mu as Core>::intern_symbol(mu, ns, name_str, *UNBOUND)
+                    Namespace::intern_symbol(mu, ns, name_str, *UNBOUND)
                 }
             }
             Err(e) => return Err(e),
@@ -204,7 +187,7 @@ impl MuFunction for Mu {
             Ok(_) => {
                 let ns = match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
-                    Type::Keyword => match Self::is_ns(mu, ns_tag) {
+                    Type::Keyword => match Namespace::is_ns(mu, ns_tag) {
                         Some(ns) => ns,
                         _ => return Err(Exception::new(Condition::Type, "intern", ns_tag)),
                     },
@@ -226,7 +209,7 @@ impl MuFunction for Mu {
 
                     Symbol::keyword(&name_str)
                 } else {
-                    <Mu as Core>::intern_symbol(mu, ns, name_str, value)
+                    Self::intern_symbol(mu, ns, name_str, value)
                 }
             }
             Err(e) => return Err(e),
@@ -241,9 +224,9 @@ impl MuFunction for Mu {
         match ns_tag.type_of() {
             Type::Keyword => {
                 fp.value = ns_tag;
-                match Self::is_ns(mu, ns_tag) {
+                match Namespace::is_ns(mu, ns_tag) {
                     Some(_) => return Err(Exception::new(Condition::Namespace, "make-ns", ns_tag)),
-                    None => Self::add_ns(mu, fp.value).unwrap(),
+                    None => Namespace::add_ns(mu, fp.value).unwrap(),
                 };
             }
             _ => return Err(Exception::new(Condition::Type, "make-ns", ns_tag)),
@@ -260,14 +243,14 @@ impl MuFunction for Mu {
             Ok(_) => {
                 match ns_tag.type_of() {
                     Type::Null => mu.null_ns,
-                    Type::Keyword => match Self::is_ns(mu, ns_tag) {
+                    Type::Keyword => match Namespace::is_ns(mu, ns_tag) {
                         Some(_) => ns_tag,
                         _ => return Err(Exception::new(Condition::Type, "ns-find", ns_tag)),
                     },
                     _ => return Err(Exception::new(Condition::Type, "ns-find", ns_tag)),
                 };
 
-                match Self::map_symbol(mu, ns_tag, &Vector::as_string(mu, name)) {
+                match Namespace::map_symbol(mu, ns_tag, &Vector::as_string(mu, name)) {
                     Some(sym) => sym,
                     None => Tag::nil(),
                 }
@@ -283,7 +266,7 @@ impl MuFunction for Mu {
         let ns = fp.argv[1];
 
         fp.value = match mu.fp_argv_check("ns-syms", &[Type::Keyword, Type::T], fp) {
-            Ok(_) => match Self::is_ns(mu, ns) {
+            Ok(_) => match Namespace::is_ns(mu, ns) {
                 Some(_) => {
                     let ns_ref = block_on(mu.ns_index.read());
                     let (_, ns_cache) = &ns_ref[&ns.as_u64()];

@@ -9,7 +9,7 @@ use {
             exception::{self, Condition, Exception},
             frame::Frame,
             funcall::Core as _,
-            heap::Core as _,
+            heap::{Core as _, Heap},
             mu::{Core as _, Mu},
             readtable::{map_char_syntax, SyntaxType},
             stream,
@@ -206,7 +206,7 @@ impl<'a> Core<'a> for Vector {
         match vector {
             Tag::Direct(_) => (),
             Tag::Indirect(_) => {
-                let mark = mu.mark(vector).unwrap();
+                let mark = Heap::mark(mu, vector).unwrap();
                 let vtype = Self::type_of(mu, vector);
                 let length = Self::length(mu, vector);
 
