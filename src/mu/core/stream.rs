@@ -3,7 +3,7 @@
 
 //! mu stream functions
 use crate::{
-    async_::context::{AsyncContext, Core as _},
+    async_::context::{Context, Core as _},
     core::{
         backquote::Backquote,
         exception::{self, Condition, Exception},
@@ -134,7 +134,7 @@ impl Core for Mu {
         }
 
         match tag.type_of() {
-            Type::AsyncId => AsyncContext::write(self, tag, escape, stream),
+            Type::AsyncId => Context::write(self, tag, escape, stream),
             Type::Char => Char::write(self, tag, escape, stream),
             Type::Cons => Cons::write(self, tag, escape, stream),
             Type::Fixnum => Fixnum::write(self, tag, escape, stream),

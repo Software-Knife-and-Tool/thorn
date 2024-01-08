@@ -10,7 +10,7 @@
 use crate::{
     core::{
         exception::{self, Condition, Exception},
-        heap::Core as _,
+        heap::{Core as _, Heap},
         indirect::IndirectTag,
         mu::Mu,
         stream,
@@ -127,7 +127,7 @@ pub trait Core {
 
 impl Core for Stream {
     fn gc_mark(mu: &Mu, stream: Tag) {
-        let mark = mu.mark(stream).unwrap();
+        let mark = Heap::mark(mu, stream).unwrap();
 
         if !mark {
             // GcMark(env, ptr)

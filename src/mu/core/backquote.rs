@@ -5,7 +5,7 @@
 #[allow(unused_imports)]
 use crate::{
     core::{
-        compile::Compiler,
+        compiler::Compiler,
         exception::{self, Condition, Exception},
         frame::Frame,
         mu::{self, Core as _, Mu},
@@ -95,10 +95,9 @@ impl Backquote for Mu {
                         Type::Cons | Type::Symbol => {
                             Ok(Cons::vlist(mu, &[mu.reader.cons, expr, Tag::nil()]))
                         }
-                        _ => Mu::compile_quoted_list(
-                            mu,
-                            Cons::vlist(mu, &[Cons::vlist(mu, &[expr])]),
-                        ),
+                        _ => {
+                            Compiler::quoted_list(mu, Cons::vlist(mu, &[Cons::vlist(mu, &[expr])]))
+                        }
                     },
                     Err(e) => Err(e),
                 },
@@ -156,7 +155,7 @@ impl Backquote for Mu {
                                 Self::bq_list_element(mu, expr)
                             } else {
                                 match expr.type_of() {
-                                    Type::Symbol => Mu::compile_quoted_list(
+                                    Type::Symbol => Compiler::quoted_list(
                                         mu,
                                         Cons::new(expr, Tag::nil()).evict(mu),
                                     ),
@@ -200,7 +199,7 @@ impl Backquote for Mu {
                             Tag::nil(),
                             recursivep,
                         ) {
-                            Ok(tag) => Ok(Mu::compile_quoted_list(
+                            Ok(tag) => Ok(Compiler::quoted_list(
                                 mu,
                                 Cons::new(tag, Tag::nil()).evict(mu),
                             )

@@ -78,7 +78,7 @@ pub enum AllocatorTypes {
     Bump(BumpAllocator),
 }
 
-pub struct HeapPlus<'a> {
+pub struct Heap<'a> {
     allocator: HeapAllocator<'a>,
 }
 
@@ -94,7 +94,7 @@ pub trait Allocator {
     fn valloc(&mut self, _: &[[u8; 8]], _: &[u8], _: Type) -> usize;
 }
 
-impl Allocator for HeapPlus<'_> {
+impl Allocator for Heap<'_> {
     fn alloc(&mut self, data: &[[u8; 8]], r#type: Type) -> usize {
         ((self.allocator).alloc)(&self.allocator, data, r#type as u8)
     }
@@ -117,28 +117,28 @@ lazy_static! {
 }
 
 pub trait Core {
-    fn add_gc_root(&self, _: Tag);
+    fn add_gc_root(_: &Mu, _: Tag);
     fn gc_asyncs(_: &Mu);
     fn gc_maps(_: &Mu);
     fn gc_namespaces(_: &Mu);
-    fn mark(&self, _: Tag) -> Option<bool>;
-    fn heap_size(&self, _: Tag) -> usize;
+    fn mark(_: &Mu, _: Tag) -> Option<bool>;
+    fn heap_size(_: &Mu, _: Tag) -> usize;
     fn heap_info(_: &Mu) -> (usize, usize);
     fn heap_type(_: &Mu, _: Type) -> AllocTypeInfo;
 }
 
-impl Core for Mu {
-    fn add_gc_root(&self, tag: Tag) {
-        let mut root_ref = block_on(self.gc_root.write());
+impl Core for Heap<'_> {
+    fn add_gc_root(mu: &Mu, tag: Tag) {
+        let mut root_ref = block_on(mu.gc_root.write());
 
         root_ref.push(tag);
     }
 
-    fn mark(&self, tag: Tag) -> Option<bool> {
+    fn mark(mu: &Mu, tag: Tag) -> Option<bool> {
         match tag {
             Tag::Direct(_) => None,
             Tag::Indirect(indirect) => {
-                let mut heap_ref = block_on(self.heap.write());
+                let mut heap_ref = block_on(mu.heap.write());
 
                 let mark = heap_ref.get_image_refbit(indirect.image_id() as usize);
                 heap_ref.set_image_refbit(indirect.image_id() as usize);
@@ -176,15 +176,15 @@ impl Core for Mu {
         }
     }
 
-    fn heap_size(&self, tag: Tag) -> usize {
+    fn heap_size(mu: &Mu, tag: Tag) -> usize {
         match tag.type_of() {
-            Type::Cons => Cons::heap_size(self, tag),
-            Type::Function => Function::heap_size(self, tag),
-            Type::Map => Map::heap_size(self, tag),
-            Type::Stream => Stream::heap_size(self, tag),
-            Type::Struct => Struct::heap_size(self, tag),
-            Type::Symbol => Symbol::heap_size(self, tag),
-            Type::Vector => Vector::heap_size(self, tag),
+            Type::Cons => Cons::heap_size(mu, tag),
+            Type::Function => Function::heap_size(mu, tag),
+            Type::Map => Map::heap_size(mu, tag),
+            Type::Stream => Stream::heap_size(mu, tag),
+            Type::Struct => Struct::heap_size(mu, tag),
+            Type::Symbol => Symbol::heap_size(mu, tag),
+            Type::Vector => Vector::heap_size(mu, tag),
             _ => std::mem::size_of::<DirectTag>(),
         }
     }
@@ -211,7 +211,7 @@ pub trait MuFunction {
     fn mu_hp_stat(_: &Mu, _: &mut Frame) -> exception::Result<()>;
 }
 
-impl MuFunction for Mu {
+impl MuFunction for Heap<'_> {
     fn mu_gc(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
         fp.value = match mu.gc() {
             Ok(_) => Symbol::keyword("t"),
@@ -222,7 +222,7 @@ impl MuFunction for Mu {
     }
 
     fn mu_hp_stat(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
-        let (pagesz, npages) = Self::heap_info(mu);
+        let (pagesz, npages) = Heap::heap_info(mu);
 
         let mut vec = vec![
             Symbol::keyword("heap"),

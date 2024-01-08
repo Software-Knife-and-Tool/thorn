@@ -8,7 +8,7 @@ use crate::{
         exception::{self, Condition, Exception},
         frame::Frame,
         funcall::Core as _,
-        heap::Core as _,
+        heap::{Core as _, Heap},
         indirect::IndirectTag,
         mu::{Core as _, Mu},
         stream,
@@ -133,7 +133,7 @@ impl Core for Cons {
                 Mu::gc_mark(mu, Self::cdr(mu, cons))
             }
             Tag::Indirect(_) => {
-                let mark = mu.mark(cons).unwrap();
+                let mark = Heap::mark(mu, cons).unwrap();
 
                 if !mark {
                     Mu::gc_mark(mu, Self::car(mu, cons));

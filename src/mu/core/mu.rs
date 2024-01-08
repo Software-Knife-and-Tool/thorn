@@ -3,17 +3,18 @@
 
 //! mu environment
 //!    Mu
+#![allow(clippy::type_complexity)]
 use {
     crate::{
         allocators::bump_allocator::BumpAllocator,
-        async_::context::AsyncContext,
+        async_::context::Context,
         core::{
             config::Config,
             exception::{self, Condition, Exception},
             frame::Frame,
-            funcall::LibMuFunction,
-            heap::Core as _,
-            namespace::{Core as NSCore, Namespace},
+            funcall::{Core as _, LibMuFunction},
+            heap::{Core as _, Heap},
+            namespace::Namespace,
             reader::{Core as _, Reader},
             types::{Tag, Type},
         },
@@ -59,9 +60,9 @@ pub struct Mu {
     pub exception: RwLock<Vec<usize>>,
 
     // map/ns/async indices
-    pub async_index: RwLock<HashMap<u64, AsyncContext>>,
+    pub async_index: RwLock<HashMap<u64, Context>>,
     pub map_index: RwLock<HashMap<usize, HashMap<u64, Tag>>>,
-    pub ns_index: RwLock<<Mu as Namespace>::NSIndex>,
+    pub ns_index: RwLock<HashMap<u64, (Tag, RwLock<HashMap<String, Tag>>)>>,
 
     // native function map
     pub native_map: HashMap<u64, LibMuFunction>,
@@ -133,46 +134,46 @@ impl Core for Mu {
         mu.keyword_ns = Symbol::keyword("keyword");
 
         mu.mu_ns = Symbol::keyword("mu");
-        match <Mu as Namespace>::add_ns(&mu, mu.mu_ns) {
+        match Namespace::add_ns(&mu, mu.mu_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         mu.null_ns = Tag::nil();
-        match <Mu as Namespace>::add_ns(&mu, mu.null_ns) {
+        match Namespace::add_ns(&mu, mu.null_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         mu.sys_ns = Symbol::keyword("sys");
-        match <Mu as Namespace>::add_ns(&mu, mu.sys_ns) {
+        match Namespace::add_ns(&mu, mu.sys_ns) {
             Ok(_) => (),
             Err(_) => panic!(),
         };
 
         // the version string
         mu.version = Vector::from_string(<Mu as Core>::VERSION).evict(&mu);
-        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "version".to_string(), mu.version);
+        Namespace::intern_symbol(&mu, mu.mu_ns, "version".to_string(), mu.version);
 
         // the standard streams
         mu.stdin = match StreamBuilder::new().stdin().build(&mu) {
             Ok(stdin) => stdin.evict(&mu),
             Err(_) => panic!(),
         };
-        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "std-in".to_string(), mu.stdin);
+        Namespace::intern_symbol(&mu, mu.mu_ns, "std-in".to_string(), mu.stdin);
 
         mu.stdout = match StreamBuilder::new().stdout().build(&mu) {
             Ok(stdout) => stdout.evict(&mu),
             Err(_) => panic!(),
         };
-        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "std-out".to_string(), mu.stdout);
+        Namespace::intern_symbol(&mu, mu.mu_ns, "std-out".to_string(), mu.stdout);
 
         mu.errout = match StreamBuilder::new().errout().build(&mu) {
             Ok(errout) => errout.evict(&mu),
             Err(_) => panic!(),
         };
 
-        <Mu as NSCore>::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
+        Namespace::intern_symbol(&mu, mu.mu_ns, "err-out".to_string(), mu.errout);
 
         // mu functions
         mu.native_map = Self::install_lib_functions(&mu);
@@ -266,9 +267,9 @@ impl Core for Mu {
             heap_ref.gc_clear();
         }
 
-        Mu::gc_namespaces(self);
-        Mu::gc_maps(self);
-        Mu::gc_asyncs(self);
+        Heap::gc_namespaces(self);
+        Heap::gc_maps(self);
+        Heap::gc_asyncs(self);
 
         Frame::gc_lexical(self);
 
@@ -282,6 +283,123 @@ impl Core for Mu {
         }
 
         Ok(true)
+    }
+}
+
+pub trait MuFunction {
+    fn mu_apply(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_eval(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn mu_fix(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn if_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+    fn append_(_: &Mu, _: &mut Frame) -> exception::Result<()>;
+}
+
+impl MuFunction for Mu {
+    fn append_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let list1 = fp.argv[0];
+        let list2 = fp.argv[1];
+
+        let mut append = Vec::new();
+
+        match list1.type_of() {
+            Type::Null | Type::Cons => {
+                for elt in ConsIter::new(mu, list1) {
+                    append.push(Cons::car(mu, elt))
+                }
+            }
+            _ => {
+                fp.value = list1;
+                return Ok(());
+            }
+        };
+
+        fp.value = Cons::vappend(mu, &append, list2);
+
+        Ok(())
+    }
+
+    fn if_(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let test = fp.argv[0];
+        let true_fn = fp.argv[1];
+        let false_fn = fp.argv[2];
+
+        fp.value = match mu.fp_argv_check("::if", &[Type::T, Type::Function, Type::Function], fp) {
+            Ok(_) => match mu.apply(if test.null_() { false_fn } else { true_fn }, Tag::nil()) {
+                Ok(tag) => tag,
+                Err(e) => return Err(e),
+            },
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_eval(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        fp.value = match mu.eval(fp.argv[0]) {
+            Ok(tag) => tag,
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_apply(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let func = fp.argv[0];
+        let args = fp.argv[1];
+
+        fp.value = match mu.fp_argv_check("apply", &[Type::Function, Type::List], fp) {
+            Ok(_) => {
+                let mut argv = Vec::new();
+
+                for cons in ConsIter::new(mu, args) {
+                    argv.push(Cons::car(mu, cons))
+                }
+
+                match (Frame {
+                    func,
+                    argv,
+                    value: Tag::nil(),
+                })
+                .apply(mu, func)
+                {
+                    Ok(value) => value,
+                    Err(e) => return Err(e),
+                }
+            }
+            Err(e) => return Err(e),
+        };
+
+        Ok(())
+    }
+
+    fn mu_fix(mu: &Mu, fp: &mut Frame) -> exception::Result<()> {
+        let func = fp.argv[0];
+
+        fp.value = fp.argv[1];
+
+        match func.type_of() {
+            Type::Function => {
+                loop {
+                    let value = Tag::nil();
+                    let argv = vec![fp.value];
+                    let result = Frame { func, argv, value }.apply(mu, func);
+
+                    fp.value = match result {
+                        Ok(value) => {
+                            if value.eq_(&fp.value) {
+                                break;
+                            }
+
+                            value
+                        }
+                        Err(e) => return Err(e),
+                    };
+                }
+
+                Ok(())
+            }
+            _ => Err(Exception::new(Condition::Type, "fix", func)),
+        }
     }
 }
 

@@ -3,7 +3,7 @@
 
 //! core module
 pub mod backquote;
-pub mod compile;
+pub mod compiler;
 pub mod config;
 pub mod direct;
 pub mod dynamic;
